@@ -13,6 +13,8 @@ The compiler will always generate a single file, no matter how many source files
 
 The templates can define blocks. If something is defined outside of blocks, it should be used for any source. If it is inside a block, it should only be used if the block matches the compiler argument expectations, e.g.: ``single_source`` should be used if just one source file is provided, ``multiple_sources`` should be used if more than one source file is provided, being used once for each source file, and ``multiple_sources_once`` should be used if more than one source file is provided, but only once. Templates blocks can't be nested.
 
+The templates can use conditional blocks: ``{% if variable %}``, ``{% else %}`` and ``{% endif %}``. They check if a variable is defined or not.
+
 The variables defined in the source file are only available inside blocks. If something does not depends on the source files, and is global, it must be hardcoded in the template, for the sake of simplicity.
 
 As the compiler is output-agnostic, Atom feeds and sitemaps should be generated using templates as well.
@@ -33,9 +35,9 @@ DATE: 2007-04-05T12:30-02:00
 test content
 ```
 
-``DATE`` is the only variable required by the compiler, because it will be used to sort the source files, needed. It is an ISO-8601 date-time, with seconds, and always in UTC. If you want to show the date of your posts in your blog, you can use the ``DATE`` variable, but it won't be nicely formated, it will always be an ISO-8601 date-time.
+If more than one source file is provided, and they have the ``DATE`` variable required by the compiler, it will be used to sort the source files, if needed. Otherwise, the file name will be used to sort the source files.
 
-All the variables used in templates are mandatory. The compiler will raise errors if a template requires a variable and it is not found in the source file.
+The ``DATE`` variable is an ISO-8601 date-time, with seconds, and always in UTC. If you want to show the date of your posts in your blog, you can use the ``DATE`` variable, but it won't be nicely formated, it will always be an ISO-8601 date-time.
 
 Variables are single-line, and all the whitespace characters, including tabs, before the leading non-whitespace character and after the trailing non-whitespace character will be removed.
 
@@ -58,11 +60,11 @@ Markdown-parsed content is available in template blocks as the ``CONTENT`` varia
         <h1>My cool blog</h1>
         {% block single_source %}
         <h2>{{ TITLE }}</h2>
-        <h4>Published in: {{ DATE }}</h4>
+        {% if DATE %}<h4>Published in: {{ DATE }}</h4>{% endif %}
         {{ CONTENT }}
         {% endblock %}
         {% block multiple_sources_once %}<ul>{% endblock %}
-        {% block multiple_sources %}<p><a href="{{ FILENAME }}.html">{{ TITLE }}</a> - {{ DATE }}</p>{% endblock %}
+        {% block multiple_sources %}<p><a href="{{ FILENAME }}.html">{{ TITLE }}</a>{% if DATE %} - {{ DATE }}{% endif %}</p>{% endblock %}
         {% block multiple_sources_once %}</ul>{% endblock %}
     </body>
 </html>
