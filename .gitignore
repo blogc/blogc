@@ -40,10 +40,11 @@ Makefile.in
 /blogc
 
 # tests
+/tests/check_template_grammar
 /tests/check_utils
 
 # leg generated source
-/src/template/parser-grammar.c
+/src/template-grammar.c
 
 # tarballs
 blogc-*.tar.*

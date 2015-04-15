@@ -14,12 +14,14 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 EXTRA_DIST = \
 	autogen.sh \
 	README.md \
+	src/template-grammar.leg \
 	$(NULL)
 
 CLEANFILES = \
 	$(NULL)
 
 noinst_HEADERS = \
+	src/template-grammar.h \
 	src/utils/utils.h \
 	$(NULL)
 
@@ -39,6 +41,7 @@ check_PROGRAMS = \
 
 
 libblogc_la_SOURCES = \
+	src/template-grammar.c \
 	src/utils/slist.c \
 	src/utils/strings.c \
 	src/utils/trie.c \
@@ -53,6 +56,8 @@ libblogc_la_LIBADD = \
 	$(NULL)
 
 if USE_LEG
+src/%-grammar.c: src/%-grammar.leg
+	$(AM_V_GEN)$(LEG) -o $@ $<
 endif
 
 blogc_SOURCES = \
@@ -84,7 +89,25 @@ endif
 if USE_CMOCKA
 
 check_PROGRAMS += \
+	tests/check_template_grammar \
 	tests/check_utils \
+	$(NULL)
+
+tests_check_template_grammar_SOURCES = \
+	tests/check_template_grammar.c \
+	$(NULL)
+
+tests_check_template_grammar_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_check_template_grammar_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_check_template_grammar_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc.la \
 	$(NULL)
 
 tests_check_utils_SOURCES = \
@@ -96,7 +119,8 @@ tests_check_utils_CFLAGS = \
 	$(NULL)
 
 tests_check_utils_LDFLAGS = \
-	-no-install
+	-no-install \
+	$(NULL)
 
 tests_check_utils_LDADD = \
 	$(CMOCKA_LIBS) \
@@ -119,7 +143,7 @@ valgrind: all
 		$(LIBTOOL) \
 			--mode=execute \
 			$(VALGRIND) \
-				--tool=memcheck \
+				--tool=memcheck  --leak-check=full --show-leak-kinds=all \
 				--leak-check=full \
 				--leak-resolution=high \
 				--num-callers=20 \
@@ -145,5 +169,4 @@ endif
 # Helpers: Cleanup of helper files
 
 clean-local:
-	-rm -rf $(top_builddir)/doc/build/
 	-rm -rf $(top_builddir)/valgrind-*.xml

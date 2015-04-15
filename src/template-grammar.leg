@@ -1,0 +1,200 @@
+#
+# blogc: A balde compiler.
+# Copyright (C) 2015 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+#
+# This program can be distributed under the terms of the BSD License.
+# See the file COPYING.
+#
+
+%{
+
+#include <stdio.h>
+#include "utils/utils.h"
+#include "template-grammar.h"
+
+#define YY_INPUT(buf, result, max_size)                          \
+{                                                                \
+    int yyc = (charbuf && *charbuf != '\0') ? *charbuf++ : EOF;  \
+    result = (EOF == yyc) ? 0 : (*buf = yyc, 1);                 \
+}
+
+
+static b_slist_t *stmts = NULL;
+static int if_count = 0;
+static int block_count = 0;
+static const char *charbuf = NULL;
+
+
+static void
+blogc_template_if_stmt(const char *value)
+{
+    if (block_count <= 0) {
+        fprintf(stderr, "Syntax error: {" "%% if ... %%" "} statement before "
+            "any {" "%% block ... %%" "} statement\n");
+        exit(1);
+    }
+    blogc_template_stmt_t *stmt = malloc(sizeof(blogc_template_stmt_t));
+    stmt->value = b_strdup(value);
+    stmt->type = BLOGC_TEMPLATE_IF_STMT;
+    stmts = b_slist_append(stmts, stmt);
+    if_count++;
+}
+
+
+static void
+blogc_template_else_stmt(void)
+{
+    if (if_count <= 0) {
+        fprintf(stderr, "Syntax error: {" "%% else %%" "} statement without "
+            "any open {" "%% if ... %%" "} statement\n");
+        exit(1);
+    }
+    blogc_template_stmt_t *stmt = malloc(sizeof(blogc_template_stmt_t));
+    stmt->value = NULL;
+    stmt->type = BLOGC_TEMPLATE_ELSE_STMT;
+    stmts = b_slist_append(stmts, stmt);
+}
+
+
+static void
+blogc_template_endif_stmt(void)
+{
+    if (if_count-- <= 0) {
+        fprintf(stderr, "Syntax error: {" "%% endif %%" "} statement before "
+            "any {" "%% if ... %%" "} statement\n");
+        exit(1);
+    }
+    blogc_template_stmt_t *stmt = malloc(sizeof(blogc_template_stmt_t));
+    stmt->value = NULL;
+    stmt->type = BLOGC_TEMPLATE_ENDIF_STMT;
+    stmts = b_slist_append(stmts, stmt);
+}
+
+
+static void
+blogc_template_block_stmt(const char *value)
+{
+    if (block_count > 0) {
+        fprintf(stderr, "Syntax error: {" "%% block %%" "} statements "
+            "can't be nested\n");
+        exit(1);
+    }
+    blogc_template_stmt_t *stmt = malloc(sizeof(blogc_template_stmt_t));
+    stmt->value = b_strdup(value);
+    stmt->type = BLOGC_TEMPLATE_BLOCK_STMT;
+    stmts = b_slist_append(stmts, stmt);
+    block_count++;
+}
+
+
+static void
+blogc_template_endblock_stmt(void)
+{
+    if (block_count-- <= 0) {
+        fprintf(stderr, "Syntax error: {" "%% endblock %%" "} statement before "
+            "any {" "%% block ... %%" "} statement\n");
+        exit(1);
+    }
+    blogc_template_stmt_t *stmt = malloc(sizeof(blogc_template_stmt_t));
+    stmt->value = NULL;
+    stmt->type = BLOGC_TEMPLATE_ENDBLOCK_STMT;
+    stmts = b_slist_append(stmts, stmt);
+}
+
+
+static void
+blogc_template_variable_stmt(const char *value)
+{
+    if (block_count <= 0) {
+        fprintf(stderr, "Syntax error: {{ ... }} statement before "
+            "any {" "%% block ... %%" "} statement\n");
+        exit(1);
+    }
+    blogc_template_stmt_t *stmt = malloc(sizeof(blogc_template_stmt_t));
+    stmt->value = b_strdup(value);
+    stmt->type = BLOGC_TEMPLATE_VARIABLE_STMT;
+    stmts = b_slist_append(stmts, stmt);
+}
+
+
+static void
+blogc_template_content_stmt(const char *value)
+{
+    blogc_template_stmt_t *stmt = malloc(sizeof(blogc_template_stmt_t));
+    stmt->value = b_strdup(value);
+    stmt->type = BLOGC_TEMPLATE_CONTENT_STMT;
+    stmts = b_slist_append(stmts, stmt);
+}
+
+%}
+
+page = if | else | endif | block | endblock | print | content | anything
+    { fprintf(stderr, "Syntax error near: %s\n", yytext); exit(1); }
+
+
+# Useful rules
+eol = '\n' | '\r\n' | '\r'
+eof = !.
+- = [\t ]*
+id = [A-Z][A-Z0-9_]*
+anything = < ( !eol . )* > eol
+
+# Conditionals
+if_open = '{%' -
+if_close = - '%}'
+if = if_open 'if' ' '+ < id > if_close  { blogc_template_if_stmt(yytext); }
+else = if_open 'else' if_close          { blogc_template_else_stmt(); }
+endif = if_open 'endif' if_close        { blogc_template_endif_stmt(); }
+
+# Blocks
+block_open = '{%' -
+block_close = - '%}'
+block_name = ( 'single_source' | 'multiple_sources_once' | 'multiple_sources' )
+block = block_open 'block' ' '+ < block_name > block_close  { blogc_template_block_stmt(yytext); }
+endblock = block_open 'endblock' block_close                { blogc_template_endblock_stmt(); }
+
+# Print calls
+print_open = '{{' -
+print_close = - '}}'
+print_var = < id >                      { blogc_template_variable_stmt(yytext); }
+print = print_open print_var print_close
+
+# Generic content
+content = < ( !eof !if_open !if_close !block_open !block_close !print_open !print_close . )+ >
+    { blogc_template_content_stmt(yytext); }
+
+%%
+
+
+void
+blogc_template_free_stmts(b_slist_t *stmts)
+{
+    for (b_slist_t *tmp = stmts; tmp != NULL; tmp = tmp->next) {
+        blogc_template_stmt_t *data = tmp->data;
+        free(data->value);
+        free(data);
+    }
+    b_slist_free(stmts);
+}
+
+
+b_slist_t*
+blogc_template_parse(const char *tmpl)
+{
+    if_count = 0;
+    block_count = 0;
+    charbuf = tmpl;
+    while(yyparse());
+    if (if_count != 0) {
+        fprintf(stderr, "Syntax error: You left %d open {" "%% if ... %%" "} statements.\n", if_count);
+        exit(1);
+    }
+    if (block_count != 0) {
+        fprintf(stderr, "Syntax error: You left %d open {" "%% block ... %%" "} statements.\n", block_count);
+        exit(1);
+    }
+    b_slist_t *rv = stmts;
+    charbuf = NULL;
+    stmts = NULL;
+    return rv;
+}

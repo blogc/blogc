@@ -12,10 +12,16 @@
 
 #include <stdio.h>
 
+#include "template-grammar.h"
+
 
 int
 main(int argc, char **argv)
 {
+    b_slist_t *t = blogc_template_parse(
+        "<html>{{ BOLA }}</html>\n"
+        "{% block single_source %}\n");
+    printf("%s\n", (char*) ((blogc_template_stmt_t*)t->next->next->next->data)->value);
     printf("Hello, World!\n");
     return 0;
 }
