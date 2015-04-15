@@ -143,7 +143,7 @@ valgrind: all
 		$(LIBTOOL) \
 			--mode=execute \
 			$(VALGRIND) \
-				--tool=memcheck  --leak-check=full --show-leak-kinds=all \
+				--tool=memcheck \
 				--leak-check=full \
 				--leak-resolution=high \
 				--num-callers=20 \
