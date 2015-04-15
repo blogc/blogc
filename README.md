@@ -18,7 +18,7 @@ The templates can define blocks. These are the block rules:
     - ``single_source`` should be used if just one source file is provided.
     - ``multiple_sources`` should be used if more than one source file is provided, being used once for each source file.
     - ``multiple_sources_once`` should be used if more than one source file is provided, but only once.
-- Template blocks can't be nested.
+- Template blocks can't be nested, but can't be defined multiple times in the same template.
 
 The variables defined in the source file are only available inside of blocks. If something does not depends on the source files, and is global, it must be hardcoded in the template, for the sake of simplicity.
 
