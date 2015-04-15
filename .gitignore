@@ -1,14 +1,49 @@
-# http://www.gnu.org/software/automake
+# Object files
+*.o
+*.ko
 
+# Libraries
+*.lib
+*.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Autotools
+Makefile
 Makefile.in
-
-# http://www.gnu.org/software/autoconf
-
-/autom4te.cache
+.deps
+.libs
+*.la
+*.lo
 /aclocal.m4
-/compile
 /configure
-/depcomp
-/install-sh
-/missing
+/config.*
+/autom4te.cache
+/libtool
 /stamp-h1
+.dirstamp
+/build-aux/*
+
+# installed .m4 files
+/m4/*.m4
+
+# blogc
+/blogc
+
+# tests
+/tests/check_utils
+
+# leg generated source
+/src/template/parser-grammar.c
+
+# tarballs
+blogc-*.tar.*
