@@ -9,9 +9,16 @@ The main idea is simple: a source file is read by the compiler, and a result fil
 
 The source file must provide (almost) all the data needed to build the result file, including any variables. The result file is built using a template, that defines how the information provided by the source file should be used to generate a reasonable result file.
 
-The compiler will always generate a single file, no matter how many source files are provided to it. If more than one source file is provided, the template must know how to convert them to a single result file.
+The compiler will always generate a single file, no matter how many source files are provided. If more than one source file is provided, the template must know how to convert them to a single result file.
 
-The templates can define blocks. If something is defined outside of blocks, it should be used for any source. If it is inside a block, it should only be used if the block matches the compiler argument expectations, e.g.: ``single_source`` should be used if just one source file is provided, ``multiple_sources`` should be used if more than one source file is provided, being used once for each source file, and ``multiple_sources_once`` should be used if more than one source file is provided, but only once. Templates blocks can't be nested.
+The templates can define blocks. These are the block rules:
+
+- If something is defined outside of blocks, it should be always used.
+- If something is defined inside a block, it should only be used if the block matches the compiler argument expectations, e.g.:
+    - ``single_source`` should be used if just one source file is provided.
+    - ``multiple_sources`` should be used if more than one source file is provided, being used once for each source file.
+    - ``multiple_sources_once`` should be used if more than one source file is provided, but only once.
+- Template blocks can't be nested.
 
 The variables defined in the source file are only available inside of blocks. If something does not depends on the source files, and is global, it must be hardcoded in the template, for the sake of simplicity.
 
