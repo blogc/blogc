@@ -39,11 +39,36 @@ test_source_parse(void **state)
 }
 
 
+static void
+test_source_parse_with_spaces(void **state)
+{
+    blogc_source_t *source = blogc_source_parse(
+        "\n  \n"
+        "VAR1: chunda     \t   \n"
+        "\n\n"
+        "BOLA: guda\n"
+        "----------\n"
+        "# This is a test\n"
+        "\n"
+        "bola\n");
+    assert_non_null(source);
+    assert_int_equal(b_trie_size(source->config), 2);
+    assert_string_equal(b_trie_lookup(source->config, "VAR1"), "chunda");
+    assert_string_equal(b_trie_lookup(source->config, "BOLA"), "guda");
+    assert_string_equal(source->content,
+        "# This is a test\n"
+        "\n"
+        "bola\n");
+    blogc_source_free(source);
+}
+
+
 int
 main(void)
 {
     const UnitTest tests[] = {
         unit_test(test_source_parse),
+        unit_test(test_source_parse_with_spaces),
     };
     return run_tests(tests);
 }
