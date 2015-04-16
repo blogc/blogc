@@ -100,8 +100,8 @@ AS_ECHO("
         ldflags:      ${LDFLAGS}
 
         examples:     ${EXAMPLES}
+        cmocka:       ${CMOCKA}
 
         valgrind:     ${VALGRIND}
         leg:          ${LEG}
-        cmocka:       ${CMOCKA}
 ")
