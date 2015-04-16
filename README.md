@@ -26,7 +26,7 @@ The templates can use conditional statements: ``{% if variable %}``, ``{% else %
 
 As the compiler is output-agnostic, Atom feeds and sitemaps should be generated using templates as well.
 
-The content defined in source files must be written using Markdown syntax. Javascript and CSS are allowed. Be careful!
+The content defined in source files must be written as pre-formatted text. Make sure to enclose the content with ``<pre>`` and ``</pre>`` tags in your templates.
 
 The compiler is designed to be easily used with any POSIX-compatible implementation of ``make``.
 
@@ -37,9 +37,9 @@ The compiler is designed to be easily used with any POSIX-compatible implementat
 TITLE: My nice post
 DATE: 2007-04-05T12:30-02:00
 ----
-# I'm a title
+test content.
 
-test content
+more test content.
 ```
 
 If more than one source file is provided, and they have the ``DATE`` variable required by the compiler, it will be used to sort the source files, if needed. Otherwise, the file name will be used to sort the source files.
@@ -48,7 +48,7 @@ The ``DATE`` variable is an ISO-8601 date-time, with seconds, and always in UTC.
 
 Variables are single-line, and all the whitespace characters, including tabs, before the leading non-whitespace character and after the trailing non-whitespace character will be removed.
 
-Markdown-parsed content is available in template blocks as the ``CONTENT`` variable.
+Pre-formatted content is available in template blocks as the ``CONTENT`` variable.
 
 
 ### Template file syntax
@@ -68,7 +68,7 @@ Markdown-parsed content is available in template blocks as the ``CONTENT`` varia
         {% block single_source %}
         <h2>{{ TITLE }}</h2>
         {% if DATE %}<h4>Published in: {{ DATE }}</h4>{% endif %}
-        {{ CONTENT }}
+        <pre>{{ CONTENT }}</pre>
         {% endblock %}
         {% block multiple_sources_once %}<ul>{% endblock %}
         {% block multiple_sources %}<p><a href="{{ FILENAME }}.html">{{ TITLE }}</a>{% if DATE %} - {{ DATE }}{% endif %}</p>{% endblock %}
