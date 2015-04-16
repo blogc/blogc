@@ -12,16 +12,18 @@
 
 #include <stdio.h>
 
-#include "template-grammar.h"
+#include "source-grammar.h"
 
 
 int
 main(int argc, char **argv)
 {
-    b_slist_t *t = blogc_template_parse(
-        "<html>{{ BOLA }}</html>\n"
-        "{% block single_source %}\n");
-    printf("%s\n", (char*) ((blogc_template_stmt_t*)t->next->next->next->data)->value);
+    blogc_source_t *t = blogc_source_parse(
+        "\n  \nBOLA: guda\n\t\n\n\n\n"
+        "CHUNDA: asd\n"
+        "----\n"
+        "{% block single_source %}\nbola\n\nzas\n");
+    printf("%s\n", t->content);
     printf("Hello, World!\n");
     return 0;
 }
