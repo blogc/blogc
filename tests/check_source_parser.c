@@ -14,19 +14,21 @@
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
-#include "../src/source-grammar.h"
+#include <string.h>
+#include "../src/source-parser.h"
 
 
 static void
 test_source_parse(void **state)
 {
-    blogc_source_t *source = blogc_source_parse(
+    const char *a =
         "VAR1: asd asd\n"
         "VAR2: 123chunda\n"
         "----------\n"
         "# This is a test\n"
         "\n"
-        "bola\n");
+        "bola\n";
+    blogc_source_t *source = blogc_source_parse(a, strlen(a));
     assert_non_null(source);
     assert_int_equal(b_trie_size(source->config), 2);
     assert_string_equal(b_trie_lookup(source->config, "VAR1"), "asd asd");
@@ -42,7 +44,7 @@ test_source_parse(void **state)
 static void
 test_source_parse_with_spaces(void **state)
 {
-    blogc_source_t *source = blogc_source_parse(
+    const char *a =
         "\n  \n"
         "VAR1: chunda     \t   \n"
         "\n\n"
@@ -50,7 +52,8 @@ test_source_parse_with_spaces(void **state)
         "----------\n"
         "# This is a test\n"
         "\n"
-        "bola\n");
+        "bola\n";
+    blogc_source_t *source = blogc_source_parse(a, strlen(a));
     assert_non_null(source);
     assert_int_equal(b_trie_size(source->config), 2);
     assert_string_equal(b_trie_lookup(source->config, "VAR1"), "chunda");

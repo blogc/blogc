@@ -38,6 +38,8 @@ b_trie_free_node(b_trie_t *trie, b_trie_node_t *node)
 void
 b_trie_free(b_trie_t *trie)
 {
+    if (trie == NULL)
+        return;
     b_trie_free_node(trie, trie->root);
     free(trie);
 }

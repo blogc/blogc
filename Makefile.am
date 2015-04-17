@@ -14,7 +14,6 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 EXTRA_DIST = \
 	autogen.sh \
 	README.md \
-	src/source-grammar.leg \
 	src/template-grammar.leg \
 	$(NULL)
 
@@ -22,7 +21,8 @@ CLEANFILES = \
 	$(NULL)
 
 noinst_HEADERS = \
-	src/source-grammar.h \
+	src/output.h \
+	src/source-parser.h \
 	src/template-grammar.h \
 	src/utils/utils.h \
 	$(NULL)
@@ -43,7 +43,8 @@ check_PROGRAMS = \
 
 
 libblogc_la_SOURCES = \
-	src/source-grammar.c \
+	src/output.c \
+	src/source-parser.c \
 	src/template-grammar.c \
 	src/utils/slist.c \
 	src/utils/strings.c \
@@ -92,24 +93,24 @@ endif
 if USE_CMOCKA
 
 check_PROGRAMS += \
-	tests/check_source_grammar \
+	tests/check_source_parser \
 	tests/check_template_grammar \
 	tests/check_utils \
 	$(NULL)
 
-tests_check_source_grammar_SOURCES = \
-	tests/check_source_grammar.c \
+tests_check_source_parser_SOURCES = \
+	tests/check_source_parser.c \
 	$(NULL)
 
-tests_check_source_grammar_CFLAGS = \
+tests_check_source_parser_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
 	$(NULL)
 
-tests_check_source_grammar_LDFLAGS = \
+tests_check_source_parser_LDFLAGS = \
 	-no-install \
 	$(NULL)
 
-tests_check_source_grammar_LDADD = \
+tests_check_source_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
 	$(NULL)

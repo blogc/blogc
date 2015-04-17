@@ -88,11 +88,58 @@ test_template_parse(void **state)
 }
 
 
+static void
+test_template_parse_html(void **state)
+{
+    b_slist_t *stmts = blogc_template_parse(
+        "<html>\n"
+        "    <head>\n"
+        "        {% block single_source %}\n"
+        "        <title>My cool blog >> {{ TITLE }}</title>\n"
+        "        {% endblock %}\n"
+        "        {% block multiple_sources %}\n"
+        "        <title>My cool blog - Main page</title>\n"
+        "        {% endblock %}\n"
+        "    </head>\n"
+        "    <body>\n"
+        "        <h1>My cool blog</h1>\n"
+        "        {% block single_source %}\n"
+        "        <h2>{{ TITLE }}</h2>\n"
+        "        {% if DATE %}<h4>Published in: {{ DATE }}</h4>{% endif %}\n"
+        "        <pre>{{ CONTENT }}</pre>\n"
+        "        {% endblock %}\n"
+        "        {% block multiple_sources_once %}<ul>{% endblock %}\n"
+        "        {% block multiple_sources %}<p><a href=\"{{ FILENAME }}.html\">"
+        "{{ TITLE }}</a>{% if DATE %} - {{ DATE }}{% endif %}</p>{% endblock %}\n"
+        "        {% block multiple_sources_once %}</ul>{% endblock %}\n"
+        "    </body>\n"
+        "</html>\n");
+    assert_non_null(stmts);
+    blogc_assert_template_stmt(stmts, "<html>\n    <head>\n        ",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(stmts->next, "single_source",
+        BLOGC_TEMPLATE_BLOCK_STMT);
+    blogc_assert_template_stmt(stmts->next->next,
+        "\n        <title>My cool blog >> ", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next, "TITLE",
+        BLOGC_TEMPLATE_VARIABLE_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next->next,
+        "</title>\n        ", BLOGC_TEMPLATE_CONTENT_STMT);
+
+
+
+
+
+    blogc_template_free_stmts(stmts);
+}
+
+
 int
 main(void)
 {
     const UnitTest tests[] = {
         unit_test(test_template_parse),
+        unit_test(test_template_parse_html),
     };
     return run_tests(tests);
 }

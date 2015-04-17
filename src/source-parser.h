@@ -6,9 +6,10 @@
  * See the file COPYING.
  */
 
-#ifndef _SOURCE_GRAMAR_H
-#define _SOURCE_GRAMAR_H
+#ifndef _SOURCE_PARSER_H
+#define _SOURCE_PARSER_H
 
+#include <stdlib.h>
 #include "utils/utils.h"
 
 typedef struct {
@@ -16,7 +17,7 @@ typedef struct {
     char *content;
 } blogc_source_t;
 
-blogc_source_t* blogc_source_parse(const char *tmpl);
+blogc_source_t* blogc_source_parse(const char *src, size_t src_len);
 void blogc_source_free(blogc_source_t *source);
 
-#endif /* _SOURCE_GRAMAR_H */
+#endif /* _SOURCE_PARSER_H */

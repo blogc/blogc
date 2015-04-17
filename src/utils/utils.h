@@ -10,6 +10,7 @@
 #define _UTILS_UTILS_H
 
 #include <stdbool.h>
+#include <stdlib.h>
 #include <stdarg.h>
 
 #define B_STRING_CHUNK_SIZE 128
