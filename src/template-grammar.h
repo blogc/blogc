@@ -2,7 +2,7 @@
  * blogc: A blog compiler.
  * Copyright (C) 2015 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
- * This program can be distributed under the terms of the LGPL-2 License.
+ * This program can be distributed under the terms of the BSD License.
  * See the file COPYING.
  */
 
