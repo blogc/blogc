@@ -41,7 +41,6 @@ blogc_template_parse(const char *src, size_t src_len)
     size_t current = 0;
     size_t start = 0;
     size_t end = 0;
-    size_t remaining = 0;
 
     bool error = false;
     char *tmp = NULL;
