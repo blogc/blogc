@@ -35,6 +35,14 @@ typedef enum {
 } blogc_template_parser_state_t;
 
 
+typedef enum {
+    BLOCK_CLOSED = 1,
+    BLOCK_SINGLE_SOURCE,
+    BLOCK_MULTIPLE_SOURCES,
+    BLOCK_MULTIPLE_SOURCES_ONCE,
+} blogc_template_parser_block_state_t;
+
+
 b_slist_t*
 blogc_template_parse(const char *src, size_t src_len)
 {
@@ -45,13 +53,13 @@ blogc_template_parse(const char *src, size_t src_len)
     bool error = false;
     char *tmp = NULL;
 
-    bool open_block = false;
     unsigned int if_count = 0;
 
     b_slist_t *stmts = NULL;
     blogc_template_stmt_t *stmt = NULL;
 
     blogc_template_parser_state_t state = TEMPLATE_START;
+    blogc_template_parser_block_state_t block_state = BLOCK_CLOSED;
     blogc_template_stmt_type_t type = BLOGC_TEMPLATE_CONTENT_STMT;
 
     while (current < src_len) {
@@ -106,24 +114,23 @@ blogc_template_parse(const char *src, size_t src_len)
                     break;
                 if (c == ' ') {
                     if (0 == strncmp("block", src + start, current - start)) {
-                        if (!open_block) {
+                        if (block_state == BLOCK_CLOSED) {
                             state = TEMPLATE_BLOCK_BLOCK_TYPE_START;
                             type = BLOGC_TEMPLATE_BLOCK_STMT;
                             start = current;
-                            open_block = true;
                             break;
                         }
                     }
                     else if (0 == strncmp("endblock", src + start, current - start)) {
-                        if (open_block) {
+                        if (block_state != BLOCK_CLOSED) {
                             state = TEMPLATE_BLOCK_END;
                             type = BLOGC_TEMPLATE_ENDBLOCK_STMT;
-                            open_block = false;
+                            block_state = BLOCK_CLOSED;
                             break;
                         }
                     }
                     else if (0 == strncmp("if", src + start, current - start)) {
-                        if (open_block) {
+                        if (block_state == BLOCK_SINGLE_SOURCE || block_state == BLOCK_MULTIPLE_SOURCES) {
                             state = TEMPLATE_BLOCK_IF_VARIABLE_START;
                             type = BLOGC_TEMPLATE_IF_STMT;
                             start = current;
@@ -132,7 +139,7 @@ blogc_template_parse(const char *src, size_t src_len)
                         }
                     }
                     else if (0 == strncmp("endif", src + start, current - start)) {
-                        if (open_block) {
+                        if (block_state == BLOCK_SINGLE_SOURCE || block_state == BLOCK_MULTIPLE_SOURCES) {
                             if (if_count > 0) {
                                 state = TEMPLATE_BLOCK_END;
                                 type = BLOGC_TEMPLATE_ENDIF_STMT;
@@ -160,10 +167,20 @@ blogc_template_parse(const char *src, size_t src_len)
                 if ((c >= 'a' && c <= 'z') || c == '_')
                     break;
                 if (c == ' ') {
-                    if ((0 == strncmp("single_source", src + start, current - start)) ||
-                        (0 == strncmp("multiple_sources", src + start, current - start)) ||
-                        (0 == strncmp("multiple_sources_once", src + start, current - start)))
-                    {
+                    if (0 == strncmp("single_source", src + start, current - start)) {
+                        block_state = BLOCK_SINGLE_SOURCE;
+                        end = current;
+                        state = TEMPLATE_BLOCK_END;
+                        break;
+                    }
+                    else if (0 == strncmp("multiple_sources", src + start, current - start)) {
+                        block_state = BLOCK_MULTIPLE_SOURCES;
+                        end = current;
+                        state = TEMPLATE_BLOCK_END;
+                        break;
+                    }
+                    else if (0 == strncmp("multiple_sources_once", src + start, current - start)) {
+                        block_state = BLOCK_MULTIPLE_SOURCES_ONCE;
                         end = current;
                         state = TEMPLATE_BLOCK_END;
                         break;
@@ -208,7 +225,7 @@ blogc_template_parse(const char *src, size_t src_len)
                 if (c == ' ')
                     break;
                 if (c >= 'A' && c <= 'Z') {
-                    if (open_block) {
+                    if (block_state == BLOCK_SINGLE_SOURCE || block_state == BLOCK_MULTIPLE_SOURCES) {
                         state = TEMPLATE_VARIABLE;
                         type = BLOGC_TEMPLATE_VARIABLE_STMT;
                         start = current;

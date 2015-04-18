@@ -24,6 +24,8 @@ The variables defined in the source file are only available inside of blocks. If
 
 The templates can use conditional statements: ``{% if variable %}`` and ``{% endif %}``. They check if a variable is defined or not. As variables are not available outside of blocks, these conditional statements can't be defined outside of blocks.
 
+Variables are not available in ``multiple_sources_once`` blocks, because it is not possible to guess which source file to get the variables from.
+
 As the compiler is output-agnostic, Atom feeds and sitemaps should be generated using templates as well.
 
 The content defined in source files must be written as pre-formatted text. Make sure to enclose the content with ``<pre>`` and ``</pre>`` tags in your templates.
