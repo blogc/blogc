@@ -16,16 +16,6 @@ AS_IF([test "x$ac_cv_prog_cc_c99" = "xno"], [
   AC_MSG_ERROR([no C99 compiler found, blogc requires a C99 compiler.])
 ])
 
-AC_ARG_ENABLE([examples], AS_HELP_STRING([--enable-examples], [build examples]))
-AS_IF([test "x$enable_examples" = "xyes"], [
-  build_examples=yes
-  EXAMPLES="enabled"
-], [
-  build_examples=no
-  EXAMPLES="disabled"
-])
-AM_CONDITIONAL([BUILD_EXAMPLES], [test "x$build_examples" = "xyes"])
-
 AC_ARG_ENABLE([valgrind], AS_HELP_STRING([--disable-valgrind],
               [ignore presence of valgrind]))
 AS_IF([test "x$enable_valgrind" != "xno"], [
@@ -44,25 +34,6 @@ AS_IF([test "x$have_valgrind" = "xyes"], , [
 AM_CONDITIONAL([USE_VALGRIND], [test "x$have_valgrind" = "xyes"])
 VALGRIND="$ac_cv_path_valgrind"
 AC_SUBST(VALGRIND)
-
-AC_ARG_ENABLE([leg], AS_HELP_STRING([--disable-leg],
-              [ignore presence of peg/leg and disable parser grammar regeneration]))
-AS_IF([test "x$enable_leg" != "xno"], [
-  AC_PATH_PROG([leg], [leg])
-  AS_IF([test "x$ac_cv_path_leg" = "x"], [
-    have_leg=no
-  ], [
-    have_leg=yes
-  ])
-])
-AS_IF([test "x$have_leg" = "xyes"], , [
-  AS_IF([test "x$enable_leg" = "xyes"], [
-    AC_MSG_ERROR([peg/leg requested but not found])
-  ])
-])
-AM_CONDITIONAL([USE_LEG], [test "x$have_leg" = "xyes"])
-LEG="$ac_cv_path_leg"
-AC_SUBST(LEG)
 
 AC_ARG_ENABLE([cmocka], AS_HELP_STRING([--disable-cmocka],
               [ignore presence of cmocka. this will disable unit tests]))
@@ -99,9 +70,7 @@ AS_ECHO("
         cflags:       ${CFLAGS}
         ldflags:      ${LDFLAGS}
 
-        examples:     ${EXAMPLES}
         cmocka:       ${CMOCKA}
 
         valgrind:     ${VALGRIND}
-        leg:          ${LEG}
 ")

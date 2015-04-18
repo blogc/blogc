@@ -13,19 +13,13 @@
 #include <stdio.h>
 
 #include "source-parser.h"
+#include "template-parser.h"
 #include <string.h>
 
 
 int
 main(int argc, char **argv)
 {
-    const char *a =
-        "\n  \nBOLA : guda\n\t\n\n\n\n"
-        "CHUNDA: asd\n"
-        "----\n"
-        "{% block single_source %}\nbola\n\nzas\n";
-    blogc_source_t *t = blogc_source_parse(a, strlen(a));
-    printf("%s\n", t->content);
     printf("Hello, World!\n");
     return 0;
 }

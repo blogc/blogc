@@ -32,7 +32,7 @@ blogc_parser_syntax_error(const char *name, const char *src, size_t src_len,
         current++;
     }
 
-    fprintf(stderr, "%s parser error: syntax error near \"%s\"\n", name,
+    fprintf(stderr, "%s parser error: failed to parse input near \"%s\".\n", name,
         msg->str);
 
     b_string_free(msg, true);

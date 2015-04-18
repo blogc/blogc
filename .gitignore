@@ -41,11 +41,8 @@ Makefile.in
 
 # tests
 /tests/check_source_parser
-/tests/check_template_grammar
+/tests/check_template_parser
 /tests/check_utils
-
-# leg generated source
-/src/template-grammar.c
 
 # tarballs
 blogc-*.tar.*

@@ -14,7 +14,6 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 EXTRA_DIST = \
 	autogen.sh \
 	README.md \
-	src/template-grammar.leg \
 	$(NULL)
 
 CLEANFILES = \
@@ -23,7 +22,7 @@ CLEANFILES = \
 noinst_HEADERS = \
 	src/output.h \
 	src/source-parser.h \
-	src/template-grammar.h \
+	src/template-parser.h \
 	src/utils/utils.h \
 	$(NULL)
 
@@ -45,7 +44,7 @@ check_PROGRAMS = \
 libblogc_la_SOURCES = \
 	src/output.c \
 	src/source-parser.c \
-	src/template-grammar.c \
+	src/template-parser.c \
 	src/utils/slist.c \
 	src/utils/strings.c \
 	src/utils/trie.c \
@@ -59,10 +58,6 @@ libblogc_la_CFLAGS = \
 libblogc_la_LIBADD = \
 	$(NULL)
 
-if USE_LEG
-src/%-grammar.c: src/%-grammar.leg
-	$(AM_V_GEN)$(LEG) -o $@ $<
-endif
 
 blogc_SOURCES = \
 	src/main.c \
@@ -78,23 +73,13 @@ blogc_LDADD = \
 	$(NULL)
 
 
-## Build rules: examples
-
-if BUILD_EXAMPLES
-
-noinst_PROGRAMS += \
-	$(NULL)
-
-endif
-
-
 ## Build rules: tests
 
 if USE_CMOCKA
 
 check_PROGRAMS += \
 	tests/check_source_parser \
-	tests/check_template_grammar \
+	tests/check_template_parser \
 	tests/check_utils \
 	$(NULL)
 
@@ -115,19 +100,19 @@ tests_check_source_parser_LDADD = \
 	libblogc.la \
 	$(NULL)
 
-tests_check_template_grammar_SOURCES = \
-	tests/check_template_grammar.c \
+tests_check_template_parser_SOURCES = \
+	tests/check_template_parser.c \
 	$(NULL)
 
-tests_check_template_grammar_CFLAGS = \
+tests_check_template_parser_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
 	$(NULL)
 
-tests_check_template_grammar_LDFLAGS = \
+tests_check_template_parser_LDFLAGS = \
 	-no-install \
 	$(NULL)
 
-tests_check_template_grammar_LDADD = \
+tests_check_template_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
 	$(NULL)
