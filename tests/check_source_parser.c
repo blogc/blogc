@@ -16,6 +16,7 @@
 #include <cmocka.h>
 #include <string.h>
 #include "../src/source-parser.h"
+#include "../src/error.h"
 
 
 static void
@@ -28,7 +29,9 @@ test_source_parse(void **state)
         "# This is a test\n"
         "\n"
         "bola\n";
-    blogc_source_t *source = blogc_source_parse(a, strlen(a));
+    blogc_error_t *err = NULL;
+    blogc_source_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(err);
     assert_non_null(source);
     assert_int_equal(b_trie_size(source->config), 2);
     assert_string_equal(b_trie_lookup(source->config, "VAR1"), "asd asd");
@@ -53,7 +56,9 @@ test_source_parse_with_spaces(void **state)
         "# This is a test\n"
         "\n"
         "bola\n";
-    blogc_source_t *source = blogc_source_parse(a, strlen(a));
+    blogc_error_t *err = NULL;
+    blogc_source_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(err);
     assert_non_null(source);
     assert_int_equal(b_trie_size(source->config), 2);
     assert_string_equal(b_trie_lookup(source->config, "VAR1"), "chunda");

@@ -20,7 +20,8 @@ CLEANFILES = \
 	$(NULL)
 
 noinst_HEADERS = \
-	src/output.h \
+	src/error.h \
+	src/loader.h \
 	src/source-parser.h \
 	src/template-parser.h \
 	src/utils/utils.h \
@@ -42,7 +43,8 @@ check_PROGRAMS = \
 
 
 libblogc_la_SOURCES = \
-	src/output.c \
+	src/error.c \
+	src/loader.c \
 	src/source-parser.c \
 	src/template-parser.c \
 	src/utils/slist.c \

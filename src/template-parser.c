@@ -15,7 +15,7 @@
 
 #include "utils/utils.h"
 #include "template-parser.h"
-#include "output.h"
+#include "error.h"
 
 
 typedef enum {
@@ -44,13 +44,15 @@ typedef enum {
 
 
 b_slist_t*
-blogc_template_parse(const char *src, size_t src_len)
+blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
 {
+    if (err == NULL || *err != NULL)
+        return NULL;
+
     size_t current = 0;
     size_t start = 0;
     size_t end = 0;
 
-    bool error = false;
     char *tmp = NULL;
 
     unsigned int if_count = 0;
@@ -95,7 +97,11 @@ blogc_template_parse(const char *src, size_t src_len)
                         stmts = b_slist_append(stmts, stmt);
                         stmt = NULL;
                     }
+                    break;
                 }
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid statement syntax. Must be '%%' or '{'.");
                 break;
 
             case TEMPLATE_BLOCK_START:
@@ -106,7 +112,9 @@ blogc_template_parse(const char *src, size_t src_len)
                     start = current;
                     break;
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid statement syntax. Must begin lowercase letter.");
                 break;
 
             case TEMPLATE_BLOCK_TYPE:
@@ -120,6 +128,9 @@ blogc_template_parse(const char *src, size_t src_len)
                             start = current;
                             break;
                         }
+                        *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
+                            src, src_len, current, "Blocks can't be nested.");
+                        break;
                     }
                     else if (0 == strncmp("endblock", src + start, current - start)) {
                         if (block_state != BLOCK_CLOSED) {
@@ -128,6 +139,10 @@ blogc_template_parse(const char *src, size_t src_len)
                             block_state = BLOCK_CLOSED;
                             break;
                         }
+                        *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
+                            src, src_len, current,
+                            "'endblock' statement without an open 'block' statement.");
+                        break;
                     }
                     else if (0 == strncmp("if", src + start, current - start)) {
                         if (block_state == BLOCK_SINGLE_SOURCE || block_state == BLOCK_MULTIPLE_SOURCES) {
@@ -137,6 +152,11 @@ blogc_template_parse(const char *src, size_t src_len)
                             if_count++;
                             break;
                         }
+                        *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
+                            src, src_len, current,
+                            "'if' statements only allowed inside 'single_source' "
+                            "and 'multiple_sources' blocks.");
+                        break;
                     }
                     else if (0 == strncmp("endif", src + start, current - start)) {
                         if (block_state == BLOCK_SINGLE_SOURCE || block_state == BLOCK_MULTIPLE_SOURCES) {
@@ -146,10 +166,21 @@ blogc_template_parse(const char *src, size_t src_len)
                                 if_count--;
                                 break;
                             }
+                            *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
+                                src, src_len, current,
+                                "'endif' statement without an open 'if' statement.");
+                            break;
                         }
+                        *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
+                            src, src_len, current,
+                            "'endif' statements only allowed inside 'single_source' "
+                            "and 'multiple_sources' blocks.");
+                        break;
                     }
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid statement type: Allowed types are: block, endblock, if, endif.");
                 break;
 
             case TEMPLATE_BLOCK_BLOCK_TYPE_START:
@@ -160,7 +191,9 @@ blogc_template_parse(const char *src, size_t src_len)
                     start = current;
                     break;
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid block syntax. Must begin with lowercase letter.");
                 break;
 
             case TEMPLATE_BLOCK_BLOCK_TYPE:
@@ -186,7 +219,9 @@ blogc_template_parse(const char *src, size_t src_len)
                         break;
                     }
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid block type. Allowed types are: single_source, multiple_sources, multiple_sources_once.");
                 break;
 
             case TEMPLATE_BLOCK_IF_VARIABLE_START:
@@ -197,7 +232,9 @@ blogc_template_parse(const char *src, size_t src_len)
                     start = current;
                     break;
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid variable name. Must begin with uppercase letter.");
                 break;
 
             case TEMPLATE_BLOCK_IF_VARIABLE:
@@ -208,7 +245,9 @@ blogc_template_parse(const char *src, size_t src_len)
                     state = TEMPLATE_BLOCK_END;
                     break;
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid variable name. Must be uppercase letter, number or '_'.");
                 break;
 
             case TEMPLATE_BLOCK_END:
@@ -218,7 +257,9 @@ blogc_template_parse(const char *src, size_t src_len)
                     state = TEMPLATE_CLOSE_BRACKET;
                     break;
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid statement syntax. Must end with '%}'.");
                 break;
 
             case TEMPLATE_VARIABLE_START:
@@ -231,8 +272,15 @@ blogc_template_parse(const char *src, size_t src_len)
                         start = current;
                         break;
                     }
+                    *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
+                        src, src_len, current,
+                        "variable statements only allowed inside 'single_source' "
+                        "and 'multiple_sources' blocks.");
+                    break;
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid variable name. Must begin with uppercase letter.");
                 break;
 
             case TEMPLATE_VARIABLE:
@@ -248,7 +296,9 @@ blogc_template_parse(const char *src, size_t src_len)
                     state = TEMPLATE_CLOSE_BRACKET;
                     break;
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid variable name. Must be uppercase letter, number or '_'.");
                 break;
 
             case TEMPLATE_VARIABLE_END:
@@ -258,7 +308,9 @@ blogc_template_parse(const char *src, size_t src_len)
                     state = TEMPLATE_CLOSE_BRACKET;
                     break;
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid statement syntax. Must end with '}}'.");
                 break;
 
             case TEMPLATE_CLOSE_BRACKET:
@@ -275,24 +327,25 @@ blogc_template_parse(const char *src, size_t src_len)
                     start = current + 1;
                     break;
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid statement syntax. Must end with '}'.");
                 break;
 
         }
 
-        if (error)
+        if (*err != NULL)
             break;
 
         current++;
     }
 
-    if (error) {
+    if (*err != NULL) {
         if (stmt != NULL) {
             free(stmt->value);
             free(stmt);
         }
         blogc_template_free_stmts(stmts);
-        blogc_parser_syntax_error("template", src, src_len, current);
         return NULL;
     }
 

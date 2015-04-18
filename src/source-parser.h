@@ -11,13 +11,15 @@
 
 #include <stdlib.h>
 #include "utils/utils.h"
+#include "error.h"
 
 typedef struct {
     b_trie_t *config;
     char *content;
 } blogc_source_t;
 
-blogc_source_t* blogc_source_parse(const char *src, size_t src_len);
-void blogc_source_free(blogc_source_t *source);
+blogc_source_t* blogc_source_parse(const char *src, size_t src_len,
+    blogc_error_t **err);
+void blogc_source_free(void *source);
 
 #endif /* _SOURCE_PARSER_H */

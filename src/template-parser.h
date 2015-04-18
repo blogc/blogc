@@ -10,6 +10,7 @@
 #define _TEMPLATE_PARSER_H
 
 #include "utils/utils.h"
+#include "error.h"
 
 typedef enum {
     BLOGC_TEMPLATE_IF_STMT = 1,
@@ -25,7 +26,8 @@ typedef struct {
     char *value;
 } blogc_template_stmt_t;
 
-b_slist_t* blogc_template_parse(const char *src, size_t src_len);
+b_slist_t* blogc_template_parse(const char *src, size_t src_len,
+    blogc_error_t **err);
 void blogc_template_free_stmts(b_slist_t *stmts);
 
 #endif /* _TEMPLATE_GRAMMAR_H */

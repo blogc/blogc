@@ -14,7 +14,7 @@
 
 #include "utils/utils.h"
 #include "source-parser.h"
-#include "output.h"
+#include "error.h"
 
 
 typedef enum {
@@ -29,12 +29,14 @@ typedef enum {
 
 
 blogc_source_t*
-blogc_source_parse(const char *src, size_t src_len)
+blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
 {
+    if (err == NULL || *err != NULL)
+        return NULL;
+
     size_t current = 0;
     size_t start = 0;
 
-    bool error = false;
     char *key = NULL;
     char *tmp = NULL;
     b_trie_t *config = b_trie_new(free);
@@ -59,7 +61,9 @@ blogc_source_parse(const char *src, size_t src_len)
                     state = SOURCE_SEPARATOR;
                     break;
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                    current,
+                    "Can't find a configuration key or the content separator.");
                 break;
 
             case SOURCE_CONFIG_KEY:
@@ -70,7 +74,8 @@ blogc_source_parse(const char *src, size_t src_len)
                     state = SOURCE_CONFIG_VALUE_START;
                     break;
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                    current, "Invalid configuration key.");
                 break;
 
             case SOURCE_CONFIG_VALUE_START:
@@ -79,7 +84,9 @@ blogc_source_parse(const char *src, size_t src_len)
                     start = current;
                     break;
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                    current, "Configuration value not provided for '%s'.",
+                    key);
                 break;
 
             case SOURCE_CONFIG_VALUE:
@@ -100,7 +107,9 @@ blogc_source_parse(const char *src, size_t src_len)
                     state = SOURCE_CONTENT_START;
                     break;
                 }
-                error = true;
+                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                    current,
+                    "Invalid content separator. Must be one or more '-' characters.");
                 break;
 
             case SOURCE_CONTENT_START:
@@ -114,17 +123,16 @@ blogc_source_parse(const char *src, size_t src_len)
                 break;
         }
 
-        if (error)
+        if (*err != NULL)
             break;
 
         current++;
     }
 
-    if (error) {
+    if (*err != NULL) {
         free(key);
         free(content);
         b_trie_free(config);
-        blogc_parser_syntax_error("source", src, src_len, current);
         return NULL;
     }
 
@@ -137,11 +145,12 @@ blogc_source_parse(const char *src, size_t src_len)
 
 
 void
-blogc_source_free(blogc_source_t *source)
+blogc_source_free(void *source)
 {
     if (source == NULL)
         return;
-    free(source->content);
-    b_trie_free(source->config);
-    free(source);
+    blogc_source_t *s = source;
+    free(s->content);
+    b_trie_free(s->config);
+    free(s);
 }

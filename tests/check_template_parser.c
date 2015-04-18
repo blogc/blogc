@@ -16,6 +16,7 @@
 #include <cmocka.h>
 #include <string.h>
 #include "../src/template-parser.h"
+#include "../src/error.h"
 
 
 static void
@@ -44,7 +45,9 @@ test_template_parse(void **state)
         "{% endblock %}\n"
         "{% block multiple_sources %}{{ BOLA }}{% endblock %}\n"
         "{% block multiple_sources_once %}asd{% endblock %}\n";
-    b_slist_t *stmts = blogc_template_parse(a, strlen(a));
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_null(err);
     assert_non_null(stmts);
     blogc_assert_template_stmt(stmts, "Test\n\n    ",
         BLOGC_TEMPLATE_CONTENT_STMT);
@@ -110,7 +113,9 @@ test_template_parse_html(void **state)
         "        {% block multiple_sources_once %}</ul>{% endblock %}\n"
         "    </body>\n"
         "</html>\n";
-    b_slist_t *stmts = blogc_template_parse(a, strlen(a));
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_null(err);
     assert_non_null(stmts);
     blogc_assert_template_stmt(stmts, "<html>\n    <head>\n        ",
         BLOGC_TEMPLATE_CONTENT_STMT);
