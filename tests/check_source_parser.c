@@ -17,6 +17,7 @@
 #include <string.h>
 #include "../src/source-parser.h"
 #include "../src/error.h"
+#include "../src/utils/utils.h"
 
 
 static void

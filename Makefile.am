@@ -81,10 +81,28 @@ blogc_LDADD = \
 if USE_CMOCKA
 
 check_PROGRAMS += \
+	tests/check_error \
 	tests/check_loader \
 	tests/check_source_parser \
 	tests/check_template_parser \
 	tests/check_utils \
+	$(NULL)
+
+tests_check_error_SOURCES = \
+	tests/check_error.c \
+	$(NULL)
+
+tests_check_error_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_check_error_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_check_error_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc.la \
 	$(NULL)
 
 tests_check_loader_SOURCES = \

@@ -16,6 +16,7 @@
 #include <cmocka.h>
 #include <string.h>
 #include "../src/loader.h"
+#include "../src/utils/utils.h"
 
 
 static void
