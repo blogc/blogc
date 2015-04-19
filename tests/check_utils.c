@@ -623,6 +623,39 @@ test_trie_insert(void **state)
 
 
 static void
+test_trie_insert_duplicated(void **state)
+{
+    b_trie_t *trie = b_trie_new(free);
+
+    b_trie_insert(trie, "bola", b_strdup("guda"));
+    assert_true(trie->root->key == 'b');
+    assert_null(trie->root->data);
+    assert_true(trie->root->child->key == 'o');
+    assert_null(trie->root->child->data);
+    assert_true(trie->root->child->child->key == 'l');
+    assert_null(trie->root->child->child->data);
+    assert_true(trie->root->child->child->child->key == 'a');
+    assert_null(trie->root->child->child->child->data);
+    assert_true(trie->root->child->child->child->child->key == '\0');
+    assert_string_equal(trie->root->child->child->child->child->data, "guda");
+
+    b_trie_insert(trie, "bola", b_strdup("asdf"));
+    assert_true(trie->root->key == 'b');
+    assert_null(trie->root->data);
+    assert_true(trie->root->child->key == 'o');
+    assert_null(trie->root->child->data);
+    assert_true(trie->root->child->child->key == 'l');
+    assert_null(trie->root->child->child->data);
+    assert_true(trie->root->child->child->child->key == 'a');
+    assert_null(trie->root->child->child->child->data);
+    assert_true(trie->root->child->child->child->child->key == '\0');
+    assert_string_equal(trie->root->child->child->child->child->data, "asdf");
+
+    b_trie_free(trie);
+}
+
+
+static void
 test_trie_keep_data(void **state)
 {
     b_trie_t *trie = b_trie_new(NULL);
@@ -781,6 +814,7 @@ main(void)
         // trie
         unit_test(test_trie_new),
         unit_test(test_trie_insert),
+        unit_test(test_trie_insert_duplicated),
         unit_test(test_trie_keep_data),
         unit_test(test_trie_lookup),
         unit_test(test_trie_size),
