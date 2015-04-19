@@ -46,7 +46,7 @@ test content.
 more test content.
 ```
 
-If more than one source file is provided, and they have the ``DATE`` variable required by the compiler, it will be used to sort the source files, if needed. Otherwise, the file name will be used to sort the source files.
+If more than one source file is provided, they won't be sorted, and will be used by ``multiple_sources`` blocks in the order that they were provided in the command line.
 
 The ``DATE`` variable is an ISO-8601 date-time, with seconds, and always in UTC. If you want to show the date of your posts in your blog, you can use the ``DATE`` variable, but it won't be nicely formated, it will always be an ISO-8601 date-time.
 
