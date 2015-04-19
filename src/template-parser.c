@@ -97,9 +97,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     }
                     break;
                 }
-                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid statement syntax. Must be '%%' or '{'.");
+                state = TEMPLATE_START;
                 break;
 
             case TEMPLATE_BLOCK_START:
