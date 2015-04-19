@@ -70,7 +70,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
 
             case TEMPLATE_START:
                 if (last) {
-                    stmt = malloc(sizeof(blogc_template_stmt_t));
+                    stmt = b_malloc(sizeof(blogc_template_stmt_t));
                     stmt->type = type;
                     stmt->value = b_strndup(src + start, src_len - start);
                     stmts = b_slist_append(stmts, stmt);
@@ -89,7 +89,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     else
                         state = TEMPLATE_VARIABLE_START;
                     if (end > start) {
-                        stmt = malloc(sizeof(blogc_template_stmt_t));
+                        stmt = b_malloc(sizeof(blogc_template_stmt_t));
                         stmt->type = type;
                         stmt->value = b_strndup(src + start, end - start);
                         stmts = b_slist_append(stmts, stmt);
@@ -313,7 +313,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
 
             case TEMPLATE_CLOSE_BRACKET:
                 if (c == '}') {
-                    stmt = malloc(sizeof(blogc_template_stmt_t));
+                    stmt = b_malloc(sizeof(blogc_template_stmt_t));
                     stmt->type = type;
                     stmt->value = NULL;
                     if (end > start)

@@ -15,7 +15,7 @@
 b_trie_t*
 b_trie_new(void (*free_func)(void *ptr))
 {
-    b_trie_t *trie = malloc(sizeof(b_trie_t));
+    b_trie_t *trie = b_malloc(sizeof(b_trie_t));
     trie->root = NULL;
     trie->free_func = free_func;
     return trie;
@@ -59,7 +59,7 @@ b_trie_insert(b_trie_t *trie, const char *key, void *data)
     while (1) {
 
         if (trie->root == NULL || (parent != NULL && parent->child == NULL)) {
-            current = malloc(sizeof(b_trie_node_t));
+            current = b_malloc(sizeof(b_trie_node_t));
             current->key = *key;
             current->data = NULL;
             current->next = NULL;
@@ -85,7 +85,7 @@ b_trie_insert(b_trie_t *trie, const char *key, void *data)
         if (previous == NULL || parent != NULL)
             goto clean;
 
-        current = malloc(sizeof(b_trie_node_t));
+        current = b_malloc(sizeof(b_trie_node_t));
         current->key = *key;
         current->data = NULL;
         current->next = NULL;

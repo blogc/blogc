@@ -136,7 +136,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
         return NULL;
     }
 
-    blogc_source_t *rv = malloc(sizeof(blogc_source_t));
+    blogc_source_t *rv = b_malloc(sizeof(blogc_source_t));
     rv->config = config;
     rv->content = content;
 

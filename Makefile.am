@@ -49,6 +49,7 @@ libblogc_la_SOURCES = \
 	src/renderer.c \
 	src/source-parser.c \
 	src/template-parser.c \
+	src/utils/mem.c \
 	src/utils/slist.c \
 	src/utils/strings.c \
 	src/utils/trie.c \

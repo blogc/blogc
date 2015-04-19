@@ -69,4 +69,6 @@ void* b_trie_lookup(b_trie_t *trie, const char *key);
 unsigned int b_trie_size(b_trie_t *trie);
 void b_trie_foreach(b_trie_t *trie, void (*func)(const char *key, void *data));
 
+void* b_malloc(size_t size);
+
 #endif /* _UTILS_UTILS_H */

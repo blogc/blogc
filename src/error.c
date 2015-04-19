@@ -21,7 +21,7 @@
 blogc_error_t*
 blogc_error_new(blogc_error_type_t type, const char *msg)
 {
-    blogc_error_t *err = malloc(sizeof(blogc_error_t));
+    blogc_error_t *err = b_malloc(sizeof(blogc_error_t));
     err->type = type;
     err->msg = b_strdup(msg);
     return err;

@@ -125,14 +125,14 @@ b_str_split(const char *str, char c, unsigned int max_pieces)
 {
     if (!str)
         return NULL;
-    char **rv = malloc(sizeof(char*));
+    char **rv = b_malloc(sizeof(char*));
     unsigned int i, start = 0, count = 0;
     for (i = 0; i < strlen(str) + 1; i++) {
         if (str[0] == '\0')
             break;
         if ((str[i] == c && (!max_pieces || count + 1 < max_pieces)) || str[i] == '\0') {
             rv = realloc(rv, (count + 1) * sizeof(char*));
-            rv[count] = malloc(i - start + 1);
+            rv[count] = b_malloc(i - start + 1);
             memcpy(rv[count], str + start, i - start);
             rv[count++][i - start] = '\0';
             start = i + 1;
@@ -198,7 +198,7 @@ b_strv_length(char **strv)
 b_string_t*
 b_string_new(void)
 {
-    b_string_t* rv = malloc(sizeof(b_string_t));
+    b_string_t* rv = b_malloc(sizeof(b_string_t));
     rv->str = NULL;
     rv->len = 0;
     rv->allocated_len = 0;
