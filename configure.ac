@@ -35,21 +35,21 @@ AM_CONDITIONAL([USE_VALGRIND], [test "x$have_valgrind" = "xyes"])
 VALGRIND="$ac_cv_path_valgrind"
 AC_SUBST(VALGRIND)
 
-AC_ARG_ENABLE([cmocka], AS_HELP_STRING([--disable-cmocka],
-              [ignore presence of cmocka. this will disable unit tests]))
-AS_IF([test "x$enable_cmocka" != "xno"], [
+AC_ARG_ENABLE([tests], AS_HELP_STRING([--disable-tests],
+              [disable unit tests, ignoring presence of cmocka]))
+AS_IF([test "x$enable_tests" != "xno"], [
   PKG_PROG_PKG_CONFIG
   PKG_CHECK_MODULES([CMOCKA], [cmocka], [
-    CMOCKA="enabled"
+    TESTS="enabled"
     have_cmocka=yes
   ], [
-    CMOCKA="disabled"
+    TESTS="disabled"
     have_cmocka=no
   ])
 ])
 AS_IF([test "x$have_cmocka" = "xyes"], , [
-  AS_IF([test "x$enable_cmocka" = "xyes"], [
-    AC_MSG_ERROR([cmocka requested but not found])
+  AS_IF([test "x$enable_tests" = "xyes"], [
+    AC_MSG_ERROR([unit tests requested but cmocka not found])
   ])
 ])
 AM_CONDITIONAL([USE_CMOCKA], [test "x$have_cmocka" = "xyes"])
@@ -70,7 +70,7 @@ AS_ECHO("
         cflags:       ${CFLAGS}
         ldflags:      ${LDFLAGS}
 
-        cmocka:       ${CMOCKA}
+        tests:        ${TESTS}
 
         valgrind:     ${VALGRIND}
 ")

@@ -3,7 +3,7 @@
 ACLOCAL_AMFLAGS = -I m4
 
 AM_DISTCHECK_CONFIGURE_FLAGS = \
-	--enable-cmocka \
+	--enable-tests \
 	--disable-valgrind
 
 
