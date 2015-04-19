@@ -82,9 +82,8 @@ b_trie_insert(b_trie_t *trie, const char *key, void *data)
 
         parent = tmp;
 
-        if (previous == NULL || parent != NULL) {
+        if (previous == NULL || parent != NULL)
             goto clean;
-        }
 
         current = b_malloc(sizeof(b_trie_node_t));
         current->key = *key;
