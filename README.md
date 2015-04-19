@@ -30,7 +30,7 @@ Variables are not available in ``multiple_sources_once`` blocks, because it is n
 
 As the compiler is output-agnostic, Atom feeds and sitemaps should be generated using templates as well.
 
-The content defined in source files must be written as pre-formatted text. Make sure to enclose the content with ``<pre>`` and ``</pre>`` tags in your templates.
+The content won't touch the content. If the user write pre-formatted text it will stay formatted, and the user may want to enclose the ``{{ CONTENT }}`` statement with ``<pre>`` and ``</pre>`` tags in the templates. For more flexibility, the user can even write raw HTML in the source content.
 
 The compiler is designed to be easily used with any POSIX-compatible implementation of ``make``.
 
