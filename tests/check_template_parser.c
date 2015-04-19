@@ -96,7 +96,7 @@ test_template_parse_html(void **state)
         "        {% block single_source %}\n"
         "        <title>My cool blog >> {{ TITLE }}</title>\n"
         "        {% endblock %}\n"
-        "        {% block multiple_sources %}\n"
+        "        {% block multiple_sources_once %}\n"
         "        <title>My cool blog - Main page</title>\n"
         "        {% endblock %}\n"
         "    </head>\n"
@@ -132,7 +132,7 @@ test_template_parse_html(void **state)
     blogc_assert_template_stmt(stmts->next->next->next->next->next->next,
         "\n        ", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(stmts->next->next->next->next->next->next->next,
-        "multiple_sources", BLOGC_TEMPLATE_BLOCK_STMT);
+        "multiple_sources_once", BLOGC_TEMPLATE_BLOCK_STMT);
     b_slist_t *tmp = stmts->next->next->next->next->next->next->next->next;
     blogc_assert_template_stmt(tmp,
         "\n        <title>My cool blog - Main page</title>\n        ",
