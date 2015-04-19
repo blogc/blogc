@@ -3,9 +3,7 @@
 ACLOCAL_AMFLAGS = -I m4
 
 AM_DISTCHECK_CONFIGURE_FLAGS = \
-	--enable-examples \
 	--enable-cmocka \
-	--disable-leg \
 	--disable-valgrind
 
 
@@ -179,3 +177,5 @@ valgrind: all
 				--num-callers=20 \
 				--error-exitcode=1 \
 				--show-possibly-lost=no"
+
+endif
