@@ -163,7 +163,7 @@ TESTS = \
 	$(check_PROGRAMS)
 
 
-## Helpers: Valgrind runners
+## Helpers: Valgrind runner
 
 if USE_VALGRIND
 valgrind: all
@@ -177,26 +177,5 @@ valgrind: all
 				--leak-check=full \
 				--leak-resolution=high \
 				--num-callers=20 \
+				--error-exitcode=1 \
 				--show-possibly-lost=no"
-
-valgrind-ci: all clean-local
-	$(MAKE) check TESTS_ENVIRONMENT=" \
-		G_SLICE=always-malloc \
-		G_DEBUG=gc-friendly \
-		$(LIBTOOL) \
-			--mode=execute \
-			$(VALGRIND) \
-				--tool=memcheck \
-				--xml=yes \
-				--xml-file=valgrind-%p.xml \
-				--leak-check=full \
-				--leak-resolution=high \
-				--num-callers=20 \
-				--show-possibly-lost=no"
-endif
-
-
-# Helpers: Cleanup of helper files
-
-clean-local:
-	-rm -rf $(top_builddir)/valgrind-*.xml
