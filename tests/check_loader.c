@@ -19,6 +19,9 @@
 #include "../src/utils/utils.h"
 
 
+// FIXME: test the file functions
+
+
 static void
 test_get_filename(void **state)
 {

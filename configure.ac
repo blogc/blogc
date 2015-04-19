@@ -35,6 +35,7 @@ AM_CONDITIONAL([USE_VALGRIND], [test "x$have_valgrind" = "xyes"])
 VALGRIND="$ac_cv_path_valgrind"
 AC_SUBST(VALGRIND)
 
+TESTS="disabled"
 AC_ARG_ENABLE([tests], AS_HELP_STRING([--disable-tests],
               [disable unit tests, ignoring presence of cmocka]))
 AS_IF([test "x$enable_tests" != "xno"], [
@@ -43,7 +44,6 @@ AS_IF([test "x$enable_tests" != "xno"], [
     TESTS="enabled"
     have_cmocka=yes
   ], [
-    TESTS="disabled"
     have_cmocka=no
   ])
 ])
