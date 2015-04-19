@@ -1,0 +1,19 @@
+language: c
+
+compiler:
+  - clang
+  - gcc
+
+before_install:
+  - sudo apt-get update -qq
+
+install:
+  - sudo apt-get install -qq libcmocka-dev valgrind
+
+before_script:
+  - mkdir build
+  - ./autogen.sh
+  - pushd build > /dev/null && ../configure CFLAGS="-Wall" --enable-cmocka --enable-valgrind && popd > /dev/null
+
+script:
+  - make valgrind
