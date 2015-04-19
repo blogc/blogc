@@ -53,8 +53,6 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     size_t start = 0;
     size_t end = 0;
 
-    char *tmp = NULL;
-
     unsigned int if_count = 0;
 
     b_slist_t *stmts = NULL;
@@ -338,6 +336,15 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
             break;
 
         current++;
+    }
+
+    if (*err == NULL) {
+        if (if_count != 0)
+            *err = blogc_error_new_printf(BLOGC_ERROR_TEMPLATE_PARSER,
+                "%d 'if' statements were not closed!", if_count);
+        else if (block_state != BLOCK_CLOSED)
+            *err = blogc_error_new(BLOGC_ERROR_TEMPLATE_PARSER,
+                "A block was not closed!");
     }
 
     if (*err != NULL) {

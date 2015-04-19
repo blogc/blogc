@@ -18,6 +18,7 @@
 #include "source-parser.h"
 #include "template-parser.h"
 #include "loader.h"
+#include "renderer.h"
 #include "error.h"
 
 
@@ -102,7 +103,9 @@ main(int argc, char **argv)
         goto cleanup3;
     }
 
-    printf("%d\n", s == NULL);
+    char *out = blogc_render(l, s);
+    printf("%s", out);
+    free(out);
 
 cleanup3:
     b_slist_free_full(s, blogc_source_free);

@@ -61,7 +61,7 @@ Pre-formatted content is available in template blocks as the ``CONTENT`` variabl
         {% block single_source %}
         <title>My cool blog >> {{ TITLE }}</title>
         {% endblock %}
-        {% block multiple_sources %}
+        {% block multiple_sources_once %}
         <title>My cool blog - Main page</title>
         {% endblock %}
     </head>

@@ -22,6 +22,7 @@ CLEANFILES = \
 noinst_HEADERS = \
 	src/error.h \
 	src/loader.h \
+	src/renderer.h \
 	src/source-parser.h \
 	src/template-parser.h \
 	src/utils/utils.h \
@@ -45,6 +46,7 @@ check_PROGRAMS = \
 libblogc_la_SOURCES = \
 	src/error.c \
 	src/loader.c \
+	src/renderer.c \
 	src/source-parser.c \
 	src/template-parser.c \
 	src/utils/slist.c \
