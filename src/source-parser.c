@@ -11,6 +11,7 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <stdbool.h>
+#include <string.h>
 
 #include "utils/utils.h"
 #include "source-parser.h"
@@ -70,6 +71,14 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                     break;
                 if (c == ':') {
                     key = b_strndup(src + start, current - start);
+                    if ((0 == strncmp("FILENAME", src + start, current - start)) ||
+                        (0 == strncmp("CONTENT", src + start, current - start)))
+                    {
+                        *err = blogc_error_new_printf(BLOGC_ERROR_SOURCE_PARSER,
+                            "'%s' variable is forbidden in source files. It will "
+                            "be set for you by the compiler.", key);
+                        break;
+                    }
                     state = SOURCE_CONFIG_VALUE_START;
                     break;
                 }

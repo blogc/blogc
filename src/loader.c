@@ -49,6 +49,42 @@ blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err)
 }
 
 
+char*
+blogc_get_filename(const char *f)
+{
+    if (f == NULL)
+        return NULL;
+
+    if (strlen(f) == 0)
+        return NULL;
+
+    // keep a pointer to original string
+    char *filename = b_strdup(f);
+    char *tmp = filename;
+
+    bool removed_dot = false;
+    for (int i = strlen(tmp); i >= 0 ; i--) {
+
+        // remove last extension
+        if (!removed_dot && tmp[i] == '.') {
+            tmp[i] = '\0';
+            removed_dot = true;
+            continue;
+        }
+
+        if (tmp[i] == '/' || tmp[i] == '\\') {
+            tmp += i + 1;
+            break;
+        }
+    }
+
+    char *final_filename = b_strdup(tmp);
+    free(filename);
+
+    return final_filename;
+}
+
+
 b_slist_t*
 blogc_template_parse_from_file(const char *f, blogc_error_t **err)
 {
@@ -74,6 +110,14 @@ blogc_source_parse_from_file(const char *f, blogc_error_t **err)
     if (s == NULL)
         return NULL;
     b_trie_t *rv = blogc_source_parse(s, len, err);
+
+    // set FILENAME variable
+    if (rv != NULL) {
+        char *filename = blogc_get_filename(f);
+        if (filename != NULL)
+            b_trie_insert(rv, "FILENAME", filename);
+    }
+
     free(s);
     return rv;
 }

@@ -40,6 +40,7 @@ Makefile.in
 /blogc
 
 # tests
+/tests/check_loader
 /tests/check_source_parser
 /tests/check_template_parser
 /tests/check_utils
