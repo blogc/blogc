@@ -16,7 +16,7 @@
 
 char* blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err);
 b_slist_t* blogc_template_parse_from_file(const char *f, blogc_error_t **err);
-blogc_source_t* blogc_source_parse_from_file(const char *f, blogc_error_t **err);
+b_trie_t* blogc_source_parse_from_file(const char *f, blogc_error_t **err);
 b_slist_t* blogc_source_parse_from_files(b_slist_t *l, blogc_error_t **err);
 
 #endif /* _LOADER_H */

@@ -30,7 +30,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources)
 
     b_string_t *str = b_string_new();
 
-    blogc_source_t *tmp_source = NULL;
+    b_trie_t *tmp_source = NULL;
     char *config_value = NULL;
 
     unsigned int if_count = 0;
@@ -87,7 +87,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources)
 
             case BLOGC_TEMPLATE_VARIABLE_STMT:
                 if (stmt->value != NULL && tmp_source != NULL) {
-                    config_value = b_trie_lookup(tmp_source->config, stmt->value);
+                    config_value = b_trie_lookup(tmp_source, stmt->value);
                     if (config_value != NULL)
                         b_string_append(str, config_value);
                     break;
@@ -108,7 +108,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources)
 
             case BLOGC_TEMPLATE_IF_STMT:
                 if (stmt->value != NULL && tmp_source != NULL) {
-                    if (b_trie_lookup(tmp_source->config, stmt->value) == NULL) {
+                    if (b_trie_lookup(tmp_source, stmt->value) == NULL) {
                         if_skip = if_count;
 
                         // at this point we can just skip anything, counting the

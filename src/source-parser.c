@@ -28,7 +28,7 @@ typedef enum {
 } blogc_source_parser_state_t;
 
 
-blogc_source_t*
+b_trie_t*
 blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
 {
     if (err == NULL || *err != NULL)
@@ -39,8 +39,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
 
     char *key = NULL;
     char *tmp = NULL;
-    b_trie_t *config = b_trie_new(free);
-    char *content = NULL;
+    b_trie_t *rv = b_trie_new(free);
 
     blogc_source_parser_state_t state = SOURCE_START;
 
@@ -92,7 +91,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
             case SOURCE_CONFIG_VALUE:
                 if (c == '\n' || c == '\r') {
                     tmp = b_strndup(src + start, current - start);
-                    b_trie_insert(config, key, b_strdup(b_str_strip(tmp)));
+                    b_trie_insert(rv, key, b_strdup(b_str_strip(tmp)));
                     free(tmp);
                     free(key);
                     key = NULL;
@@ -119,7 +118,8 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
 
             case SOURCE_CONTENT:
                 if (current == (src_len - 1))
-                    content = b_strndup(src + start, src_len - start);
+                    b_trie_insert(rv, "CONTENT",
+                        b_strndup(src + start, src_len - start));
                 break;
         }
 
@@ -131,26 +131,9 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
 
     if (*err != NULL) {
         free(key);
-        free(content);
-        b_trie_free(config);
+        b_trie_free(rv);
         return NULL;
     }
 
-    blogc_source_t *rv = b_malloc(sizeof(blogc_source_t));
-    rv->config = config;
-    rv->content = content;
-
     return rv;
-}
-
-
-void
-blogc_source_free(void *source)
-{
-    if (source == NULL)
-        return;
-    blogc_source_t *s = source;
-    free(s->content);
-    b_trie_free(s->config);
-    free(s);
 }

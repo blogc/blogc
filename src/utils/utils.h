@@ -15,6 +15,8 @@
 
 #define B_STRING_CHUNK_SIZE 128
 
+typedef void (*b_free_func_t) (void *ptr);
+
 typedef struct _b_slist_t {
     struct _b_slist_t *next;
     void *data;
@@ -34,11 +36,11 @@ typedef struct _b_trie_node_t {
 
 typedef struct _b_trie_t {
     b_trie_node_t *root;
-    void (*free_func)(void *ptr);
+    b_free_func_t free_func;
 } b_trie_t;
 
 b_slist_t* b_slist_append(b_slist_t *l, void *data);
-void b_slist_free_full(b_slist_t *l, void (*free_func)(void *ptr));
+void b_slist_free_full(b_slist_t *l, b_free_func_t free_func);
 void b_slist_free(b_slist_t *l);
 unsigned int b_slist_length(b_slist_t *l);
 
@@ -62,7 +64,7 @@ b_string_t* b_string_append(b_string_t *str, const char *suffix);
 b_string_t* b_string_append_c(b_string_t *str, char c);
 b_string_t* b_string_append_printf(b_string_t *str, const char *format, ...);
 
-b_trie_t* b_trie_new(void (*free_func)(void *ptr));
+b_trie_t* b_trie_new(b_free_func_t free_func);
 void b_trie_free(b_trie_t *trie);
 void b_trie_insert(b_trie_t *trie, const char *key, void *data);
 void* b_trie_lookup(b_trie_t *trie, const char *key);

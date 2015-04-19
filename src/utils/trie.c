@@ -13,7 +13,7 @@
 
 
 b_trie_t*
-b_trie_new(void (*free_func)(void *ptr))
+b_trie_new(b_free_func_t free_func)
 {
     b_trie_t *trie = b_malloc(sizeof(b_trie_t));
     trie->root = NULL;

@@ -108,7 +108,7 @@ main(int argc, char **argv)
     free(out);
 
 cleanup3:
-    b_slist_free_full(s, blogc_source_free);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
 cleanup2:
     blogc_template_free_stmts(l);
     blogc_error_free(err);

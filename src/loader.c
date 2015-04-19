@@ -64,7 +64,7 @@ blogc_template_parse_from_file(const char *f, blogc_error_t **err)
 }
 
 
-blogc_source_t*
+b_trie_t*
 blogc_source_parse_from_file(const char *f, blogc_error_t **err)
 {
     if (err == NULL || *err != NULL)
@@ -73,7 +73,7 @@ blogc_source_parse_from_file(const char *f, blogc_error_t **err)
     char *s = blogc_file_get_contents(f, &len, err);
     if (s == NULL)
         return NULL;
-    blogc_source_t *rv = blogc_source_parse(s, len, err);
+    b_trie_t *rv = blogc_source_parse(s, len, err);
     free(s);
     return rv;
 }
@@ -87,14 +87,14 @@ blogc_source_parse_from_files(b_slist_t *l, blogc_error_t **err)
 
     for (b_slist_t *tmp = l; tmp != NULL; tmp = tmp->next) {
         char *f = tmp->data;
-        blogc_source_t *s = blogc_source_parse_from_file(f, &tmp_err);
+        b_trie_t *s = blogc_source_parse_from_file(f, &tmp_err);
         if (s == NULL) {
             *err = blogc_error_new_printf(BLOGC_ERROR_LOADER,
                 "An error occurred while parsing source file: %s\n\n%s",
                 f, tmp_err->msg);
             blogc_error_free(tmp_err);
             tmp_err = NULL;
-            b_slist_free_full(rv, blogc_source_free);
+            b_slist_free_full(rv, (b_free_func_t) b_trie_free);
             rv = NULL;
             break;
         }
