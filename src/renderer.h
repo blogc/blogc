@@ -11,7 +11,6 @@
 
 #include "utils/utils.h"
 
-char*
-blogc_render(b_slist_t *tmpl, b_slist_t *sources);
+char* blogc_render(b_slist_t *tmpl, b_slist_t *sources);
 
 #endif /* _RENDERER_H */
