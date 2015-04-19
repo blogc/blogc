@@ -10,6 +10,7 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -104,9 +105,27 @@ main(int argc, char **argv)
     }
 
     char *out = blogc_render(l, s);
-    printf("%s", out);
-    free(out);
 
+    bool write_to_stdout = (output == NULL || (0 == strcmp(output, "-")));
+
+    FILE *fp = stdout;
+    if (!write_to_stdout) {
+        fp = fopen(output, "w");
+        if (fp == NULL) {
+            fprintf(stderr, "blogc: error: failed to open output file (%s): %s\n",
+                output, strerror(errno));
+            rv = 2;
+            goto cleanup4;
+        }
+    }
+
+    fprintf(fp, "%s", out);
+
+    if (!write_to_stdout)
+        fclose(fp);
+
+cleanup4:
+    free(out);
 cleanup3:
     b_slist_free_full(s, (b_free_func_t) b_trie_free);
 cleanup2:
