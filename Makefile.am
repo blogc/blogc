@@ -11,6 +11,7 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 
 EXTRA_DIST = \
 	autogen.sh \
+	LICENSE \
 	README.md \
 	$(NULL)
 
