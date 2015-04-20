@@ -82,11 +82,10 @@ blogc_mkdir_recursive(const char *filename)
             // FIXME: show this warning only if actually trying to create a directory.
             fprintf(stderr, "blogc: warning: can't create output directories "
                 "for your platform. please create the directories yourself.\n");
-            goto cleanup;
+            break;
 #endif
         }
     }
-cleanup:
     free(fname);
 }
 
