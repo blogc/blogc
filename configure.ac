@@ -54,6 +54,8 @@ AS_IF([test "x$have_cmocka" = "xyes"], , [
 ])
 AM_CONDITIONAL([USE_CMOCKA], [test "x$have_cmocka" = "xyes"])
 
+AC_CHECK_HEADERS([sys/types.h sys/stat.h])
+
 AC_CONFIG_FILES([
     Makefile
 ])

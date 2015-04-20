@@ -10,6 +10,14 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif /* HAVE_SYS_STAT_H */
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif /* HAVE_SYS_TYPES_H */
+
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -44,6 +52,42 @@ static void
 blogc_print_usage(void)
 {
     printf("usage: blogc [-h] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...]\n");
+}
+
+
+static void
+blogc_mkdir_recursive(const char *filename)
+{
+#if defined(HAVE_SYS_STAT_H) && defined(HAVE_SYS_TYPES_H)
+    // honor umask if possible
+    mode_t m = umask(0);
+    umask(m);
+    mode_t mode = (S_IRWXU | S_IRWXG | S_IRWXO) & ~m;
+#endif
+    char *fname = b_strdup(filename);
+
+    for (char *tmp = fname; *tmp != '\0'; tmp++) {
+        if (*tmp == '/' || *tmp == '\\') {
+#if defined(HAVE_SYS_STAT_H) && defined(HAVE_SYS_TYPES_H)
+            char bkp = *tmp;
+            *tmp = '\0';
+            if ((strlen(fname) > 0) && (-1 == mkdir(fname, mode)) && (errno != EEXIST)) {
+                fprintf(stderr, "blogc: error: failed to create output "
+                    "directory (%s): %s\n", fname, strerror(errno));
+                free(fname);
+                exit(2);
+            }
+            *tmp = bkp;
+#else
+            // FIXME: show this warning only if actually trying to create a directory.
+            fprintf(stderr, "blogc: warning: can't create output directories "
+                "for your platform. please create the directories yourself.\n");
+            goto cleanup;
+#endif
+        }
+    }
+cleanup:
+    free(fname);
 }
 
 
@@ -110,6 +154,7 @@ main(int argc, char **argv)
 
     FILE *fp = stdout;
     if (!write_to_stdout) {
+        blogc_mkdir_recursive(output);
         fp = fopen(output, "w");
         if (fp == NULL) {
             fprintf(stderr, "blogc: error: failed to open output file (%s): %s\n",
