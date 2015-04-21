@@ -111,13 +111,23 @@ main(int argc, char **argv)
                     listing = true;
                     break;
                 case 't':
-                    if (i + 1 < argc)
+                    if (argv[i][2] != '\0')
+                        template = b_strndup(argv[i] + 2, strlen(argv[i]) - 2);
+                    else if (i + 1 < argc)
                         template = b_strdup(argv[++i]);
                     break;
                 case 'o':
-                    if (i + 1 < argc)
+                    if (argv[i][2] != '\0')
+                        output = b_strndup(argv[i] + 2, strlen(argv[i]) - 2);
+                    else if (i + 1 < argc)
                         output = b_strdup(argv[++i]);
                     break;
+                default:
+                    blogc_print_usage();
+                    fprintf(stderr, "blogc: error: invalid argument: -%c\n",
+                        argv[i][1]);
+                    rv = 2;
+                    goto cleanup;
             }
         }
         else
