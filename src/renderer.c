@@ -18,15 +18,13 @@
 
 
 char*
-blogc_render(b_slist_t *tmpl, b_slist_t *sources)
+blogc_render(b_slist_t *tmpl, b_slist_t *sources, bool listing)
 {
     if (tmpl == NULL || sources == NULL)
         return NULL;
 
-    bool single_source = sources->next == NULL;
-
     b_slist_t *current_source = NULL;
-    b_slist_t *multiple_sources_start = NULL;
+    b_slist_t *listing_start = NULL;
 
     b_string_t *str = b_string_new();
 
@@ -49,8 +47,8 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources)
 
             case BLOGC_TEMPLATE_BLOCK_STMT:
                 if_count = 0;
-                if (0 == strcmp("single_source", stmt->value)) {
-                    if (!single_source) {
+                if (0 == strcmp("entry", stmt->value)) {
+                    if (listing) {
 
                         // we can just skip anything and walk until the next
                         // 'endblock'
@@ -63,9 +61,9 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources)
                     current_source = sources;
                     tmp_source = current_source->data;
                 }
-                else if ((0 == strcmp("multiple_sources", stmt->value)) ||
-                         (0 == strcmp("multiple_sources_once", stmt->value))) {
-                    if (single_source) {
+                else if ((0 == strcmp("listing", stmt->value)) ||
+                         (0 == strcmp("listing_once", stmt->value))) {
+                    if (!listing) {
 
                         // we can just skip anything and walk until the next
                         // 'endblock'
@@ -76,9 +74,9 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources)
                         break;
                     }
                 }
-                if (0 == strcmp("multiple_sources", stmt->value)) {
+                if (0 == strcmp("listing", stmt->value)) {
                     if (current_source == NULL) {
-                        multiple_sources_start = tmp;
+                        listing_start = tmp;
                         current_source = sources;
                     }
                     tmp_source = current_source->data;
@@ -95,14 +93,14 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources)
                 break;
 
             case BLOGC_TEMPLATE_ENDBLOCK_STMT:
-                if (multiple_sources_start != NULL && current_source != NULL) {
+                if (listing_start != NULL && current_source != NULL) {
                     current_source = current_source->next;
                     if (current_source != NULL) {
-                        tmp = multiple_sources_start;
+                        tmp = listing_start;
                         continue;
                     }
                     else
-                        multiple_sources_start = NULL;
+                        listing_start = NULL;
                 }
                 break;
 

@@ -36,13 +36,14 @@ blogc_print_help(void)
 {
     printf(
         "usage:\n"
-        "    blogc [-h] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...] - A blog compiler.\n"
+        "    blogc [-h] [-l] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...] - A blog compiler.\n"
         "\n"
         "positional arguments:\n"
         "    SOURCE       source file(s)\n"
         "\n"
         "optional arguments:\n"
-        "    -h, --help   show this help message and exit\n"
+        "    -h           show this help message and exit\n"
+        "    -l           build listing page, from multiple source files\n"
         "    -t TEMPLATE  template file\n"
         "    -o OUTPUT    output file\n");
 }
@@ -51,7 +52,7 @@ blogc_print_help(void)
 static void
 blogc_print_usage(void)
 {
-    printf("usage: blogc [-h] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...]\n");
+    printf("usage: blogc [-h] [-l] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...]\n");
 }
 
 
@@ -95,6 +96,7 @@ main(int argc, char **argv)
 {
     int rv = 0;
 
+    bool listing = false;
     char *template = NULL;
     char *output = NULL;
     b_slist_t *sources = NULL;
@@ -105,6 +107,9 @@ main(int argc, char **argv)
                 case 'h':
                     blogc_print_help();
                     goto cleanup;
+                case 'l':
+                    listing = true;
+                    break;
                 case 't':
                     if (i + 1 < argc)
                         template = b_strdup(argv[++i]);
@@ -128,7 +133,18 @@ main(int argc, char **argv)
 
     if (b_slist_length(sources) == 0) {
         blogc_print_usage();
-        fprintf(stderr, "blogc: error: at least one source file is required\n");
+        if (listing)
+            fprintf(stderr, "blogc: error: at least one source file is required\n");
+        else
+            fprintf(stderr, "blogc: error: one source file is required\n");
+        rv = 2;
+        goto cleanup;
+    }
+
+    if (!listing && b_slist_length(sources) > 1) {
+        blogc_print_usage();
+        fprintf(stderr, "blogc: error: only one source file should be provided, "
+            "if running without '-l'\n");
         rv = 2;
         goto cleanup;
     }
@@ -147,7 +163,7 @@ main(int argc, char **argv)
         goto cleanup3;
     }
 
-    char *out = blogc_render(l, s);
+    char *out = blogc_render(l, s, listing);
 
     bool write_to_stdout = (output == NULL || (0 == strcmp(output, "-")));
 

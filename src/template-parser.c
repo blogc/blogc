@@ -37,9 +37,9 @@ typedef enum {
 
 typedef enum {
     BLOCK_CLOSED = 1,
-    BLOCK_SINGLE_SOURCE,
-    BLOCK_MULTIPLE_SOURCES,
-    BLOCK_MULTIPLE_SOURCES_ONCE,
+    BLOCK_ENTRY,
+    BLOCK_LISTING,
+    BLOCK_LISTING_ONCE,
 } blogc_template_parser_block_state_t;
 
 
@@ -110,7 +110,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
                     src_len, current,
-                    "Invalid statement syntax. Must begin lowercase letter.");
+                    "Invalid statement syntax. Must begin with lowercase letter.");
                 break;
 
             case TEMPLATE_BLOCK_TYPE:
@@ -141,7 +141,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         break;
                     }
                     else if (0 == strncmp("if", src + start, current - start)) {
-                        if (block_state == BLOCK_SINGLE_SOURCE || block_state == BLOCK_MULTIPLE_SOURCES) {
+                        if (block_state == BLOCK_ENTRY || block_state == BLOCK_LISTING) {
                             state = TEMPLATE_BLOCK_IF_VARIABLE_START;
                             type = BLOGC_TEMPLATE_IF_STMT;
                             start = current;
@@ -150,12 +150,12 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         }
                         *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
                             src, src_len, current,
-                            "'if' statements only allowed inside 'single_source' "
-                            "and 'multiple_sources' blocks.");
+                            "'if' statements only allowed inside 'entry' and "
+                            "'listing' blocks.");
                         break;
                     }
                     else if (0 == strncmp("endif", src + start, current - start)) {
-                        if (block_state == BLOCK_SINGLE_SOURCE || block_state == BLOCK_MULTIPLE_SOURCES) {
+                        if (block_state == BLOCK_ENTRY || block_state == BLOCK_LISTING) {
                             if (if_count > 0) {
                                 state = TEMPLATE_BLOCK_END;
                                 type = BLOGC_TEMPLATE_ENDIF_STMT;
@@ -169,14 +169,15 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         }
                         *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
                             src, src_len, current,
-                            "'endif' statements only allowed inside 'single_source' "
-                            "and 'multiple_sources' blocks.");
+                            "'endif' statements only allowed inside 'entry' "
+                            "and 'listing' blocks.");
                         break;
                     }
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
                     src_len, current,
-                    "Invalid statement type: Allowed types are: block, endblock, if, endif.");
+                    "Invalid statement type: Allowed types are: 'block', "
+                    "'endblock', 'if' and 'endif'.");
                 break;
 
             case TEMPLATE_BLOCK_BLOCK_TYPE_START:
@@ -196,20 +197,20 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 if ((c >= 'a' && c <= 'z') || c == '_')
                     break;
                 if (c == ' ') {
-                    if (0 == strncmp("single_source", src + start, current - start)) {
-                        block_state = BLOCK_SINGLE_SOURCE;
+                    if (0 == strncmp("entry", src + start, current - start)) {
+                        block_state = BLOCK_ENTRY;
                         end = current;
                         state = TEMPLATE_BLOCK_END;
                         break;
                     }
-                    else if (0 == strncmp("multiple_sources", src + start, current - start)) {
-                        block_state = BLOCK_MULTIPLE_SOURCES;
+                    else if (0 == strncmp("listing", src + start, current - start)) {
+                        block_state = BLOCK_LISTING;
                         end = current;
                         state = TEMPLATE_BLOCK_END;
                         break;
                     }
-                    else if (0 == strncmp("multiple_sources_once", src + start, current - start)) {
-                        block_state = BLOCK_MULTIPLE_SOURCES_ONCE;
+                    else if (0 == strncmp("listing_once", src + start, current - start)) {
+                        block_state = BLOCK_LISTING_ONCE;
                         end = current;
                         state = TEMPLATE_BLOCK_END;
                         break;
@@ -217,7 +218,8 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
                     src_len, current,
-                    "Invalid block type. Allowed types are: single_source, multiple_sources, multiple_sources_once.");
+                    "Invalid block type. Allowed types are: 'entry', 'listing' "
+                    "and 'listing_once'.");
                 break;
 
             case TEMPLATE_BLOCK_IF_VARIABLE_START:
@@ -243,7 +245,8 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
                     src_len, current,
-                    "Invalid variable name. Must be uppercase letter, number or '_'.");
+                    "Invalid variable name. Must be uppercase letter, number "
+                    "or '_'.");
                 break;
 
             case TEMPLATE_BLOCK_END:
@@ -262,7 +265,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 if (c == ' ')
                     break;
                 if (c >= 'A' && c <= 'Z') {
-                    if (block_state == BLOCK_SINGLE_SOURCE || block_state == BLOCK_MULTIPLE_SOURCES) {
+                    if (block_state == BLOCK_ENTRY || block_state == BLOCK_LISTING) {
                         state = TEMPLATE_VARIABLE;
                         type = BLOGC_TEMPLATE_VARIABLE_STMT;
                         start = current;
@@ -270,8 +273,8 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     }
                     *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
                         src, src_len, current,
-                        "variable statements only allowed inside 'single_source' "
-                        "and 'multiple_sources' blocks.");
+                        "variable statements only allowed inside 'entry' and "
+                        "'listing' blocks.");
                     break;
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
@@ -294,7 +297,8 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
                     src_len, current,
-                    "Invalid variable name. Must be uppercase letter, number or '_'.");
+                    "Invalid variable name. Must be uppercase letter, number "
+                    "or '_'.");
                 break;
 
             case TEMPLATE_VARIABLE_END:
@@ -339,10 +343,10 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     if (*err == NULL) {
         if (if_count != 0)
             *err = blogc_error_new_printf(BLOGC_ERROR_TEMPLATE_PARSER,
-                "%d 'if' statements were not closed!", if_count);
+                "%d open 'if' statements were not closed!", if_count);
         else if (block_state != BLOCK_CLOSED)
             *err = blogc_error_new(BLOGC_ERROR_TEMPLATE_PARSER,
-                "A block was not closed!");
+                "An open block was not closed!");
     }
 
     if (*err != NULL) {

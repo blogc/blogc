@@ -39,20 +39,20 @@ test_template_parse(void **state)
     const char *a =
         "Test\n"
         "\n"
-        "    {% block single_source %}\n"
+        "    {% block entry %}\n"
         "{% if CHUNDA %}\n"
         "bola\n"
         "{% endif %}\n"
         "{% endblock %}\n"
-        "{% block multiple_sources %}{{ BOLA }}{% endblock %}\n"
-        "{% block multiple_sources_once %}asd{% endblock %}\n";
+        "{% block listing %}{{ BOLA }}{% endblock %}\n"
+        "{% block listing_once %}asd{% endblock %}\n";
     blogc_error_t *err = NULL;
     b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(stmts);
     blogc_assert_template_stmt(stmts, "Test\n\n    ",
         BLOGC_TEMPLATE_CONTENT_STMT);
-    blogc_assert_template_stmt(stmts->next, "single_source",
+    blogc_assert_template_stmt(stmts->next, "entry",
         BLOGC_TEMPLATE_BLOCK_STMT);
     blogc_assert_template_stmt(stmts->next->next, "\n",
         BLOGC_TEMPLATE_CONTENT_STMT);
@@ -67,7 +67,7 @@ test_template_parse(void **state)
     b_slist_t *tmp = stmts->next->next->next->next->next->next->next;
     blogc_assert_template_stmt(tmp, NULL, BLOGC_TEMPLATE_ENDBLOCK_STMT);
     blogc_assert_template_stmt(tmp->next, "\n", BLOGC_TEMPLATE_CONTENT_STMT);
-    blogc_assert_template_stmt(tmp->next->next, "multiple_sources",
+    blogc_assert_template_stmt(tmp->next->next, "listing",
         BLOGC_TEMPLATE_BLOCK_STMT);
     blogc_assert_template_stmt(tmp->next->next->next, "BOLA",
         BLOGC_TEMPLATE_VARIABLE_STMT);
@@ -76,7 +76,7 @@ test_template_parse(void **state)
     blogc_assert_template_stmt(tmp->next->next->next->next->next, "\n",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next,
-        "multiple_sources_once", BLOGC_TEMPLATE_BLOCK_STMT);
+        "listing_once", BLOGC_TEMPLATE_BLOCK_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next,
         "asd", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next->next,
@@ -94,24 +94,24 @@ test_template_parse_html(void **state)
     const char *a =
         "<html>\n"
         "    <head>\n"
-        "        {% block single_source %}\n"
+        "        {% block entry %}\n"
         "        <title>My cool blog >> {{ TITLE }}</title>\n"
         "        {% endblock %}\n"
-        "        {% block multiple_sources_once %}\n"
+        "        {% block listing_once %}\n"
         "        <title>My cool blog - Main page</title>\n"
         "        {% endblock %}\n"
         "    </head>\n"
         "    <body>\n"
         "        <h1>My cool blog</h1>\n"
-        "        {% block single_source %}\n"
+        "        {% block entry %}\n"
         "        <h2>{{ TITLE }}</h2>\n"
         "        {% if DATE %}<h4>Published in: {{ DATE }}</h4>{% endif %}\n"
         "        <pre>{{ CONTENT }}</pre>\n"
         "        {% endblock %}\n"
-        "        {% block multiple_sources_once %}<ul>{% endblock %}\n"
-        "        {% block multiple_sources %}<p><a href=\"{{ FILENAME }}.html\">"
+        "        {% block listing_once %}<ul>{% endblock %}\n"
+        "        {% block listing %}<p><a href=\"{{ FILENAME }}.html\">"
         "{{ TITLE }}</a>{% if DATE %} - {{ DATE }}{% endif %}</p>{% endblock %}\n"
-        "        {% block multiple_sources_once %}</ul>{% endblock %}\n"
+        "        {% block listing_once %}</ul>{% endblock %}\n"
         "    </body>\n"
         "</html>\n";
     blogc_error_t *err = NULL;
@@ -120,7 +120,7 @@ test_template_parse_html(void **state)
     assert_non_null(stmts);
     blogc_assert_template_stmt(stmts, "<html>\n    <head>\n        ",
         BLOGC_TEMPLATE_CONTENT_STMT);
-    blogc_assert_template_stmt(stmts->next, "single_source",
+    blogc_assert_template_stmt(stmts->next, "entry",
         BLOGC_TEMPLATE_BLOCK_STMT);
     blogc_assert_template_stmt(stmts->next->next,
         "\n        <title>My cool blog >> ", BLOGC_TEMPLATE_CONTENT_STMT);
@@ -133,7 +133,7 @@ test_template_parse_html(void **state)
     blogc_assert_template_stmt(stmts->next->next->next->next->next->next,
         "\n        ", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(stmts->next->next->next->next->next->next->next,
-        "multiple_sources_once", BLOGC_TEMPLATE_BLOCK_STMT);
+        "listing_once", BLOGC_TEMPLATE_BLOCK_STMT);
     b_slist_t *tmp = stmts->next->next->next->next->next->next->next->next;
     blogc_assert_template_stmt(tmp,
         "\n        <title>My cool blog - Main page</title>\n        ",
@@ -142,7 +142,7 @@ test_template_parse_html(void **state)
     blogc_assert_template_stmt(tmp->next->next,
         "\n    </head>\n    <body>\n        <h1>My cool blog</h1>\n        ",
         BLOGC_TEMPLATE_CONTENT_STMT);
-    blogc_assert_template_stmt(tmp->next->next->next, "single_source",
+    blogc_assert_template_stmt(tmp->next->next->next, "entry",
         BLOGC_TEMPLATE_BLOCK_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next,
         "\n        <h2>", BLOGC_TEMPLATE_CONTENT_STMT);
@@ -170,7 +170,7 @@ test_template_parse_html(void **state)
         NULL, BLOGC_TEMPLATE_ENDBLOCK_STMT);
     tmp = tmp->next->next->next->next->next->next->next->next;
     blogc_assert_template_stmt(tmp, "\n        ", BLOGC_TEMPLATE_CONTENT_STMT);
-    blogc_assert_template_stmt(tmp->next, "multiple_sources_once",
+    blogc_assert_template_stmt(tmp->next, "listing_once",
         BLOGC_TEMPLATE_BLOCK_STMT);
     blogc_assert_template_stmt(tmp->next->next, "<ul>",
         BLOGC_TEMPLATE_CONTENT_STMT);
@@ -179,7 +179,7 @@ test_template_parse_html(void **state)
     blogc_assert_template_stmt(tmp->next->next->next->next, "\n        ",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next,
-        "multiple_sources", BLOGC_TEMPLATE_BLOCK_STMT);
+        "listing", BLOGC_TEMPLATE_BLOCK_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next,
         "<p><a href=\"", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next,
@@ -204,7 +204,7 @@ test_template_parse_html(void **state)
     blogc_assert_template_stmt(tmp, NULL, BLOGC_TEMPLATE_ENDBLOCK_STMT);
     blogc_assert_template_stmt(tmp->next, "\n        ",
         BLOGC_TEMPLATE_CONTENT_STMT);
-    blogc_assert_template_stmt(tmp->next->next, "multiple_sources_once",
+    blogc_assert_template_stmt(tmp->next->next, "listing_once",
         BLOGC_TEMPLATE_BLOCK_STMT);
     blogc_assert_template_stmt(tmp->next->next->next, "</ul>",
         BLOGC_TEMPLATE_CONTENT_STMT);
