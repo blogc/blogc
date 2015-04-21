@@ -48,7 +48,7 @@ test_error_parser(void **state)
     blogc_error_t *error = blogc_error_parser(1, a, strlen(a), 11, "asd %d", 10);
     assert_non_null(error);
     assert_int_equal(error->type, 1);
-    assert_string_equal(error->msg, "asd 10\nError occurred near to \"hunda\".");
+    assert_string_equal(error->msg, "asd 10\nError occurred near to 'hunda'");
     blogc_error_free(error);
 }
 

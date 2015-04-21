@@ -117,7 +117,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current,
-                    "Invalid content separator. Must be one or more '-' characters.");
+                    "Invalid content separator. Must be more than one '-' characters.");
                 break;
 
             case SOURCE_CONTENT_START:
@@ -125,9 +125,9 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                 state = SOURCE_CONTENT;
                 break;
 
-            case SOURCE_CONTENT:
-                if (current == (src_len - 1))
-                    b_trie_insert(rv, "CONTENT",
+             case SOURCE_CONTENT:
+                 if (current == (src_len - 1))
+                     b_trie_insert(rv, "CONTENT",
                         b_strndup(src + start, src_len - start));
                 break;
         }
@@ -136,6 +136,38 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
             break;
 
         current++;
+    }
+
+    if (*err == NULL && b_trie_size(rv) == 0) {
+
+        // ok, nothing found in the config trie, but no error set either.
+        // let's try to be nice with the users and provide some reasonable
+        // output. :)
+        switch (state) {
+            case SOURCE_START:
+                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                    current, "Your config file is empty.");
+                break;
+            case SOURCE_CONFIG_KEY:
+                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                    current, "Your last configuration key is missing ':' and "
+                    "the value");
+                break;
+            case SOURCE_CONFIG_VALUE_START:
+                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                    current, "Configuration value not provided for '%s'.",
+                    key);
+                break;
+            case SOURCE_CONFIG_VALUE:
+                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                    current, "No line ending after the configuration value for "
+                    "'%s'.", key);
+                break;
+            case SOURCE_SEPARATOR:
+            case SOURCE_CONTENT_START:
+            case SOURCE_CONTENT:
+                break;  // won't happen, and if even happen, shouldn't be fatal
+        }
     }
 
     if (*err != NULL) {

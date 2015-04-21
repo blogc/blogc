@@ -72,12 +72,165 @@ test_source_parse_with_spaces(void **state)
 }
 
 
+static void
+test_source_parse_config_empty(void **state)
+{
+    const char *a = "";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg, "Your config file is empty.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_config_invalid_key(void **state)
+{
+    const char *a = "bola: guda";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "Can't find a configuration key or the content separator.\n"
+        "Error occurred near to 'bola: guda'");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_config_no_key(void **state)
+{
+    const char *a = "BOLa";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid configuration key.\n"
+        "Error occurred near to 'a'");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_config_no_key2(void **state)
+{
+    const char *a = "BOLA";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "Your last configuration key is missing ':' and the value");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_config_no_value(void **state)
+{
+    const char *a = "BOLA:\r\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "Configuration value not provided for 'BOLA'.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_config_no_value2(void **state)
+{
+    const char *a = "BOLA:";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "Configuration value not provided for 'BOLA'.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_config_reserved_name(void **state)
+{
+    const char *a = "FILENAME: asd\r\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "'FILENAME' variable is forbidden in source files. It will be set "
+        "for you by the compiler.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_config_value_no_line_ending(void **state)
+{
+    const char *a = "BOLA: asd";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "No line ending after the configuration value for 'BOLA'.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_invalid_separator(void **state)
+{
+    const char *a = "BOLA: asd\n---#";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid content separator. Must be more than one '-' characters.\n"
+        "Error occurred near to '#'");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
 int
 main(void)
 {
     const UnitTest tests[] = {
         unit_test(test_source_parse),
         unit_test(test_source_parse_with_spaces),
+        unit_test(test_source_parse_config_empty),
+        unit_test(test_source_parse_config_invalid_key),
+        unit_test(test_source_parse_config_no_key),
+        unit_test(test_source_parse_config_no_key2),
+        unit_test(test_source_parse_config_no_value),
+        unit_test(test_source_parse_config_no_value2),
+        unit_test(test_source_parse_config_reserved_name),
+        unit_test(test_source_parse_config_value_no_line_ending),
+        unit_test(test_source_parse_invalid_separator),
     };
     return run_tests(tests);
 }

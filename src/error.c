@@ -69,7 +69,7 @@ blogc_error_parser(blogc_error_type_t type, const char *src, size_t src_len,
         rv = blogc_error_new(type, msg);
     else
         rv = blogc_error_new_printf(type,
-            "%s\nError occurred near to \"%s\".", msg, line);
+            "%s\nError occurred near to '%s'", msg, line);
 
     free(msg);
     free(line);
