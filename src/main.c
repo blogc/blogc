@@ -101,7 +101,7 @@ main(int argc, char **argv)
     char *output = NULL;
     b_slist_t *sources = NULL;
 
-    for (int i = 1; i < argc; i++) {
+    for (unsigned int i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
             switch (argv[i][1]) {
                 case 'h':
