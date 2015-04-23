@@ -43,6 +43,7 @@ blogc_print_help(void)
         "\n"
         "optional arguments:\n"
         "    -h           show this help message and exit\n"
+        "    -v           show version and exit\n"
         "    -l           build listing page, from multiple source files\n"
         "    -t TEMPLATE  template file\n"
         "    -o OUTPUT    output file\n");
@@ -52,7 +53,7 @@ blogc_print_help(void)
 static void
 blogc_print_usage(void)
 {
-    printf("usage: blogc [-h] [-l] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...]\n");
+    printf("usage: blogc [-h] [-v] [-l] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...]\n");
 }
 
 
@@ -106,6 +107,9 @@ main(int argc, char **argv)
             switch (argv[i][1]) {
                 case 'h':
                     blogc_print_help();
+                    goto cleanup;
+                case 'v':
+                    printf("%s\n", PACKAGE_STRING);
                     goto cleanup;
                 case 'l':
                     listing = true;
