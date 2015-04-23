@@ -34,6 +34,8 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, bool listing)
     unsigned int if_count = 0;
     unsigned int if_skip = 0;
 
+    bool if_not = false;
+
     b_slist_t *tmp = tmpl;
     while (tmp != NULL) {
         blogc_template_stmt_t *stmt = tmp->data;
@@ -104,9 +106,14 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, bool listing)
                 }
                 break;
 
+            case BLOGC_TEMPLATE_IF_NOT_STMT:
+                if_not = true;
+
             case BLOGC_TEMPLATE_IF_STMT:
                 if (stmt->value != NULL && tmp_source != NULL) {
-                    if (b_trie_lookup(tmp_source, stmt->value) == NULL) {
+                    if ((!if_not && (b_trie_lookup(tmp_source, stmt->value) == NULL)) ||
+                        (if_not && (b_trie_lookup(tmp_source, stmt->value) != NULL)))
+                    {
                         if_skip = if_count;
 
                         // at this point we can just skip anything, counting the
@@ -115,7 +122,9 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, bool listing)
                         while (1) {
                             tmp = tmp->next;
                             stmt = tmp->data;
-                            if (stmt->type == BLOGC_TEMPLATE_IF_STMT) {
+                            if ((stmt->type == BLOGC_TEMPLATE_IF_STMT) ||
+                                (stmt->type == BLOGC_TEMPLATE_IF_NOT_STMT))
+                            {
                                 if_count++;
                                 continue;
                             }
@@ -129,6 +138,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, bool listing)
                             }
                         }
                     }
+                    if_not = false;
                 }
                 break;
 

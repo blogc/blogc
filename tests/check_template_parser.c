@@ -43,6 +43,9 @@ test_template_parse(void **state)
         "{% if CHUNDA %}\n"
         "bola\n"
         "{% endif %}\n"
+        "{% if not BOLA %}\n"
+        "bolao\n"
+        "{% endif %}\n"
         "{% endblock %}\n"
         "{% block listing %}{{ BOLA }}{% endblock %}\n"
         "{% block listing_once %}asd{% endblock %}\n";
@@ -60,19 +63,25 @@ test_template_parse(void **state)
         BLOGC_TEMPLATE_IF_STMT);
     blogc_assert_template_stmt(stmts->next->next->next->next, "\nbola\n",
         BLOGC_TEMPLATE_CONTENT_STMT);
-    blogc_assert_template_stmt(stmts->next->next->next->next->next,
-        NULL, BLOGC_TEMPLATE_ENDIF_STMT);
-    blogc_assert_template_stmt(stmts->next->next->next->next->next->next,
-        "\n", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next->next->next, NULL,
+        BLOGC_TEMPLATE_ENDIF_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next->next->next->next, "\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
     b_slist_t *tmp = stmts->next->next->next->next->next->next->next;
+    blogc_assert_template_stmt(tmp, "BOLA", BLOGC_TEMPLATE_IF_NOT_STMT);
+    blogc_assert_template_stmt(tmp->next, "\nbolao\n", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next, NULL, BLOGC_TEMPLATE_ENDIF_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next, "\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    tmp = tmp->next->next->next->next;
     blogc_assert_template_stmt(tmp, NULL, BLOGC_TEMPLATE_ENDBLOCK_STMT);
     blogc_assert_template_stmt(tmp->next, "\n", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next, "listing",
         BLOGC_TEMPLATE_BLOCK_STMT);
     blogc_assert_template_stmt(tmp->next->next->next, "BOLA",
         BLOGC_TEMPLATE_VARIABLE_STMT);
-    blogc_assert_template_stmt(tmp->next->next->next->next, NULL,
-        BLOGC_TEMPLATE_ENDBLOCK_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next,
+        NULL, BLOGC_TEMPLATE_ENDBLOCK_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next, "\n",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next,

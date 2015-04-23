@@ -24,7 +24,7 @@ The templates can define blocks. These are the block rules:
 
 The variables defined in the source file are only available inside of blocks. If something does not depends on the source files, and is global, it must be hardcoded in the template, for the sake of simplicity.
 
-The templates can use conditional statements: ``{% if variable %}`` and ``{% endif %}``. They check if a variable is defined or not. As variables are not available outside of blocks, these conditional statements can't be defined outside of blocks as well.
+The templates can use conditional statements: ``{% if VARIABLE %}`` or ``{% if not VARIABLE %}``, and ``{% endif %}``. They check if a variable is defined or not. As variables are not available outside of blocks, these conditional statements can't be defined outside of blocks as well.
 
 Variables are not available in ``listing_once`` blocks, because it is not possible to guess which source file would provide the variable contents.
 

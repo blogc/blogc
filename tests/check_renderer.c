@@ -214,6 +214,39 @@ test_render_if3(void **state)
 
 
 static void
+test_render_if_not(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% if not CHUNDA %}chunda\n"
+        "{% if GUDA %}guda\n"
+        "{% if not BOLA %}bola\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    b_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, false);
+    assert_string_equal(out,
+        "\n"
+        "chunda\n"
+        "guda\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n");
+    blogc_template_free_stmts(l);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
+    free(out);
+}
+
+
+static void
 test_render_null(void **state)
 {
     assert_null(blogc_render(NULL, NULL, false));
@@ -229,6 +262,7 @@ main(void)
         unit_test(test_render_if),
         unit_test(test_render_if2),
         unit_test(test_render_if3),
+        unit_test(test_render_if_not),
         unit_test(test_render_null),
     };
     return run_tests(tests);

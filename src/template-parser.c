@@ -25,7 +25,8 @@ typedef enum {
     TEMPLATE_BLOCK_TYPE,
     TEMPLATE_BLOCK_BLOCK_TYPE_START,
     TEMPLATE_BLOCK_BLOCK_TYPE,
-    TEMPLATE_BLOCK_IF_VARIABLE_START,
+    TEMPLATE_BLOCK_IF_START,
+    TEMPLATE_BLOCK_IF_CONDITION,
     TEMPLATE_BLOCK_IF_VARIABLE,
     TEMPLATE_BLOCK_END,
     TEMPLATE_VARIABLE_START,
@@ -54,6 +55,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     size_t end = 0;
 
     unsigned int if_count = 0;
+    bool conditional = false;
 
     b_slist_t *stmts = NULL;
     blogc_template_stmt_t *stmt = NULL;
@@ -142,7 +144,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     }
                     else if (0 == strncmp("if", src + start, current - start)) {
                         if (block_state == BLOCK_ENTRY || block_state == BLOCK_LISTING) {
-                            state = TEMPLATE_BLOCK_IF_VARIABLE_START;
+                            state = TEMPLATE_BLOCK_IF_START;
                             type = BLOGC_TEMPLATE_IF_STMT;
                             start = current;
                             if_count++;
@@ -222,9 +224,17 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     "and 'listing_once'.");
                 break;
 
-            case TEMPLATE_BLOCK_IF_VARIABLE_START:
+            case TEMPLATE_BLOCK_IF_START:
                 if (c == ' ')
                     break;
+                if (c >= 'a' && c <= 'z') {
+                    if (!conditional) {
+                        conditional = true;
+                        state = TEMPLATE_BLOCK_IF_CONDITION;
+                        start = current;
+                        break;
+                    }
+                }
                 if (c >= 'A' && c <= 'Z') {
                     state = TEMPLATE_BLOCK_IF_VARIABLE;
                     start = current;
@@ -233,6 +243,23 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
                     src_len, current,
                     "Invalid variable name. Must begin with uppercase letter.");
+                break;
+
+            case TEMPLATE_BLOCK_IF_CONDITION:
+                if (c >= 'a' && c <= 'z')
+                    break;
+                if (c == ' ') {
+                    if (0 == strncmp("not", src + start, current - start)) {
+                        block_state = BLOCK_ENTRY;
+                        end = current;
+                        state = TEMPLATE_BLOCK_IF_START;
+                        type = BLOGC_TEMPLATE_IF_NOT_STMT;
+                        break;
+                    }
+                }
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid 'if' condition. Allowed conditions are: 'not'.");
                 break;
 
             case TEMPLATE_BLOCK_IF_VARIABLE:
@@ -253,6 +280,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 if (c == ' ')
                     break;
                 if (c == '%') {
+                    conditional = false;
                     state = TEMPLATE_CLOSE_BRACKET;
                     break;
                 }
