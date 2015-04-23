@@ -36,7 +36,7 @@ blogc_print_help(void)
 {
     printf(
         "usage:\n"
-        "    blogc [-h] [-l] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...] - A blog compiler.\n"
+        "    blogc [-h] [-v] [-l] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...] - A blog compiler.\n"
         "\n"
         "positional arguments:\n"
         "    SOURCE       source file(s)\n"
