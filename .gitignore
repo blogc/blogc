@@ -42,6 +42,7 @@ Makefile.in
 # tests
 /tests/check_error
 /tests/check_loader
+/tests/check_renderer
 /tests/check_source_parser
 /tests/check_template_parser
 /tests/check_utils

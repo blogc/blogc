@@ -84,6 +84,7 @@ if USE_CMOCKA
 check_PROGRAMS += \
 	tests/check_error \
 	tests/check_loader \
+	tests/check_renderer \
 	tests/check_source_parser \
 	tests/check_template_parser \
 	tests/check_utils \
@@ -119,6 +120,23 @@ tests_check_loader_LDFLAGS = \
 	$(NULL)
 
 tests_check_loader_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc.la \
+	$(NULL)
+
+tests_check_renderer_SOURCES = \
+	tests/check_renderer.c \
+	$(NULL)
+
+tests_check_renderer_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_check_renderer_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_check_renderer_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
 	$(NULL)
