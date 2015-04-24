@@ -227,7 +227,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
             case TEMPLATE_BLOCK_IF_START:
                 if (c == ' ')
                     break;
-                if (c >= 'a' && c <= 'z') {
+                if (c == 'n') {
                     if (!conditional) {
                         conditional = true;
                         state = TEMPLATE_BLOCK_IF_CONDITION;
@@ -301,7 +301,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     }
                     *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
                         src, src_len, current,
-                        "variable statements only allowed inside 'entry' and "
+                        "Variable statements only allowed inside 'entry' and "
                         "'listing' blocks.");
                     break;
                 }

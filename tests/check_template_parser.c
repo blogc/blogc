@@ -226,12 +226,418 @@ test_template_parse_html(void **state)
 }
 
 
+static void
+test_template_parse_invalid_block_start(void **state)
+{
+    const char *a = "{% ASD %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid statement syntax. Must begin with lowercase letter.\n"
+        "Error occurred near to 'ASD %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_block_nested(void **state)
+{
+    const char *a =
+        "{% block entry %}\n"
+        "{% block listing %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Blocks can't be nested.\n"
+        "Error occurred near to ' listing %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_block_not_open(void **state)
+{
+    const char *a = "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "'endblock' statement without an open 'block' statement.\n"
+        "Error occurred near to ' %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_if_outside_block(void **state)
+{
+    const char *a = "{% if BOLA %}";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "'if' statements only allowed inside 'entry' and 'listing' blocks.\n"
+        "Error occurred near to ' BOLA %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_if_inside_listing_once_block(void **state)
+{
+    const char *a = "{% block listing_once %}{% if BOLA %}{% endblock %}";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "'if' statements only allowed inside 'entry' and 'listing' blocks.\n"
+        "Error occurred near to ' BOLA %}{% endblock %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_endif_not_open(void **state)
+{
+    const char *a = "{% block listing %}{% endif %}{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "'endif' statement without an open 'if' statement.\n"
+        "Error occurred near to ' %}{% endblock %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_endif_outside_block(void **state)
+{
+    const char *a = "{% endif %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "'endif' statements only allowed inside 'entry' and 'listing' blocks.\n"
+        "Error occurred near to ' %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_endif_inside_listing_once_block(void **state)
+{
+    const char *a = "{% block listing_once %}{% endif %}{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "'endif' statements only allowed inside 'entry' and 'listing' blocks.\n"
+        "Error occurred near to ' %}{% endblock %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_block_name(void **state)
+{
+    const char *a = "{% chunda %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid statement type: Allowed types are: 'block', 'endblock', 'if' and 'endif'.\n"
+        "Error occurred near to ' %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_block_type_start(void **state)
+{
+    const char *a = "{% block ENTRY %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid block syntax. Must begin with lowercase letter.\n"
+        "Error occurred near to 'ENTRY %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_block_type(void **state)
+{
+    const char *a = "{% block chunda %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid block type. Allowed types are: 'entry', 'listing' and 'listing_once'.\n"
+        "Error occurred near to ' %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_if_start(void **state)
+{
+    const char *a = "{% block entry %}{% if guda %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid variable name. Must begin with uppercase letter.\n"
+        "Error occurred near to 'guda %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_if_condition(void **state)
+{
+    const char *a = "{% block entry %}{% if non BOLA %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid 'if' condition. Allowed conditions are: 'not'.\n"
+        "Error occurred near to ' BOLA %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_if_variable(void **state)
+{
+    const char *a = "{% block entry %}{% if BoLA %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid variable name. Must be uppercase letter, number or '_'.\n"
+        "Error occurred near to 'oLA %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_block_end(void **state)
+{
+    const char *a = "{% block entry }}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid statement syntax. Must end with '%}'.\n"
+        "Error occurred near to '}}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_variable_outside_block(void **state)
+{
+    const char *a = "{{ BOLA }}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Variable statements only allowed inside 'entry' and 'listing' blocks.\n"
+        "Error occurred near to 'BOLA }}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_variable_inside_listing_once_block(void **state)
+{
+    const char *a = "{% block listing_once %}{{ BOLA }}{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Variable statements only allowed inside 'entry' and 'listing' blocks.\n"
+        "Error occurred near to 'BOLA }}{% endblock %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_variable_name(void **state)
+{
+    const char *a = "{% block entry %}{{ bola }}{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid variable name. Must begin with uppercase letter.\n"
+        "Error occurred near to 'bola }}{% endblock %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_variable_name2(void **state)
+{
+    const char *a = "{% block entry %}{{ Bola }}{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid variable name. Must be uppercase letter, number or '_'.\n"
+        "Error occurred near to 'ola }}{% endblock %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_variable_end(void **state)
+{
+    const char *a = "{% block entry %}{{ BOLA %}{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid statement syntax. Must end with '}}'.\n"
+        "Error occurred near to '%}{% endblock %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_close(void **state)
+{
+    const char *a = "{% block entry %%\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid statement syntax. Must end with '}'.\n"
+        "Error occurred near to '%'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_close2(void **state)
+{
+    const char *a = "{% block entry %}{{ BOLA }%{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid statement syntax. Must end with '}'.\n"
+        "Error occurred near to '%{% endblock %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_if_not_closed(void **state)
+{
+    const char *a = "{% block entry %}{% if BOLA %}{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg, "1 open 'if' statements were not closed!");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_block_not_closed(void **state)
+{
+    const char *a = "{% block entry %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg, "An open block was not closed!");
+    blogc_error_free(err);
+}
+
+
 int
 main(void)
 {
     const UnitTest tests[] = {
         unit_test(test_template_parse),
         unit_test(test_template_parse_html),
+        unit_test(test_template_parse_invalid_block_start),
+        unit_test(test_template_parse_invalid_block_nested),
+        unit_test(test_template_parse_invalid_block_not_open),
+        unit_test(test_template_parse_invalid_if_outside_block),
+        unit_test(test_template_parse_invalid_if_inside_listing_once_block),
+        unit_test(test_template_parse_invalid_endif_not_open),
+        unit_test(test_template_parse_invalid_endif_outside_block),
+        unit_test(test_template_parse_invalid_endif_inside_listing_once_block),
+        unit_test(test_template_parse_invalid_block_name),
+        unit_test(test_template_parse_invalid_block_type_start),
+        unit_test(test_template_parse_invalid_block_type),
+        unit_test(test_template_parse_invalid_if_start),
+        unit_test(test_template_parse_invalid_if_condition),
+        unit_test(test_template_parse_invalid_if_variable),
+        unit_test(test_template_parse_invalid_block_end),
+        unit_test(test_template_parse_invalid_variable_outside_block),
+        unit_test(test_template_parse_invalid_variable_inside_listing_once_block),
+        unit_test(test_template_parse_invalid_variable_name),
+        unit_test(test_template_parse_invalid_variable_name2),
+        unit_test(test_template_parse_invalid_variable_end),
+        unit_test(test_template_parse_invalid_close),
+        unit_test(test_template_parse_invalid_close2),
+        unit_test(test_template_parse_invalid_if_not_closed),
+        unit_test(test_template_parse_invalid_block_not_closed),
     };
     return run_tests(tests);
 }
