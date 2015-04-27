@@ -36,24 +36,25 @@ blogc_print_help(void)
 {
     printf(
         "usage:\n"
-        "    blogc [-h] [-v] [-l] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...] - A blog compiler.\n"
+        "    blogc [-h] [-v] [-l] [-D KEY=VALUE ...] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...] - A blog compiler.\n"
         "\n"
         "positional arguments:\n"
-        "    SOURCE       source file(s)\n"
+        "    SOURCE        source file(s)\n"
         "\n"
         "optional arguments:\n"
-        "    -h           show this help message and exit\n"
-        "    -v           show version and exit\n"
-        "    -l           build listing page, from multiple source files\n"
-        "    -t TEMPLATE  template file\n"
-        "    -o OUTPUT    output file\n");
+        "    -h            show this help message and exit\n"
+        "    -v            show version and exit\n"
+        "    -l            build listing page, from multiple source files\n"
+        "    -D KEY=VALUE  set global configuration parameter\n"
+        "    -t TEMPLATE   template file\n"
+        "    -o OUTPUT     output file\n");
 }
 
 
 static void
 blogc_print_usage(void)
 {
-    printf("usage: blogc [-h] [-v] [-l] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...]\n");
+    printf("usage: blogc [-h] [-v] [-l] [-D KEY=VALUE ...] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...]\n");
 }
 
 
@@ -100,9 +101,14 @@ main(int argc, char **argv)
     bool listing = false;
     char *template = NULL;
     char *output = NULL;
+    char *tmp = NULL;
+    char **pieces = NULL;
+
     b_slist_t *sources = NULL;
+    b_trie_t *config = b_trie_new(free);
 
     for (unsigned int i = 1; i < argc; i++) {
+        tmp = NULL;
         if (argv[i][0] == '-') {
             switch (argv[i][1]) {
                 case 'h':
@@ -125,6 +131,35 @@ main(int argc, char **argv)
                         output = b_strdup(argv[i] + 2);
                     else if (i + 1 < argc)
                         output = b_strdup(argv[++i]);
+                    break;
+                case 'D':
+                    if (argv[i][2] != '\0')
+                        tmp = argv[i] + 2;
+                    else if (i + 1 < argc)
+                        tmp = argv[++i];
+                    if (tmp != NULL) {
+                        pieces = b_str_split(tmp, '=', 2);
+                        if (b_strv_length(pieces) != 2) {
+                            fprintf(stderr, "blogc: error: invalid value for "
+                                "-D (must have an '='): %s\n", tmp);
+                            b_strv_free(pieces);
+                            rv = 2;
+                            goto cleanup;
+                        }
+                        for (unsigned int j = 0; pieces[0][j] != '\0'; j++) {
+                            if (!(pieces[0][j] >= 'A' && pieces[0][j] <= 'Z')) {
+                                fprintf(stderr, "blogc: error: invalid value "
+                                    "for -D (configuration key must be uppercase): "
+                                    "%s\n", pieces[0]);
+                                b_strv_free(pieces);
+                                rv = 2;
+                                goto cleanup;
+                            }
+                        }
+                        b_trie_insert(config, pieces[0], b_strdup(pieces[1]));
+                        b_strv_free(pieces);
+                        pieces = NULL;
+                    }
                     break;
                 default:
                     blogc_print_usage();
@@ -177,7 +212,7 @@ main(int argc, char **argv)
         goto cleanup3;
     }
 
-    char *out = blogc_render(l, s, listing);
+    char *out = blogc_render(l, s, config, listing);
 
     bool write_to_stdout = (output == NULL || (0 == strcmp(output, "-")));
 
@@ -206,6 +241,7 @@ cleanup2:
     blogc_template_free_stmts(l);
     blogc_error_free(err);
 cleanup:
+    b_trie_free(config);
     free(template);
     free(output);
     b_slist_free_full(sources, free);

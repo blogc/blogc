@@ -1,6 +1,6 @@
 # blogc
 
-[![Build Status](https://semaphoreci.com/api/v1/projects/bd67545c-8593-4a37-ba94-ef1187a6d58d/402577/badge.svg)](https://semaphoreci.com/rafaelmartins/blogc)      
+[![Build Status](https://semaphoreci.com/api/v1/projects/bd67545c-8593-4a37-ba94-ef1187a6d58d/402577/badge.svg)](https://semaphoreci.com/rafaelmartins/blogc)
 
 A blog compiler.
 
@@ -22,11 +22,11 @@ The templates can define blocks. These are the block rules:
     - ``listing_once`` should be inclueded if more than one source file is provided, but only once, if the compiler is called with ``-l``.
 - Template blocks can be defined multiple times in the same template, but can't be nested.
 
-The variables defined in the source file are only available inside of blocks. If something does not depends on the source files, and is global, it must be hardcoded in the template, for the sake of simplicity.
+The variables defined in source files are only available inside of blocks. The variables defined in the command line are global and available everywhere. Inside blocks, variables defined in source files are always used, even if a global variable with the same name exists.
 
-The templates can use conditional statements: ``{% if VARIABLE %}`` or ``{% if not VARIABLE %}``, and ``{% endif %}``. They check if a variable is defined or not. As variables are not available outside of blocks, these conditional statements can't be defined outside of blocks as well.
+The templates can use conditional statements: ``{% if VARIABLE %}`` or ``{% if not VARIABLE %}``, and ``{% endif %}``. They check if a variable is defined or not.
 
-Variables are not available in ``listing_once`` blocks, because it is not possible to guess which source file would provide the variable contents.
+Variables defined in source files are not available in ``listing_once`` blocks, because it is not possible to guess which source file would provide the variable contents. Global variables, defined in the command line are available.
 
 As the compiler is output-agnostic, Atom feeds and sitemaps should be generated using templates as well.
 

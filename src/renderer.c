@@ -18,7 +18,7 @@
 
 
 char*
-blogc_render(b_slist_t *tmpl, b_slist_t *sources, bool listing)
+blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing)
 {
     if (tmpl == NULL || sources == NULL)
         return NULL;
@@ -35,6 +35,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, bool listing)
     unsigned int if_skip = 0;
 
     bool if_not = false;
+    bool defined = false;
 
     b_slist_t *tmp = tmpl;
     while (tmp != NULL) {
@@ -86,11 +87,25 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, bool listing)
                 break;
 
             case BLOGC_TEMPLATE_VARIABLE_STMT:
-                if (stmt->value != NULL && tmp_source != NULL) {
-                    config_value = b_trie_lookup(tmp_source, stmt->value);
-                    if (config_value != NULL)
-                        b_string_append(str, config_value);
-                    break;
+                if (stmt->value != NULL) {
+
+                    // try local config first
+                    if (tmp_source != NULL) {
+                        config_value = b_trie_lookup(tmp_source, stmt->value);
+                        if (config_value != NULL) {
+                            b_string_append(str, config_value);
+                            break;
+                        }
+                    }
+
+                    // if not found, try global config
+                    if (config != NULL) {
+                        config_value = b_trie_lookup(config, stmt->value);
+                        if (config_value != NULL) {
+                            b_string_append(str, config_value);
+                            break;
+                        }
+                    }
                 }
                 break;
 
@@ -110,36 +125,39 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, bool listing)
                 if_not = true;
 
             case BLOGC_TEMPLATE_IF_STMT:
-                if (stmt->value != NULL && tmp_source != NULL) {
-                    if ((!if_not && (b_trie_lookup(tmp_source, stmt->value) == NULL)) ||
-                        (if_not && (b_trie_lookup(tmp_source, stmt->value) != NULL)))
-                    {
-                        if_skip = if_count;
+                defined = false;
+                if (stmt->value != NULL) {
+                    if (tmp_source != NULL && b_trie_lookup(tmp_source, stmt->value) != NULL)
+                        defined = true;
+                    if (config != NULL && b_trie_lookup(config, stmt->value) != NULL)
+                        defined = true;
+                }
+                if ((!if_not && !defined) || (if_not && defined)) {
+                    if_skip = if_count;
 
-                        // at this point we can just skip anything, counting the
-                        // number of 'if's, to know how many 'endif's we need to
-                        // skip as well.
-                        while (1) {
-                            tmp = tmp->next;
-                            stmt = tmp->data;
-                            if ((stmt->type == BLOGC_TEMPLATE_IF_STMT) ||
-                                (stmt->type == BLOGC_TEMPLATE_IF_NOT_STMT))
-                            {
-                                if_count++;
+                    // at this point we can just skip anything, counting the
+                    // number of 'if's, to know how many 'endif's we need to
+                    // skip as well.
+                    while (1) {
+                        tmp = tmp->next;
+                        stmt = tmp->data;
+                        if ((stmt->type == BLOGC_TEMPLATE_IF_STMT) ||
+                            (stmt->type == BLOGC_TEMPLATE_IF_NOT_STMT))
+                        {
+                            if_count++;
+                            continue;
+                        }
+                        if (stmt->type == BLOGC_TEMPLATE_ENDIF_STMT) {
+                            if (if_count > if_skip) {
+                                if_count--;
                                 continue;
                             }
-                            if (stmt->type == BLOGC_TEMPLATE_ENDIF_STMT) {
-                                if (if_count > if_skip) {
-                                    if_count--;
-                                    continue;
-                                }
-                                if (if_count == if_skip)
-                                    break;
-                            }
+                            if (if_count == if_skip)
+                                break;
                         }
                     }
-                    if_not = false;
                 }
+                if_not = false;
                 break;
 
             case BLOGC_TEMPLATE_ENDIF_STMT:

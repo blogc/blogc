@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include "utils/utils.h"
 
-char* blogc_render(b_slist_t *tmpl, b_slist_t *sources, bool listing);
+char* blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config,
+    bool listing);
 
 #endif /* _RENDERER_H */

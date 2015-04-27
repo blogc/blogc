@@ -143,36 +143,22 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         break;
                     }
                     else if (0 == strncmp("if", src + start, current - start)) {
-                        if (block_state == BLOCK_ENTRY || block_state == BLOCK_LISTING) {
-                            state = TEMPLATE_BLOCK_IF_START;
-                            type = BLOGC_TEMPLATE_IF_STMT;
-                            start = current;
-                            if_count++;
-                            break;
-                        }
-                        *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
-                            src, src_len, current,
-                            "'if' statements only allowed inside 'entry' and "
-                            "'listing' blocks.");
+                        state = TEMPLATE_BLOCK_IF_START;
+                        type = BLOGC_TEMPLATE_IF_STMT;
+                        start = current;
+                        if_count++;
                         break;
                     }
                     else if (0 == strncmp("endif", src + start, current - start)) {
-                        if (block_state == BLOCK_ENTRY || block_state == BLOCK_LISTING) {
-                            if (if_count > 0) {
-                                state = TEMPLATE_BLOCK_END;
-                                type = BLOGC_TEMPLATE_ENDIF_STMT;
-                                if_count--;
-                                break;
-                            }
-                            *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
-                                src, src_len, current,
-                                "'endif' statement without an open 'if' statement.");
+                        if (if_count > 0) {
+                            state = TEMPLATE_BLOCK_END;
+                            type = BLOGC_TEMPLATE_ENDIF_STMT;
+                            if_count--;
                             break;
                         }
                         *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
                             src, src_len, current,
-                            "'endif' statements only allowed inside 'entry' "
-                            "and 'listing' blocks.");
+                            "'endif' statement without an open 'if' statement.");
                         break;
                     }
                 }
@@ -250,7 +236,6 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     break;
                 if (c == ' ') {
                     if (0 == strncmp("not", src + start, current - start)) {
-                        block_state = BLOCK_ENTRY;
                         end = current;
                         state = TEMPLATE_BLOCK_IF_START;
                         type = BLOGC_TEMPLATE_IF_NOT_STMT;
@@ -293,16 +278,9 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 if (c == ' ')
                     break;
                 if (c >= 'A' && c <= 'Z') {
-                    if (block_state == BLOCK_ENTRY || block_state == BLOCK_LISTING) {
-                        state = TEMPLATE_VARIABLE;
-                        type = BLOGC_TEMPLATE_VARIABLE_STMT;
-                        start = current;
-                        break;
-                    }
-                    *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
-                        src, src_len, current,
-                        "Variable statements only allowed inside 'entry' and "
-                        "'listing' blocks.");
+                    state = TEMPLATE_VARIABLE;
+                    type = BLOGC_TEMPLATE_VARIABLE_STMT;
+                    start = current;
                     break;
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,

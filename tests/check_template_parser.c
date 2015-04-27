@@ -227,6 +227,40 @@ test_template_parse_html(void **state)
 
 
 static void
+test_template_parse_if_and_var_outside_block(void **state)
+{
+    const char *a =
+        "{% if GUDA %}bola{% endif %}\n"
+        "{{ BOLA }}\n"
+        "{% if not CHUNDA %}{{ CHUNDA }}{% endif %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(stmts);
+    blogc_assert_template_stmt(stmts, "GUDA", BLOGC_TEMPLATE_IF_STMT);
+    blogc_assert_template_stmt(stmts->next, "bola",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(stmts->next->next, NULL,
+        BLOGC_TEMPLATE_ENDIF_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next, "\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next->next, "BOLA",
+        BLOGC_TEMPLATE_VARIABLE_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next->next->next, "\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next->next->next->next,
+        "CHUNDA", BLOGC_TEMPLATE_IF_NOT_STMT);
+    b_slist_t *tmp = stmts->next->next->next->next->next->next->next;
+    blogc_assert_template_stmt(tmp, "CHUNDA", BLOGC_TEMPLATE_VARIABLE_STMT);
+    blogc_assert_template_stmt(tmp->next, NULL, BLOGC_TEMPLATE_ENDIF_STMT);
+    blogc_assert_template_stmt(tmp->next->next, "\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    assert_null(tmp->next->next->next);
+    blogc_template_free_stmts(stmts);
+}
+
+
+static void
 test_template_parse_invalid_block_start(void **state)
 {
     const char *a = "{% ASD %}\n";
@@ -277,38 +311,6 @@ test_template_parse_invalid_block_not_open(void **state)
 
 
 static void
-test_template_parse_invalid_if_outside_block(void **state)
-{
-    const char *a = "{% if BOLA %}";
-    blogc_error_t *err = NULL;
-    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
-    assert_non_null(err);
-    assert_null(stmts);
-    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
-    assert_string_equal(err->msg,
-        "'if' statements only allowed inside 'entry' and 'listing' blocks.\n"
-        "Error occurred near to ' BOLA %}'");
-    blogc_error_free(err);
-}
-
-
-static void
-test_template_parse_invalid_if_inside_listing_once_block(void **state)
-{
-    const char *a = "{% block listing_once %}{% if BOLA %}{% endblock %}";
-    blogc_error_t *err = NULL;
-    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
-    assert_non_null(err);
-    assert_null(stmts);
-    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
-    assert_string_equal(err->msg,
-        "'if' statements only allowed inside 'entry' and 'listing' blocks.\n"
-        "Error occurred near to ' BOLA %}{% endblock %}'");
-    blogc_error_free(err);
-}
-
-
-static void
 test_template_parse_invalid_endif_not_open(void **state)
 {
     const char *a = "{% block listing %}{% endif %}{% endblock %}\n";
@@ -319,38 +321,6 @@ test_template_parse_invalid_endif_not_open(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "'endif' statement without an open 'if' statement.\n"
-        "Error occurred near to ' %}{% endblock %}'");
-    blogc_error_free(err);
-}
-
-
-static void
-test_template_parse_invalid_endif_outside_block(void **state)
-{
-    const char *a = "{% endif %}\n";
-    blogc_error_t *err = NULL;
-    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
-    assert_non_null(err);
-    assert_null(stmts);
-    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
-    assert_string_equal(err->msg,
-        "'endif' statements only allowed inside 'entry' and 'listing' blocks.\n"
-        "Error occurred near to ' %}'");
-    blogc_error_free(err);
-}
-
-
-static void
-test_template_parse_invalid_endif_inside_listing_once_block(void **state)
-{
-    const char *a = "{% block listing_once %}{% endif %}{% endblock %}\n";
-    blogc_error_t *err = NULL;
-    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
-    assert_non_null(err);
-    assert_null(stmts);
-    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
-    assert_string_equal(err->msg,
-        "'endif' statements only allowed inside 'entry' and 'listing' blocks.\n"
         "Error occurred near to ' %}{% endblock %}'");
     blogc_error_free(err);
 }
@@ -469,38 +439,6 @@ test_template_parse_invalid_block_end(void **state)
 
 
 static void
-test_template_parse_invalid_variable_outside_block(void **state)
-{
-    const char *a = "{{ BOLA }}\n";
-    blogc_error_t *err = NULL;
-    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
-    assert_non_null(err);
-    assert_null(stmts);
-    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
-    assert_string_equal(err->msg,
-        "Variable statements only allowed inside 'entry' and 'listing' blocks.\n"
-        "Error occurred near to 'BOLA }}'");
-    blogc_error_free(err);
-}
-
-
-static void
-test_template_parse_invalid_variable_inside_listing_once_block(void **state)
-{
-    const char *a = "{% block listing_once %}{{ BOLA }}{% endblock %}\n";
-    blogc_error_t *err = NULL;
-    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
-    assert_non_null(err);
-    assert_null(stmts);
-    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
-    assert_string_equal(err->msg,
-        "Variable statements only allowed inside 'entry' and 'listing' blocks.\n"
-        "Error occurred near to 'BOLA }}{% endblock %}'");
-    blogc_error_free(err);
-}
-
-
-static void
 test_template_parse_invalid_variable_name(void **state)
 {
     const char *a = "{% block entry %}{{ bola }}{% endblock %}\n";
@@ -614,14 +552,11 @@ main(void)
     const UnitTest tests[] = {
         unit_test(test_template_parse),
         unit_test(test_template_parse_html),
+        unit_test(test_template_parse_if_and_var_outside_block),
         unit_test(test_template_parse_invalid_block_start),
         unit_test(test_template_parse_invalid_block_nested),
         unit_test(test_template_parse_invalid_block_not_open),
-        unit_test(test_template_parse_invalid_if_outside_block),
-        unit_test(test_template_parse_invalid_if_inside_listing_once_block),
         unit_test(test_template_parse_invalid_endif_not_open),
-        unit_test(test_template_parse_invalid_endif_outside_block),
-        unit_test(test_template_parse_invalid_endif_inside_listing_once_block),
         unit_test(test_template_parse_invalid_block_name),
         unit_test(test_template_parse_invalid_block_type_start),
         unit_test(test_template_parse_invalid_block_type),
@@ -629,8 +564,6 @@ main(void)
         unit_test(test_template_parse_invalid_if_condition),
         unit_test(test_template_parse_invalid_if_variable),
         unit_test(test_template_parse_invalid_block_end),
-        unit_test(test_template_parse_invalid_variable_outside_block),
-        unit_test(test_template_parse_invalid_variable_inside_listing_once_block),
         unit_test(test_template_parse_invalid_variable_name),
         unit_test(test_template_parse_invalid_variable_name2),
         unit_test(test_template_parse_invalid_variable_end),

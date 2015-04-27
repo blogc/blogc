@@ -68,7 +68,7 @@ test_render_entry(void **state)
     assert_null(err);
     b_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, false);
+    char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
         "foo\n"
         "\n"
@@ -102,7 +102,7 @@ test_render_listing(void **state)
     assert_null(err);
     b_slist_t *s = create_sources(3);
     assert_non_null(s);
-    char *out = blogc_render(l, s, true);
+    char *out = blogc_render(l, s, NULL, true);
     assert_string_equal(out,
         "foo\n"
         "fuuu\n"
@@ -138,7 +138,7 @@ test_render_if(void **state)
     assert_null(err);
     b_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, false);
+    char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
         "\n"
         "\n"
@@ -167,7 +167,7 @@ test_render_if2(void **state)
     assert_null(err);
     b_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, false);
+    char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
         "\n"
         "guda\n"
@@ -198,7 +198,7 @@ test_render_if3(void **state)
     assert_null(err);
     b_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, false);
+    char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
         "\n"
         "guda\n"
@@ -231,7 +231,7 @@ test_render_if_not(void **state)
     assert_null(err);
     b_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, false);
+    char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
         "\n"
         "chunda\n"
@@ -249,7 +249,73 @@ test_render_if_not(void **state)
 static void
 test_render_null(void **state)
 {
-    assert_null(blogc_render(NULL, NULL, false));
+    assert_null(blogc_render(NULL, NULL, NULL, false));
+}
+
+
+static void
+test_render_outside_block(void **state)
+{
+    const char *str =
+        "{% if GUDA %}bola{% endif %}\n"
+        "{{ BOLA }}\n"
+        "{% if not CHUNDA %}lol{% endif %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    b_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    b_trie_t *c = b_trie_new(free);
+    b_trie_insert(c, "GUDA", b_strdup("asd"));
+    char *out = blogc_render(l, s, c, false);
+    assert_string_equal(out,
+        "bola\n"
+        "\n"
+        "lol\n");
+    b_trie_free(c);
+    blogc_template_free_stmts(l);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_prefer_local_variable(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% if LOL %}{{ LOL }}{% endif %}\n"
+        "{% if not CHUNDA %}chunda\n"
+        "{% if GUDA %}{{ GUDA }}\n"
+        "{% if not BOLA %}bola\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    b_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    b_trie_t *c = b_trie_new(free);
+    b_trie_insert(c, "GUDA", b_strdup("hehe"));
+    b_trie_insert(c, "LOL", b_strdup("hmm"));
+    char *out = blogc_render(l, s, c, false);
+    assert_string_equal(out,
+        "\n"
+        "hmm\n"
+        "chunda\n"
+        "zxc\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n");
+    b_trie_free(c);
+    blogc_template_free_stmts(l);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
+    free(out);
 }
 
 
@@ -263,7 +329,9 @@ main(void)
         unit_test(test_render_if2),
         unit_test(test_render_if3),
         unit_test(test_render_if_not),
+        unit_test(test_render_outside_block),
         unit_test(test_render_null),
+        unit_test(test_render_prefer_local_variable),
     };
     return run_tests(tests);
 }
