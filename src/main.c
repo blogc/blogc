@@ -147,10 +147,12 @@ main(int argc, char **argv)
                             goto cleanup;
                         }
                         for (unsigned int j = 0; pieces[0][j] != '\0'; j++) {
-                            if (!(pieces[0][j] >= 'A' && pieces[0][j] <= 'Z')) {
+                            if (!((pieces[0][j] >= 'A' && pieces[0][j] <= 'Z') ||
+                                pieces[0][j] == '_'))
+                            {
                                 fprintf(stderr, "blogc: error: invalid value "
-                                    "for -D (configuration key must be uppercase): "
-                                    "%s\n", pieces[0]);
+                                    "for -D (configuration key must be uppercase "
+                                    "with '_'): %s\n", pieces[0]);
                                 b_strv_free(pieces);
                                 rv = 2;
                                 goto cleanup;

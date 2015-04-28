@@ -9,6 +9,8 @@ AC_CONFIG_HEADERS([config.h])
 AM_SILENT_RULES([yes])
 AM_MAINTAINER_MODE([enable])
 
+AC_USE_SYSTEM_EXTENSIONS
+
 LT_INIT
 
 AC_PROG_CC_C99
@@ -54,7 +56,7 @@ AS_IF([test "x$have_cmocka" = "xyes"], , [
 ])
 AM_CONDITIONAL([USE_CMOCKA], [test "x$have_cmocka" = "xyes"])
 
-AC_CHECK_HEADERS([sys/types.h sys/stat.h])
+AC_CHECK_HEADERS([sys/types.h sys/stat.h time.h])
 
 AC_CONFIG_FILES([
     Makefile

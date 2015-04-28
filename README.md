@@ -50,6 +50,8 @@ If more than one source file is provided to the compiler with the ``-t`` argumen
 
 Variables are single-line, and all the whitespace characters, including tabs, before the leading non-whitespace character and after the trailing non-whitespace character will be removed.
 
+``DATE`` variable, if provided in the correct format, as shown in the example, will be parsed and set to ``DATE_FORMATTED`` variable. User can set ``DATE_FORMAT`` variable with ``strftime(3)`` format string, to change the default formatting, e.g. using the -D command line argument: ``-D DATE_FORMAT="%H:%M:%S"``
+
 Raw content is available in template blocks as the ``CONTENT`` variable.
 
 
@@ -69,11 +71,11 @@ Raw content is available in template blocks as the ``CONTENT`` variable.
         <h1>My cool blog</h1>
         {% block entry %}
         <h2>{{ TITLE }}</h2>
-        {% if DATE %}<h4>Published in: {{ DATE }}</h4>{% endif %}
+        {% if DATE_FORMATTED %}<h4>Published in: {{ DATE_FORMATTED }}</h4>{% endif %}
         <pre>{{ CONTENT }}</pre>
         {% endblock %}
         {% block listing_once %}<ul>{% endblock %}
-        {% block listing %}<p><a href="{{ FILENAME }}.html">{{ TITLE }}</a>{% if DATE %} - {{ DATE }}{% endif %}</p>{% endblock %}
+        {% block listing %}<p><a href="{{ FILENAME }}.html">{{ TITLE }}</a>{% if DATE_FORMATTED %} - {{ DATE_FORMATTED }}{% endif %}</p>{% endblock %}
         {% block listing_once %}</ul>{% endblock %}
     </body>
 </html>

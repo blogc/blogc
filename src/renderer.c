@@ -10,11 +10,63 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif /* HAVE_TIME_H */
+
+#include <stdio.h>
 #include <string.h>
 #include "utils/utils.h"
+#include "loader.h"
 #include "source-parser.h"
 #include "template-parser.h"
 #include "renderer.h"
+
+
+const char*
+blogc_get_variable(const char *name, b_trie_t *global, b_trie_t *local)
+{
+    const char *rv = NULL;
+    if (local != NULL) {
+        rv = b_trie_lookup(local, name);
+        if (rv != NULL)
+            return rv;
+    }
+    if (global != NULL)
+        rv = b_trie_lookup(global, name);
+    return rv;
+}
+
+
+char*
+blogc_format_date(b_trie_t *global, b_trie_t *local)
+{
+    const char *date = blogc_get_variable("DATE", global, local);
+    const char *date_format = blogc_get_variable("DATE_FORMAT", global, local);
+    if (date == NULL)
+        return NULL;
+    if (date_format == NULL)
+        return b_strdup(date);
+#ifdef HAVE_TIME_H
+    struct tm tm;
+    memset(&tm, 0, sizeof(struct tm));
+    if (NULL == strptime(date, "%Y-%m-%d %H:%M:%S", &tm)) {
+        fprintf(stderr, "blogc: warning: Failed to parse DATE variable: %s\n",
+            date);
+        return b_strdup(date);
+    }
+    char tmp[1024];
+    if (0 == strftime(tmp, sizeof(tmp), date_format, &tm)) {
+        fprintf(stderr, "blogc: warning: Failed to format DATE variable, "
+            "FORMAT is too long: %s\n", date_format);
+        return b_strdup(date);
+    }
+    return b_strdup(tmp);
+#else
+    fprintf(stderr, "blogc: warning: Can't pre-process DATE variable.\n");
+    return NULL;
+#endif
+}
 
 
 char*
@@ -29,7 +81,8 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
     b_string_t *str = b_string_new();
 
     b_trie_t *tmp_source = NULL;
-    char *config_value = NULL;
+    const char *config_value = NULL;
+    char *config_value2 = NULL;
 
     unsigned int if_count = 0;
     unsigned int if_skip = 0;
@@ -88,23 +141,19 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
 
             case BLOGC_TEMPLATE_VARIABLE_STMT:
                 if (stmt->value != NULL) {
-
-                    // try local config first
-                    if (tmp_source != NULL) {
-                        config_value = b_trie_lookup(tmp_source, stmt->value);
-                        if (config_value != NULL) {
-                            b_string_append(str, config_value);
+                    if (0 == strcmp(stmt->value, "DATE_FORMATTED")) {
+                        config_value2 = blogc_format_date(config, tmp_source);
+                        if (config_value2 != NULL) {
+                            b_string_append(str, config_value2);
+                            free(config_value2);
+                            config_value2 = NULL;
                             break;
                         }
                     }
-
-                    // if not found, try global config
-                    if (config != NULL) {
-                        config_value = b_trie_lookup(config, stmt->value);
-                        if (config_value != NULL) {
+                    else {
+                        config_value = blogc_get_variable(stmt->value, config, tmp_source);
+                        if (config_value != NULL)
                             b_string_append(str, config_value);
-                            break;
-                        }
                     }
                 }
                 break;
@@ -127,10 +176,16 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
             case BLOGC_TEMPLATE_IF_STMT:
                 defined = false;
                 if (stmt->value != NULL) {
-                    if (tmp_source != NULL && b_trie_lookup(tmp_source, stmt->value) != NULL)
-                        defined = true;
-                    if (config != NULL && b_trie_lookup(config, stmt->value) != NULL)
-                        defined = true;
+                    if (0 == strcmp(stmt->value, "DATE_FORMATTED")) {
+                        config_value2 = blogc_format_date(config, tmp_source);
+                        if (config_value2 != NULL) {
+                            defined = true;
+                            free(config_value2);
+                            config_value2 = NULL;
+                        }
+                    }
+                    else
+                        defined = blogc_get_variable(stmt->value, config, tmp_source) != NULL;
                 }
                 if ((!if_not && !defined) || (if_not && defined)) {
                     if_skip = if_count;
