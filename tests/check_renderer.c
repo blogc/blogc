@@ -379,7 +379,7 @@ static void
 test_format_date(void **state)
 {
     b_trie_t *g = b_trie_new(free);
-    b_trie_insert(g, "DATE_FORMAT", b_strdup("%H -- %j"));
+    b_trie_insert(g, "DATE_FORMAT", b_strdup("%H -- %M"));
     b_trie_t *l = b_trie_new(free);
     b_trie_insert(l, "DATE", b_strdup("2015-01-02 03:04:05"));
     b_trie_insert(l, "DATE_FORMAT", b_strdup("%R"));
@@ -395,11 +395,11 @@ static void
 test_format_date_with_global_format(void **state)
 {
     b_trie_t *g = b_trie_new(free);
-    b_trie_insert(g, "DATE_FORMAT", b_strdup("%H -- %j"));
+    b_trie_insert(g, "DATE_FORMAT", b_strdup("%H -- %M"));
     b_trie_t *l = b_trie_new(free);
     b_trie_insert(l, "DATE", b_strdup("2015-01-02 03:04:05"));
     char *date = blogc_format_date(g, l);
-    assert_string_equal(date, "03 -- 002");
+    assert_string_equal(date, "03 -- 04");
     free(date);
     b_trie_free(g);
     b_trie_free(l);
