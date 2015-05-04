@@ -19,6 +19,7 @@ CLEANFILES = \
 	$(NULL)
 
 noinst_HEADERS = \
+	src/content-parser.h \
 	src/error.h \
 	src/loader.h \
 	src/renderer.h \
@@ -43,6 +44,7 @@ check_PROGRAMS = \
 
 
 libblogc_la_SOURCES = \
+	src/content-parser.c \
 	src/error.c \
 	src/loader.c \
 	src/renderer.c \
@@ -82,6 +84,7 @@ blogc_LDADD = \
 if USE_CMOCKA
 
 check_PROGRAMS += \
+	tests/check_content_parser \
 	tests/check_error \
 	tests/check_loader \
 	tests/check_renderer \
@@ -120,6 +123,23 @@ tests_check_loader_LDFLAGS = \
 	$(NULL)
 
 tests_check_loader_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc.la \
+	$(NULL)
+
+tests_check_content_parser_SOURCES = \
+	tests/check_content_parser.c \
+	$(NULL)
+
+tests_check_content_parser_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_check_content_parser_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_check_content_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
 	$(NULL)
