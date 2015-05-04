@@ -23,7 +23,9 @@
 
 
 // TODO: block elements: list, horizontal rule
-// TODO: inline elements: links, emphasis, code, images
+// TODO: inline elements: links, emphasis, code, images, line breaks
+// TODO: automatic scaping of html entities
+// TODO: automatic links
 // TODO: error handling
 
 
