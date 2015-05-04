@@ -17,6 +17,7 @@ typedef enum {
     BLOGC_ERROR_SOURCE_PARSER = 1,
     BLOGC_ERROR_TEMPLATE_PARSER,
     BLOGC_ERROR_LOADER,
+    BLOGC_ERROR_CONTENT_PARSER,
 } blogc_error_type_t;
 
 typedef struct {
