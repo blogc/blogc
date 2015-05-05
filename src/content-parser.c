@@ -87,7 +87,7 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
         switch (state) {
 
             case CONTENT_START_LINE:
-                if (c == '\n' || c == '\r')
+                if (c == '\n' || c == '\r' || is_last)
                     break;
                 if (c == '#') {
                     header_level = 1;
@@ -140,18 +140,15 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
             case CONTENT_HEADER_TITLE_START:
                 if (c == ' ' || c == '\t')
                     break;
-                if (c != '\n' || c != '\r') {
-                    start = current;
+                start = current;
+                if (c != '\n' && c != '\r') {
                     state = CONTENT_HEADER_TITLE;
                     break;
                 }
-                *err = blogc_error_parser(BLOGC_ERROR_CONTENT_PARSER, src, src_len,
-                    current, "Empty header");
-                break;
 
             case CONTENT_HEADER_TITLE:
                 if (c == '\n' || c == '\r' || is_last) {
-                    end = is_last ? src_len : current;
+                    end = is_last && c != '\n' && c != '\r' ? src_len : current;
                     tmp = b_strndup(src + start, end - start);
                     b_string_append_printf(rv, "<h%d>%s</h%d>\n", header_level,
                         tmp, header_level);
@@ -159,14 +156,13 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                     tmp = NULL;
                     state = CONTENT_START_LINE;
                     start = current;
-                    break;
                 }
                 break;
 
             case CONTENT_HTML:
                 if (c == '\n' || c == '\r' || is_last) {
                     state = CONTENT_HTML_END;
-                    end = is_last ? src_len : current;
+                    end = is_last && c != '\n' && c != '\r' ? src_len : current;
                 }
                 if (!is_last)
                     break;
@@ -189,10 +185,11 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                     break;
                 prefix = b_strndup(src + start, current - start);
                 state = CONTENT_BLOCKQUOTE_START;
+                break;
 
             case CONTENT_BLOCKQUOTE_START:
                 if (c == '\n' || c == '\r' || is_last) {
-                    end = is_last ? src_len : current;
+                    end = is_last && c != '\n' && c != '\r' ? src_len : current;
                     tmp = b_strndup(src + start, end - start);
                     if (b_str_starts_with(tmp, prefix)) {
                         lines = b_slist_append(lines, b_strdup(tmp + strlen(prefix)));
@@ -202,6 +199,10 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                         *err = blogc_error_parser(BLOGC_ERROR_CONTENT_PARSER, src, src_len,
                             current, "Malformed blockquote, must use same prefix "
                             "as previous line(s): %s", prefix);
+                        free(prefix);
+                        prefix = NULL;
+                        b_slist_free_full(lines, free);
+                        lines = NULL;
                     }
                     free(tmp);
                     tmp = NULL;
@@ -245,10 +246,11 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                     break;
                 prefix = b_strndup(src + start, current - start);
                 state = CONTENT_CODE_START;
+                break;
 
             case CONTENT_CODE_START:
                 if (c == '\n' || c == '\r' || is_last) {
-                    end = is_last ? src_len : current;
+                    end = is_last && c != '\n' && c != '\r' ? src_len : current;
                     tmp = b_strndup(src + start, end - start);
                     if (b_str_starts_with(tmp, prefix)) {
                         lines = b_slist_append(lines, b_strdup(tmp + strlen(prefix)));
@@ -258,6 +260,10 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                         *err = blogc_error_parser(BLOGC_ERROR_CONTENT_PARSER, src, src_len,
                             current, "Malformed code block, must use same prefix "
                             "as previous line(s): '%s'", prefix);
+                        free(prefix);
+                        prefix = NULL;
+                        b_slist_free_full(lines, free);
+                        lines = NULL;
                     }
                     free(tmp);
                     tmp = NULL;
@@ -316,7 +322,7 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
 
             case CONTENT_UNORDERED_LIST_START:
                 if (c == '\n' || c == '\r' || is_last) {
-                    end = is_last ? src_len : current;
+                    end = is_last && c != '\n' && c != '\r' ? src_len : current;
                     tmp = b_strndup(src + start, end - start);
                     if (b_str_starts_with(tmp, prefix)) {
                         lines = b_slist_append(lines, b_strdup(tmp + strlen(prefix)));
@@ -367,10 +373,11 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                     break;
                 prefix_len = current - start;
                 state = CONTENT_ORDERED_LIST_START;
+                break;
 
             case CONTENT_ORDERED_LIST_START:
                 if (c == '\n' || c == '\r' || is_last) {
-                    end = is_last ? src_len : current;
+                    end = is_last && c != '\n' && c != '\r' ? src_len : current;
                     tmp = b_strndup(src + start, end - start);
                     if (strlen(tmp) >= prefix_len) {
                         tmp2 = b_strndup(tmp, prefix_len);
@@ -436,7 +443,7 @@ err_li:
             case CONTENT_PARAGRAPH:
                 if (c == '\n' || c == '\r' || is_last) {
                     state = CONTENT_PARAGRAPH_END;
-                    end = is_last ? src_len : current;
+                    end = is_last && c != '\n' && c != '\r' ? src_len : current;
                 }
                 if (!is_last)
                     break;

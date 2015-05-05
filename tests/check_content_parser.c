@@ -96,11 +96,242 @@ test_content_parse(void **state)
 }
 
 
+void
+test_content_parse_header(void **state)
+{
+    const char *a = "## bola";
+    blogc_error_t *err = NULL;
+    char *html = blogc_content_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(html);
+    assert_string_equal(html, "<h2>bola</h2>\n");
+    free(html);
+    a = "## bola\n";
+    html = blogc_content_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(html);
+    assert_string_equal(html, "<h2>bola</h2>\n");
+    free(html);
+    a =
+        "bola\n"
+        "\n"
+        "## bola\n"
+        "\n"
+        "guda\n";
+    html = blogc_content_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>bola</p>\n"
+        "<h2>bola</h2>\n"
+        "<p>guda</p>\n");
+    free(html);
+}
+
+
+void
+test_content_parse_html(void **state)
+{
+    const char *a = "<div>\n</div>";
+    blogc_error_t *err = NULL;
+    char *html = blogc_content_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(html);
+    assert_string_equal(html, "<div>\n</div>\n");
+    free(html);
+    a = "<div>\n</div>\n";
+    html = blogc_content_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(html);
+    assert_string_equal(html, "<div>\n</div>\n");
+    free(html);
+    a =
+        "bola\n"
+        "\n"
+        "<div>\n"
+        "</div>\n"
+        "\n"
+        "chunda\n";
+    html = blogc_content_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>bola</p>\n"
+        "<div>\n</div>\n"
+        "<p>chunda</p>\n");
+    free(html);
+}
+
+
+void
+test_content_parse_blockquote(void **state)
+{
+    const char *a = ">  bola\n>  guda";
+    blogc_error_t *err = NULL;
+    char *html = blogc_content_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<blockquote><p>bola\n"
+        "guda</p>\n"
+        "</blockquote>\n");
+    free(html);
+    a = ">  bola\n>  guda\n";
+    html = blogc_content_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<blockquote><p>bola\n"
+        "guda</p>\n"
+        "</blockquote>\n");
+    free(html);
+    a =
+        "bola\n"
+        "\n"
+        ">   bola\n"
+        ">   guda\n"
+        "\n"
+        "chunda\n";
+    html = blogc_content_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>bola</p>\n"
+        "<blockquote><p>bola\n"
+        "guda</p>\n"
+        "</blockquote>\n"
+        "<p>chunda</p>\n");
+    free(html);
+}
+
+
+void
+test_content_parse_code(void **state)
+{
+    const char *a = "  bola\n  guda";
+    blogc_error_t *err = NULL;
+    char *html = blogc_content_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<pre><code>bola\n"
+        "guda</code></pre>\n");
+    free(html);
+    a = "  bola\n  guda\n";
+    html = blogc_content_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<pre><code>bola\n"
+        "guda</code></pre>\n");
+    free(html);
+    a =
+        "bola\n"
+        "\n"
+        "   bola\n"
+        "   guda\n"
+        "\n"
+        "chunda\n";
+    html = blogc_content_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>bola</p>\n"
+        "<pre><code>bola\n"
+        "guda</code></pre>\n"
+        "<p>chunda</p>\n");
+    free(html);
+}
+
+
+void
+test_content_parse_invalid_header(void **state)
+{
+    const char *a =
+        "asd\n"
+        "\n"
+        "##bola\n";
+    blogc_error_t *err = NULL;
+    char *html = blogc_content_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(html);
+    assert_int_equal(err->type, BLOGC_ERROR_CONTENT_PARSER);
+    assert_string_equal(err->msg,
+        "Malformed header, no space or tab after '#'\n"
+        "Error occurred near to 'bola'");
+    blogc_error_free(err);
+}
+
+
+void
+test_content_parse_invalid_header_empty(void **state)
+{
+    const char *a =
+        "asd\n"
+        "\n"
+        "##\n"
+        "\n"
+        "qwe\n";
+    blogc_error_t *err = NULL;
+    char *html = blogc_content_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(html);
+    assert_int_equal(err->type, BLOGC_ERROR_CONTENT_PARSER);
+    assert_string_equal(err->msg,
+        "Malformed header, no space or tab after '#'");
+    blogc_error_free(err);
+}
+
+
+void
+test_content_parse_invalid_blockquote(void **state)
+{
+    const char *a =
+        ">   asd\n"
+        "> bola\n"
+        ">   foo\n";
+    blogc_error_t *err = NULL;
+    char *html = blogc_content_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(html);
+    assert_int_equal(err->type, BLOGC_ERROR_CONTENT_PARSER);
+    assert_string_equal(err->msg,
+        "Malformed blockquote, must use same prefix as previous line(s): >   ");
+    blogc_error_free(err);
+}
+
+
+void
+test_content_parse_invalid_code(void **state)
+{
+    const char *a =
+        "    asd\n"
+        "  bola\n"
+        "    foo\n";
+    blogc_error_t *err = NULL;
+    char *html = blogc_content_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(html);
+    assert_int_equal(err->type, BLOGC_ERROR_CONTENT_PARSER);
+    assert_string_equal(err->msg,
+        "Malformed code block, must use same prefix as previous line(s): '    '");
+    blogc_error_free(err);
+}
+
+
 int
 main(void)
 {
     const UnitTest tests[] = {
         unit_test(test_content_parse),
+        unit_test(test_content_parse_header),
+        unit_test(test_content_parse_html),
+        unit_test(test_content_parse_blockquote),
+        unit_test(test_content_parse_code),
+        unit_test(test_content_parse_invalid_header),
+        unit_test(test_content_parse_invalid_header_empty),
+        unit_test(test_content_parse_invalid_blockquote),
+        unit_test(test_content_parse_invalid_code),
     };
     return run_tests(tests);
 }
