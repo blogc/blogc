@@ -56,7 +56,9 @@ test_content_parse(void **state)
         "</style>\n"
         "\n"
         "guda\n"
-        "yay";
+        "yay\n"
+        "\n"
+        "**bola**\n";
     blogc_error_t *err = NULL;
     char *html = blogc_content_parse(a, strlen(a), &err);
     assert_null(err);
@@ -91,7 +93,8 @@ test_content_parse(void **state)
         "   chunda\n"
         "</style>\n"
         "<p>guda\n"
-        "yay</p>\n");
+        "yay</p>\n"
+        "<p>**bola**</p>\n");
     free(html);
 }
 
@@ -319,6 +322,18 @@ test_content_parse_invalid_code(void **state)
 }
 
 
+void
+test_content_parse_inline(void **state)
+{
+    char *html = blogc_content_parse_inline("**bola***asd* ``chunda``");
+    assert_string_equal(html, "<strong>bola</strong><em>asd</em> <code>chunda</code>");
+    free(html);
+    html = blogc_content_parse_inline("*bola*");
+    assert_string_equal(html, "<em>bola</em>");
+    free(html);
+}
+
+
 int
 main(void)
 {
@@ -332,6 +347,7 @@ main(void)
         unit_test(test_content_parse_invalid_header_empty),
         unit_test(test_content_parse_invalid_blockquote),
         unit_test(test_content_parse_invalid_code),
+        unit_test(test_content_parse_inline),
     };
     return run_tests(tests);
 }

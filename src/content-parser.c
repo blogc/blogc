@@ -55,6 +55,217 @@ typedef enum {
 
 
 char*
+blogc_content_parse_inline(const char *src)
+{
+    // this function is always called by blogc_content_parse, then its safe to
+    // assume that src is always nul-terminated.
+    size_t src_len = strlen(src);
+
+    size_t current = 0;
+
+    b_string_t *rv = b_string_new();
+
+    bool open_em_ast = false;
+    bool open_strong_ast = false;
+    bool open_em_und = false;
+    bool open_strong_und = false;
+    bool open_code = false;
+    bool open_code_double = false;
+    unsigned int link_state = 0;
+    unsigned int image_state = 0;
+    size_t link_start = 0;
+    size_t image_start = 0;
+
+    char *tmp = NULL;
+    char *title = NULL;
+
+    while (current < src_len) {
+        char c = src[current];
+        bool is_last = current == src_len - 1;
+
+        switch (c) {
+            case '*':
+            case '_':
+                if (!is_last && src[current + 1] == c) {
+                    current++;
+                    if ((c == '*' && open_strong_ast) ||
+                        (c == '_' && open_strong_und))
+                    {
+                        b_string_append(rv, "</strong>");
+                        if (c == '*')
+                            open_strong_ast = false;
+                        else
+                            open_strong_und = false;
+                    }
+                    else {
+                        b_string_append(rv, "<strong>");
+                        if (c == '*')
+                            open_strong_ast = true;
+                        else
+                            open_strong_und = true;
+                    }
+                }
+                else {
+                    if ((c == '*' && open_em_ast) || (c == '_' && open_em_und)) {
+                        b_string_append(rv, "</em>");
+                        if (c == '*')
+                            open_em_ast = false;
+                        else
+                            open_em_und = false;
+                    }
+                    else {
+                        b_string_append(rv, "<em>");
+                        if (c == '*')
+                            open_em_ast = true;
+                        else
+                            open_em_und = true;
+                    }
+                }
+                break;
+
+            case '`':
+                if (!is_last && src[current + 1] == c) {
+                    current++;
+                    if (open_code_double)
+                        b_string_append(rv, "</code>");
+                    else
+                        b_string_append(rv, "<code>");
+                    open_code_double = !open_code_double;
+                }
+                else {
+                    if (open_code)
+                        b_string_append(rv, "</code>");
+                    else
+                        b_string_append(rv, "<code>");
+                    open_code = !open_code;
+                }
+                break;
+
+            case '[':
+                if (link_state == 0 && image_state == 0) {
+                    tmp = strchr(src + current, ']');
+                    if (tmp != NULL) {
+                        if (strlen(tmp) > 1 && tmp[1] == '(') {
+                            tmp = strchr(tmp, ')');
+                            if (tmp != NULL) {  // this is a link
+                                link_start = current + 1;  // its safe
+                                link_state = 1;
+                                break;
+                            }
+                        }
+                    }
+                    b_string_append_c(rv, c);
+                }
+                break;
+
+            case '!':
+                if (link_state == 0 && image_state == 0) {
+                    if (!is_last && src[current + 1] == '[') {
+                        tmp = strchr(src + current + 1, ']');
+                        if (tmp != NULL) {
+                            if (strlen(tmp) > 1 && tmp[1] == '(') {
+                                tmp = strchr(tmp, ')');
+                                if (tmp != NULL) {  // this is an image
+                                    image_start = current + 2;  // its safe
+                                    image_state = 1;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    b_string_append_c(rv, c);
+                }
+                break;
+
+            case ']':
+                if (link_state == 1) {
+                    link_state = 2;
+                    title = b_strndup(src + link_start, current - link_start);
+                    break;
+                }
+                if (image_state == 1) {
+                    image_state = 2;
+                    title = b_strndup(src + image_start, current - image_start);
+                    break;
+                }
+                b_string_append_c(rv, c);
+                break;
+
+            case '(':
+                if (link_state == 2) {
+                    link_state = 3;
+                    link_start = current + 1;  // its safe
+                    break;
+                }
+                if (image_state == 2) {
+                    image_state = 3;
+                    image_start = current + 1;  // its safe
+                    break;
+                }
+                b_string_append_c(rv, c);
+                break;
+
+            case ')':
+                if (link_state == 3) {
+                    link_state = 0;
+                    tmp = b_strndup(src + link_start, current - link_start);
+                    b_string_append_printf(rv, "<a href=\"%s\">%s</a>", tmp, title);
+                    free(tmp);
+                    tmp = NULL;
+                    free(title);
+                    title = NULL;
+                    break;
+                }
+                if (image_state == 3) {
+                    image_state = 0;
+                    tmp = b_strndup(src + image_start, current - image_start);
+                    b_string_append_printf(rv, "<img src=\"%s\" alt=\"%s\">", tmp, title);
+                    free(tmp);
+                    tmp = NULL;
+                    free(title);
+                    title = NULL;
+                    break;
+                }
+                b_string_append_c(rv, c);
+                break;
+
+            case '&':
+                b_string_append(rv, "&amp;");
+                break;
+
+            case '<':
+                b_string_append(rv, "&lt;");
+                break;
+
+            case '>':
+                b_string_append(rv, "&gt;");
+                break;
+
+            case '"':
+                b_string_append(rv, "&quot;");
+                break;
+
+            case '\'':
+                b_string_append(rv, "&#x27;");
+                break;
+
+            case '/':
+                b_string_append(rv, "&#x2F;");
+                break;
+
+            default:
+                if (link_state == 0 && image_state == 0)
+                    b_string_append_c(rv, c);
+        }
+
+        current++;
+    }
+
+    return b_string_free(rv, false);
+}
+
+
+char*
 blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
 {
     if (err == NULL || *err != NULL)
@@ -69,6 +280,7 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
     size_t prefix_len = 0;
     char *tmp = NULL;
     char *tmp2 = NULL;
+    char *parsed = NULL;
     char **tmpv = NULL;
 
     char d;
@@ -150,8 +362,11 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                 if (c == '\n' || c == '\r' || is_last) {
                     end = is_last && c != '\n' && c != '\r' ? src_len : current;
                     tmp = b_strndup(src + start, end - start);
+                    parsed = blogc_content_parse_inline(tmp);
                     b_string_append_printf(rv, "<h%d>%s</h%d>\n", header_level,
-                        tmp, header_level);
+                        parsed, header_level);
+                    free(parsed);
+                    parsed = NULL;
                     free(tmp);
                     tmp = NULL;
                     state = CONTENT_START_LINE;
@@ -316,8 +531,7 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                     d = '\0';
                     break;
                 }
-                *err = blogc_error_parser(BLOGC_ERROR_CONTENT_PARSER, src, src_len,
-                    current, "Malformed horizontal rule, must use only '%c'", d);
+                state = CONTENT_PARAGRAPH;
                 break;
 
             case CONTENT_UNORDERED_LIST_START:

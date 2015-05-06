@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include "error.h"
 
+char* blogc_content_parse_inline(const char *src);
 char* blogc_content_parse(const char *src, size_t src_len,
     blogc_error_t **err);
 
