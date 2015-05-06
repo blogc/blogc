@@ -280,6 +280,7 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
     size_t prefix_len = 0;
     char *tmp = NULL;
     char *tmp2 = NULL;
+    char *tmp3 = NULL;
     char *parsed = NULL;
     char **tmpv = NULL;
 
@@ -539,7 +540,13 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                     end = is_last && c != '\n' && c != '\r' ? src_len : current;
                     tmp = b_strndup(src + start, end - start);
                     if (b_str_starts_with(tmp, prefix)) {
-                        lines = b_slist_append(lines, b_strdup(tmp + strlen(prefix)));
+                        tmp3 = b_strdup(tmp + strlen(prefix));
+                        parsed = blogc_content_parse_inline(tmp3);
+                        free(tmp3);
+                        tmp3 = NULL;
+                        lines = b_slist_append(lines, b_strdup(parsed));
+                        free(parsed);
+                        parsed = NULL;
                     }
                     else {
                         *err = blogc_error_parser(BLOGC_ERROR_CONTENT_PARSER, src, src_len,
@@ -623,8 +630,14 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                                 goto err_li;
                             }
                         }
-                        lines = b_slist_append(lines, b_strdup(tmp + prefix_len));
+                        tmp3 = b_strdup(tmp + prefix_len);
+                        parsed = blogc_content_parse_inline(tmp3);
+                        free(tmp3);
+                        tmp3 = NULL;
+                        lines = b_slist_append(lines, b_strdup(parsed));
                         state = CONTENT_ORDERED_LIST_END;
+                        free(parsed);
+                        parsed = NULL;
 err_li:
                         b_strv_free(tmpv);
                         tmpv = NULL;
@@ -665,7 +678,10 @@ err_li:
             case CONTENT_PARAGRAPH_END:
                 if (c == '\n' || c == '\r' || is_last) {
                     tmp = b_strndup(src + start, end - start);
-                    b_string_append_printf(rv, "<p>%s</p>\n", tmp);
+                    parsed = blogc_content_parse_inline(tmp);
+                    b_string_append_printf(rv, "<p>%s</p>\n", parsed);
+                    free(parsed);
+                    parsed = NULL;
                     free(tmp);
                     tmp = NULL;
                     state = CONTENT_START_LINE;

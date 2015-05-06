@@ -94,7 +94,7 @@ test_content_parse(void **state)
         "</style>\n"
         "<p>guda\n"
         "yay</p>\n"
-        "<p>**bola**</p>\n");
+        "<p><strong>bola</strong></p>\n");
     free(html);
 }
 
