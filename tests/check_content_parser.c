@@ -325,8 +325,14 @@ test_content_parse_invalid_code(void **state)
 void
 test_content_parse_inline(void **state)
 {
-    char *html = blogc_content_parse_inline("**bola***asd* ``chunda``");
-    assert_string_equal(html, "<strong>bola</strong><em>asd</em> <code>chunda</code>");
+    char *html = blogc_content_parse_inline(
+        "**bola***asd* [![lol](http://google.com/lol.png) **lol** "
+        "\\[asd\\]\\(qwe\\)](http://google.com) ``chunda``");
+    assert_string_equal(html,
+        "<strong>bola</strong><em>asd</em> "
+        "<a href=\"http://google.com\"><img src=\"http://google.com/lol.png\" "
+        "alt=\"lol\"> <strong>lol</strong> [asd](qwe)</a> "
+        "<code>chunda</code>");
     free(html);
     html = blogc_content_parse_inline("*bola*");
     assert_string_equal(html, "<em>bola</em>");

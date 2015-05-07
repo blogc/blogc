@@ -55,11 +55,12 @@ typedef enum {
 char*
 blogc_content_parse_inline(const char *src)
 {
-    // this function is always called by blogc_content_parse, then its safe to
-    // assume that src is always nul-terminated.
+    // this function is always called by blogc_content_parse or by itself,
+    // then its safe to assume that src is always nul-terminated.
     size_t src_len = strlen(src);
 
     size_t current = 0;
+    size_t start = 0;
 
     b_string_t *rv = b_string_new();
 
@@ -69,20 +70,40 @@ blogc_content_parse_inline(const char *src)
     bool open_strong_und = false;
     bool open_code = false;
     bool open_code_double = false;
-    unsigned int link_state = 0;
-    unsigned int image_state = 0;
-    size_t link_start = 0;
-    size_t image_start = 0;
+
+    unsigned int state = 0;
+    bool is_image = false;
 
     char *tmp = NULL;
-    char *title = NULL;
-    char *alt = NULL;
+    char *tmp2 = NULL;
+
+    unsigned int open_bracket = 0;
+
+    bool escape = false;
 
     while (current < src_len) {
         char c = src[current];
         bool is_last = current == src_len - 1;
 
+        if (escape) {
+            if (state == 0)
+                b_string_append_c(rv, c);
+            current++;
+            escape = false;
+            continue;
+        }
+
         switch (c) {
+
+            case '\\':
+                if (open_code || open_code_double) {
+                    b_string_append_c(rv, c);
+                    break;
+                }
+                if (!escape)
+                    escape = true;
+                break;
+
             case '*':
             case '_':
                 if (open_code || open_code_double) {
@@ -94,14 +115,16 @@ blogc_content_parse_inline(const char *src)
                     if ((c == '*' && open_strong_ast) ||
                         (c == '_' && open_strong_und))
                     {
-                        b_string_append(rv, "</strong>");
+                        if (state == 0)
+                            b_string_append(rv, "</strong>");
                         if (c == '*')
                             open_strong_ast = false;
                         else
                             open_strong_und = false;
                     }
                     else {
-                        b_string_append(rv, "<strong>");
+                        if (state == 0)
+                            b_string_append(rv, "<strong>");
                         if (c == '*')
                             open_strong_ast = true;
                         else
@@ -110,14 +133,16 @@ blogc_content_parse_inline(const char *src)
                 }
                 else {
                     if ((c == '*' && open_em_ast) || (c == '_' && open_em_und)) {
-                        b_string_append(rv, "</em>");
+                        if (state == 0)
+                            b_string_append(rv, "</em>");
                         if (c == '*')
                             open_em_ast = false;
                         else
                             open_em_und = false;
                     }
                     else {
-                        b_string_append(rv, "<em>");
+                        if (state == 0)
+                            b_string_append(rv, "<em>");
                         if (c == '*')
                             open_em_ast = true;
                         else
@@ -129,39 +154,22 @@ blogc_content_parse_inline(const char *src)
             case '`':
                 if (!is_last && src[current + 1] == c) {
                     current++;
-                    if (open_code_double)
-                        b_string_append(rv, "</code>");
-                    else
-                        b_string_append(rv, "<code>");
+                    if (state == 0) {
+                        if (open_code_double)
+                            b_string_append(rv, "</code>");
+                        else
+                            b_string_append(rv, "<code>");
+                    }
                     open_code_double = !open_code_double;
                 }
                 else {
-                    if (open_code)
-                        b_string_append(rv, "</code>");
-                    else
-                        b_string_append(rv, "<code>");
-                    open_code = !open_code;
-                }
-                break;
-
-            case '[':
-                if (open_code || open_code_double) {
-                    b_string_append_c(rv, c);
-                    break;
-                }
-                if (link_state == 0 && image_state == 0) {
-                    tmp = strchr(src + current, ']');
-                    if (tmp != NULL) {
-                        if (strlen(tmp) > 1 && tmp[1] == '(') {
-                            tmp = strchr(tmp, ')');
-                            if (tmp != NULL) {  // this is a link
-                                link_start = current + 1;  // its safe
-                                link_state = 1;
-                                break;
-                            }
-                        }
+                    if (state == 0) {
+                        if (open_code)
+                            b_string_append(rv, "</code>");
+                        else
+                            b_string_append(rv, "<code>");
                     }
-                    b_string_append_c(rv, c);
+                    open_code = !open_code;
                 }
                 break;
 
@@ -170,21 +178,24 @@ blogc_content_parse_inline(const char *src)
                     b_string_append_c(rv, c);
                     break;
                 }
-                if (link_state == 0 && image_state == 0) {
-                    if (!is_last && src[current + 1] == '[') {
-                        tmp = strchr(src + current + 1, ']');
-                        if (tmp != NULL) {
-                            if (strlen(tmp) > 1 && tmp[1] == '(') {
-                                tmp = strchr(tmp, ')');
-                                if (tmp != NULL) {  // this is an image
-                                    image_start = current + 2;  // its safe
-                                    image_state = 1;
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                if (state == 0)
+                    is_image = true;
+                break;
+
+            case '[':
+                if (open_code || open_code_double) {
                     b_string_append_c(rv, c);
+                    break;
+                }
+                if (state == 0) {
+                    state = 1;
+                    start = current + 1;
+                    open_bracket = 0;
+                    break;
+                }
+                if (state == 1) {
+                    open_bracket++;
+                    break;
                 }
                 break;
 
@@ -193,17 +204,18 @@ blogc_content_parse_inline(const char *src)
                     b_string_append_c(rv, c);
                     break;
                 }
-                if (link_state == 1) {
-                    link_state = 2;
-                    title = b_strndup(src + link_start, current - link_start);
+                if (state == 1) {
+                    if (open_bracket-- == 0) {
+                        state = 2;
+                        tmp = b_strndup(src + start, current - start);
+                        tmp2 = blogc_content_parse_inline(tmp);
+                        free(tmp);
+                        tmp = NULL;
+                    }
                     break;
                 }
-                if (image_state == 1) {
-                    image_state = 2;
-                    alt = b_strndup(src + image_start, current - image_start);
-                    break;
-                }
-                b_string_append_c(rv, c);
+                if (state == 0)
+                    b_string_append_c(rv, c);
                 break;
 
             case '(':
@@ -211,17 +223,13 @@ blogc_content_parse_inline(const char *src)
                     b_string_append_c(rv, c);
                     break;
                 }
-                if (link_state == 2) {
-                    link_state = 3;
-                    link_start = current + 1;  // its safe
+                if (state == 2) {
+                    state = 3;
+                    start = current + 1;
                     break;
                 }
-                if (image_state == 2) {
-                    image_state = 3;
-                    image_start = current + 1;  // its safe
-                    break;
-                }
-                b_string_append_c(rv, c);
+                if (state == 0)
+                    b_string_append_c(rv, c);
                 break;
 
             case ')':
@@ -229,55 +237,58 @@ blogc_content_parse_inline(const char *src)
                     b_string_append_c(rv, c);
                     break;
                 }
-                if (link_state == 3) {
-                    link_state = 0;
-                    tmp = b_strndup(src + link_start, current - link_start);
-                    b_string_append_printf(rv, "<a href=\"%s\">%s</a>", tmp, title);
+                if (state == 3) {
+                    state = 0;
+                    tmp = b_strndup(src + start, current - start);
+                    if (is_image) {
+                        b_string_append_printf(rv, "<img src=\"%s\" alt=\"%s\">", tmp, tmp2);
+                    }
+                    else {
+                        b_string_append_printf(rv, "<a href=\"%s\">%s</a>", tmp, tmp2);
+                    }
                     free(tmp);
                     tmp = NULL;
-                    free(title);
-                    title = NULL;
+                    free(tmp2);
+                    tmp2 = NULL;
+                    is_image = false;
                     break;
                 }
-                if (image_state == 3) {
-                    image_state = 0;
-                    tmp = b_strndup(src + image_start, current - image_start);
-                    b_string_append_printf(rv, "<img src=\"%s\" alt=\"%s\">", tmp, alt);
-                    free(tmp);
-                    tmp = NULL;
-                    free(alt);
-                    alt = NULL;
-                    break;
-                }
-                b_string_append_c(rv, c);
+                if (state == 0)
+                    b_string_append_c(rv, c);
                 break;
 
             case '&':
-                b_string_append(rv, "&amp;");
+                if (state == 0)
+                    b_string_append(rv, "&amp;");
                 break;
 
             case '<':
-                b_string_append(rv, "&lt;");
+                if (state == 0)
+                    b_string_append(rv, "&lt;");
                 break;
 
             case '>':
-                b_string_append(rv, "&gt;");
+                if (state == 0)
+                    b_string_append(rv, "&gt;");
                 break;
 
             case '"':
-                b_string_append(rv, "&quot;");
+                if (state == 0)
+                    b_string_append(rv, "&quot;");
                 break;
 
             case '\'':
-                b_string_append(rv, "&#x27;");
+                if (state == 0)
+                    b_string_append(rv, "&#x27;");
                 break;
 
             case '/':
-                b_string_append(rv, "&#x2F;");
+                if (state == 0)
+                    b_string_append(rv, "&#x2F;");
                 break;
 
             default:
-                if (link_state == 0 && image_state == 0)
+                if (state == 0)
                     b_string_append_c(rv, c);
         }
 
