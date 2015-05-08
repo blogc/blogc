@@ -34,10 +34,13 @@ test_source_parse(void **state)
     b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(b_trie_size(source), 3);
+    assert_int_equal(b_trie_size(source), 4);
     assert_string_equal(b_trie_lookup(source, "VAR1"), "asd asd");
     assert_string_equal(b_trie_lookup(source, "VAR2"), "123chunda");
     assert_string_equal(b_trie_lookup(source, "CONTENT"),
+        "<h1>This is a test</h1>\n"
+        "<p>bola</p>\n");
+    assert_string_equal(b_trie_lookup(source, "RAW_CONTENT"),
         "# This is a test\n"
         "\n"
         "bola\n");
@@ -61,10 +64,13 @@ test_source_parse_with_spaces(void **state)
     b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(b_trie_size(source), 3);
+    assert_int_equal(b_trie_size(source), 4);
     assert_string_equal(b_trie_lookup(source, "VAR1"), "chunda");
     assert_string_equal(b_trie_lookup(source, "BOLA"), "guda");
     assert_string_equal(b_trie_lookup(source, "CONTENT"),
+        "<h1>This is a test</h1>\n"
+        "<p>bola</p>\n");
+    assert_string_equal(b_trie_lookup(source, "RAW_CONTENT"),
         "# This is a test\n"
         "\n"
         "bola\n");

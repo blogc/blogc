@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include "utils/utils.h"
+#include "content-parser.h"
 #include "source-parser.h"
 #include "error.h"
 
@@ -125,10 +126,12 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                 state = SOURCE_CONTENT;
                 break;
 
-             case SOURCE_CONTENT:
-                 if (current == (src_len - 1))
-                     b_trie_insert(rv, "CONTENT",
-                        b_strndup(src + start, src_len - start));
+            case SOURCE_CONTENT:
+                if (current == (src_len - 1)) {
+                    tmp = b_strndup(src + start, src_len - start);
+                    b_trie_insert(rv, "RAW_CONTENT", tmp);
+                    b_trie_insert(rv, "CONTENT", blogc_content_parse(tmp));
+                }
                 break;
         }
 

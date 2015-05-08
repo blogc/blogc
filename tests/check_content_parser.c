@@ -16,14 +16,13 @@
 #include <cmocka.h>
 #include <string.h>
 #include "../src/content-parser.h"
-#include "../src/error.h"
 #include "../src/utils/utils.h"
 
 
 static void
 test_content_parse(void **state)
 {
-    const char *a =
+    char *html = blogc_content_parse(
         "# um\n"
         "## dois\n"
         "### tres\n"
@@ -58,10 +57,7 @@ test_content_parse(void **state)
         "guda\n"
         "yay\n"
         "\n"
-        "**bola**\n";
-    blogc_error_t *err = NULL;
-    char *html = blogc_content_parse(a, strlen(a), &err);
-    assert_null(err);
+        "**bola**\n");
     assert_non_null(html);
     assert_string_equal(html,
         "<h1>um</h1>\n"
@@ -102,27 +98,20 @@ test_content_parse(void **state)
 void
 test_content_parse_header(void **state)
 {
-    const char *a = "## bola";
-    blogc_error_t *err = NULL;
-    char *html = blogc_content_parse(a, strlen(a), &err);
-    assert_null(err);
+    char *html = blogc_content_parse("## bola");
     assert_non_null(html);
     assert_string_equal(html, "<h2>bola</h2>\n");
     free(html);
-    a = "## bola\n";
-    html = blogc_content_parse(a, strlen(a), &err);
-    assert_null(err);
+    html = blogc_content_parse("## bola\n");
     assert_non_null(html);
     assert_string_equal(html, "<h2>bola</h2>\n");
     free(html);
-    a =
+    html = blogc_content_parse(
         "bola\n"
         "\n"
         "## bola\n"
         "\n"
-        "guda\n";
-    html = blogc_content_parse(a, strlen(a), &err);
-    assert_null(err);
+        "guda\n");
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -135,28 +124,21 @@ test_content_parse_header(void **state)
 void
 test_content_parse_html(void **state)
 {
-    const char *a = "<div>\n</div>";
-    blogc_error_t *err = NULL;
-    char *html = blogc_content_parse(a, strlen(a), &err);
-    assert_null(err);
+    char *html = blogc_content_parse("<div>\n</div>");
     assert_non_null(html);
     assert_string_equal(html, "<div>\n</div>\n");
     free(html);
-    a = "<div>\n</div>\n";
-    html = blogc_content_parse(a, strlen(a), &err);
-    assert_null(err);
+    html = blogc_content_parse("<div>\n</div>\n");
     assert_non_null(html);
     assert_string_equal(html, "<div>\n</div>\n");
     free(html);
-    a =
+    html = blogc_content_parse(
         "bola\n"
         "\n"
         "<div>\n"
         "</div>\n"
         "\n"
-        "chunda\n";
-    html = blogc_content_parse(a, strlen(a), &err);
-    assert_null(err);
+        "chunda\n");
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -169,34 +151,27 @@ test_content_parse_html(void **state)
 void
 test_content_parse_blockquote(void **state)
 {
-    const char *a = ">  bola\n>  guda";
-    blogc_error_t *err = NULL;
-    char *html = blogc_content_parse(a, strlen(a), &err);
-    assert_null(err);
+    char *html = blogc_content_parse(">  bola\n>  guda");
     assert_non_null(html);
     assert_string_equal(html,
         "<blockquote><p>bola\n"
         "guda</p>\n"
         "</blockquote>\n");
     free(html);
-    a = ">  bola\n>  guda\n";
-    html = blogc_content_parse(a, strlen(a), &err);
-    assert_null(err);
+    html = blogc_content_parse(">  bola\n>  guda\n");
     assert_non_null(html);
     assert_string_equal(html,
         "<blockquote><p>bola\n"
         "guda</p>\n"
         "</blockquote>\n");
     free(html);
-    a =
+    html = blogc_content_parse(
         "bola\n"
         "\n"
         ">   bola\n"
         ">   guda\n"
         "\n"
-        "chunda\n";
-    html = blogc_content_parse(a, strlen(a), &err);
-    assert_null(err);
+        "chunda\n");
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -211,32 +186,25 @@ test_content_parse_blockquote(void **state)
 void
 test_content_parse_code(void **state)
 {
-    const char *a = "  bola\n  guda";
-    blogc_error_t *err = NULL;
-    char *html = blogc_content_parse(a, strlen(a), &err);
-    assert_null(err);
+    char *html = blogc_content_parse("  bola\n  guda");
     assert_non_null(html);
     assert_string_equal(html,
         "<pre><code>bola\n"
         "guda</code></pre>\n");
     free(html);
-    a = "  bola\n  guda\n";
-    html = blogc_content_parse(a, strlen(a), &err);
-    assert_null(err);
+    html = blogc_content_parse("  bola\n  guda\n");
     assert_non_null(html);
     assert_string_equal(html,
         "<pre><code>bola\n"
         "guda</code></pre>\n");
     free(html);
-    a =
+    html = blogc_content_parse(
         "bola\n"
         "\n"
         "   bola\n"
         "   guda\n"
         "\n"
-        "chunda\n";
-    html = blogc_content_parse(a, strlen(a), &err);
-    assert_null(err);
+        "chunda\n");
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -250,75 +218,66 @@ test_content_parse_code(void **state)
 void
 test_content_parse_invalid_header(void **state)
 {
-    const char *a =
+    char *html = blogc_content_parse(
         "asd\n"
         "\n"
-        "##bola\n";
-    blogc_error_t *err = NULL;
-    char *html = blogc_content_parse(a, strlen(a), &err);
-    assert_non_null(err);
-    assert_null(html);
-    assert_int_equal(err->type, BLOGC_ERROR_CONTENT_PARSER);
-    assert_string_equal(err->msg,
-        "Malformed header, no space or tab after '#'\n"
-        "Error occurred near to 'bola'");
-    blogc_error_free(err);
+        "##bola\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>asd</p>\n"
+        "<p>##bola</p>\n");
+    free(html);
 }
 
 
 void
 test_content_parse_invalid_header_empty(void **state)
 {
-    const char *a =
+    char *html = blogc_content_parse(
         "asd\n"
         "\n"
         "##\n"
         "\n"
-        "qwe\n";
-    blogc_error_t *err = NULL;
-    char *html = blogc_content_parse(a, strlen(a), &err);
-    assert_non_null(err);
-    assert_null(html);
-    assert_int_equal(err->type, BLOGC_ERROR_CONTENT_PARSER);
-    assert_string_equal(err->msg,
-        "Malformed header, no space or tab after '#'");
-    blogc_error_free(err);
+        "qwe\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>asd</p>\n"
+        "<p>##\n"
+        "\n"
+        "qwe</p>\n");
+    free(html);
 }
 
 
 void
 test_content_parse_invalid_blockquote(void **state)
 {
-    const char *a =
+    char *html = blogc_content_parse(
         ">   asd\n"
         "> bola\n"
-        ">   foo\n";
-    blogc_error_t *err = NULL;
-    char *html = blogc_content_parse(a, strlen(a), &err);
-    assert_non_null(err);
-    assert_null(html);
-    assert_int_equal(err->type, BLOGC_ERROR_CONTENT_PARSER);
-    assert_string_equal(err->msg,
-        "Malformed blockquote, must use same prefix as previous line(s): >   ");
-    blogc_error_free(err);
+        ">   foo\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>&gt;   asd\n"
+        "&gt; bola\n"
+        "&gt;   foo</p>\n");
+    free(html);
 }
 
 
 void
 test_content_parse_invalid_code(void **state)
 {
-    const char *a =
+    char *html = blogc_content_parse(
         "    asd\n"
         "  bola\n"
-        "    foo\n";
-    blogc_error_t *err = NULL;
-    char *html = blogc_content_parse(a, strlen(a), &err);
-    assert_non_null(err);
-    assert_null(html);
-    assert_int_equal(err->type, BLOGC_ERROR_CONTENT_PARSER);
-    assert_string_equal(err->msg,
-        "Malformed code block, must use same prefix as previous line(s): '    '");
-    blogc_error_free(err);
+        "    foo\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>    asd\n"
+        "  bola\n"
+        "    foo</p>\n");
+    free(html);
 }
 
 

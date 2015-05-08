@@ -15,7 +15,6 @@
 
 #include "utils/utils.h"
 #include "content-parser.h"
-#include "error.h"
 
 
 // this is a half ass implementation of a markdown-like syntax. bugs are
@@ -23,7 +22,6 @@
 
 
 // TODO: inline elements: line breaks
-// TODO: error handling
 
 
 typedef enum {
@@ -121,56 +119,45 @@ blogc_content_parse_inline(const char *src)
                             open_strong_ast = false;
                         else
                             open_strong_und = false;
+                        break;
                     }
-                    else {
-                        if (state == 0)
-                            b_string_append(rv, "<strong>");
-                        if (c == '*')
-                            open_strong_ast = true;
-                        else
-                            open_strong_und = true;
-                    }
+                    if (state == 0)
+                        b_string_append(rv, "<strong>");
+                    if (c == '*')
+                        open_strong_ast = true;
+                    else
+                        open_strong_und = true;
+                    break;
                 }
-                else {
-                    if ((c == '*' && open_em_ast) || (c == '_' && open_em_und)) {
-                        if (state == 0)
-                            b_string_append(rv, "</em>");
-                        if (c == '*')
-                            open_em_ast = false;
-                        else
-                            open_em_und = false;
-                    }
-                    else {
-                        if (state == 0)
-                            b_string_append(rv, "<em>");
-                        if (c == '*')
-                            open_em_ast = true;
-                        else
-                            open_em_und = true;
-                    }
+                if ((c == '*' && open_em_ast) || (c == '_' && open_em_und)) {
+                    if (state == 0)
+                        b_string_append(rv, "</em>");
+                    if (c == '*')
+                        open_em_ast = false;
+                    else
+                        open_em_und = false;
+                    break;
                 }
+                if (state == 0)
+                    b_string_append(rv, "<em>");
+                if (c == '*')
+                    open_em_ast = true;
+                else
+                    open_em_und = true;
                 break;
 
             case '`':
                 if (!is_last && src[current + 1] == c) {
                     current++;
-                    if (state == 0) {
-                        if (open_code_double)
-                            b_string_append(rv, "</code>");
-                        else
-                            b_string_append(rv, "<code>");
-                    }
+                    if (state == 0)
+                        b_string_append_printf(rv, "<%scode>",
+                            open_code_double ? "/" : "");
                     open_code_double = !open_code_double;
+                    break;
                 }
-                else {
-                    if (state == 0) {
-                        if (open_code)
-                            b_string_append(rv, "</code>");
-                        else
-                            b_string_append(rv, "<code>");
-                    }
-                    open_code = !open_code;
-                }
+                if (state == 0)
+                    b_string_append_printf(rv, "<%scode>", open_code ? "/" : "");
+                open_code = !open_code;
                 break;
 
             case '!':
@@ -240,12 +227,12 @@ blogc_content_parse_inline(const char *src)
                 if (state == 3) {
                     state = 0;
                     tmp = b_strndup(src + start, current - start);
-                    if (is_image) {
-                        b_string_append_printf(rv, "<img src=\"%s\" alt=\"%s\">", tmp, tmp2);
-                    }
-                    else {
-                        b_string_append_printf(rv, "<a href=\"%s\">%s</a>", tmp, tmp2);
-                    }
+                    if (is_image)
+                        b_string_append_printf(rv, "<img src=\"%s\" alt=\"%s\">",
+                            tmp, tmp2);
+                    else
+                        b_string_append_printf(rv, "<a href=\"%s\">%s</a>",
+                            tmp, tmp2);
                     free(tmp);
                     tmp = NULL;
                     free(tmp2);
@@ -300,13 +287,14 @@ blogc_content_parse_inline(const char *src)
 
 
 char*
-blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
+blogc_content_parse(const char *src)
 {
-    if (err == NULL || *err != NULL)
-        return NULL;
+    // src is always nul-terminated.
+    size_t src_len = strlen(src);
 
     size_t current = 0;
     size_t start = 0;
+    size_t start2 = 0;
     size_t end = 0;
 
     unsigned int header_level = 0;
@@ -336,38 +324,37 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
             case CONTENT_START_LINE:
                 if (c == '\n' || c == '\r' || is_last)
                     break;
+                start = current;
                 if (c == '#') {
                     header_level = 1;
                     state = CONTENT_HEADER;
                     break;
                 }
                 if (c == '*' || c == '+' || c == '-') {
+                    start2 = current;
                     state = CONTENT_UNORDERED_LIST_OR_HORIZONTAL_RULE;
-                    start = current;
                     d = c;
                     break;
                 }
                 if (c >= '0' && c <= '9') {
+                    start2 = current;
                     state = CONTENT_ORDERED_LIST;
-                    start = current;
                     break;
                 }
                 if (c == ' ' || c == '\t') {
+                    start2 = current;
                     state = CONTENT_CODE;
-                    start = current;
                     break;
                 }
                 if (c == '<') {
                     state = CONTENT_HTML;
-                    start = current;
                     break;
                 }
                 if (c == '>') {
                     state = CONTENT_BLOCKQUOTE;
-                    start = current;
+                    start2 = current;
                     break;
                 }
-                start = current;
                 state = CONTENT_PARAGRAPH;
                 break;
 
@@ -380,8 +367,7 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                     state = CONTENT_HEADER_TITLE_START;
                     break;
                 }
-                *err = blogc_error_parser(BLOGC_ERROR_CONTENT_PARSER, src, src_len,
-                    current, "Malformed header, no space or tab after '#'");
+                state = CONTENT_PARAGRAPH;
                 break;
 
             case CONTENT_HEADER_TITLE_START:
@@ -440,15 +426,13 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
             case CONTENT_BLOCKQUOTE_START:
                 if (c == '\n' || c == '\r' || is_last) {
                     end = is_last && c != '\n' && c != '\r' ? src_len : current;
-                    tmp = b_strndup(src + start, end - start);
+                    tmp = b_strndup(src + start2, end - start2);
                     if (b_str_starts_with(tmp, prefix)) {
                         lines = b_slist_append(lines, b_strdup(tmp + strlen(prefix)));
                         state = CONTENT_BLOCKQUOTE_END;
                     }
                     else {
-                        *err = blogc_error_parser(BLOGC_ERROR_CONTENT_PARSER, src, src_len,
-                            current, "Malformed blockquote, must use same prefix "
-                            "as previous line(s): %s", prefix);
+                        state = CONTENT_PARAGRAPH;
                         free(prefix);
                         prefix = NULL;
                         b_slist_free_full(lines, free);
@@ -469,11 +453,9 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                         else
                             b_string_append_printf(tmp_str, "%s\n", l->data);
                     }
-                    tmp = blogc_content_parse(tmp_str->str, tmp_str->len, err);
-                    if (*err == NULL) {
-                        b_string_append_printf(rv, "<blockquote>%s</blockquote>\n",
-                            tmp);
-                    }
+                    tmp = blogc_content_parse(tmp_str->str);
+                    b_string_append_printf(rv, "<blockquote>%s</blockquote>\n",
+                        tmp);
                     free(tmp);
                     tmp = NULL;
                     b_string_free(tmp_str, true);
@@ -483,10 +465,10 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                     free(prefix);
                     prefix = NULL;
                     state = CONTENT_START_LINE;
-                    start = current;
+                    start2 = current;
                 }
                 else {
-                    start = current;
+                    start2 = current;
                     state = CONTENT_BLOCKQUOTE_START;
                 }
                 break;
@@ -501,19 +483,20 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
             case CONTENT_CODE_START:
                 if (c == '\n' || c == '\r' || is_last) {
                     end = is_last && c != '\n' && c != '\r' ? src_len : current;
-                    tmp = b_strndup(src + start, end - start);
+                    tmp = b_strndup(src + start2, end - start2);
                     if (b_str_starts_with(tmp, prefix)) {
                         lines = b_slist_append(lines, b_strdup(tmp + strlen(prefix)));
                         state = CONTENT_CODE_END;
                     }
                     else {
-                        *err = blogc_error_parser(BLOGC_ERROR_CONTENT_PARSER, src, src_len,
-                            current, "Malformed code block, must use same prefix "
-                            "as previous line(s): '%s'", prefix);
+                        state = CONTENT_PARAGRAPH;
                         free(prefix);
                         prefix = NULL;
                         b_slist_free_full(lines, free);
                         lines = NULL;
+                        free(tmp);
+                        tmp = NULL;
+                        break;
                     }
                     free(tmp);
                     tmp = NULL;
@@ -536,10 +519,10 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                     free(prefix);
                     prefix = NULL;
                     state = CONTENT_START_LINE;
-                    start = current;
+                    start2 = current;
                 }
                 else {
-                    start = current;
+                    start2 = current;
                     state = CONTENT_CODE_START;
                 }
                 break;
@@ -572,7 +555,7 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
             case CONTENT_UNORDERED_LIST_START:
                 if (c == '\n' || c == '\r' || is_last) {
                     end = is_last && c != '\n' && c != '\r' ? src_len : current;
-                    tmp = b_strndup(src + start, end - start);
+                    tmp = b_strndup(src + start2, end - start2);
                     if (b_str_starts_with(tmp, prefix)) {
                         tmp3 = b_strdup(tmp + strlen(prefix));
                         parsed = blogc_content_parse_inline(tmp3);
@@ -583,9 +566,10 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                         parsed = NULL;
                     }
                     else {
-                        *err = blogc_error_parser(BLOGC_ERROR_CONTENT_PARSER, src, src_len,
-                            current, "Malformed unordered list, must use same prefix "
-                            "as previous line(s): %s", prefix);
+                        state = CONTENT_PARAGRAPH;
+                        free(tmp);
+                        tmp = NULL;
+                        break;
                     }
                     free(tmp);
                     tmp = NULL;
@@ -605,10 +589,10 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
                     free(prefix);
                     prefix = NULL;
                     state = CONTENT_START_LINE;
-                    start = current;
+                    start2 = current;
                 }
                 else {
-                    start = current;
+                    start2 = current;
                     state = CONTENT_UNORDERED_LIST_START;
                 }
                 break;
@@ -633,34 +617,25 @@ blogc_content_parse(const char *src, size_t src_len, blogc_error_t **err)
             case CONTENT_ORDERED_LIST_START:
                 if (c == '\n' || c == '\r' || is_last) {
                     end = is_last && c != '\n' && c != '\r' ? src_len : current;
-                    tmp = b_strndup(src + start, end - start);
+                    tmp = b_strndup(src + start2, end - start2);
                     if (strlen(tmp) >= prefix_len) {
                         tmp2 = b_strndup(tmp, prefix_len);
                         tmpv = b_str_split(tmp2, '.', 2);
                         free(tmp2);
                         tmp2 = NULL;
                         if (b_strv_length(tmpv) != 2) {
-                            *err = blogc_error_parser(BLOGC_ERROR_CONTENT_PARSER, src, src_len,
-                                current, "Malformed ordered list, prefix must be a "
-                                "number, followed by a '.', followed by the content. "
-                                "Content must be aligned with content from previous line(s)");
+                            state = CONTENT_PARAGRAPH;
                             goto err_li;
                         }
                         for (unsigned int i = 0; tmpv[0][i] != '\0'; i++) {
                             if (!(tmpv[0][i] >= '0' && tmpv[0][i] <= '9')) {
-                                *err = blogc_error_parser(BLOGC_ERROR_CONTENT_PARSER, src, src_len,
-                                    current, "Malformed ordered list, prefix must be a "
-                                    "number, followed by a '.', followed by the content. "
-                                    "Content must be aligned with content from previous line(s)");
+                                state = CONTENT_PARAGRAPH;
                                 goto err_li;
                             }
                         }
                         for (unsigned int i = 0; tmpv[1][i] != '\0'; i++) {
                             if (!(tmpv[1][i] == ' ' || tmpv[1][i] == '\t')) {
-                                *err = blogc_error_parser(BLOGC_ERROR_CONTENT_PARSER, src, src_len,
-                                    current, "Malformed ordered list, prefix must be a "
-                                    "number, followed by a '.', followed by the content. "
-                                    "Content must be aligned with content from previous line(s)");
+                                state = CONTENT_PARAGRAPH;
                                 goto err_li;
                             }
                         }
@@ -679,7 +654,7 @@ err_li:
                     free(tmp);
                     tmp = NULL;
                 }
-                if (!is_last)
+                if (state == CONTENT_PARAGRAPH || !is_last)
                     break;
 
             case CONTENT_ORDERED_LIST_END:
@@ -693,10 +668,10 @@ err_li:
                     free(prefix);
                     prefix = NULL;
                     state = CONTENT_START_LINE;
-                    start = current;
+                    start2 = current;
                 }
                 else {
-                    start = current;
+                    start2 = current;
                     state = CONTENT_ORDERED_LIST_START;
                 }
                 break;
@@ -727,15 +702,7 @@ err_li:
 
         }
 
-        if (*err != NULL)
-            break;
-
         current++;
-    }
-
-    if (*err != NULL) {
-        b_string_free(rv, true);
-        return NULL;
     }
 
     return b_string_free(rv, false);

@@ -230,7 +230,8 @@ main(int argc, char **argv)
         }
     }
 
-    fprintf(fp, "%s", out);
+    if (out != NULL)
+        fprintf(fp, "%s", out);
 
     if (!write_to_stdout)
         fclose(fp);
