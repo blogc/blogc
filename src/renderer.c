@@ -89,6 +89,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
 
     bool if_not = false;
     bool defined = false;
+    bool inside_block = false;
 
     b_slist_t *tmp = tmpl;
     while (tmp != NULL) {
@@ -102,6 +103,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                 break;
 
             case BLOGC_TEMPLATE_BLOCK_STMT:
+                inside_block = true;
                 if_count = 0;
                 if (0 == strcmp("entry", stmt->value)) {
                     if (listing) {
@@ -142,7 +144,8 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
             case BLOGC_TEMPLATE_VARIABLE_STMT:
                 if (stmt->value != NULL) {
                     if (0 == strcmp(stmt->value, "DATE_FORMATTED")) {
-                        config_value2 = blogc_format_date(config, tmp_source);
+                        config_value2 = blogc_format_date(config,
+                            inside_block ? tmp_source : NULL);
                         if (config_value2 != NULL) {
                             b_string_append(str, config_value2);
                             free(config_value2);
@@ -151,7 +154,8 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                         }
                     }
                     else {
-                        config_value = blogc_get_variable(stmt->value, config, tmp_source);
+                        config_value = blogc_get_variable(stmt->value, config,
+                            inside_block ? tmp_source : NULL);
                         if (config_value != NULL)
                             b_string_append(str, config_value);
                     }
@@ -159,6 +163,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                 break;
 
             case BLOGC_TEMPLATE_ENDBLOCK_STMT:
+                inside_block = false;
                 if (listing_start != NULL && current_source != NULL) {
                     current_source = current_source->next;
                     if (current_source != NULL) {

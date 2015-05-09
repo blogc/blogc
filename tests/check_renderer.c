@@ -331,6 +331,38 @@ test_render_prefer_local_variable(void **state)
 
 
 static void
+test_render_respect_variable_scope(void **state)
+{
+    const char *str =
+        "{{ LOL }}\n"
+        "{{ BOLA }}\n"
+        "{% block entry %}\n"
+        "{% if LOL %}{{ LOL }}{% endif %}\n"
+        "{% if BOLA %}{{ BOLA }}{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    b_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    b_trie_t *c = b_trie_new(free);
+    char *out = blogc_render(l, s, c, false);
+    assert_string_equal(out,
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "asd\n"
+        "\n");
+    b_trie_free(c);
+    blogc_template_free_stmts(l);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
+    free(out);
+}
+
+
+static void
 test_get_variable(void **state)
 {
     b_trie_t *g = b_trie_new(free);
@@ -446,6 +478,7 @@ main(void)
         unit_test(test_render_outside_block),
         unit_test(test_render_null),
         unit_test(test_render_prefer_local_variable),
+        unit_test(test_render_respect_variable_scope),
         unit_test(test_get_variable),
         unit_test(test_get_variable_only_local),
         unit_test(test_get_variable_only_global),
