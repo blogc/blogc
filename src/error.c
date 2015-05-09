@@ -96,9 +96,6 @@ blogc_error_print(blogc_error_t *err)
         case BLOGC_ERROR_LOADER:
             tmp = b_strdup("Loader error");
             break;
-        case BLOGC_ERROR_CONTENT_PARSER:
-            tmp = b_strdup("Content parser error");
-            break;
         default:
             tmp = b_strdup("Unknown error");
     }
