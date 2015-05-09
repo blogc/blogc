@@ -124,10 +124,11 @@ blogc_source_parse_from_file(const char *f, blogc_error_t **err)
 
 
 b_slist_t*
-blogc_source_parse_from_files(b_slist_t *l, blogc_error_t **err)
+blogc_source_parse_from_files(b_trie_t *conf, b_slist_t *l, blogc_error_t **err)
 {
     blogc_error_t *tmp_err = NULL;
     b_slist_t *rv = NULL;
+    bool first = true;
 
     for (b_slist_t *tmp = l; tmp != NULL; tmp = tmp->next) {
         char *f = tmp->data;
@@ -141,6 +142,23 @@ blogc_source_parse_from_files(b_slist_t *l, blogc_error_t **err)
             b_slist_free_full(rv, (b_free_func_t) b_trie_free);
             rv = NULL;
             break;
+        }
+        if (first) {
+            const char *val = b_trie_lookup(s, "DATE");
+            if (val != NULL)
+                b_trie_insert(conf, "DATE_FIRST", b_strdup(val));
+            val = b_trie_lookup(s, "FILENAME");
+            if (val != NULL)
+                b_trie_insert(conf, "FILENAME_FIRST", b_strdup(val));
+            first = false;
+        }
+        if (tmp->next == NULL) {  // last
+            const char *val = b_trie_lookup(s, "DATE");
+            if (val != NULL)
+                b_trie_insert(conf, "DATE_LAST", b_strdup(val));
+            val = b_trie_lookup(s, "FILENAME");
+            if (val != NULL)
+                b_trie_insert(conf, "FILENAME_LAST", b_strdup(val));
         }
         rv = b_slist_append(rv, s);
     }

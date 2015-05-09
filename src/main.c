@@ -208,7 +208,7 @@ main(int argc, char **argv)
         goto cleanup2;
     }
 
-    b_slist_t *s = blogc_source_parse_from_files(sources, &err);
+    b_slist_t *s = blogc_source_parse_from_files(config, sources, &err);
     if (err != NULL) {
         blogc_error_print(err);
         goto cleanup3;

@@ -39,9 +39,8 @@ blogc_get_variable(const char *name, b_trie_t *global, b_trie_t *local)
 
 
 char*
-blogc_format_date(b_trie_t *global, b_trie_t *local)
+blogc_format_date(const char *date, b_trie_t *global, b_trie_t *local)
 {
-    const char *date = blogc_get_variable("DATE", global, local);
     const char *date_format = blogc_get_variable("DATE_FORMAT", global, local);
     if (date == NULL)
         return NULL;
@@ -82,6 +81,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
 
     b_trie_t *tmp_source = NULL;
     const char *config_value = NULL;
+    const char *config_var = NULL;
     char *config_value2 = NULL;
 
     unsigned int if_count = 0;
@@ -143,9 +143,18 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
 
             case BLOGC_TEMPLATE_VARIABLE_STMT:
                 if (stmt->value != NULL) {
-                    if (0 == strcmp(stmt->value, "DATE_FORMATTED")) {
-                        config_value2 = blogc_format_date(config,
-                            inside_block ? tmp_source : NULL);
+                    config_var = NULL;
+                    if (0 == strcmp(stmt->value, "DATE_FORMATTED"))
+                        config_var = "DATE";
+                    else if (0 == strcmp(stmt->value, "DATE_FIRST_FORMATTED"))
+                        config_var = "DATE_FIRST";
+                    else if (0 == strcmp(stmt->value, "DATE_LAST_FORMATTED"))
+                        config_var = "DATE_LAST";
+                    if (config_var != NULL) {
+                        config_value2 = blogc_format_date(
+                            blogc_get_variable(config_var, config,
+                                inside_block ? tmp_source : NULL),
+                            config, inside_block ? tmp_source : NULL);
                         if (config_value2 != NULL) {
                             b_string_append(str, config_value2);
                             free(config_value2);
@@ -181,8 +190,18 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
             case BLOGC_TEMPLATE_IF_STMT:
                 defined = false;
                 if (stmt->value != NULL) {
-                    if (0 == strcmp(stmt->value, "DATE_FORMATTED")) {
-                        config_value2 = blogc_format_date(config, tmp_source);
+                    config_var = NULL;
+                    if (0 == strcmp(stmt->value, "DATE_FORMATTED"))
+                        config_var = "DATE";
+                    else if (0 == strcmp(stmt->value, "DATE_FIRST_FORMATTED"))
+                        config_var = "DATE_FIRST";
+                    else if (0 == strcmp(stmt->value, "DATE_LAST_FORMATTED"))
+                        config_var = "DATE_LAST";
+                    if (config_var != NULL) {
+                        config_value2 = blogc_format_date(
+                            blogc_get_variable(config_var, config,
+                                inside_block ? tmp_source : NULL),
+                            config, inside_block ? tmp_source : NULL);
                         if (config_value2 != NULL) {
                             defined = true;
                             free(config_value2);
@@ -190,7 +209,8 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                         }
                     }
                     else
-                        defined = blogc_get_variable(stmt->value, config, tmp_source) != NULL;
+                        defined = blogc_get_variable(stmt->value, config,
+                            inside_block ? tmp_source : NULL) != NULL;
                 }
                 if ((!if_not && !defined) || (if_not && defined)) {
                     if_skip = if_count;

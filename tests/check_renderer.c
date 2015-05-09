@@ -39,6 +39,7 @@ create_sources(unsigned int count)
         "ahahahahahahahaha2",
         "BOLA: asd3\n"
         "GUDA: zxc3\n"
+        "DATE: 2013-01-02 03:04:05\n"
         "-----\n"
         "ahahahahahahahaha3",
     };
@@ -122,7 +123,7 @@ test_render_listing(void **state)
         "2014-02-03 04:05:06\n"
         "bola: asd2\n"
         "\n"
-        "\n"
+        "2013-01-02 03:04:05\n"
         "bola: asd3\n"
         "\n");
     blogc_template_free_stmts(l);
@@ -413,9 +414,8 @@ test_format_date(void **state)
     b_trie_t *g = b_trie_new(free);
     b_trie_insert(g, "DATE_FORMAT", b_strdup("%H -- %M"));
     b_trie_t *l = b_trie_new(free);
-    b_trie_insert(l, "DATE", b_strdup("2015-01-02 03:04:05"));
     b_trie_insert(l, "DATE_FORMAT", b_strdup("%R"));
-    char *date = blogc_format_date(g, l);
+    char *date = blogc_format_date("2015-01-02 03:04:05", g, l);
     assert_string_equal(date, "03:04");
     free(date);
     b_trie_free(g);
@@ -429,8 +429,7 @@ test_format_date_with_global_format(void **state)
     b_trie_t *g = b_trie_new(free);
     b_trie_insert(g, "DATE_FORMAT", b_strdup("%H -- %M"));
     b_trie_t *l = b_trie_new(free);
-    b_trie_insert(l, "DATE", b_strdup("2015-01-02 03:04:05"));
-    char *date = blogc_format_date(g, l);
+    char *date = blogc_format_date("2015-01-02 03:04:05", g, l);
     assert_string_equal(date, "03 -- 04");
     free(date);
     b_trie_free(g);
@@ -443,8 +442,7 @@ test_format_date_without_format(void **state)
 {
     b_trie_t *g = b_trie_new(free);
     b_trie_t *l = b_trie_new(free);
-    b_trie_insert(l, "DATE", b_strdup("2015-01-02 03:04:05"));
-    char *date = blogc_format_date(g, l);
+    char *date = blogc_format_date("2015-01-02 03:04:05", g, l);
     assert_string_equal(date, "2015-01-02 03:04:05");
     free(date);
     b_trie_free(g);
@@ -457,7 +455,7 @@ test_format_date_without_date(void **state)
 {
     b_trie_t *g = b_trie_new(free);
     b_trie_t *l = b_trie_new(free);
-    char *date = blogc_format_date(g, l);
+    char *date = blogc_format_date(NULL, g, l);
     assert_null(date);
     free(date);
     b_trie_free(g);
