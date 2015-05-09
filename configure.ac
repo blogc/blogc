@@ -43,8 +43,25 @@ AC_ARG_ENABLE([tests], AS_HELP_STRING([--disable-tests],
 AS_IF([test "x$enable_tests" != "xno"], [
   PKG_PROG_PKG_CONFIG
   PKG_CHECK_MODULES([CMOCKA], [cmocka], [
-    TESTS="enabled"
-    have_cmocka=yes
+    AC_MSG_CHECKING([whether the linker supports -wrap])
+    save_LDFLAGS="$LDFLAGS"
+    LDFLAGS="$LDFLAGS -Wl,-wrap,exit"
+    AC_RUN_IFELSE([
+      AC_LANG_PROGRAM([
+        [void __wrap_exit(int s){__real_exit(0);}]
+      ], [
+        [exit(1);]
+      ])
+    ], [
+      TESTS="enabled"
+      have_cmocka=yes
+    ], [
+      have_cmocka=no
+    ], [
+      have_cmocka=no
+    ])
+    AC_MSG_RESULT([$have_cmocka])
+    LDFLAGS="$save_LDFLAGS"
   ], [
     have_cmocka=no
   ])

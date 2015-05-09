@@ -10,43 +10,13 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
-#include <errno.h>
-#include <stdio.h>
 #include <string.h>
 #include "utils/utils.h"
+#include "file.h"
 #include "source-parser.h"
 #include "template-parser.h"
 #include "loader.h"
 #include "error.h"
-
-
-char*
-blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err)
-{
-    if (err == NULL || *err != NULL)
-        return NULL;
-
-    *len = 0;
-    FILE *fp = fopen(path, "r");
-
-    if (fp == NULL) {
-        int tmp_errno = errno;
-        *err = blogc_error_new_printf(BLOGC_ERROR_LOADER,
-            "Failed to open file (%s): %s", path, strerror(tmp_errno));
-        return NULL;
-    }
-
-    b_string_t *str = b_string_new();
-    char buffer[BLOGC_FILE_CHUNK_SIZE];
-
-    while (!feof(fp)) {
-        size_t read_len = fread(buffer, sizeof(char), BLOGC_FILE_CHUNK_SIZE, fp);
-        *len += read_len;
-        b_string_append_len(str, buffer, read_len);
-    }
-    fclose(fp);
-    return b_string_free(str, false);
-}
 
 
 char*

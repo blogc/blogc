@@ -12,9 +12,6 @@
 #include "utils/utils.h"
 #include "error.h"
 
-#define BLOGC_FILE_CHUNK_SIZE 1024
-
-char* blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err);
 char* blogc_get_filename(const char *f);
 b_slist_t* blogc_template_parse_from_file(const char *f, blogc_error_t **err);
 b_trie_t* blogc_source_parse_from_file(const char *f, blogc_error_t **err);

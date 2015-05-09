@@ -20,6 +20,7 @@ CLEANFILES = \
 
 noinst_HEADERS = \
 	src/content-parser.h \
+	src/file.h \
 	src/error.h \
 	src/loader.h \
 	src/renderer.h \
@@ -45,6 +46,7 @@ check_PROGRAMS = \
 
 libblogc_la_SOURCES = \
 	src/content-parser.c \
+	src/file.c \
 	src/error.c \
 	src/loader.c \
 	src/renderer.c \
@@ -120,6 +122,7 @@ tests_check_loader_CFLAGS = \
 
 tests_check_loader_LDFLAGS = \
 	-no-install \
+	-Wl,--wrap=blogc_file_get_contents \
 	$(NULL)
 
 tests_check_loader_LDADD = \
