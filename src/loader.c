@@ -10,6 +10,7 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include <stdio.h>
 #include <string.h>
 #include "utils/utils.h"
 #include "file.h"
@@ -99,6 +100,7 @@ blogc_source_parse_from_files(b_trie_t *conf, b_slist_t *l, blogc_error_t **err)
     blogc_error_t *tmp_err = NULL;
     b_slist_t *rv = NULL;
     bool first = true;
+    unsigned int with_date = 0;
 
     for (b_slist_t *tmp = l; tmp != NULL; tmp = tmp->next) {
         char *f = tmp->data;
@@ -113,6 +115,8 @@ blogc_source_parse_from_files(b_trie_t *conf, b_slist_t *l, blogc_error_t **err)
             rv = NULL;
             break;
         }
+        if (b_trie_lookup(s, "DATE"))
+            with_date++;
         if (first) {
             const char *val = b_trie_lookup(s, "DATE");
             if (val != NULL)
@@ -132,5 +136,11 @@ blogc_source_parse_from_files(b_trie_t *conf, b_slist_t *l, blogc_error_t **err)
         }
         rv = b_slist_append(rv, s);
     }
+    if (with_date > 0 && with_date < b_slist_length(l))
+        // fatal error, maybe?
+        fprintf(stderr,
+            "blogc: warning: 'DATE' variable provided for at least one source "
+            "file, but not for all source files. This means that you may get "
+            "wrong values for 'DATE_FIRST' and 'DATE_LAST' variables.\n");
     return rv;
 }

@@ -123,6 +123,7 @@ tests_check_loader_CFLAGS = \
 tests_check_loader_LDFLAGS = \
 	-no-install \
 	-Wl,--wrap=blogc_file_get_contents \
+	-Wl,--wrap=fprintf \
 	$(NULL)
 
 tests_check_loader_LDADD = \
