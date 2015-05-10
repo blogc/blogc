@@ -67,7 +67,7 @@ __wrap_blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **er
 
 
 int
-__wrap_fprintf(FILE *stream, const char *format, ...)
+__wrap_blogc_fprintf(FILE *stream, const char *format, ...)
 {
     assert_true(stream == mock_type(FILE*));
     assert_string_equal(format, mock_type(const char*));
@@ -179,8 +179,8 @@ test_source_parse_from_files(void **state)
 static void
 test_source_parse_from_files_without_all_dates(void **state)
 {
-    will_return(__wrap_fprintf, stderr);
-    will_return(__wrap_fprintf,
+    will_return(__wrap_blogc_fprintf, stderr);
+    will_return(__wrap_blogc_fprintf,
         "blogc: warning: 'DATE' variable provided for at least one source "
         "file, but not for all source files. This means that you may get wrong "
         "values for 'DATE_FIRST' and 'DATE_LAST' variables.\n");

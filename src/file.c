@@ -48,3 +48,14 @@ blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err)
     fclose(fp);
     return b_string_free(str, false);
 }
+
+
+int
+blogc_fprintf(FILE *stream, const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    int rv = vfprintf(stream, format, ap);
+    va_end(ap);
+    return rv;
+}

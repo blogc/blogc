@@ -138,7 +138,7 @@ blogc_source_parse_from_files(b_trie_t *conf, b_slist_t *l, blogc_error_t **err)
     }
     if (with_date > 0 && with_date < b_slist_length(l))
         // fatal error, maybe?
-        fprintf(stderr,
+        blogc_fprintf(stderr,
             "blogc: warning: 'DATE' variable provided for at least one source "
             "file, but not for all source files. This means that you may get "
             "wrong values for 'DATE_FIRST' and 'DATE_LAST' variables.\n");
