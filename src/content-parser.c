@@ -306,7 +306,7 @@ blogc_content_parse(const char *src)
     char *parsed = NULL;
     char **tmpv = NULL;
 
-    char d;
+    char d = '\0';
 
     b_slist_t *lines = NULL;
 

@@ -6,6 +6,10 @@
  * See the file COPYING.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
 #include <ctype.h>
 #include <string.h>
 #include <stdarg.h>
@@ -57,8 +61,10 @@ b_strdup_vprintf(const char *format, va_list ap)
     if (!tmp)
         return NULL;
     int l2 = vsnprintf(tmp, l + 1, format, ap);
-    if (l2 < 0)
+    if (l2 < 0) {
+        free(tmp);
         return NULL;
+    }
     return tmp;
 }
 
