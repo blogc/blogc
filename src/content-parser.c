@@ -16,12 +16,8 @@
 #include "utils/utils.h"
 #include "content-parser.h"
 
-
 // this is a half ass implementation of a markdown-like syntax. bugs are
 // expected. feel free to improve the parser and and new features.
-
-
-// TODO: inline elements: line breaks
 
 
 typedef enum {
@@ -76,6 +72,7 @@ blogc_content_parse_inline(const char *src)
     char *tmp2 = NULL;
 
     unsigned int open_bracket = 0;
+    unsigned int spaces = 0;
 
     bool escape = false;
 
@@ -90,6 +87,9 @@ blogc_content_parse_inline(const char *src)
             escape = false;
             continue;
         }
+
+        if (c != ' ' && c != '\n' && c != '\r')
+            spaces = 0;
 
         switch (c) {
 
@@ -242,6 +242,25 @@ blogc_content_parse_inline(const char *src)
                 }
                 if (state == 0)
                     b_string_append_c(rv, c);
+                break;
+
+            case ' ':
+                if (state == 0) {
+                    spaces++;
+                    b_string_append_c(rv, c);
+                }
+                break;
+
+            case '\n':
+            case '\r':
+                if (state == 0) {
+                    if (spaces >= 2) {
+                        b_string_append(rv, "<br />\n");
+                        spaces = 0;
+                    }
+                    else
+                        b_string_append_c(rv, c);
+                }
                 break;
 
             case '&':
