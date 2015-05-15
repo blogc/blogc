@@ -4,7 +4,9 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-tests \
-	--disable-valgrind
+	--disable-ronn \
+	--disable-valgrind \
+	$(NULL)
 
 
 ## File listings
@@ -16,6 +18,9 @@ EXTRA_DIST = \
 	$(NULL)
 
 CLEANFILES = \
+	$(NULL)
+
+MAINTAINERCLEANFILES = \
 	$(NULL)
 
 noinst_HEADERS = \
@@ -79,6 +84,46 @@ blogc_CFLAGS = \
 blogc_LDADD = \
 	libblogc.la \
 	$(NULL)
+
+
+## Build rules: man pages
+
+if USE_RONN
+
+EXTRA_DIST += \
+	man/blogc.1.ronn \
+	man/blogc-source.7.ronn \
+	man/blogc-template.7.ronn \
+	man/index.txt \
+	$(NULL)
+
+dist_man_MANS = \
+	man/blogc.1 \
+	man/blogc-source.7 \
+	man/blogc-template.7 \
+	$(NULL)
+
+MAINTAINERCLEANFILES += \
+	$(dist_man_MANS) \
+	$(NULL)
+
+man/blogc.1: man/blogc.1.ronn
+	$(AM_V_GEN)$(RONN) \
+		--roff \
+		--pipe \
+		--organization "Rafael G. Martins" \
+		--manual "$(PACKAGE_NAME) Manual" \
+		$< > $@
+
+man/blogc%.7: man/blogc%.7.ronn
+	$(AM_V_GEN)$(RONN) \
+		--roff \
+		--pipe \
+		--organization "Rafael G. Martins" \
+		--manual "$(PACKAGE_NAME) Manual" \
+		$< > $@
+
+endif
 
 
 ## Build rules: tests

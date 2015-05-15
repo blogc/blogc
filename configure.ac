@@ -18,6 +18,25 @@ AS_IF([test "x$ac_cv_prog_cc_c99" = "xno"], [
   AC_MSG_ERROR([no C99 compiler found, blogc requires a C99 compiler.])
 ])
 
+AC_ARG_ENABLE([ronn], AS_HELP_STRING([--disable-ronn],
+              [ignore presence of ronn and disable man pages generation]))
+AS_IF([test "x$enable_ronn" != "xno"], [
+  AC_PATH_PROG([ronn], [ronn])
+  AS_IF([test "x$ac_cv_path_ronn" = "x"], [
+    have_ronn=no
+  ], [
+    have_ronn=yes
+  ])
+])
+AS_IF([test "x$have_ronn" = "xyes"], , [
+  AS_IF([test "x$enable_ronn" = "xyes"], [
+    AC_MSG_ERROR([ronn requested but not found])
+  ])
+])
+AM_CONDITIONAL([USE_RONN], [test "x$have_ronn" = "xyes"])
+RONN="$ac_cv_path_ronn"
+AC_SUBST(RONN)
+
 AC_ARG_ENABLE([valgrind], AS_HELP_STRING([--disable-valgrind],
               [ignore presence of valgrind]))
 AS_IF([test "x$enable_valgrind" != "xno"], [
@@ -93,5 +112,6 @@ AS_ECHO("
 
         tests:        ${TESTS}
 
+        ronn:         ${RONN}
         valgrind:     ${VALGRIND}
 ")

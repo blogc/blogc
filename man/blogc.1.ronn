@@ -1,0 +1,88 @@
+blogc(1) -- a blog compiler
+===========================
+
+## SYNOPSIS
+
+`blogc` [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] <SOURCE><br>
+`blogc` `-l` [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] <SOURCE> [<SOURCE> ...]<br>
+`blogc` [`-h`|`-v`]
+
+## DESCRIPTION
+
+**blogc** converts source files and templates into blog/website resources. It
+gets one (or more) source files and a template, and generates an output file,
+based on the template and the content read from the source file(s). It was
+designed to be used with make(1).
+
+`blogc` works on two modes:
+
+  * `entry`:
+    Default mode, first example in [SYNOPSIS][]. Accepts only one source
+    file, and process it as a single entry of the blog/website, like a static
+    page or a post.
+
+  * `listing`:
+    Listing mode, second example in [SYNOPSIS][], activated when
+    calling `blogc` with `-l` option. Accepts multiple source files, and allow
+    users to iterate over the content of all the source files to produce listing
+    pages, like indexes and feeds.
+
+## OPTIONS
+
+  * `-l`:
+    Activates listing mode, allowing user to provide multiple source files. See
+    blogc-source(7) for details.
+
+  * `-D` <KEY>=<VALUE>:
+    Set global configuration parameter. <KEY> must be an ascii uppercase string,
+    with only letters, numbers (after the first letter) and underscores (after
+    the first letter). These parameters are available anywhere in templates,
+    but may be overridden by local configuration parameters set in source files.
+    See blogc-template(7) for details.
+
+  * `-t` <TEMPLATE>:
+    Template file. It is a required option. See blogc-template(7) for details.
+
+  * `-o` <OUTPUT>:
+    Output file. If provided this option, save the compiled output to the given
+    file. Otherwise, the compiled output is sent to `stdout`.
+
+  * `-v`:
+    Show program name, version and exit.
+
+  * `-h`:
+    Show help message and exit.
+
+## FILES
+
+The `blogc` command expects a template file blogc-template(7), one (or more)
+source files blogc-source(7) and an output file, if wanted.
+
+## ENVIRONMENT
+
+No environment variables are required by `blogc`, but global timezone will
+be used by locale-dependant datetime input field descriptors (like `%c`, and
+can be overridden using environment variables. See strptime(3).
+
+## EXAMPLES
+
+Build index from source files:
+
+    $ blogc -l -t template.tmpl -o index.html source1.txt source2.txt source3.txt
+
+Build entry page from source file:
+
+    $ blogc -t template.tmpl -o entry.html entry.txt
+
+## BUGS
+
+**blogc** is based in handwritten parsers, that even being well tested, may be
+subject of parsing bugs.
+
+## AUTHOR
+
+Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
+
+## SEE ALSO
+
+blogc-source(7), blogc-template(7), make(1), strptime(3)

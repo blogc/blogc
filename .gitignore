@@ -37,6 +37,10 @@ Makefile.in
 /m4/*.m4
 !/m4/pkg.m4
 
+# man pages
+/man/blogc*.[17]
+/man/blogc*.html
+
 # blogc
 /blogc
 

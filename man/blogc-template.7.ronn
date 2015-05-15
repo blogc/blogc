@@ -1,0 +1,18 @@
+blogc-template(7) -- blogc's template format
+============================================
+
+## SYNOPSIS
+
+TODO
+
+## DESCRIPTION
+
+TODO
+
+## AUTHOR
+
+Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
+
+## SEE ALSO
+
+blogc(1)

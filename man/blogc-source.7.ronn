@@ -1,0 +1,18 @@
+blogc-source(7) -- blogc's source file format
+=============================================
+
+## SYNOPSIS
+
+TODO
+
+## DESCRIPTION
+
+TODO
+
+## AUTHOR
+
+Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
+
+## SEE ALSO
+
+blogc(1), strptime(3)
