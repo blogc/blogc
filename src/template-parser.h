@@ -15,6 +15,7 @@
 typedef enum {
     BLOGC_TEMPLATE_IFDEF_STMT = 1,
     BLOGC_TEMPLATE_IFNDEF_STMT,
+    BLOGC_TEMPLATE_IF_STMT,
     BLOGC_TEMPLATE_ENDIF_STMT,
     BLOGC_TEMPLATE_BLOCK_STMT,
     BLOGC_TEMPLATE_ENDBLOCK_STMT,
@@ -25,6 +26,8 @@ typedef enum {
 typedef struct {
     blogc_template_stmt_type_t type;
     char *value;
+    char *value2;
+    char *op;
 } blogc_template_stmt_t;
 
 b_slist_t* blogc_template_parse(const char *src, size_t src_len,

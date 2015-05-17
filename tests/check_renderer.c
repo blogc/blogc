@@ -63,9 +63,9 @@ test_render_entry(void **state)
         "{% block listing_once %}fuuu{% endblock %}\n"
         "{% block entry %}\n"
         "{{ DATE }}\n"
-        "{% if DATE_FORMATTED %}{{ DATE_FORMATTED }}{% endif %}\n"
-        "{% if GUDA %}{{ GUDA }}{% endif %}\n"
-        "{% if CHUNDA %}{{ CHUNDA }}{% endif %}\n"
+        "{% ifdef DATE_FORMATTED %}{{ DATE_FORMATTED }}{% endif %}\n"
+        "{% ifdef GUDA %}{{ GUDA }}{% endif %}\n"
+        "{% ifdef CHUNDA %}{{ CHUNDA }}{% endif %}\n"
         "{% endblock %}\n"
         "{% block listing %}lol{% endblock %}\n";
     blogc_error_t *err = NULL;
@@ -98,12 +98,12 @@ test_render_listing(void **state)
         "foo\n"
         "{% block listing_once %}fuuu{% endblock %}\n"
         "{% block entry %}\n"
-        "{% if GUDA %}{{ GUDA }}{% endif %}\n"
-        "{% if CHUNDA %}{{ CHUNDA }}{% endif %}\n"
+        "{% ifdef GUDA %}{{ GUDA }}{% endif %}\n"
+        "{% ifdef CHUNDA %}{{ CHUNDA }}{% endif %}\n"
         "{% endblock %}\n"
         "{% block listing %}\n"
-        "{% if DATE_FORMATTED %}{{ DATE_FORMATTED }}{% endif %}\n"
-        "bola: {% if BOLA %}{{ BOLA }}{% endif %}\n"
+        "{% ifdef DATE_FORMATTED %}{{ DATE_FORMATTED }}{% endif %}\n"
+        "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
     b_slist_t *l = blogc_template_parse(str, strlen(str), &err);

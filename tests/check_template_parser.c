@@ -34,6 +34,18 @@ blogc_assert_template_stmt(b_slist_t *l, const char *value,
 
 
 static void
+blogc_assert_template_if_stmt(b_slist_t *l, const char *variable,
+    const char *operator, const char *operand)
+{
+    blogc_template_stmt_t *stmt = l->data;
+    assert_string_equal(stmt->value, variable);
+    assert_string_equal(stmt->op, operator);
+    assert_string_equal(stmt->value2, operand);
+    assert_int_equal(stmt->type, BLOGC_TEMPLATE_IF_STMT);
+}
+
+
+static void
 test_template_parse(void **state)
 {
     const char *a =
@@ -48,7 +60,8 @@ test_template_parse(void **state)
         "{% endif %}\n"
         "{% endblock %}\n"
         "{% block listing %}{{ BOLA }}{% endblock %}\n"
-        "{% block listing_once %}asd{% endblock %}\n";
+        "{% block listing_once %}asd{% endblock %}\n"
+        "{% if BOLA == \"10\" %}aee{% endif %}";
     blogc_error_t *err = NULL;
     b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_null(err);
@@ -92,7 +105,12 @@ test_template_parse(void **state)
         NULL, BLOGC_TEMPLATE_ENDBLOCK_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next->next->next,
         "\n", BLOGC_TEMPLATE_CONTENT_STMT);
-    assert_null(tmp->next->next->next->next->next->next->next->next->next->next);
+    tmp = tmp->next->next->next->next->next->next->next->next->next->next;
+    blogc_assert_template_if_stmt(tmp, "BOLA", "==", "10");
+    blogc_assert_template_stmt(tmp->next, "aee", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next, NULL,
+        BLOGC_TEMPLATE_ENDIF_STMT);
+    assert_null(tmp->next->next->next);
     blogc_template_free_stmts(stmts);
 }
 
@@ -407,6 +425,22 @@ test_template_parse_invalid_ifdef_variable(void **state)
 
 
 static void
+test_template_parse_invalid_if_operator(void **state)
+{
+    const char *a = "{% block entry %}{% if BOLA = \"asd\" %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid 'if' operator. Must be '<', '>', '<=', '>=', '==' or '!='.\n"
+        "Error occurred near to '= \"asd\" %}'");
+    blogc_error_free(err);
+}
+
+
+static void
 test_template_parse_invalid_block_end(void **state)
 {
     const char *a = "{% block entry }}\n";
@@ -505,7 +539,7 @@ test_template_parse_invalid_close2(void **state)
 static void
 test_template_parse_invalid_if_not_closed(void **state)
 {
-    const char *a = "{% block entry %}{% if BOLA %}{% endblock %}\n";
+    const char *a = "{% block entry %}{% ifdef BOLA %}{% endblock %}\n";
     blogc_error_t *err = NULL;
     b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
@@ -547,6 +581,7 @@ main(void)
         unit_test(test_template_parse_invalid_block_type),
         unit_test(test_template_parse_invalid_ifdef_start),
         unit_test(test_template_parse_invalid_ifdef_variable),
+        unit_test(test_template_parse_invalid_if_operator),
         unit_test(test_template_parse_invalid_block_end),
         unit_test(test_template_parse_invalid_variable_name),
         unit_test(test_template_parse_invalid_variable_name2),

@@ -25,8 +25,12 @@ typedef enum {
     TEMPLATE_BLOCK_TYPE,
     TEMPLATE_BLOCK_BLOCK_TYPE_START,
     TEMPLATE_BLOCK_BLOCK_TYPE,
-    TEMPLATE_BLOCK_IFDEF_START,
-    TEMPLATE_BLOCK_IFDEF_VARIABLE,
+    TEMPLATE_BLOCK_IF_START,
+    TEMPLATE_BLOCK_IF_VARIABLE,
+    TEMPLATE_BLOCK_IF_OPERATOR_START,
+    TEMPLATE_BLOCK_IF_OPERATOR,
+    TEMPLATE_BLOCK_IF_OPERAND_START,
+    TEMPLATE_BLOCK_IF_OPERAND,
     TEMPLATE_BLOCK_END,
     TEMPLATE_VARIABLE_START,
     TEMPLATE_VARIABLE,
@@ -52,6 +56,10 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     size_t current = 0;
     size_t start = 0;
     size_t end = 0;
+    size_t op_start = 0;
+    size_t op_end = 0;
+    size_t start2 = 0;
+    size_t end2 = 0;
 
     unsigned int if_count = 0;
 
@@ -73,6 +81,8 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     stmt = b_malloc(sizeof(blogc_template_stmt_t));
                     stmt->type = type;
                     stmt->value = b_strndup(src + start, src_len - start);
+                    stmt->op = NULL;
+                    stmt->value2 = NULL;
                     stmts = b_slist_append(stmts, stmt);
                     stmt = NULL;
                 }
@@ -92,6 +102,8 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         stmt = b_malloc(sizeof(blogc_template_stmt_t));
                         stmt->type = type;
                         stmt->value = b_strndup(src + start, end - start);
+                        stmt->op = NULL;
+                        stmt->value2 = NULL;
                         stmts = b_slist_append(stmts, stmt);
                         stmt = NULL;
                     }
@@ -117,7 +129,9 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 if (c >= 'a' && c <= 'z')
                     break;
                 if (c == ' ') {
-                    if (0 == strncmp("block", src + start, current - start)) {
+                    if ((current - start == 5) &&
+                        (0 == strncmp("block", src + start, current - start)))
+                    {
                         if (block_state == BLOCK_CLOSED) {
                             state = TEMPLATE_BLOCK_BLOCK_TYPE_START;
                             type = BLOGC_TEMPLATE_BLOCK_STMT;
@@ -128,7 +142,9 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                             src, src_len, current, "Blocks can't be nested.");
                         break;
                     }
-                    else if (0 == strncmp("endblock", src + start, current - start)) {
+                    else if ((current - start == 8) &&
+                        (0 == strncmp("endblock", src + start, current - start)))
+                    {
                         if (block_state != BLOCK_CLOSED) {
                             state = TEMPLATE_BLOCK_END;
                             type = BLOGC_TEMPLATE_ENDBLOCK_STMT;
@@ -140,21 +156,36 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                             "'endblock' statement without an open 'block' statement.");
                         break;
                     }
-                    else if (0 == strncmp("ifdef", src + start, current - start)) {
-                        state = TEMPLATE_BLOCK_IFDEF_START;
+                    else if ((current - start == 5) &&
+                        (0 == strncmp("ifdef", src + start, current - start)))
+                    {
+                        state = TEMPLATE_BLOCK_IF_START;
                         type = BLOGC_TEMPLATE_IFDEF_STMT;
                         start = current;
                         if_count++;
                         break;
                     }
-                    else if (0 == strncmp("ifndef", src + start, current - start)) {
-                        state = TEMPLATE_BLOCK_IFDEF_START;
+                    else if ((current - start == 6) &&
+                        (0 == strncmp("ifndef", src + start, current - start)))
+                    {
+                        state = TEMPLATE_BLOCK_IF_START;
                         type = BLOGC_TEMPLATE_IFNDEF_STMT;
                         start = current;
                         if_count++;
                         break;
                     }
-                    else if (0 == strncmp("endif", src + start, current - start)) {
+                    else if ((current - start == 2) &&
+                        (0 == strncmp("if", src + start, current - start)))
+                    {
+                        state = TEMPLATE_BLOCK_IF_START;
+                        type = BLOGC_TEMPLATE_IF_STMT;
+                        start = current;
+                        if_count++;
+                        break;
+                    }
+                    else if ((current - start == 5) &&
+                        (0 == strncmp("endif", src + start, current - start)))
+                    {
                         if (if_count > 0) {
                             state = TEMPLATE_BLOCK_END;
                             type = BLOGC_TEMPLATE_ENDIF_STMT;
@@ -216,11 +247,11 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     "and 'listing_once'.");
                 break;
 
-            case TEMPLATE_BLOCK_IFDEF_START:
+            case TEMPLATE_BLOCK_IF_START:
                 if (c == ' ')
                     break;
                 if (c >= 'A' && c <= 'Z') {
-                    state = TEMPLATE_BLOCK_IFDEF_VARIABLE;
+                    state = TEMPLATE_BLOCK_IF_VARIABLE;
                     start = current;
                     break;
                 }
@@ -229,18 +260,60 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     "Invalid variable name. Must begin with uppercase letter.");
                 break;
 
-            case TEMPLATE_BLOCK_IFDEF_VARIABLE:
+            case TEMPLATE_BLOCK_IF_VARIABLE:
                 if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
                     break;
                 if (c == ' ') {
                     end = current;
-                    state = TEMPLATE_BLOCK_END;
+                    if (type == BLOGC_TEMPLATE_IF_STMT)
+                        state = TEMPLATE_BLOCK_IF_OPERATOR_START;
+                    else
+                        state = TEMPLATE_BLOCK_END;
                     break;
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
                     src_len, current,
                     "Invalid variable name. Must be uppercase letter, number "
                     "or '_'.");
+                break;
+
+            case TEMPLATE_BLOCK_IF_OPERATOR_START:
+                if (c == ' ') {
+                    break;
+                }
+                state = TEMPLATE_BLOCK_IF_OPERATOR;
+                op_start = current;
+                break;
+
+            case TEMPLATE_BLOCK_IF_OPERATOR:
+                if (c != ' ')
+                    break;
+                state = TEMPLATE_BLOCK_IF_OPERAND_START;
+                op_end = current;
+                break;
+
+            case TEMPLATE_BLOCK_IF_OPERAND_START:
+                if (c == ' ')
+                    break;
+                if (c != '"') {
+                    op_start = 0;
+                    op_end = 0;
+                    *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                        src_len, current,
+                        "Invalid 'if' operand. Must be double-quoted static string.");
+                    break;
+                }
+                state = TEMPLATE_BLOCK_IF_OPERAND;
+                start2 = current + 1;
+                break;
+
+            case TEMPLATE_BLOCK_IF_OPERAND:
+                if (c != '"')
+                    break;
+                if (c == '"' && src[current - 1] == '\\')
+                    break;
+                state = TEMPLATE_BLOCK_END;
+                end2 = current;
                 break;
 
             case TEMPLATE_BLOCK_END:
@@ -302,11 +375,44 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
 
             case TEMPLATE_CLOSE_BRACKET:
                 if (c == '}') {
+                    if (op_end > op_start) {
+                        if ((!((op_end - op_start == 1) &&
+                               (0 == strncmp("<", src + op_start, op_end - op_start)))) &&
+                            (!((op_end - op_start == 1) &&
+                               (0 == strncmp(">", src + op_start, op_end - op_start)))) &&
+                            (!((op_end - op_start == 2) &&
+                               (0 == strncmp("<=", src + op_start, op_end - op_start)))) &&
+                            (!((op_end - op_start == 2) &&
+                               (0 == strncmp(">=", src + op_start, op_end - op_start)))) &&
+                            (!((op_end - op_start == 2) &&
+                               (0 == strncmp("==", src + op_start, op_end - op_start)))) &&
+                            (!((op_end - op_start == 2) &&
+                               (0 == strncmp("!=", src + op_start, op_end - op_start)))))
+                        {
+                            *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
+                                src, src_len, op_start,
+                                "Invalid 'if' operator. Must be '<', '>', "
+                                "'<=', '>=', '==' or '!='.");
+                            break;
+                        }
+                    }
                     stmt = b_malloc(sizeof(blogc_template_stmt_t));
                     stmt->type = type;
                     stmt->value = NULL;
+                    stmt->op = NULL;
+                    stmt->value2 = NULL;
+                    if (op_end > op_start) {
+                        stmt->op = b_strndup(src + op_start, op_end - op_start);
+                        op_start = 0;
+                        op_end = 0;
+                    }
                     if (end > start)
                         stmt->value = b_strndup(src + start, end - start);
+                    if (end2 > start2) {
+                        stmt->value2 = b_strndup(src + start2, end2 - start2);
+                        start2 = 0;
+                        end2 = 0;
+                    }
                     stmts = b_slist_append(stmts, stmt);
                     stmt = NULL;
                     state = TEMPLATE_START;
@@ -355,7 +461,11 @@ blogc_template_free_stmts(b_slist_t *stmts)
 {
     for (b_slist_t *tmp = stmts; tmp != NULL; tmp = tmp->next) {
         blogc_template_stmt_t *data = tmp->data;
+        if (data == NULL)
+            continue;
         free(data->value);
+        free(data->op);
+        free(data->value2);
         free(data);
     }
     b_slist_free(stmts);
