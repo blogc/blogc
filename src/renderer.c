@@ -184,10 +184,10 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                 }
                 break;
 
-            case BLOGC_TEMPLATE_IF_NOT_STMT:
+            case BLOGC_TEMPLATE_IFNDEF_STMT:
                 if_not = true;
 
-            case BLOGC_TEMPLATE_IF_STMT:
+            case BLOGC_TEMPLATE_IFDEF_STMT:
                 defined = false;
                 if (stmt->value != NULL) {
                     config_var = NULL;
@@ -221,8 +221,8 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                     while (1) {
                         tmp = tmp->next;
                         stmt = tmp->data;
-                        if ((stmt->type == BLOGC_TEMPLATE_IF_STMT) ||
-                            (stmt->type == BLOGC_TEMPLATE_IF_NOT_STMT))
+                        if ((stmt->type == BLOGC_TEMPLATE_IFDEF_STMT) ||
+                            (stmt->type == BLOGC_TEMPLATE_IFNDEF_STMT))
                         {
                             if_count++;
                             continue;

@@ -40,10 +40,10 @@ test_template_parse(void **state)
         "Test\n"
         "\n"
         "    {% block entry %}\n"
-        "{% if CHUNDA %}\n"
+        "{% ifdef CHUNDA %}\n"
         "bola\n"
         "{% endif %}\n"
-        "{% if not BOLA %}\n"
+        "{% ifndef BOLA %}\n"
         "bolao\n"
         "{% endif %}\n"
         "{% endblock %}\n"
@@ -60,7 +60,7 @@ test_template_parse(void **state)
     blogc_assert_template_stmt(stmts->next->next, "\n",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(stmts->next->next->next, "CHUNDA",
-        BLOGC_TEMPLATE_IF_STMT);
+        BLOGC_TEMPLATE_IFDEF_STMT);
     blogc_assert_template_stmt(stmts->next->next->next->next, "\nbola\n",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(stmts->next->next->next->next->next, NULL,
@@ -68,7 +68,7 @@ test_template_parse(void **state)
     blogc_assert_template_stmt(stmts->next->next->next->next->next->next, "\n",
         BLOGC_TEMPLATE_CONTENT_STMT);
     b_slist_t *tmp = stmts->next->next->next->next->next->next->next;
-    blogc_assert_template_stmt(tmp, "BOLA", BLOGC_TEMPLATE_IF_NOT_STMT);
+    blogc_assert_template_stmt(tmp, "BOLA", BLOGC_TEMPLATE_IFNDEF_STMT);
     blogc_assert_template_stmt(tmp->next, "\nbolao\n", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next, NULL, BLOGC_TEMPLATE_ENDIF_STMT);
     blogc_assert_template_stmt(tmp->next->next->next, "\n",
@@ -114,12 +114,12 @@ test_template_parse_html(void **state)
         "        <h1>My cool blog</h1>\n"
         "        {% block entry %}\n"
         "        <h2>{{ TITLE }}</h2>\n"
-        "        {% if DATE %}<h4>Published in: {{ DATE }}</h4>{% endif %}\n"
+        "        {% ifdef DATE %}<h4>Published in: {{ DATE }}</h4>{% endif %}\n"
         "        <pre>{{ CONTENT }}</pre>\n"
         "        {% endblock %}\n"
         "        {% block listing_once %}<ul>{% endblock %}\n"
         "        {% block listing %}<p><a href=\"{{ FILENAME }}.html\">"
-        "{{ TITLE }}</a>{% if DATE %} - {{ DATE }}{% endif %}</p>{% endblock %}\n"
+        "{{ TITLE }}</a>{% ifdef DATE %} - {{ DATE }}{% endif %}</p>{% endblock %}\n"
         "        {% block listing_once %}</ul>{% endblock %}\n"
         "    </body>\n"
         "</html>\n";
@@ -160,7 +160,7 @@ test_template_parse_html(void **state)
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next,
         "</h2>\n        ", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next,
-        "DATE", BLOGC_TEMPLATE_IF_STMT);
+        "DATE", BLOGC_TEMPLATE_IFDEF_STMT);
     tmp = tmp->next->next->next->next->next->next->next->next;
     blogc_assert_template_stmt(tmp, "<h4>Published in: ",
         BLOGC_TEMPLATE_CONTENT_STMT);
@@ -200,7 +200,7 @@ test_template_parse_html(void **state)
     blogc_assert_template_stmt(tmp->next->next, "</a>",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next->next, "DATE",
-        BLOGC_TEMPLATE_IF_STMT);
+        BLOGC_TEMPLATE_IFDEF_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next, " - ",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next, "DATE",
@@ -227,17 +227,17 @@ test_template_parse_html(void **state)
 
 
 static void
-test_template_parse_if_and_var_outside_block(void **state)
+test_template_parse_ifdef_and_var_outside_block(void **state)
 {
     const char *a =
-        "{% if GUDA %}bola{% endif %}\n"
+        "{% ifdef GUDA %}bola{% endif %}\n"
         "{{ BOLA }}\n"
-        "{% if not CHUNDA %}{{ CHUNDA }}{% endif %}\n";
+        "{% ifndef CHUNDA %}{{ CHUNDA }}{% endif %}\n";
     blogc_error_t *err = NULL;
     b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(stmts);
-    blogc_assert_template_stmt(stmts, "GUDA", BLOGC_TEMPLATE_IF_STMT);
+    blogc_assert_template_stmt(stmts, "GUDA", BLOGC_TEMPLATE_IFDEF_STMT);
     blogc_assert_template_stmt(stmts->next, "bola",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(stmts->next->next, NULL,
@@ -249,7 +249,7 @@ test_template_parse_if_and_var_outside_block(void **state)
     blogc_assert_template_stmt(stmts->next->next->next->next->next, "\n",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(stmts->next->next->next->next->next->next,
-        "CHUNDA", BLOGC_TEMPLATE_IF_NOT_STMT);
+        "CHUNDA", BLOGC_TEMPLATE_IFNDEF_STMT);
     b_slist_t *tmp = stmts->next->next->next->next->next->next->next;
     blogc_assert_template_stmt(tmp, "CHUNDA", BLOGC_TEMPLATE_VARIABLE_STMT);
     blogc_assert_template_stmt(tmp->next, NULL, BLOGC_TEMPLATE_ENDIF_STMT);
@@ -320,7 +320,7 @@ test_template_parse_invalid_endif_not_open(void **state)
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
-        "'endif' statement without an open 'if' statement.\n"
+        "'endif' statement without an open 'ifdef' or 'ifndef' statement.\n"
         "Error occurred near to ' %}{% endblock %}'");
     blogc_error_free(err);
 }
@@ -336,8 +336,8 @@ test_template_parse_invalid_block_name(void **state)
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
-        "Invalid statement type: Allowed types are: 'block', 'endblock', 'if' and 'endif'.\n"
-        "Error occurred near to ' %}'");
+        "Invalid statement type: Allowed types are: 'block', 'endblock', 'ifdef', "
+        "'ifndef' and 'endif'.\nError occurred near to ' %}'");
     blogc_error_free(err);
 }
 
@@ -375,9 +375,9 @@ test_template_parse_invalid_block_type(void **state)
 
 
 static void
-test_template_parse_invalid_if_start(void **state)
+test_template_parse_invalid_ifdef_start(void **state)
 {
-    const char *a = "{% block entry %}{% if guda %}\n";
+    const char *a = "{% block entry %}{% ifdef guda %}\n";
     blogc_error_t *err = NULL;
     b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
@@ -391,25 +391,9 @@ test_template_parse_invalid_if_start(void **state)
 
 
 static void
-test_template_parse_invalid_if_condition(void **state)
+test_template_parse_invalid_ifdef_variable(void **state)
 {
-    const char *a = "{% block entry %}{% if non BOLA %}\n";
-    blogc_error_t *err = NULL;
-    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
-    assert_non_null(err);
-    assert_null(stmts);
-    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
-    assert_string_equal(err->msg,
-        "Invalid 'if' condition. Allowed conditions are: 'not'.\n"
-        "Error occurred near to ' BOLA %}'");
-    blogc_error_free(err);
-}
-
-
-static void
-test_template_parse_invalid_if_variable(void **state)
-{
-    const char *a = "{% block entry %}{% if BoLA %}\n";
+    const char *a = "{% block entry %}{% ifdef BoLA %}\n";
     blogc_error_t *err = NULL;
     b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
@@ -527,7 +511,8 @@ test_template_parse_invalid_if_not_closed(void **state)
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
-    assert_string_equal(err->msg, "1 open 'if' statements were not closed!");
+    assert_string_equal(err->msg, "1 open 'ifdef' and/or 'ifndef' statements "
+        "were not closed!");
     blogc_error_free(err);
 }
 
@@ -552,7 +537,7 @@ main(void)
     const UnitTest tests[] = {
         unit_test(test_template_parse),
         unit_test(test_template_parse_html),
-        unit_test(test_template_parse_if_and_var_outside_block),
+        unit_test(test_template_parse_ifdef_and_var_outside_block),
         unit_test(test_template_parse_invalid_block_start),
         unit_test(test_template_parse_invalid_block_nested),
         unit_test(test_template_parse_invalid_block_not_open),
@@ -560,9 +545,8 @@ main(void)
         unit_test(test_template_parse_invalid_block_name),
         unit_test(test_template_parse_invalid_block_type_start),
         unit_test(test_template_parse_invalid_block_type),
-        unit_test(test_template_parse_invalid_if_start),
-        unit_test(test_template_parse_invalid_if_condition),
-        unit_test(test_template_parse_invalid_if_variable),
+        unit_test(test_template_parse_invalid_ifdef_start),
+        unit_test(test_template_parse_invalid_ifdef_variable),
         unit_test(test_template_parse_invalid_block_end),
         unit_test(test_template_parse_invalid_variable_name),
         unit_test(test_template_parse_invalid_variable_name2),

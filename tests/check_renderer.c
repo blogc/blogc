@@ -133,13 +133,13 @@ test_render_listing(void **state)
 
 
 static void
-test_render_if(void **state)
+test_render_ifdef(void **state)
 {
     const char *str =
         "{% block entry %}\n"
-        "{% if CHUNDA %}chunda\n"
-        "{% if GUDA %}guda\n"
-        "{% if BOLA %}bola\n"
+        "{% ifdef CHUNDA %}chunda\n"
+        "{% ifdef GUDA %}guda\n"
+        "{% ifdef BOLA %}bola\n"
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endif %}\n"
@@ -162,13 +162,13 @@ test_render_if(void **state)
 
 
 static void
-test_render_if2(void **state)
+test_render_ifdef2(void **state)
 {
     const char *str =
         "{% block entry %}\n"
-        "{% if GUDA %}guda\n"
-        "{% if CHUNDA %}chunda\n"
-        "{% if BOLA %}bola\n"
+        "{% ifdef GUDA %}guda\n"
+        "{% ifdef CHUNDA %}chunda\n"
+        "{% ifdef BOLA %}bola\n"
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endif %}\n"
@@ -193,13 +193,13 @@ test_render_if2(void **state)
 
 
 static void
-test_render_if3(void **state)
+test_render_ifdef3(void **state)
 {
     const char *str =
         "{% block entry %}\n"
-        "{% if GUDA %}guda\n"
-        "{% if BOLA %}bola\n"
-        "{% if CHUNDA %}chunda\n"
+        "{% ifdef GUDA %}guda\n"
+        "{% ifdef BOLA %}bola\n"
+        "{% ifdef CHUNDA %}chunda\n"
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endif %}\n"
@@ -226,13 +226,13 @@ test_render_if3(void **state)
 
 
 static void
-test_render_if_not(void **state)
+test_render_ifndef(void **state)
 {
     const char *str =
         "{% block entry %}\n"
-        "{% if not CHUNDA %}chunda\n"
-        "{% if GUDA %}guda\n"
-        "{% if not BOLA %}bola\n"
+        "{% ifndef CHUNDA %}chunda\n"
+        "{% ifdef GUDA %}guda\n"
+        "{% ifndef BOLA %}bola\n"
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endif %}\n"
@@ -269,9 +269,9 @@ static void
 test_render_outside_block(void **state)
 {
     const char *str =
-        "{% if GUDA %}bola{% endif %}\n"
+        "{% ifdef GUDA %}bola{% endif %}\n"
         "{{ BOLA }}\n"
-        "{% if not CHUNDA %}lol{% endif %}\n";
+        "{% ifndef CHUNDA %}lol{% endif %}\n";
     blogc_error_t *err = NULL;
     b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
@@ -297,10 +297,10 @@ test_render_prefer_local_variable(void **state)
 {
     const char *str =
         "{% block entry %}\n"
-        "{% if LOL %}{{ LOL }}{% endif %}\n"
-        "{% if not CHUNDA %}chunda\n"
-        "{% if GUDA %}{{ GUDA }}\n"
-        "{% if not BOLA %}bola\n"
+        "{% ifdef LOL %}{{ LOL }}{% endif %}\n"
+        "{% ifndef CHUNDA %}chunda\n"
+        "{% ifdef GUDA %}{{ GUDA }}\n"
+        "{% ifndef BOLA %}bola\n"
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endif %}\n"
@@ -338,8 +338,8 @@ test_render_respect_variable_scope(void **state)
         "{{ LOL }}\n"
         "{{ BOLA }}\n"
         "{% block entry %}\n"
-        "{% if LOL %}{{ LOL }}{% endif %}\n"
-        "{% if BOLA %}{{ BOLA }}{% endif %}\n"
+        "{% ifdef LOL %}{{ LOL }}{% endif %}\n"
+        "{% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
     b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
@@ -469,10 +469,10 @@ main(void)
     const UnitTest tests[] = {
         unit_test(test_render_entry),
         unit_test(test_render_listing),
-        unit_test(test_render_if),
-        unit_test(test_render_if2),
-        unit_test(test_render_if3),
-        unit_test(test_render_if_not),
+        unit_test(test_render_ifdef),
+        unit_test(test_render_ifdef2),
+        unit_test(test_render_ifdef3),
+        unit_test(test_render_ifndef),
         unit_test(test_render_outside_block),
         unit_test(test_render_null),
         unit_test(test_render_prefer_local_variable),

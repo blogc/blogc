@@ -25,9 +25,8 @@ typedef enum {
     TEMPLATE_BLOCK_TYPE,
     TEMPLATE_BLOCK_BLOCK_TYPE_START,
     TEMPLATE_BLOCK_BLOCK_TYPE,
-    TEMPLATE_BLOCK_IF_START,
-    TEMPLATE_BLOCK_IF_CONDITION,
-    TEMPLATE_BLOCK_IF_VARIABLE,
+    TEMPLATE_BLOCK_IFDEF_START,
+    TEMPLATE_BLOCK_IFDEF_VARIABLE,
     TEMPLATE_BLOCK_END,
     TEMPLATE_VARIABLE_START,
     TEMPLATE_VARIABLE,
@@ -55,7 +54,6 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     size_t end = 0;
 
     unsigned int if_count = 0;
-    bool conditional = false;
 
     b_slist_t *stmts = NULL;
     blogc_template_stmt_t *stmt = NULL;
@@ -142,9 +140,16 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                             "'endblock' statement without an open 'block' statement.");
                         break;
                     }
-                    else if (0 == strncmp("if", src + start, current - start)) {
-                        state = TEMPLATE_BLOCK_IF_START;
-                        type = BLOGC_TEMPLATE_IF_STMT;
+                    else if (0 == strncmp("ifdef", src + start, current - start)) {
+                        state = TEMPLATE_BLOCK_IFDEF_START;
+                        type = BLOGC_TEMPLATE_IFDEF_STMT;
+                        start = current;
+                        if_count++;
+                        break;
+                    }
+                    else if (0 == strncmp("ifndef", src + start, current - start)) {
+                        state = TEMPLATE_BLOCK_IFDEF_START;
+                        type = BLOGC_TEMPLATE_IFNDEF_STMT;
                         start = current;
                         if_count++;
                         break;
@@ -158,14 +163,15 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         }
                         *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
                             src, src_len, current,
-                            "'endif' statement without an open 'if' statement.");
+                            "'endif' statement without an open 'ifdef' or 'ifndef' "
+                            "statement.");
                         break;
                     }
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
                     src_len, current,
                     "Invalid statement type: Allowed types are: 'block', "
-                    "'endblock', 'if' and 'endif'.");
+                    "'endblock', 'ifdef', 'ifndef' and 'endif'.");
                 break;
 
             case TEMPLATE_BLOCK_BLOCK_TYPE_START:
@@ -210,19 +216,11 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     "and 'listing_once'.");
                 break;
 
-            case TEMPLATE_BLOCK_IF_START:
+            case TEMPLATE_BLOCK_IFDEF_START:
                 if (c == ' ')
                     break;
-                if (c == 'n') {
-                    if (!conditional) {
-                        conditional = true;
-                        state = TEMPLATE_BLOCK_IF_CONDITION;
-                        start = current;
-                        break;
-                    }
-                }
                 if (c >= 'A' && c <= 'Z') {
-                    state = TEMPLATE_BLOCK_IF_VARIABLE;
+                    state = TEMPLATE_BLOCK_IFDEF_VARIABLE;
                     start = current;
                     break;
                 }
@@ -231,23 +229,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     "Invalid variable name. Must begin with uppercase letter.");
                 break;
 
-            case TEMPLATE_BLOCK_IF_CONDITION:
-                if (c >= 'a' && c <= 'z')
-                    break;
-                if (c == ' ') {
-                    if (0 == strncmp("not", src + start, current - start)) {
-                        end = current;
-                        state = TEMPLATE_BLOCK_IF_START;
-                        type = BLOGC_TEMPLATE_IF_NOT_STMT;
-                        break;
-                    }
-                }
-                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid 'if' condition. Allowed conditions are: 'not'.");
-                break;
-
-            case TEMPLATE_BLOCK_IF_VARIABLE:
+            case TEMPLATE_BLOCK_IFDEF_VARIABLE:
                 if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
                     break;
                 if (c == ' ') {
@@ -265,7 +247,6 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 if (c == ' ')
                     break;
                 if (c == '%') {
-                    conditional = false;
                     state = TEMPLATE_CLOSE_BRACKET;
                     break;
                 }
@@ -349,7 +330,8 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     if (*err == NULL) {
         if (if_count != 0)
             *err = blogc_error_new_printf(BLOGC_ERROR_TEMPLATE_PARSER,
-                "%d open 'if' statements were not closed!", if_count);
+                "%d open 'ifdef' and/or 'ifndef' statements were not closed!",
+                if_count);
         else if (block_state != BLOCK_CLOSED)
             *err = blogc_error_new(BLOGC_ERROR_TEMPLATE_PARSER,
                 "An open block was not closed!");
