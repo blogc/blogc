@@ -61,7 +61,7 @@ test_template_parse(void **state)
         "{% endblock %}\n"
         "{% block listing %}{{ BOLA }}{% endblock %}\n"
         "{% block listing_once %}asd{% endblock %}\n"
-        "{% if BOLA == \"10\" %}aee{% endif %}";
+        "{% if BOLA == \"1\\\"0\" %}aee{% endif %}";
     blogc_error_t *err = NULL;
     b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_null(err);
@@ -106,7 +106,7 @@ test_template_parse(void **state)
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next->next->next,
         "\n", BLOGC_TEMPLATE_CONTENT_STMT);
     tmp = tmp->next->next->next->next->next->next->next->next->next->next;
-    blogc_assert_template_if_stmt(tmp, "BOLA", "==", "10");
+    blogc_assert_template_if_stmt(tmp, "BOLA", "==", "1\\\"0");
     blogc_assert_template_stmt(tmp->next, "aee", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next, NULL,
         BLOGC_TEMPLATE_ENDIF_STMT);
@@ -441,6 +441,38 @@ test_template_parse_invalid_if_operator(void **state)
 
 
 static void
+test_template_parse_invalid_if_operand(void **state)
+{
+    const char *a = "{% block entry %}{% if BOLA == asd %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid 'if' operand. Must be double-quoted static string.\n"
+        "Error occurred near to 'asd %}'");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_if_operand2(void **state)
+{
+    const char *a = "{% block entry %}{% if BOLA == \"asd %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Found an open double-quoted string.\n"
+        "Error occurred near to '\"asd %}'");
+    blogc_error_free(err);
+}
+
+
+static void
 test_template_parse_invalid_block_end(void **state)
 {
     const char *a = "{% block entry }}\n";
@@ -582,6 +614,8 @@ main(void)
         unit_test(test_template_parse_invalid_ifdef_start),
         unit_test(test_template_parse_invalid_ifdef_variable),
         unit_test(test_template_parse_invalid_if_operator),
+        unit_test(test_template_parse_invalid_if_operand),
+        unit_test(test_template_parse_invalid_if_operand2),
         unit_test(test_template_parse_invalid_block_end),
         unit_test(test_template_parse_invalid_variable_name),
         unit_test(test_template_parse_invalid_variable_name2),

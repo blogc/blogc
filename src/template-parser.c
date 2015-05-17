@@ -222,19 +222,25 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 if ((c >= 'a' && c <= 'z') || c == '_')
                     break;
                 if (c == ' ') {
-                    if (0 == strncmp("entry", src + start, current - start)) {
+                    if ((current - start == 5) &&
+                        (0 == strncmp("entry", src + start, current - start)))
+                    {
                         block_state = BLOCK_ENTRY;
                         end = current;
                         state = TEMPLATE_BLOCK_END;
                         break;
                     }
-                    else if (0 == strncmp("listing", src + start, current - start)) {
+                    else if ((current - start == 7) &&
+                        (0 == strncmp("listing", src + start, current - start)))
+                    {
                         block_state = BLOCK_LISTING;
                         end = current;
                         state = TEMPLATE_BLOCK_END;
                         break;
                     }
-                    else if (0 == strncmp("listing_once", src + start, current - start)) {
+                    else if ((current - start == 12) &&
+                        (0 == strncmp("listing_once", src + start, current - start)))
+                    {
                         block_state = BLOCK_LISTING_ONCE;
                         end = current;
                         state = TEMPLATE_BLOCK_END;
@@ -434,7 +440,10 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     }
 
     if (*err == NULL) {
-        if (if_count != 0)
+        if (state == TEMPLATE_BLOCK_IF_OPERAND)
+            *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src, src_len,
+                start2 - 1, "Found an open double-quoted string.");
+        else if (if_count != 0)
             *err = blogc_error_new_printf(BLOGC_ERROR_TEMPLATE_PARSER,
                 "%d open 'ifdef' and/or 'ifndef' statements were not closed!",
                 if_count);
