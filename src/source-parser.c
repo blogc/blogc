@@ -72,8 +72,16 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                     break;
                 if (c == ':') {
                     key = b_strndup(src + start, current - start);
-                    if ((0 == strncmp("FILENAME", src + start, current - start)) ||
-                        (0 == strncmp("CONTENT", src + start, current - start)))
+                    if (((current - start == 8) &&
+                         (0 == strncmp("FILENAME", src + start, 8))) ||
+                        ((current - start == 7) &&
+                         (0 == strncmp("CONTENT", src + start, 7))) ||
+                        ((current - start == 14) &&
+                         (0 == strncmp("DATE_FORMATTED", src + start, 14))) ||
+                        ((current - start == 20) &&
+                         (0 == strncmp("DATE_FIRST_FORMATTED", src + start, 20))) ||
+                        ((current - start == 19) &&
+                         (0 == strncmp("DATE_LAST_FORMATTED", src + start, 19))))
                     {
                         *err = blogc_error_new_printf(BLOGC_ERROR_SOURCE_PARSER,
                             "'%s' variable is forbidden in source files. It will "

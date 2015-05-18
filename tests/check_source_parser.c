@@ -190,6 +190,74 @@ test_source_parse_config_reserved_name(void **state)
 
 
 static void
+test_source_parse_config_reserved_name2(void **state)
+{
+    const char *a = "CONTENT: asd\r\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "'CONTENT' variable is forbidden in source files. It will be set "
+        "for you by the compiler.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_config_reserved_name3(void **state)
+{
+    const char *a = "DATE_FORMATTED: asd\r\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "'DATE_FORMATTED' variable is forbidden in source files. It will be set "
+        "for you by the compiler.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_config_reserved_name4(void **state)
+{
+    const char *a = "DATE_FIRST_FORMATTED: asd\r\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "'DATE_FIRST_FORMATTED' variable is forbidden in source files. It will be set "
+        "for you by the compiler.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_config_reserved_name5(void **state)
+{
+    const char *a = "DATE_LAST_FORMATTED: asd\r\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "'DATE_LAST_FORMATTED' variable is forbidden in source files. It will be set "
+        "for you by the compiler.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
 test_source_parse_config_value_no_line_ending(void **state)
 {
     const char *a = "BOLA: asd";
@@ -235,6 +303,10 @@ main(void)
         unit_test(test_source_parse_config_no_value),
         unit_test(test_source_parse_config_no_value2),
         unit_test(test_source_parse_config_reserved_name),
+        unit_test(test_source_parse_config_reserved_name2),
+        unit_test(test_source_parse_config_reserved_name3),
+        unit_test(test_source_parse_config_reserved_name4),
+        unit_test(test_source_parse_config_reserved_name5),
         unit_test(test_source_parse_config_value_no_line_ending),
         unit_test(test_source_parse_invalid_separator),
     };
