@@ -61,6 +61,8 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     size_t start2 = 0;
     size_t end2 = 0;
 
+    blogc_template_stmt_operator_t tmp_op = 0;
+
     unsigned int if_count = 0;
 
     b_slist_t *stmts = NULL;
@@ -81,7 +83,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     stmt = b_malloc(sizeof(blogc_template_stmt_t));
                     stmt->type = type;
                     stmt->value = b_strndup(src + start, src_len - start);
-                    stmt->op = NULL;
+                    stmt->op = 0;
                     stmt->value2 = NULL;
                     stmts = b_slist_append(stmts, stmt);
                     stmt = NULL;
@@ -102,7 +104,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         stmt = b_malloc(sizeof(blogc_template_stmt_t));
                         stmt->type = type;
                         stmt->value = b_strndup(src + start, end - start);
-                        stmt->op = NULL;
+                        stmt->op = 0;
                         stmt->value2 = NULL;
                         stmts = b_slist_append(stmts, stmt);
                         stmt = NULL;
@@ -381,37 +383,41 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
 
             case TEMPLATE_CLOSE_BRACKET:
                 if (c == '}') {
+                    tmp_op = 0;
                     if (op_end > op_start) {
-                        if ((!((op_end - op_start == 1) &&
-                               (0 == strncmp("<", src + op_start, op_end - op_start)))) &&
-                            (!((op_end - op_start == 1) &&
-                               (0 == strncmp(">", src + op_start, op_end - op_start)))) &&
-                            (!((op_end - op_start == 2) &&
-                               (0 == strncmp("<=", src + op_start, op_end - op_start)))) &&
-                            (!((op_end - op_start == 2) &&
-                               (0 == strncmp(">=", src + op_start, op_end - op_start)))) &&
-                            (!((op_end - op_start == 2) &&
-                               (0 == strncmp("==", src + op_start, op_end - op_start)))) &&
-                            (!((op_end - op_start == 2) &&
-                               (0 == strncmp("!=", src + op_start, op_end - op_start)))))
-                        {
+                        if (op_end - op_start == 1) {
+                            if (0 == strncmp("<", src + op_start, 1))
+                                tmp_op = BLOGC_TEMPLATE_OP_LT;
+                            else if (0 == strncmp(">", src + op_start, 1))
+                                tmp_op = BLOGC_TEMPLATE_OP_GT;
+                        }
+                        else if (op_end - op_start == 2) {
+                            if (0 == strncmp("<=", src + op_start, 2))
+                                tmp_op = BLOGC_TEMPLATE_OP_LT | BLOGC_TEMPLATE_OP_EQ;
+                            else if (0 == strncmp(">=", src + op_start, 2))
+                                tmp_op = BLOGC_TEMPLATE_OP_GT | BLOGC_TEMPLATE_OP_EQ;
+                            else if (0 == strncmp("==", src + op_start, 2))
+                                tmp_op = BLOGC_TEMPLATE_OP_EQ;
+                            else if (0 == strncmp("!=", src + op_start, 2))
+                                tmp_op = BLOGC_TEMPLATE_OP_NOT | BLOGC_TEMPLATE_OP_EQ;
+                        }
+                        if (tmp_op == 0) {
                             *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
                                 src, src_len, op_start,
                                 "Invalid 'if' operator. Must be '<', '>', "
                                 "'<=', '>=', '==' or '!='.");
+                            op_start = 0;
+                            op_end = 0;
                             break;
                         }
+                        op_start = 0;
+                        op_end = 0;
                     }
                     stmt = b_malloc(sizeof(blogc_template_stmt_t));
                     stmt->type = type;
                     stmt->value = NULL;
-                    stmt->op = NULL;
+                    stmt->op = tmp_op;
                     stmt->value2 = NULL;
-                    if (op_end > op_start) {
-                        stmt->op = b_strndup(src + op_start, op_end - op_start);
-                        op_start = 0;
-                        op_end = 0;
-                    }
                     if (end > start)
                         stmt->value = b_strndup(src + start, end - start);
                     if (end2 > start2) {
@@ -473,7 +479,6 @@ blogc_template_free_stmts(b_slist_t *stmts)
         if (data == NULL)
             continue;
         free(data->value);
-        free(data->op);
         free(data->value2);
         free(data);
     }

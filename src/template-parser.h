@@ -23,11 +23,18 @@ typedef enum {
     BLOGC_TEMPLATE_CONTENT_STMT,
 } blogc_template_stmt_type_t;
 
+typedef enum {
+    BLOGC_TEMPLATE_OP_NOT = 1 << 0,
+    BLOGC_TEMPLATE_OP_EQ  = 1 << 1,
+    BLOGC_TEMPLATE_OP_LT  = 1 << 2,
+    BLOGC_TEMPLATE_OP_GT  = 1 << 3,
+} blogc_template_stmt_operator_t;
+
 typedef struct {
     blogc_template_stmt_type_t type;
     char *value;
     char *value2;
-    char *op;
+    blogc_template_stmt_operator_t op;
 } blogc_template_stmt_t;
 
 b_slist_t* blogc_template_parse(const char *src, size_t src_len,

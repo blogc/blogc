@@ -35,11 +35,11 @@ blogc_assert_template_stmt(b_slist_t *l, const char *value,
 
 static void
 blogc_assert_template_if_stmt(b_slist_t *l, const char *variable,
-    const char *operator, const char *operand)
+    blogc_template_stmt_operator_t operator, const char *operand)
 {
     blogc_template_stmt_t *stmt = l->data;
     assert_string_equal(stmt->value, variable);
-    assert_string_equal(stmt->op, operator);
+    assert_int_equal(stmt->op, operator);
     assert_string_equal(stmt->value2, operand);
     assert_int_equal(stmt->type, BLOGC_TEMPLATE_IF_STMT);
 }
@@ -106,7 +106,7 @@ test_template_parse(void **state)
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next->next->next,
         "\n", BLOGC_TEMPLATE_CONTENT_STMT);
     tmp = tmp->next->next->next->next->next->next->next->next->next->next;
-    blogc_assert_template_if_stmt(tmp, "BOLA", "==", "1\\\"0");
+    blogc_assert_template_if_stmt(tmp, "BOLA", BLOGC_TEMPLATE_OP_EQ, "1\\\"0");
     blogc_assert_template_stmt(tmp->next, "aee", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next, NULL,
         BLOGC_TEMPLATE_ENDIF_STMT);
