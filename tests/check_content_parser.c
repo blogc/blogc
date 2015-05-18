@@ -216,6 +216,64 @@ test_content_parse_code(void **state)
 
 
 void
+test_content_parse_horizontal_rule(void **state)
+{
+    char *html = blogc_content_parse("bola\nguda\n\n**");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>bola\n"
+        "guda</p>\n"
+        "<hr />\n");
+    free(html);
+    html = blogc_content_parse("bola\nguda\n\n++++");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>bola\n"
+        "guda</p>\n"
+        "<hr />\n");
+    free(html);
+    html = blogc_content_parse("bola\nguda\n\n--\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>bola\n"
+        "guda</p>\n"
+        "<hr />\n");
+    free(html);
+    html = blogc_content_parse("bola\nguda\n\n****\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>bola\n"
+        "guda</p>\n"
+        "<hr />\n");
+    free(html);
+    html = blogc_content_parse(
+        "bola\n"
+        "\n"
+        "**\n"
+        "\n"
+        "chunda\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>bola</p>\n"
+        "<hr />\n"
+        "<p>chunda</p>\n");
+    free(html);
+    html = blogc_content_parse(
+        "bola\n"
+        "\n"
+        "----\n"
+        "\n"
+        "chunda\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>bola</p>\n"
+        "<hr />\n"
+        "<p>chunda</p>\n");
+    free(html);
+}
+
+
+void
 test_content_parse_invalid_header(void **state)
 {
     char *html = blogc_content_parse(
@@ -308,6 +366,7 @@ main(void)
         unit_test(test_content_parse_html),
         unit_test(test_content_parse_blockquote),
         unit_test(test_content_parse_code),
+        unit_test(test_content_parse_horizontal_rule),
         unit_test(test_content_parse_invalid_header),
         unit_test(test_content_parse_invalid_header_empty),
         unit_test(test_content_parse_invalid_blockquote),

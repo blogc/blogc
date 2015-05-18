@@ -548,6 +548,8 @@ blogc_content_parse(const char *src)
 
             case CONTENT_UNORDERED_LIST_OR_HORIZONTAL_RULE:
                 if (c == d) {
+                    if (is_last)
+                        goto hr;
                     state = CONTENT_HORIZONTAL_RULE;
                     break;
                 }
@@ -558,9 +560,10 @@ blogc_content_parse(const char *src)
                 break;
 
             case CONTENT_HORIZONTAL_RULE:
-                if (c == d) {
+                if (c == d && !is_last) {
                     break;
                 }
+hr:
                 if (c == '\n' || c == '\r' || is_last) {
                     b_string_append(rv, "<hr />\n");
                     state = CONTENT_START_LINE;
