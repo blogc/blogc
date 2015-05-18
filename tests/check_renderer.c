@@ -67,7 +67,12 @@ test_render_entry(void **state)
         "{% ifdef GUDA %}{{ GUDA }}{% endif %}\n"
         "{% ifdef CHUNDA %}{{ CHUNDA }}{% endif %}\n"
         "{% endblock %}\n"
-        "{% block listing %}lol{% endblock %}\n";
+        "{% block listing %}lol{% endblock %}\n"
+        "{% if GUDA == \"zxc\" %}LOL{% endif %}\n"
+        "{% if GUDA != \"bola\" %}HEHE{% endif %}\n"
+        "{% if GUDA < \"zxd\" %}LOL2{% endif %}\n"
+        "{% if GUDA > \"zxd\" %}LOL3{% endif %}\n"
+        "{% if GUDA <= \"zxc\" %}LOL4{% endif %}\n";
     blogc_error_t *err = NULL;
     b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
@@ -84,7 +89,12 @@ test_render_entry(void **state)
         "zxc\n"
         "\n"
         "\n"
-        "\n");
+        "\n"
+        "LOL\n"
+        "HEHE\n"
+        "LOL2\n"
+        "\n"
+        "LOL4\n");
     blogc_template_free_stmts(l);
     b_slist_free_full(s, (b_free_func_t) b_trie_free);
     free(out);

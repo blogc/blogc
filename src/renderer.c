@@ -83,13 +83,16 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
     const char *config_value = NULL;
     const char *config_var = NULL;
     char *config_value2 = NULL;
+    char *defined = NULL;
 
     unsigned int if_count = 0;
     unsigned int if_skip = 0;
 
     bool if_not = false;
-    bool defined = false;
     bool inside_block = false;
+    bool evaluate = false;
+
+    int cmp = 0;
 
     b_slist_t *tmp = tmpl;
     while (tmp != NULL) {
@@ -187,8 +190,9 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
             case BLOGC_TEMPLATE_IFNDEF_STMT:
                 if_not = true;
 
+            case BLOGC_TEMPLATE_IF_STMT:
             case BLOGC_TEMPLATE_IFDEF_STMT:
-                defined = false;
+                defined = NULL;
                 if (stmt->value != NULL) {
                     config_var = NULL;
                     if (0 == strcmp(stmt->value, "DATE_FORMATTED"))
@@ -203,16 +207,35 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                                 inside_block ? tmp_source : NULL),
                             config, inside_block ? tmp_source : NULL);
                         if (config_value2 != NULL) {
-                            defined = true;
-                            free(config_value2);
+                            defined = config_value2;
                             config_value2 = NULL;
                         }
                     }
                     else
-                        defined = blogc_get_variable(stmt->value, config,
-                            inside_block ? tmp_source : NULL) != NULL;
+                        defined = b_strdup(blogc_get_variable(stmt->value,
+                            config, inside_block ? tmp_source : NULL));
                 }
-                if ((!if_not && !defined) || (if_not && defined)) {
+                evaluate = false;
+                if (stmt->op != 0) {
+                    if (defined != NULL && stmt->value2 != NULL) {
+                        cmp = strcmp(defined, stmt->value2);
+                        if (cmp != 0 && stmt->op & BLOGC_TEMPLATE_OP_NEQ)
+                            evaluate = true;
+                        else if (cmp == 0 && stmt->op & BLOGC_TEMPLATE_OP_EQ)
+                            evaluate = true;
+                        else if (cmp < 0 && stmt->op & BLOGC_TEMPLATE_OP_LT)
+                            evaluate = true;
+                        else if (cmp > 0 && stmt->op & BLOGC_TEMPLATE_OP_GT)
+                            evaluate = true;
+                    }
+                }
+                else {
+                    if (if_not && defined == NULL)
+                        evaluate = true;
+                    if (!if_not && defined != NULL)
+                        evaluate = true;
+                }
+                if (!evaluate) {
                     if_skip = if_count;
 
                     // at this point we can just skip anything, counting the
@@ -221,7 +244,8 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                     while (1) {
                         tmp = tmp->next;
                         stmt = tmp->data;
-                        if ((stmt->type == BLOGC_TEMPLATE_IFDEF_STMT) ||
+                        if ((stmt->type == BLOGC_TEMPLATE_IF_STMT) ||
+                            (stmt->type == BLOGC_TEMPLATE_IFDEF_STMT) ||
                             (stmt->type == BLOGC_TEMPLATE_IFNDEF_STMT))
                         {
                             if_count++;
@@ -237,6 +261,8 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                         }
                     }
                 }
+                free(defined);
+                defined = NULL;
                 if_not = false;
                 break;
 

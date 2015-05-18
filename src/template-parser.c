@@ -399,7 +399,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                             else if (0 == strncmp("==", src + op_start, 2))
                                 tmp_op = BLOGC_TEMPLATE_OP_EQ;
                             else if (0 == strncmp("!=", src + op_start, 2))
-                                tmp_op = BLOGC_TEMPLATE_OP_NOT | BLOGC_TEMPLATE_OP_EQ;
+                                tmp_op = BLOGC_TEMPLATE_OP_NEQ;
                         }
                         if (tmp_op == 0) {
                             *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,

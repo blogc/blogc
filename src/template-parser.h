@@ -24,7 +24,7 @@ typedef enum {
 } blogc_template_stmt_type_t;
 
 typedef enum {
-    BLOGC_TEMPLATE_OP_NOT = 1 << 0,
+    BLOGC_TEMPLATE_OP_NEQ = 1 << 0,
     BLOGC_TEMPLATE_OP_EQ  = 1 << 1,
     BLOGC_TEMPLATE_OP_LT  = 1 << 2,
     BLOGC_TEMPLATE_OP_GT  = 1 << 3,
