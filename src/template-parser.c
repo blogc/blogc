@@ -132,7 +132,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     break;
                 if (c == ' ') {
                     if ((current - start == 5) &&
-                        (0 == strncmp("block", src + start, current - start)))
+                        (0 == strncmp("block", src + start, 5)))
                     {
                         if (block_state == BLOCK_CLOSED) {
                             state = TEMPLATE_BLOCK_BLOCK_TYPE_START;
@@ -145,7 +145,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         break;
                     }
                     else if ((current - start == 8) &&
-                        (0 == strncmp("endblock", src + start, current - start)))
+                        (0 == strncmp("endblock", src + start, 8)))
                     {
                         if (block_state != BLOCK_CLOSED) {
                             state = TEMPLATE_BLOCK_END;
@@ -159,7 +159,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         break;
                     }
                     else if ((current - start == 5) &&
-                        (0 == strncmp("ifdef", src + start, current - start)))
+                        (0 == strncmp("ifdef", src + start, 5)))
                     {
                         state = TEMPLATE_BLOCK_IF_START;
                         type = BLOGC_TEMPLATE_IFDEF_STMT;
@@ -168,7 +168,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         break;
                     }
                     else if ((current - start == 6) &&
-                        (0 == strncmp("ifndef", src + start, current - start)))
+                        (0 == strncmp("ifndef", src + start, 6)))
                     {
                         state = TEMPLATE_BLOCK_IF_START;
                         type = BLOGC_TEMPLATE_IFNDEF_STMT;
@@ -177,7 +177,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         break;
                     }
                     else if ((current - start == 2) &&
-                        (0 == strncmp("if", src + start, current - start)))
+                        (0 == strncmp("if", src + start, 2)))
                     {
                         state = TEMPLATE_BLOCK_IF_START;
                         type = BLOGC_TEMPLATE_IF_STMT;
@@ -186,7 +186,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         break;
                     }
                     else if ((current - start == 5) &&
-                        (0 == strncmp("endif", src + start, current - start)))
+                        (0 == strncmp("endif", src + start, 5)))
                     {
                         if (if_count > 0) {
                             state = TEMPLATE_BLOCK_END;
@@ -225,7 +225,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     break;
                 if (c == ' ') {
                     if ((current - start == 5) &&
-                        (0 == strncmp("entry", src + start, current - start)))
+                        (0 == strncmp("entry", src + start, 5)))
                     {
                         block_state = BLOCK_ENTRY;
                         end = current;
@@ -233,7 +233,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         break;
                     }
                     else if ((current - start == 7) &&
-                        (0 == strncmp("listing", src + start, current - start)))
+                        (0 == strncmp("listing", src + start, 7)))
                     {
                         block_state = BLOCK_LISTING;
                         end = current;
@@ -241,7 +241,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         break;
                     }
                     else if ((current - start == 12) &&
-                        (0 == strncmp("listing_once", src + start, current - start)))
+                        (0 == strncmp("listing_once", src + start, 12)))
                     {
                         block_state = BLOCK_LISTING_ONCE;
                         end = current;
