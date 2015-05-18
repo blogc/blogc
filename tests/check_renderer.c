@@ -269,6 +269,212 @@ test_render_ifndef(void **state)
 
 
 static void
+test_render_if_eq(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% if GUDA == \"zxc\" %}guda\n"
+        "{% ifdef BOLA %}bola\n"
+        "{% if GUDA > \"zxc\" %}asd\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    b_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, NULL, false);
+    assert_string_equal(out,
+        "\n"
+        "guda\n"
+        "bola\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n");
+    blogc_template_free_stmts(l);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_if_neq(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% if GUDA != \"zxa\" %}guda\n"
+        "{% ifdef BOLA %}bola\n"
+        "{% if GUDA > \"zxc\" %}asd\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    b_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, NULL, false);
+    assert_string_equal(out,
+        "\n"
+        "guda\n"
+        "bola\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n");
+    blogc_template_free_stmts(l);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_if_lt(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% if GUDA < \"zxe\" %}guda\n"
+        "{% ifdef BOLA %}bola\n"
+        "{% if GUDA > \"zxc\" %}asd\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    b_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, NULL, false);
+    assert_string_equal(out,
+        "\n"
+        "guda\n"
+        "bola\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n");
+    blogc_template_free_stmts(l);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_if_gt(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% if GUDA > \"zxa\" %}guda\n"
+        "{% ifdef BOLA %}bola\n"
+        "{% if GUDA > \"zxc\" %}asd\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    b_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, NULL, false);
+    assert_string_equal(out,
+        "\n"
+        "guda\n"
+        "bola\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n");
+    blogc_template_free_stmts(l);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_if_lt_eq(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% if GUDA <= \"zxc\" %}guda\n"
+        "{% if GUDA <= \"zxe\" %}guda2\n"
+        "{% ifdef BOLA %}bola\n"
+        "{% if GUDA > \"zxc\" %}asd\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    b_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, NULL, false);
+    assert_string_equal(out,
+        "\n"
+        "guda\n"
+        "guda2\n"
+        "bola\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n");
+    blogc_template_free_stmts(l);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_if_gt_eq(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% if GUDA >= \"zxc\" %}guda\n"
+        "{% if GUDA >= \"zxa\" %}guda2\n"
+        "{% ifdef BOLA %}bola\n"
+        "{% if GUDA > \"zxc\" %}asd\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    b_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, NULL, false);
+    assert_string_equal(out,
+        "\n"
+        "guda\n"
+        "guda2\n"
+        "bola\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n");
+    blogc_template_free_stmts(l);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
+    free(out);
+}
+
+
+static void
 test_render_null(void **state)
 {
     assert_null(blogc_render(NULL, NULL, NULL, false));
@@ -483,8 +689,14 @@ main(void)
         unit_test(test_render_ifdef2),
         unit_test(test_render_ifdef3),
         unit_test(test_render_ifndef),
-        unit_test(test_render_outside_block),
+        unit_test(test_render_if_eq),
+        unit_test(test_render_if_neq),
+        unit_test(test_render_if_lt),
+        unit_test(test_render_if_gt),
+        unit_test(test_render_if_lt_eq),
+        unit_test(test_render_if_gt_eq),
         unit_test(test_render_null),
+        unit_test(test_render_outside_block),
         unit_test(test_render_prefer_local_variable),
         unit_test(test_render_respect_variable_scope),
         unit_test(test_get_variable),
