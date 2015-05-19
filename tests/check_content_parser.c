@@ -274,6 +274,114 @@ test_content_parse_horizontal_rule(void **state)
 
 
 void
+test_content_parse_unordered_list(void **state)
+{
+    char *html = blogc_content_parse(
+        "lol\n"
+        "\n"
+        "*  asd\n"
+        "*  qwe\n"
+        "*  zxc");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>lol</p>\n"
+        "<ul>\n"
+        "<li>asd</li>\n"
+        "<li>qwe</li>\n"
+        "<li>zxc</li>\n"
+        "</ul>\n");
+    free(html);
+    html = blogc_content_parse(
+        "lol\n"
+        "\n"
+        "*  asd\n"
+        "*  qwe\n"
+        "*  zxc\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>lol</p>\n"
+        "<ul>\n"
+        "<li>asd</li>\n"
+        "<li>qwe</li>\n"
+        "<li>zxc</li>\n"
+        "</ul>\n");
+    free(html);
+    html = blogc_content_parse(
+        "lol\n"
+        "\n"
+        "*  asd\n"
+        "*  qwe\n"
+        "*  zxc\n"
+        "\n"
+        "fuuuu\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>lol</p>\n"
+        "<ul>\n"
+        "<li>asd</li>\n"
+        "<li>qwe</li>\n"
+        "<li>zxc</li>\n"
+        "</ul>\n"
+        "<p>fuuuu</p>\n");
+    free(html);
+}
+
+
+void
+test_content_parse_ordered_list(void **state)
+{
+    char *html = blogc_content_parse(
+        "lol\n"
+        "\n"
+        "1.  asd\n"
+        "2.  qwe\n"
+        "3.  zxc");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>lol</p>\n"
+        "<ol>\n"
+        "<li>asd</li>\n"
+        "<li>qwe</li>\n"
+        "<li>zxc</li>\n"
+        "</ol>\n");
+    free(html);
+    html = blogc_content_parse(
+        "lol\n"
+        "\n"
+        "1.  asd\n"
+        "2.  qwe\n"
+        "3.  zxc\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>lol</p>\n"
+        "<ol>\n"
+        "<li>asd</li>\n"
+        "<li>qwe</li>\n"
+        "<li>zxc</li>\n"
+        "</ol>\n");
+    free(html);
+    html = blogc_content_parse(
+        "lol\n"
+        "\n"
+        "1.  asd\n"
+        "2.  qwe\n"
+        "3.  zxc\n"
+        "\n"
+        "fuuuu\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>lol</p>\n"
+        "<ol>\n"
+        "<li>asd</li>\n"
+        "<li>qwe</li>\n"
+        "<li>zxc</li>\n"
+        "</ol>\n"
+        "<p>fuuuu</p>\n");
+    free(html);
+}
+
+
+void
 test_content_parse_invalid_header(void **state)
 {
     char *html = blogc_content_parse(
@@ -340,6 +448,21 @@ test_content_parse_invalid_code(void **state)
 
 
 void
+test_content_parse_invalid_horizontal_rule(void **state)
+{
+    // this generates invalid html, but...
+    char *html = blogc_content_parse("** asd");
+    assert_non_null(html);
+    assert_string_equal(html, "<p><strong> asd</p>\n");
+    free(html);
+    html = blogc_content_parse("** asd\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<p><strong> asd</p>\n");
+    free(html);
+}
+
+
+void
 test_content_parse_inline(void **state)
 {
     char *html = blogc_content_parse_inline(
@@ -367,10 +490,13 @@ main(void)
         unit_test(test_content_parse_blockquote),
         unit_test(test_content_parse_code),
         unit_test(test_content_parse_horizontal_rule),
+        unit_test(test_content_parse_unordered_list),
+        unit_test(test_content_parse_ordered_list),
         unit_test(test_content_parse_invalid_header),
         unit_test(test_content_parse_invalid_header_empty),
         unit_test(test_content_parse_invalid_blockquote),
         unit_test(test_content_parse_invalid_code),
+        unit_test(test_content_parse_invalid_horizontal_rule),
         unit_test(test_content_parse_inline),
     };
     return run_tests(tests);
