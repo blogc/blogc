@@ -3,7 +3,7 @@
  * Copyright (C) 2015 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
- * See the file COPYING.
+ * See the file LICENSE.
  */
 
 #ifdef HAVE_CONFIG_H
