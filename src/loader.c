@@ -99,8 +99,9 @@ blogc_source_parse_from_files(b_trie_t *conf, b_slist_t *l, blogc_error_t **err)
 {
     blogc_error_t *tmp_err = NULL;
     b_slist_t *rv = NULL;
-    bool first = true;
     unsigned int with_date = 0;
+
+    const char *filter_tag = b_trie_lookup(conf, "FILTER_TAG");
 
     for (b_slist_t *tmp = l; tmp != NULL; tmp = tmp->next) {
         char *f = tmp->data;
@@ -115,8 +116,39 @@ blogc_source_parse_from_files(b_trie_t *conf, b_slist_t *l, blogc_error_t **err)
             rv = NULL;
             break;
         }
-        if (b_trie_lookup(s, "DATE"))
+        if (filter_tag != NULL) {
+            const char *tags_str = b_trie_lookup(s, "TAGS");
+            // if user wants to filter by tag and no tag is provided, skip it
+            if (tags_str == NULL) {
+                b_trie_free(s);
+                continue;
+            }
+            char **tags = b_str_split(tags_str, ',', 0);
+            bool found = false;
+            for (unsigned int i = 0; tags[i] != NULL; i++)
+                if (0 == strcmp(b_str_strip(tags[i]), filter_tag))
+                    found = true;
+            b_strv_free(tags);
+            if (!found) {
+                b_trie_free(s);
+                continue;
+            }
+        }
+        if (b_trie_lookup(s, "DATE") != NULL)
             with_date++;
+        rv = b_slist_append(rv, s);
+    }
+
+    if (with_date > 0 && with_date < b_slist_length(rv))
+        // fatal error, maybe?
+        blogc_fprintf(stderr,
+            "blogc: warning: 'DATE' variable provided for at least one source "
+            "file, but not for all source files. This means that you may get "
+            "wrong values for 'DATE_FIRST' and 'DATE_LAST' variables.\n");
+
+    bool first = true;
+    for (b_slist_t *tmp = rv; tmp != NULL; tmp = tmp->next) {
+        b_trie_t *s = tmp->data;
         if (first) {
             const char *val = b_trie_lookup(s, "DATE");
             if (val != NULL)
@@ -134,13 +166,7 @@ blogc_source_parse_from_files(b_trie_t *conf, b_slist_t *l, blogc_error_t **err)
             if (val != NULL)
                 b_trie_insert(conf, "FILENAME_LAST", b_strdup(val));
         }
-        rv = b_slist_append(rv, s);
     }
-    if (with_date > 0 && with_date < b_slist_length(l))
-        // fatal error, maybe?
-        blogc_fprintf(stderr,
-            "blogc: warning: 'DATE' variable provided for at least one source "
-            "file, but not for all source files. This means that you may get "
-            "wrong values for 'DATE_FIRST' and 'DATE_LAST' variables.\n");
+
     return rv;
 }
