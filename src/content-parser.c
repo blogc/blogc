@@ -588,9 +588,15 @@ hr:
                         parsed = NULL;
                     }
                     else {
-                        state = CONTENT_PARAGRAPH;
+                        state = CONTENT_PARAGRAPH_END;
                         free(tmp);
                         tmp = NULL;
+                        free(prefix);
+                        prefix = NULL;
+                        b_slist_free_full(lines, free);
+                        lines = NULL;
+                        if (is_last)
+                            goto para;
                         break;
                     }
                     free(tmp);
@@ -634,7 +640,8 @@ hr:
                     break;
                 prefix_len = current - start;
                 state = CONTENT_ORDERED_LIST_START;
-                break;
+                if (c != '\n' && c != '\r' && !is_last)
+                    break;
 
             case CONTENT_ORDERED_LIST_START:
                 if (c == '\n' || c == '\r' || is_last) {
@@ -646,19 +653,25 @@ hr:
                         free(tmp2);
                         tmp2 = NULL;
                         if (b_strv_length(tmpv) != 2) {
-                            state = CONTENT_PARAGRAPH;
-                            goto err_li;
+                            state = CONTENT_PARAGRAPH_END;
+                            b_strv_free(tmpv);
+                            tmpv = NULL;
+                            free(tmp);
+                            tmp = NULL;
+                            b_slist_free_full(lines, free);
+                            lines = NULL;
+                            goto para;
                         }
                         for (unsigned int i = 0; tmpv[0][i] != '\0'; i++) {
                             if (!(tmpv[0][i] >= '0' && tmpv[0][i] <= '9')) {
-                                state = CONTENT_PARAGRAPH;
-                                goto err_li;
-                            }
-                        }
-                        for (unsigned int i = 0; tmpv[1][i] != '\0'; i++) {
-                            if (!(tmpv[1][i] == ' ' || tmpv[1][i] == '\t')) {
-                                state = CONTENT_PARAGRAPH;
-                                goto err_li;
+                                state = CONTENT_PARAGRAPH_END;
+                                b_strv_free(tmpv);
+                                tmpv = NULL;
+                                free(tmp);
+                                tmp = NULL;
+                                b_slist_free_full(lines, free);
+                                lines = NULL;
+                                goto para;
                             }
                         }
                         tmp3 = b_strdup(tmp + prefix_len);
@@ -669,7 +682,6 @@ hr:
                         state = CONTENT_ORDERED_LIST_END;
                         free(parsed);
                         parsed = NULL;
-err_li:
                         b_strv_free(tmpv);
                         tmpv = NULL;
                     }
@@ -707,6 +719,7 @@ err_li:
                     break;
 
             case CONTENT_PARAGRAPH_END:
+para:
                 if (c == '\n' || c == '\r' || is_last) {
                     tmp = b_strndup(src + start, end - start);
                     parsed = blogc_content_parse_inline(tmp);

@@ -378,6 +378,24 @@ test_content_parse_ordered_list(void **state)
         "</ol>\n"
         "<p>fuuuu</p>\n");
     free(html);
+    html = blogc_content_parse(
+        "1.\nasd\n"
+        "2. qwe\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>1.\n"
+        "asd</p>\n"
+        "<ol>\n"
+        "<li>qwe</li>\n"
+        "</ol>\n");
+    free(html);
+    html = blogc_content_parse("1.\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<ol>\n"
+        "<li></li>\n"
+        "</ol>\n");
+    free(html);
 }
 
 
@@ -463,6 +481,130 @@ test_content_parse_invalid_horizontal_rule(void **state)
 
 
 void
+test_content_parse_invalid_unordered_list(void **state)
+{
+    // more invalid html
+    char *html = blogc_content_parse(
+        "*  asd\n"
+        "1. qwe");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p><em>  asd\n"
+        "1. qwe</p>\n");
+    free(html);
+    html = blogc_content_parse(
+        "*  asd\n"
+        "1. qwe\n"
+        "\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p><em>  asd\n"
+        "1. qwe</p>\n");
+    free(html);
+    html = blogc_content_parse(
+        "*  asd\n"
+        "1. qwe\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p><em>  asd\n"
+        "1. qwe</p>\n");
+    free(html);
+    html = blogc_content_parse(
+        "* asd\n"
+        "1. qwe\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p><em> asd\n"
+        "1. qwe</p>\n");
+    free(html);
+    html = blogc_content_parse(
+        "chunda\n"
+        "\n"
+        "* asd\n"
+        "1. qwe\n"
+        "\n"
+        "poi\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>chunda</p>\n"
+        "<p><em> asd\n"
+        "1. qwe</p>\n"
+        "<p>poi</p>\n");
+    free(html);
+}
+
+
+void
+test_content_parse_invalid_ordered_list(void **state)
+{
+    // more invalid html
+    char *html = blogc_content_parse(
+        "1. asd\n"
+        "*  qwe");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>1. asd\n"
+        "<em>  qwe</p>\n");
+    free(html);
+    html = blogc_content_parse(
+        "1. asd\n"
+        "*  qwe\n"
+        "\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>1. asd\n"
+        "<em>  qwe</p>\n");
+    free(html);
+    html = blogc_content_parse(
+        "1. asd\n"
+        "*  qwe\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>1. asd\n"
+        "<em>  qwe</p>\n");
+    free(html);
+    html = blogc_content_parse(
+        "1. asd\n"
+        "*  qwe\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>1. asd\n"
+        "<em>  qwe</p>\n");
+    free(html);
+    html = blogc_content_parse(
+        "chunda\n"
+        "\n"
+        "1. asd\n"
+        "*  qwe\n"
+        "\n"
+        "poi\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>chunda</p>\n"
+        "<p>1. asd\n"
+        "<em>  qwe</p>\n"
+        "<p>poi</p>\n");
+    free(html);
+    html = blogc_content_parse(
+        "1 asd\n"
+        "* qwe\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>1 asd\n"
+        "<em> qwe</p>\n");
+    free(html);
+    html = blogc_content_parse(
+        "a. asd\n"
+        "2. qwe\n");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>a. asd\n"
+        "2. qwe</p>\n");
+    free(html);
+}
+
+
+void
 test_content_parse_inline(void **state)
 {
     char *html = blogc_content_parse_inline(
@@ -497,6 +639,8 @@ main(void)
         unit_test(test_content_parse_invalid_blockquote),
         unit_test(test_content_parse_invalid_code),
         unit_test(test_content_parse_invalid_horizontal_rule),
+        unit_test(test_content_parse_invalid_unordered_list),
+        unit_test(test_content_parse_invalid_ordered_list),
         unit_test(test_content_parse_inline),
     };
     return run_tests(tests);
