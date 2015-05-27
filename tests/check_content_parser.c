@@ -610,6 +610,7 @@ test_content_parse_inline(void **state)
     char *html = blogc_content_parse_inline(
         "**bola***asd* [![lol](http://google.com/lol.png) **lol** "
         "\\[asd\\]\\(qwe\\)](http://google.com) ``chunda``");
+    assert_non_null(html);
     assert_string_equal(html,
         "<strong>bola</strong><em>asd</em> "
         "<a href=\"http://google.com\"><img src=\"http://google.com/lol.png\" "
@@ -617,7 +618,200 @@ test_content_parse_inline(void **state)
         "<code>chunda</code>");
     free(html);
     html = blogc_content_parse_inline("*bola*");
+    assert_non_null(html);
     assert_string_equal(html, "<em>bola</em>");
+    free(html);
+}
+
+
+void
+test_content_parse_inline_em(void **state)
+{
+    char *html = blogc_content_parse_inline("*bola*");
+    assert_non_null(html);
+    assert_string_equal(html, "<em>bola</em>");
+    free(html);
+    html = blogc_content_parse_inline("*bola*\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<em>bola</em>\n");
+    free(html);
+    html = blogc_content_parse_inline("_bola_");
+    assert_non_null(html);
+    assert_string_equal(html, "<em>bola</em>");
+    free(html);
+    html = blogc_content_parse_inline("_bola_\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<em>bola</em>\n");
+    free(html);
+    html = blogc_content_parse_inline("_**bola**_\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<em><strong>bola</strong></em>\n");
+    free(html);
+    // this is not really valid
+    html = blogc_content_parse_inline("_**bola\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<em><strong>bola\n");
+    free(html);
+}
+
+
+void
+test_content_parse_inline_strong(void **state)
+{
+    char *html = blogc_content_parse_inline("**bola**");
+    assert_non_null(html);
+    assert_string_equal(html, "<strong>bola</strong>");
+    free(html);
+    html = blogc_content_parse_inline("**bola**\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<strong>bola</strong>\n");
+    free(html);
+    html = blogc_content_parse_inline("__bola__");
+    assert_non_null(html);
+    assert_string_equal(html, "<strong>bola</strong>");
+    free(html);
+    html = blogc_content_parse_inline("__bola__\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<strong>bola</strong>\n");
+    free(html);
+    html = blogc_content_parse_inline("__*bola*__\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<strong><em>bola</em></strong>\n");
+    free(html);
+    // this is not really valid
+    html = blogc_content_parse_inline("__*bola\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<strong><em>bola\n");
+    free(html);
+}
+
+
+void
+test_content_parse_inline_code(void **state)
+{
+    char *html = blogc_content_parse_inline("``bola``");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>bola</code>");
+    free(html);
+    html = blogc_content_parse_inline("``bola``\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>bola</code>\n");
+    free(html);
+    html = blogc_content_parse_inline("`bola`");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>bola</code>");
+    free(html);
+    html = blogc_content_parse_inline("`bola`\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>bola</code>\n");
+    free(html);
+    html = blogc_content_parse_inline("``bo*la``\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>bo*la</code>\n");
+    free(html);
+    // invalid
+    html = blogc_content_parse_inline("``bola\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>bola\n");
+    free(html);
+    html = blogc_content_parse_inline("`bola\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>bola\n");
+    free(html);
+    html = blogc_content_parse_inline("``bola`\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>bola<code>\n");
+    free(html);
+}
+
+
+void
+test_content_parse_inline_link(void **state)
+{
+    char *html = blogc_content_parse_inline("[bola](http://example.org/)");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"http://example.org/\">bola</a>");
+    free(html);
+    html = blogc_content_parse_inline("[bola](http://example.org/)\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"http://example.org/\">bola</a>\n");
+    free(html);
+    html = blogc_content_parse_inline("[bola]\n(http://example.org/)\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"http://example.org/\">bola</a>\n");
+    free(html);
+    html = blogc_content_parse_inline("[bo\nla](http://example.org/)\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"http://example.org/\">bo\nla</a>\n");
+    free(html);
+    // "invalid"
+    html = blogc_content_parse_inline("[bola](\nhttp://example.org/)\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"\nhttp://example.org/\">bola</a>\n");
+    free(html);
+    // invalid
+    html = blogc_content_parse_inline("[bola](http://example.org/\n");
+    assert_non_null(html);
+    assert_string_equal(html, "");  // FIXME
+    free(html);
+}
+
+
+void
+test_content_parse_inline_image(void **state)
+{
+    char *html = blogc_content_parse_inline("![bola](http://example.org/)");
+    assert_non_null(html);
+    assert_string_equal(html, "<img src=\"http://example.org/\" alt=\"bola\">");
+    free(html);
+    html = blogc_content_parse_inline("![bola](http://example.org/)\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<img src=\"http://example.org/\" alt=\"bola\">\n");
+    free(html);
+    html = blogc_content_parse_inline("![bola]\n(http://example.org/)\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<img src=\"http://example.org/\" alt=\"bola\">\n");
+    free(html);
+    // "invalid"
+    html = blogc_content_parse_inline("![bo\nla](http://example.org/)\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<img src=\"http://example.org/\" alt=\"bo\nla\">\n");
+    free(html);
+    html = blogc_content_parse_inline("![bola](\nhttp://example.org/)\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<img src=\"\nhttp://example.org/\" alt=\"bola\">\n");
+    free(html);
+    // invalid
+    html = blogc_content_parse_inline("![bola](http://example.org/\n");
+    assert_non_null(html);
+    assert_string_equal(html, "");  // FIXME
+    free(html);
+}
+
+
+void
+test_content_parse_inline_line_break(void **state)
+{
+    char *html = blogc_content_parse_inline("asd  \n");
+    assert_non_null(html);
+    assert_string_equal(html, "asd  <br />\n");
+    free(html);
+    html = blogc_content_parse_inline("asd  ");
+    assert_non_null(html);
+    assert_string_equal(html, "asd  <br />\n");
+    free(html);
+    html = blogc_content_parse_inline("asd   ");
+    assert_non_null(html);
+    assert_string_equal(html, "asd   <br />\n");
+    free(html);
+    // invalid
+    html = blogc_content_parse_inline("asd ");
+    assert_non_null(html);
+    assert_string_equal(html, "asd ");
+    free(html);
+    html = blogc_content_parse_inline("asd \n");
+    assert_non_null(html);
+    assert_string_equal(html, "asd \n");
     free(html);
 }
 
@@ -642,6 +836,12 @@ main(void)
         unit_test(test_content_parse_invalid_unordered_list),
         unit_test(test_content_parse_invalid_ordered_list),
         unit_test(test_content_parse_inline),
+        unit_test(test_content_parse_inline_em),
+        unit_test(test_content_parse_inline_strong),
+        unit_test(test_content_parse_inline_code),
+        unit_test(test_content_parse_inline_link),
+        unit_test(test_content_parse_inline_image),
+        unit_test(test_content_parse_inline_line_break),
     };
     return run_tests(tests);
 }

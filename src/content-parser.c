@@ -249,7 +249,8 @@ blogc_content_parse_inline(const char *src)
                     spaces++;
                     b_string_append_c(rv, c);
                 }
-                break;
+                if (!is_last)
+                    break;
 
             case '\n':
             case '\r':
@@ -258,7 +259,7 @@ blogc_content_parse_inline(const char *src)
                         b_string_append(rv, "<br />\n");
                         spaces = 0;
                     }
-                    else
+                    else if (c == '\n' || c == '\r')
                         b_string_append_c(rv, c);
                 }
                 break;
@@ -300,6 +301,10 @@ blogc_content_parse_inline(const char *src)
 
         current++;
     }
+
+    // FIXME: do not just free this leftover memory
+    free(tmp);
+    free(tmp2);
 
     return b_string_free(rv, false);
 }
