@@ -81,7 +81,17 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                         ((current - start == 20) &&
                          (0 == strncmp("DATE_FIRST_FORMATTED", src + start, 20))) ||
                         ((current - start == 19) &&
-                         (0 == strncmp("DATE_LAST_FORMATTED", src + start, 19))))
+                         (0 == strncmp("DATE_LAST_FORMATTED", src + start, 19))) ||
+                        ((current - start == 10) &&
+                         (0 == strncmp("PAGE_FIRST", src + start, 10))) ||
+                        ((current - start == 13) &&
+                         (0 == strncmp("PAGE_PREVIOUS", src + start, 13))) ||
+                        ((current - start == 12) &&
+                         (0 == strncmp("PAGE_CURRENT", src + start, 12))) ||
+                        ((current - start == 9) &&
+                         (0 == strncmp("PAGE_NEXT", src + start, 9))) ||
+                        ((current - start == 9) &&
+                         (0 == strncmp("PAGE_LAST", src + start, 9))))
                     {
                         *err = blogc_error_new_printf(BLOGC_ERROR_SOURCE_PARSER,
                             "'%s' variable is forbidden in source files. It will "

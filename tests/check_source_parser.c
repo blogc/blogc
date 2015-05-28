@@ -258,6 +258,91 @@ test_source_parse_config_reserved_name5(void **state)
 
 
 static void
+test_source_parse_config_reserved_name6(void **state)
+{
+    const char *a = "PAGE_FIRST: asd\r\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "'PAGE_FIRST' variable is forbidden in source files. It will be set "
+        "for you by the compiler.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_config_reserved_name7(void **state)
+{
+    const char *a = "PAGE_PREVIOUS: asd\r\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "'PAGE_PREVIOUS' variable is forbidden in source files. It will be set "
+        "for you by the compiler.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_config_reserved_name8(void **state)
+{
+    const char *a = "PAGE_CURRENT: asd\r\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "'PAGE_CURRENT' variable is forbidden in source files. It will be set "
+        "for you by the compiler.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_config_reserved_name9(void **state)
+{
+    const char *a = "PAGE_NEXT: asd\r\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "'PAGE_NEXT' variable is forbidden in source files. It will be set "
+        "for you by the compiler.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_config_reserved_name10(void **state)
+{
+    const char *a = "PAGE_LAST: asd\r\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "'PAGE_LAST' variable is forbidden in source files. It will be set "
+        "for you by the compiler.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
 test_source_parse_config_value_no_line_ending(void **state)
 {
     const char *a = "BOLA: asd";
@@ -307,6 +392,11 @@ main(void)
         unit_test(test_source_parse_config_reserved_name3),
         unit_test(test_source_parse_config_reserved_name4),
         unit_test(test_source_parse_config_reserved_name5),
+        unit_test(test_source_parse_config_reserved_name6),
+        unit_test(test_source_parse_config_reserved_name7),
+        unit_test(test_source_parse_config_reserved_name8),
+        unit_test(test_source_parse_config_reserved_name9),
+        unit_test(test_source_parse_config_reserved_name10),
         unit_test(test_source_parse_config_value_no_line_ending),
         unit_test(test_source_parse_invalid_separator),
     };
