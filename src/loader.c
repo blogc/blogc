@@ -10,6 +10,7 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include "utils/utils.h"
@@ -102,6 +103,21 @@ blogc_source_parse_from_files(b_trie_t *conf, b_slist_t *l, blogc_error_t **err)
     unsigned int with_date = 0;
 
     const char *filter_tag = b_trie_lookup(conf, "FILTER_TAG");
+    const char *filter_page = b_trie_lookup(conf, "FILTER_PAGE");
+    const char *filter_per_page = b_trie_lookup(conf, "FILTER_PER_PAGE");
+
+    long page = strtol(filter_page != NULL ? filter_page : "", NULL, 10);
+    if (page <= 0)
+        page = 1;
+    long per_page = strtol(filter_per_page != NULL ? filter_per_page : "10",
+        NULL, 10);
+    if (per_page <= 0)
+        per_page = 10;
+
+    // poor man's pagination
+    unsigned int start = (page - 1) * per_page;
+    unsigned int end = start + per_page;
+    unsigned int counter = 0;
 
     for (b_slist_t *tmp = l; tmp != NULL; tmp = tmp->next) {
         char *f = tmp->data;
@@ -133,6 +149,14 @@ blogc_source_parse_from_files(b_trie_t *conf, b_slist_t *l, blogc_error_t **err)
                 b_trie_free(s);
                 continue;
             }
+        }
+        if (filter_page != NULL) {
+            if (counter < start || counter >= end) {
+                counter++;
+                b_trie_free(s);
+                continue;
+            }
+            counter++;
         }
         if (b_trie_lookup(s, "DATE") != NULL)
             with_date++;
@@ -166,6 +190,19 @@ blogc_source_parse_from_files(b_trie_t *conf, b_slist_t *l, blogc_error_t **err)
             if (val != NULL)
                 b_trie_insert(conf, "FILENAME_LAST", b_strdup(val));
         }
+    }
+
+    if (filter_page != NULL) {
+        unsigned int last_page = ceilf(((float) counter) / per_page);
+        b_trie_insert(conf, "CURRENT_PAGE", b_strdup_printf("%ld", page));
+        if (page > 1)
+            b_trie_insert(conf, "PREVIOUS_PAGE", b_strdup_printf("%ld", page - 1));
+        if (page < last_page)
+            b_trie_insert(conf, "NEXT_PAGE", b_strdup_printf("%ld", page + 1));
+        if (b_slist_length(rv) > 0)
+            b_trie_insert(conf, "FIRST_PAGE", b_strdup("1"));
+        if (last_page > 0)
+            b_trie_insert(conf, "LAST_PAGE", b_strdup_printf("%d", last_page));
     }
 
     return rv;
