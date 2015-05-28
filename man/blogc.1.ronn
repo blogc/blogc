@@ -5,6 +5,7 @@ blogc(1) -- a blog compiler
 
 `blogc` [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] <SOURCE><br>
 `blogc` `-l` [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] <SOURCE> [<SOURCE> ...]<br>
+`blogc` `-l` `-p` <KEY> [`-D` <KEY>=<VALUE> ...] <SOURCE> [<SOURCE> ...]<br>
 `blogc` [`-h`|`-v`]
 
 ## DESCRIPTION
@@ -40,8 +41,14 @@ designed to be used with make(1).
     but may be overridden by local configuration parameters set in source files.
     See blogc-template(7) for details.
 
+  * `-p` <KEY>:
+    Show the value of a global configuration parameter right after the source
+    parsing and exits. This is useful to get parameters for your `Makefile`,
+    like the last page when using pagination support.
+
   * `-t` <TEMPLATE>:
-    Template file. It is a required option. See blogc-template(7) for details.
+    Template file. It is a required option, if `blogc` needs to render something.
+    See blogc-template(7) for details.
 
   * `-o` <OUTPUT>:
     Output file. If provided this option, save the compiled output to the given

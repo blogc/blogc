@@ -36,7 +36,7 @@ blogc_print_help(void)
 {
     printf(
         "usage:\n"
-        "    blogc [-h] [-v] [-l] [-D KEY=VALUE ...] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...] - A blog compiler.\n"
+        "    blogc [-h] [-v] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE] [-o OUTPUT] SOURCE [SOURCE ...] - A blog compiler.\n"
         "\n"
         "positional arguments:\n"
         "    SOURCE        source file(s)\n"
@@ -46,6 +46,7 @@ blogc_print_help(void)
         "    -v            show version and exit\n"
         "    -l            build listing page, from multiple source files\n"
         "    -D KEY=VALUE  set global configuration parameter\n"
+        "    -p KEY        show the value of a global configuration parameter after source parsing and exit\n"
         "    -t TEMPLATE   template file\n"
         "    -o OUTPUT     output file\n");
 }
@@ -54,7 +55,7 @@ blogc_print_help(void)
 static void
 blogc_print_usage(void)
 {
-    printf("usage: blogc [-h] [-v] [-l] [-D KEY=VALUE ...] -t TEMPLATE [-o OUTPUT] SOURCE [SOURCE ...]\n");
+    printf("usage: blogc [-h] [-v] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE] [-o OUTPUT] SOURCE [SOURCE ...]\n");
 }
 
 
@@ -101,6 +102,7 @@ main(int argc, char **argv)
     bool listing = false;
     char *template = NULL;
     char *output = NULL;
+    char *print = NULL;
     char *tmp = NULL;
     char **pieces = NULL;
 
@@ -131,6 +133,12 @@ main(int argc, char **argv)
                         output = b_strdup(argv[i] + 2);
                     else if (i + 1 < argc)
                         output = b_strdup(argv[++i]);
+                    break;
+                case 'p':
+                    if (argv[i][2] != '\0')
+                        print = b_strdup(argv[i] + 2);
+                    else if (i + 1 < argc)
+                        print = b_strdup(argv[++i]);
                     break;
                 case 'D':
                     if (argv[i][2] != '\0')
@@ -175,13 +183,6 @@ main(int argc, char **argv)
             sources = b_slist_append(sources, b_strdup(argv[i]));
     }
 
-    if (template == NULL) {
-        blogc_print_usage();
-        fprintf(stderr, "blogc: error: argument -t is required\n");
-        rv = 2;
-        goto cleanup;
-    }
-
     if (b_slist_length(sources) == 0) {
         blogc_print_usage();
         if (listing)
@@ -202,15 +203,35 @@ main(int argc, char **argv)
 
     blogc_error_t *err = NULL;
 
-    b_slist_t* l = blogc_template_parse_from_file(template, &err);
+    b_slist_t *s = blogc_source_parse_from_files(config, sources, &err);
     if (err != NULL) {
         blogc_error_print(err);
         goto cleanup2;
     }
 
-    b_slist_t *s = blogc_source_parse_from_files(config, sources, &err);
+    b_slist_t* l = blogc_template_parse_from_file(template, &err);
     if (err != NULL) {
         blogc_error_print(err);
+        goto cleanup3;
+    }
+
+    if (print != NULL) {
+        const char *val = b_trie_lookup(config, print);
+        if (val == NULL) {
+            fprintf(stderr, "blogc: error: configuration variable not found: %s\n",
+                print);
+            rv = 2;
+        }
+        else {
+            printf("%s\n", val);
+        }
+        goto cleanup3;
+    }
+
+    if (template == NULL) {
+        blogc_print_usage();
+        fprintf(stderr, "blogc: error: argument -t is required when rendering content\n");
+        rv = 2;
         goto cleanup3;
     }
 
@@ -239,14 +260,15 @@ main(int argc, char **argv)
 cleanup4:
     free(out);
 cleanup3:
-    b_slist_free_full(s, (b_free_func_t) b_trie_free);
-cleanup2:
     blogc_template_free_stmts(l);
+cleanup2:
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
     blogc_error_free(err);
 cleanup:
     b_trie_free(config);
     free(template);
     free(output);
+    free(print);
     b_slist_free_full(sources, free);
     return rv;
 }
