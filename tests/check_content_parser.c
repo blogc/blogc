@@ -749,10 +749,33 @@ test_content_parse_inline_link(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<a href=\"\nhttp://example.org/\">bola</a>\n");
     free(html);
-    // invalid
     html = blogc_content_parse_inline("[bola](http://example.org/\n");
     assert_non_null(html);
-    assert_string_equal(html, "");  // FIXME
+    assert_string_equal(html, "[bola](http:&#x2F;&#x2F;example.org&#x2F;\n");
+    free(html);
+    html = blogc_content_parse_inline("[");
+    assert_non_null(html);
+    assert_string_equal(html, "[");
+    free(html);
+    html = blogc_content_parse_inline("[\n");
+    assert_non_null(html);
+    assert_string_equal(html, "[\n");
+    free(html);
+    html = blogc_content_parse_inline("[a");
+    assert_non_null(html);
+    assert_string_equal(html, "[a");
+    free(html);
+    html = blogc_content_parse_inline("[a\n");
+    assert_non_null(html);
+    assert_string_equal(html, "[a\n");
+    free(html);
+    html = blogc_content_parse_inline("[a]");
+    assert_non_null(html);
+    assert_string_equal(html, "[a]");
+    free(html);
+    html = blogc_content_parse_inline("[a]\n");
+    assert_non_null(html);
+    assert_string_equal(html, "[a]\n");
     free(html);
 }
 
@@ -781,10 +804,49 @@ test_content_parse_inline_image(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<img src=\"\nhttp://example.org/\" alt=\"bola\">\n");
     free(html);
-    // invalid
     html = blogc_content_parse_inline("![bola](http://example.org/\n");
     assert_non_null(html);
-    assert_string_equal(html, "");  // FIXME
+    assert_string_equal(html, "![bola](http:&#x2F;&#x2F;example.org&#x2F;\n");
+    free(html);
+    html = blogc_content_parse_inline("!");
+    assert_non_null(html);
+    assert_string_equal(html, "!");
+    free(html);
+    html = blogc_content_parse_inline("![");
+    assert_non_null(html);
+    assert_string_equal(html, "![");
+    free(html);
+    html = blogc_content_parse_inline("!\n");
+    assert_non_null(html);
+    assert_string_equal(html, "!\n");
+    free(html);
+    html = blogc_content_parse_inline("![\n");
+    assert_non_null(html);
+    assert_string_equal(html, "![\n");
+    free(html);
+    html = blogc_content_parse_inline("![a");
+    assert_non_null(html);
+    assert_string_equal(html, "![a");
+    free(html);
+    html = blogc_content_parse_inline("!a\n");
+    assert_non_null(html);
+    assert_string_equal(html, "!a\n");
+    free(html);
+    html = blogc_content_parse_inline("![a\n");
+    assert_non_null(html);
+    assert_string_equal(html, "![a\n");
+    free(html);
+    html = blogc_content_parse_inline("![a]");
+    assert_non_null(html);
+    assert_string_equal(html, "![a]");
+    free(html);
+    html = blogc_content_parse_inline("!a]\n");
+    assert_non_null(html);
+    assert_string_equal(html, "!a]\n");
+    free(html);
+    html = blogc_content_parse_inline("![a]\n");
+    assert_non_null(html);
+    assert_string_equal(html, "![a]\n");
     free(html);
 }
 

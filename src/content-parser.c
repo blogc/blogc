@@ -46,6 +46,15 @@ typedef enum {
 } blogc_content_parser_state_t;
 
 
+typedef enum {
+    LINK_CLOSED = 1,
+    LINK_IMAGE,
+    LINK_TEXT,
+    LINK_TEXT_CLOSE,
+    LINK_URL
+} blogc_content_parser_link_state_t;
+
+
 char*
 blogc_content_parse_inline(const char *src)
 {
@@ -55,6 +64,7 @@ blogc_content_parse_inline(const char *src)
 
     size_t current = 0;
     size_t start = 0;
+    size_t start_state = 0;
 
     b_string_t *rv = b_string_new();
 
@@ -65,7 +75,7 @@ blogc_content_parse_inline(const char *src)
     bool open_code = false;
     bool open_code_double = false;
 
-    unsigned int state = 0;
+    blogc_content_parser_link_state_t state = LINK_CLOSED;
     bool is_image = false;
 
     char *tmp = NULL;
@@ -81,7 +91,7 @@ blogc_content_parse_inline(const char *src)
         bool is_last = current == src_len - 1;
 
         if (escape) {
-            if (state == 0)
+            if (state == LINK_CLOSED)
                 b_string_append_c(rv, c);
             current++;
             escape = false;
@@ -113,7 +123,7 @@ blogc_content_parse_inline(const char *src)
                     if ((c == '*' && open_strong_ast) ||
                         (c == '_' && open_strong_und))
                     {
-                        if (state == 0)
+                        if (state == LINK_CLOSED)
                             b_string_append(rv, "</strong>");
                         if (c == '*')
                             open_strong_ast = false;
@@ -121,7 +131,7 @@ blogc_content_parse_inline(const char *src)
                             open_strong_und = false;
                         break;
                     }
-                    if (state == 0)
+                    if (state == LINK_CLOSED)
                         b_string_append(rv, "<strong>");
                     if (c == '*')
                         open_strong_ast = true;
@@ -130,7 +140,7 @@ blogc_content_parse_inline(const char *src)
                     break;
                 }
                 if ((c == '*' && open_em_ast) || (c == '_' && open_em_und)) {
-                    if (state == 0)
+                    if (state == LINK_CLOSED)
                         b_string_append(rv, "</em>");
                     if (c == '*')
                         open_em_ast = false;
@@ -138,7 +148,7 @@ blogc_content_parse_inline(const char *src)
                         open_em_und = false;
                     break;
                 }
-                if (state == 0)
+                if (state == LINK_CLOSED)
                     b_string_append(rv, "<em>");
                 if (c == '*')
                     open_em_ast = true;
@@ -149,13 +159,13 @@ blogc_content_parse_inline(const char *src)
             case '`':
                 if (!is_last && src[current + 1] == c) {
                     current++;
-                    if (state == 0)
+                    if (state == LINK_CLOSED)
                         b_string_append_printf(rv, "<%scode>",
                             open_code_double ? "/" : "");
                     open_code_double = !open_code_double;
                     break;
                 }
-                if (state == 0)
+                if (state == LINK_CLOSED)
                     b_string_append_printf(rv, "<%scode>", open_code ? "/" : "");
                 open_code = !open_code;
                 break;
@@ -165,8 +175,11 @@ blogc_content_parse_inline(const char *src)
                     b_string_append_c(rv, c);
                     break;
                 }
-                if (state == 0)
+                if (state == LINK_CLOSED) {
+                    state = LINK_IMAGE;
                     is_image = true;
+                    start_state = current;
+                }
                 break;
 
             case '[':
@@ -174,13 +187,15 @@ blogc_content_parse_inline(const char *src)
                     b_string_append_c(rv, c);
                     break;
                 }
-                if (state == 0) {
-                    state = 1;
+                if (state == LINK_CLOSED || state == LINK_IMAGE) {
+                    state = LINK_TEXT;
                     start = current + 1;
                     open_bracket = 0;
+                    if (state == LINK_CLOSED)
+                        start_state = current;
                     break;
                 }
-                if (state == 1) {
+                if (state == LINK_TEXT) {
                     open_bracket++;
                     break;
                 }
@@ -191,9 +206,9 @@ blogc_content_parse_inline(const char *src)
                     b_string_append_c(rv, c);
                     break;
                 }
-                if (state == 1) {
+                if (state == LINK_TEXT) {
                     if (open_bracket-- == 0) {
-                        state = 2;
+                        state = LINK_TEXT_CLOSE;
                         tmp = b_strndup(src + start, current - start);
                         tmp2 = blogc_content_parse_inline(tmp);
                         free(tmp);
@@ -201,7 +216,7 @@ blogc_content_parse_inline(const char *src)
                     }
                     break;
                 }
-                if (state == 0)
+                if (state == LINK_CLOSED)
                     b_string_append_c(rv, c);
                 break;
 
@@ -210,12 +225,12 @@ blogc_content_parse_inline(const char *src)
                     b_string_append_c(rv, c);
                     break;
                 }
-                if (state == 2) {
-                    state = 3;
+                if (state == LINK_TEXT_CLOSE) {
+                    state = LINK_URL;
                     start = current + 1;
                     break;
                 }
-                if (state == 0)
+                if (state == LINK_CLOSED)
                     b_string_append_c(rv, c);
                 break;
 
@@ -224,8 +239,8 @@ blogc_content_parse_inline(const char *src)
                     b_string_append_c(rv, c);
                     break;
                 }
-                if (state == 3) {
-                    state = 0;
+                if (state == LINK_URL) {
+                    state = LINK_CLOSED;
                     tmp = b_strndup(src + start, current - start);
                     if (is_image)
                         b_string_append_printf(rv, "<img src=\"%s\" alt=\"%s\">",
@@ -240,12 +255,12 @@ blogc_content_parse_inline(const char *src)
                     is_image = false;
                     break;
                 }
-                if (state == 0)
+                if (state == LINK_CLOSED)
                     b_string_append_c(rv, c);
                 break;
 
             case ' ':
-                if (state == 0) {
+                if (state == LINK_CLOSED) {
                     spaces++;
                     b_string_append_c(rv, c);
                 }
@@ -254,7 +269,7 @@ blogc_content_parse_inline(const char *src)
 
             case '\n':
             case '\r':
-                if (state == 0) {
+                if (state == LINK_CLOSED) {
                     if (spaces >= 2) {
                         b_string_append(rv, "<br />\n");
                         spaces = 0;
@@ -265,44 +280,59 @@ blogc_content_parse_inline(const char *src)
                 break;
 
             case '&':
-                if (state == 0)
+                if (state == LINK_CLOSED)
                     b_string_append(rv, "&amp;");
                 break;
 
             case '<':
-                if (state == 0)
+                if (state == LINK_CLOSED)
                     b_string_append(rv, "&lt;");
                 break;
 
             case '>':
-                if (state == 0)
+                if (state == LINK_CLOSED)
                     b_string_append(rv, "&gt;");
                 break;
 
             case '"':
-                if (state == 0)
+                if (state == LINK_CLOSED)
                     b_string_append(rv, "&quot;");
                 break;
 
             case '\'':
-                if (state == 0)
+                if (state == LINK_CLOSED)
                     b_string_append(rv, "&#x27;");
                 break;
 
             case '/':
-                if (state == 0)
+                if (state == LINK_CLOSED)
                     b_string_append(rv, "&#x2F;");
                 break;
 
             default:
-                if (state == 0)
+                if (state == LINK_CLOSED)
                     b_string_append_c(rv, c);
         }
 
+        if (is_last && state != LINK_CLOSED) {
+            if (is_image) {
+                b_string_append_c(rv, src[start_state]);
+                if (start_state < (src_len - 1))
+                    b_string_append_c(rv, src[start_state + 1]);
+                current = start_state + 2;
+                is_image = false;
+            }
+            else {
+                b_string_append_c(rv, src[start_state]);
+                current = start_state + 1;
+            }
+            state = LINK_CLOSED;
+            start_state = 0;
+            continue;
+        }
         current++;
     }
 
-    // FIXME: do not just free this leftover memory
     free(tmp);
     free(tmp2);
 
