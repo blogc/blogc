@@ -4,7 +4,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-tests \
-	--disable-ronn \
+	--enable-ronn \
 	--disable-valgrind \
 	$(NULL)
 
