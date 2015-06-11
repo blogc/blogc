@@ -51,7 +51,9 @@ typedef enum {
     LINK_IMAGE,
     LINK_TEXT,
     LINK_TEXT_CLOSE,
-    LINK_URL
+    LINK_URL,
+    LINK_AUTO,
+    LINK_AUTO_CLOSE,
 } blogc_content_parser_link_state_t;
 
 
@@ -65,6 +67,7 @@ blogc_content_parse_inline(const char *src)
     size_t current = 0;
     size_t start = 0;
     size_t start_state = 0;
+    size_t end = 0;
 
     b_string_t *rv = b_string_new();
 
@@ -196,6 +199,11 @@ blogc_content_parse_inline(const char *src)
                     break;
                 }
                 if (state == LINK_TEXT) {
+                    if (current == start) {
+                        start = current + 1;
+                        state = LINK_AUTO;
+                        break;
+                    }
                     open_bracket++;
                     break;
                 }
@@ -204,6 +212,21 @@ blogc_content_parse_inline(const char *src)
             case ']':
                 if (open_code || open_code_double) {
                     b_string_append_c(rv, c);
+                    break;
+                }
+                if (state == LINK_AUTO) {
+                    end = current;
+                    state = LINK_AUTO_CLOSE;
+                    break;
+                }
+                if (state == LINK_AUTO_CLOSE) {
+                    state = LINK_CLOSED;
+                    tmp = b_strndup(src + start, end - start);
+                    b_string_append_printf(rv, "<a href=\"%s\">%s</a>", tmp, tmp);
+                    end = 0;
+                    free(tmp);
+                    tmp = NULL;
+                    is_image = false;
                     break;
                 }
                 if (state == LINK_TEXT) {
@@ -315,20 +338,11 @@ blogc_content_parse_inline(const char *src)
         }
 
         if (is_last && state != LINK_CLOSED) {
-            if (is_image) {
-                b_string_append_c(rv, src[start_state]);
-                if (start_state < (src_len - 1))
-                    b_string_append_c(rv, src[start_state + 1]);
-                current = start_state + 2;
-                is_image = false;
-            }
-            else {
-                b_string_append_c(rv, src[start_state]);
-                current = start_state + 1;
-            }
-            state = LINK_CLOSED;
-            start_state = 0;
-            continue;
+            b_string_append_c(rv, src[start_state]);
+            tmp = blogc_content_parse_inline(src + start_state + 1);
+            b_string_append(rv, tmp);
+            free(tmp);
+            tmp = NULL;
         }
         current++;
     }

@@ -609,13 +609,13 @@ test_content_parse_inline(void **state)
 {
     char *html = blogc_content_parse_inline(
         "**bola***asd* [![lol](http://google.com/lol.png) **lol** "
-        "\\[asd\\]\\(qwe\\)](http://google.com) ``chunda``");
+        "\\[asd\\]\\(qwe\\)](http://google.com) ``chunda`` [[bola]]");
     assert_non_null(html);
     assert_string_equal(html,
         "<strong>bola</strong><em>asd</em> "
         "<a href=\"http://google.com\"><img src=\"http://google.com/lol.png\" "
         "alt=\"lol\"> <strong>lol</strong> [asd](qwe)</a> "
-        "<code>chunda</code>");
+        "<code>chunda</code> <a href=\"bola\">bola</a>");
     free(html);
     html = blogc_content_parse_inline("*bola*");
     assert_non_null(html);
@@ -781,6 +781,36 @@ test_content_parse_inline_link(void **state)
 
 
 void
+test_content_parse_inline_link_auto(void **state)
+{
+    char *html = blogc_content_parse_inline("[[guda]]");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"guda\">guda</a>");
+    free(html);
+    html = blogc_content_parse_inline("[[guda]]\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"guda\">guda</a>\n");
+    free(html);
+    html = blogc_content_parse_inline("[[guda]asd]");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"guda\">guda</a>");
+    free(html);
+    html = blogc_content_parse_inline("[[guda]asd]\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"guda\">guda</a>\n");
+    free(html);
+    html = blogc_content_parse_inline("[[guda]asd");
+    assert_non_null(html);
+    assert_string_equal(html, "[[guda]asd");
+    free(html);
+    html = blogc_content_parse_inline("[[guda]asd\n");
+    assert_non_null(html);
+    assert_string_equal(html, "[[guda]asd\n");
+    free(html);
+}
+
+
+void
 test_content_parse_inline_image(void **state)
 {
     char *html = blogc_content_parse_inline("![bola](http://example.org/)");
@@ -902,6 +932,7 @@ main(void)
         unit_test(test_content_parse_inline_strong),
         unit_test(test_content_parse_inline_code),
         unit_test(test_content_parse_inline_link),
+        unit_test(test_content_parse_inline_link_auto),
         unit_test(test_content_parse_inline_image),
         unit_test(test_content_parse_inline_line_break),
     };
