@@ -27,6 +27,9 @@ typedef enum {
     SOURCE_SEPARATOR,
     SOURCE_CONTENT_START,
     SOURCE_CONTENT,
+    SOURCE_EXCERPT_SEPARATOR,
+    SOURCE_CONTENT2_START,
+    SOURCE_CONTENT2,
 } blogc_source_parser_state_t;
 
 
@@ -41,6 +44,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
 
     char *key = NULL;
     char *tmp = NULL;
+    char *tmp2 = NULL;
     b_trie_t *rv = b_trie_new(free);
 
     blogc_source_parser_state_t state = SOURCE_START;
@@ -145,10 +149,53 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                 break;
 
             case SOURCE_CONTENT:
+                if (c == '.') {
+                    state = SOURCE_EXCERPT_SEPARATOR;
+                    tmp = b_strndup(src + start, current - start);
+                    b_trie_insert(rv, "EXCERPT", blogc_content_parse(tmp));
+                    free(tmp);
+                    tmp = NULL;
+                    break;
+                }
                 if (current == (src_len - 1)) {
                     tmp = b_strndup(src + start, src_len - start);
-                    b_trie_insert(rv, "RAW_CONTENT", tmp);
-                    b_trie_insert(rv, "CONTENT", blogc_content_parse(tmp));
+                    b_trie_insert(rv, "EXCERPT", blogc_content_parse(tmp));
+                    free(tmp);
+                    tmp = NULL;
+                }
+                break;
+
+            case SOURCE_EXCERPT_SEPARATOR:
+                if (c == '.')
+                    break;
+                if (c == '\n' || c == '\r') {
+                    state = SOURCE_CONTENT2_START;
+                    break;
+                }
+                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                    current,
+                    "Invalid excerpt separator. Must be more than one '.' characters.");
+                break;
+
+            case SOURCE_CONTENT2_START:
+                start = current;
+                state = SOURCE_CONTENT2;
+                break;
+
+            case SOURCE_CONTENT2:
+                if (current == (src_len - 1)) {
+                    tmp = b_strndup(src + start, src_len - start);
+                    tmp2 = b_strdup_printf("%s\n%s",
+                        b_trie_lookup(rv, "EXCERPT"), tmp);
+                    free(tmp);
+                    tmp = NULL;
+                    b_trie_insert(rv, "CONTENT", blogc_content_parse(tmp2));
+                    free(tmp2);
+                    tmp2 = NULL;
+                }
+                if (c == '.') {
+                    state = SOURCE_EXCERPT_SEPARATOR;
+                    break;
                 }
                 break;
         }
@@ -158,6 +205,9 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
 
         current++;
     }
+
+    if (b_trie_lookup(rv, "CONTENT") == NULL)
+        b_trie_insert(rv, "CONTENT", b_strdup(b_trie_lookup(rv, "EXCERPT")));
 
     if (*err == NULL && b_trie_size(rv) == 0) {
 
@@ -187,6 +237,9 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
             case SOURCE_SEPARATOR:
             case SOURCE_CONTENT_START:
             case SOURCE_CONTENT:
+            case SOURCE_EXCERPT_SEPARATOR:
+            case SOURCE_CONTENT2_START:
+            case SOURCE_CONTENT2:
                 break;  // won't happen, and if even happen, shouldn't be fatal
         }
     }

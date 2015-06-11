@@ -117,7 +117,7 @@ test_source_parse_from_file(void **state)
     assert_string_equal(b_trie_lookup(t, "ASD"), "123");
     assert_string_equal(b_trie_lookup(t, "FILENAME"), "bola");
     assert_string_equal(b_trie_lookup(t, "CONTENT"), "<p>bola</p>\n");
-    assert_string_equal(b_trie_lookup(t, "RAW_CONTENT"), "bola");
+    assert_string_equal(b_trie_lookup(t, "EXCERPT"), "<p>bola</p>\n");
     b_trie_free(t);
 }
 

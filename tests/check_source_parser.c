@@ -40,10 +40,42 @@ test_source_parse(void **state)
     assert_string_equal(b_trie_lookup(source, "CONTENT"),
         "<h1>This is a test</h1>\n"
         "<p>bola</p>\n");
-    assert_string_equal(b_trie_lookup(source, "RAW_CONTENT"),
+    assert_string_equal(b_trie_lookup(source, "EXCERPT"),
+        "<h1>This is a test</h1>\n"
+        "<p>bola</p>\n");
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_with_excerpt(void **state)
+{
+    const char *a =
+        "VAR1: asd asd\n"
+        "VAR2: 123chunda\n"
+        "----------\n"
         "# This is a test\n"
         "\n"
-        "bola\n");
+        "bola\n"
+        "\n"
+        "...\n"
+        "guda\n"
+        "bola\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(source);
+    assert_int_equal(b_trie_size(source), 4);
+    assert_string_equal(b_trie_lookup(source, "VAR1"), "asd asd");
+    assert_string_equal(b_trie_lookup(source, "VAR2"), "123chunda");
+    assert_string_equal(b_trie_lookup(source, "CONTENT"),
+        "<h1>This is a test</h1>\n"
+        "<p>bola</p>\n"
+        "<p>guda\n"
+        "bola</p>\n");
+    assert_string_equal(b_trie_lookup(source, "EXCERPT"),
+        "<h1>This is a test</h1>\n"
+        "<p>bola</p>\n");
     b_trie_free(source);
 }
 
@@ -70,10 +102,37 @@ test_source_parse_with_spaces(void **state)
     assert_string_equal(b_trie_lookup(source, "CONTENT"),
         "<h1>This is a test</h1>\n"
         "<p>bola</p>\n");
-    assert_string_equal(b_trie_lookup(source, "RAW_CONTENT"),
+    assert_string_equal(b_trie_lookup(source, "EXCERPT"),
+        "<h1>This is a test</h1>\n"
+        "<p>bola</p>\n");
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_with_spaces_and_excerpt(void **state)
+{
+    const char *a =
+        "\n  \n"
+        "VAR1: chunda     \t   \n"
+        "\n\n"
+        "BOLA: guda\n"
+        "----------\n"
         "# This is a test\n"
-        "\n"
-        "bola\n");
+        "..\n"
+        "bola\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(source);
+    assert_int_equal(b_trie_size(source), 4);
+    assert_string_equal(b_trie_lookup(source, "VAR1"), "chunda");
+    assert_string_equal(b_trie_lookup(source, "BOLA"), "guda");
+    assert_string_equal(b_trie_lookup(source, "CONTENT"),
+        "<h1>This is a test</h1>\n"
+        "<p>bola</p>\n");
+    assert_string_equal(b_trie_lookup(source, "EXCERPT"),
+        "<h1>This is a test</h1>\n");
     b_trie_free(source);
 }
 
@@ -375,12 +434,31 @@ test_source_parse_invalid_separator(void **state)
 }
 
 
+static void
+test_source_parse_invalid_excerpt_separator(void **state)
+{
+    const char *a = "BOLA: asd\n---\nbola\n...#";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid excerpt separator. Must be more than one '.' characters.\n"
+        "Error occurred near to '#'");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
 int
 main(void)
 {
     const UnitTest tests[] = {
         unit_test(test_source_parse),
+        unit_test(test_source_parse_with_excerpt),
         unit_test(test_source_parse_with_spaces),
+        unit_test(test_source_parse_with_spaces_and_excerpt),
         unit_test(test_source_parse_config_empty),
         unit_test(test_source_parse_config_invalid_key),
         unit_test(test_source_parse_config_no_key),
@@ -399,6 +477,7 @@ main(void)
         unit_test(test_source_parse_config_reserved_name10),
         unit_test(test_source_parse_config_value_no_line_ending),
         unit_test(test_source_parse_invalid_separator),
+        unit_test(test_source_parse_invalid_excerpt_separator),
     };
     return run_tests(tests);
 }
