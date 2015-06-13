@@ -22,6 +22,8 @@
 
 typedef enum {
     CONTENT_START_LINE = 1,
+    CONTENT_EXCERPT,
+    CONTENT_EXCERPT_END,
     CONTENT_HEADER,
     CONTENT_HEADER_TITLE_START,
     CONTENT_HEADER_TITLE,
@@ -355,7 +357,7 @@ blogc_content_parse_inline(const char *src)
 
 
 char*
-blogc_content_parse(const char *src)
+blogc_content_parse(const char *src, size_t *end_excerpt)
 {
     // src is always nul-terminated.
     size_t src_len = strlen(src);
@@ -364,6 +366,7 @@ blogc_content_parse(const char *src)
     size_t start = 0;
     size_t start2 = 0;
     size_t end = 0;
+    size_t eend = 0;
 
     unsigned int header_level = 0;
     char *prefix = NULL;
@@ -393,6 +396,13 @@ blogc_content_parse(const char *src)
                 if (c == '\n' || c == '\r' || is_last)
                     break;
                 start = current;
+                if (c == '.') {
+                    if (end_excerpt != NULL) {
+                        eend = rv->len;  // fuck it
+                        state = CONTENT_EXCERPT;
+                        break;
+                    }
+                }
                 if (c == '#') {
                     header_level = 1;
                     state = CONTENT_HEADER;
@@ -424,6 +434,33 @@ blogc_content_parse(const char *src)
                     break;
                 }
                 state = CONTENT_PARAGRAPH;
+                break;
+
+            case CONTENT_EXCERPT:
+                if (end_excerpt != NULL) {
+                    if (c == '.')
+                        break;
+                    if (c == '\n' || c == '\r') {
+                        //*end_excerpt = eend;
+                        //state = CONTENT_START_LINE;
+                        state = CONTENT_EXCERPT_END;
+                        break;
+                    }
+                }
+                eend = 0;
+                state = CONTENT_PARAGRAPH;
+                break;
+
+            case CONTENT_EXCERPT_END:
+                if (end_excerpt != NULL) {
+                    if (c == '\n' || c == '\r') {
+                        *end_excerpt = eend;
+                        state = CONTENT_START_LINE;
+                        break;
+                    }
+                }
+                eend = 0;
+                state = CONTENT_PARAGRAPH_END;
                 break;
 
             case CONTENT_HEADER:
@@ -521,7 +558,7 @@ blogc_content_parse(const char *src)
                         else
                             b_string_append_printf(tmp_str, "%s\n", l->data);
                     }
-                    tmp = blogc_content_parse(tmp_str->str);
+                    tmp = blogc_content_parse(tmp_str->str, NULL);
                     b_string_append_printf(rv, "<blockquote>%s</blockquote>\n",
                         tmp);
                     free(tmp);

@@ -22,6 +22,7 @@
 static void
 test_content_parse(void **state)
 {
+    size_t l = 0;
     char *html = blogc_content_parse(
         "# um\n"
         "## dois\n"
@@ -57,8 +58,9 @@ test_content_parse(void **state)
         "guda\n"
         "yay\n"
         "\n"
-        "**bola**\n");
+        "**bola**\n", &l);
     assert_non_null(html);
+    assert_int_equal(l, 0);
     assert_string_equal(html,
         "<h1>um</h1>\n"
         "<h2>dois</h2>\n"
@@ -95,14 +97,56 @@ test_content_parse(void **state)
 }
 
 
+static void
+test_content_parse_with_excerpt(void **state)
+{
+    size_t l = 0;
+    char *html = blogc_content_parse(
+        "# test\n"
+        "\n"
+        "chunda\n"
+        "\n"
+        "..\n"
+        "\n"
+        "guda\n"
+        "lol", &l);
+    assert_non_null(html);
+    assert_int_equal(l, 28);
+    assert_string_equal(html,
+        "<h1>test</h1>\n"
+        "<p>chunda</p>\n"
+        "<p>guda\n"
+        "lol</p>\n");
+    free(html);
+    l = 0;
+    html = blogc_content_parse(
+        "# test\n"
+        "\n"
+        "chunda\n"
+        "\n"
+        "...\n"
+        "\n"
+        "guda\n"
+        "lol", &l);
+    assert_non_null(html);
+    assert_int_equal(l, 28);
+    assert_string_equal(html,
+        "<h1>test</h1>\n"
+        "<p>chunda</p>\n"
+        "<p>guda\n"
+        "lol</p>\n");
+    free(html);
+}
+
+
 void
 test_content_parse_header(void **state)
 {
-    char *html = blogc_content_parse("## bola");
+    char *html = blogc_content_parse("## bola", NULL);
     assert_non_null(html);
     assert_string_equal(html, "<h2>bola</h2>\n");
     free(html);
-    html = blogc_content_parse("## bola\n");
+    html = blogc_content_parse("## bola\n", NULL);
     assert_non_null(html);
     assert_string_equal(html, "<h2>bola</h2>\n");
     free(html);
@@ -111,7 +155,7 @@ test_content_parse_header(void **state)
         "\n"
         "## bola\n"
         "\n"
-        "guda\n");
+        "guda\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -124,11 +168,11 @@ test_content_parse_header(void **state)
 void
 test_content_parse_html(void **state)
 {
-    char *html = blogc_content_parse("<div>\n</div>");
+    char *html = blogc_content_parse("<div>\n</div>", NULL);
     assert_non_null(html);
     assert_string_equal(html, "<div>\n</div>\n");
     free(html);
-    html = blogc_content_parse("<div>\n</div>\n");
+    html = blogc_content_parse("<div>\n</div>\n", NULL);
     assert_non_null(html);
     assert_string_equal(html, "<div>\n</div>\n");
     free(html);
@@ -138,7 +182,7 @@ test_content_parse_html(void **state)
         "<div>\n"
         "</div>\n"
         "\n"
-        "chunda\n");
+        "chunda\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -151,14 +195,14 @@ test_content_parse_html(void **state)
 void
 test_content_parse_blockquote(void **state)
 {
-    char *html = blogc_content_parse(">  bola\n>  guda");
+    char *html = blogc_content_parse(">  bola\n>  guda", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<blockquote><p>bola\n"
         "guda</p>\n"
         "</blockquote>\n");
     free(html);
-    html = blogc_content_parse(">  bola\n>  guda\n");
+    html = blogc_content_parse(">  bola\n>  guda\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<blockquote><p>bola\n"
@@ -171,7 +215,7 @@ test_content_parse_blockquote(void **state)
         ">   bola\n"
         ">   guda\n"
         "\n"
-        "chunda\n");
+        "chunda\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -186,13 +230,13 @@ test_content_parse_blockquote(void **state)
 void
 test_content_parse_code(void **state)
 {
-    char *html = blogc_content_parse("  bola\n  guda");
+    char *html = blogc_content_parse("  bola\n  guda", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<pre><code>bola\n"
         "guda</code></pre>\n");
     free(html);
-    html = blogc_content_parse("  bola\n  guda\n");
+    html = blogc_content_parse("  bola\n  guda\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<pre><code>bola\n"
@@ -204,7 +248,7 @@ test_content_parse_code(void **state)
         "   bola\n"
         "   guda\n"
         "\n"
-        "chunda\n");
+        "chunda\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -218,28 +262,28 @@ test_content_parse_code(void **state)
 void
 test_content_parse_horizontal_rule(void **state)
 {
-    char *html = blogc_content_parse("bola\nguda\n\n**");
+    char *html = blogc_content_parse("bola\nguda\n\n**", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\n"
         "guda</p>\n"
         "<hr />\n");
     free(html);
-    html = blogc_content_parse("bola\nguda\n\n++++");
+    html = blogc_content_parse("bola\nguda\n\n++++", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\n"
         "guda</p>\n"
         "<hr />\n");
     free(html);
-    html = blogc_content_parse("bola\nguda\n\n--\n");
+    html = blogc_content_parse("bola\nguda\n\n--\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\n"
         "guda</p>\n"
         "<hr />\n");
     free(html);
-    html = blogc_content_parse("bola\nguda\n\n****\n");
+    html = blogc_content_parse("bola\nguda\n\n****\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\n"
@@ -251,7 +295,7 @@ test_content_parse_horizontal_rule(void **state)
         "\n"
         "**\n"
         "\n"
-        "chunda\n");
+        "chunda\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -263,7 +307,7 @@ test_content_parse_horizontal_rule(void **state)
         "\n"
         "----\n"
         "\n"
-        "chunda\n");
+        "chunda\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -281,7 +325,7 @@ test_content_parse_unordered_list(void **state)
         "\n"
         "*  asd\n"
         "*  qwe\n"
-        "*  zxc");
+        "*  zxc", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\n"
@@ -296,7 +340,7 @@ test_content_parse_unordered_list(void **state)
         "\n"
         "*  asd\n"
         "*  qwe\n"
-        "*  zxc\n");
+        "*  zxc\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\n"
@@ -313,7 +357,7 @@ test_content_parse_unordered_list(void **state)
         "*  qwe\n"
         "*  zxc\n"
         "\n"
-        "fuuuu\n");
+        "fuuuu\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\n"
@@ -335,7 +379,7 @@ test_content_parse_ordered_list(void **state)
         "\n"
         "1.  asd\n"
         "2.  qwe\n"
-        "3.  zxc");
+        "3.  zxc", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\n"
@@ -350,7 +394,7 @@ test_content_parse_ordered_list(void **state)
         "\n"
         "1.  asd\n"
         "2.  qwe\n"
-        "3.  zxc\n");
+        "3.  zxc\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\n"
@@ -367,7 +411,7 @@ test_content_parse_ordered_list(void **state)
         "2.  qwe\n"
         "3.  zxc\n"
         "\n"
-        "fuuuu\n");
+        "fuuuu\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\n"
@@ -380,7 +424,7 @@ test_content_parse_ordered_list(void **state)
     free(html);
     html = blogc_content_parse(
         "1.\nasd\n"
-        "2. qwe\n");
+        "2. qwe\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1.\n"
@@ -389,12 +433,86 @@ test_content_parse_ordered_list(void **state)
         "<li>qwe</li>\n"
         "</ol>\n");
     free(html);
-    html = blogc_content_parse("1.\n");
+    html = blogc_content_parse("1.\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<ol>\n"
         "<li></li>\n"
         "</ol>\n");
+    free(html);
+}
+
+
+static void
+test_content_parse_invalid_excerpt(void **state)
+{
+    size_t l = 0;
+    char *html = blogc_content_parse(
+        "# test\n"
+        "\n"
+        "chunda\n"
+        "..\n"
+        "\n"
+        "guda\n"
+        "lol", &l);
+    assert_non_null(html);
+    assert_int_equal(l, 0);
+    assert_string_equal(html,
+        "<h1>test</h1>\n"
+        "<p>chunda\n"
+        "..</p>\n"
+        "<p>guda\n"
+        "lol</p>\n");
+    free(html);
+    l = 0;
+    html = blogc_content_parse(
+        "# test\n"
+        "\n"
+        "chunda\n"
+        "\n"
+        "...\n"
+        "guda\n"
+        "lol", &l);
+    assert_non_null(html);
+    assert_int_equal(l, 0);
+    assert_string_equal(html,
+        "<h1>test</h1>\n"
+        "<p>chunda</p>\n"
+        "<p>...\n"
+        "guda\n"
+        "lol</p>\n");
+    free(html);
+    l = 0;
+    html = blogc_content_parse(
+        "# test\n"
+        "\n"
+        "chunda..\n"
+        "\n"
+        "guda\n"
+        "lol", &l);
+    assert_non_null(html);
+    assert_int_equal(l, 0);
+    assert_string_equal(html,
+        "<h1>test</h1>\n"
+        "<p>chunda..</p>\n"
+        "<p>guda\n"
+        "lol</p>\n");
+    free(html);
+    l = 0;
+    html = blogc_content_parse(
+        "# test\n"
+        "\n"
+        "chunda\n"
+        "\n"
+        "...guda\n"
+        "lol", &l);
+    assert_non_null(html);
+    assert_int_equal(l, 0);
+    assert_string_equal(html,
+        "<h1>test</h1>\n"
+        "<p>chunda</p>\n"
+        "<p>...guda\n"
+        "lol</p>\n");
     free(html);
 }
 
@@ -405,7 +523,7 @@ test_content_parse_invalid_header(void **state)
     char *html = blogc_content_parse(
         "asd\n"
         "\n"
-        "##bola\n");
+        "##bola\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>asd</p>\n"
@@ -422,7 +540,7 @@ test_content_parse_invalid_header_empty(void **state)
         "\n"
         "##\n"
         "\n"
-        "qwe\n");
+        "qwe\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>asd</p>\n"
@@ -439,7 +557,7 @@ test_content_parse_invalid_blockquote(void **state)
     char *html = blogc_content_parse(
         ">   asd\n"
         "> bola\n"
-        ">   foo\n");
+        ">   foo\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>&gt;   asd\n"
@@ -455,7 +573,7 @@ test_content_parse_invalid_code(void **state)
     char *html = blogc_content_parse(
         "    asd\n"
         "  bola\n"
-        "    foo\n");
+        "    foo\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>    asd\n"
@@ -469,11 +587,11 @@ void
 test_content_parse_invalid_horizontal_rule(void **state)
 {
     // this generates invalid html, but...
-    char *html = blogc_content_parse("** asd");
+    char *html = blogc_content_parse("** asd", NULL);
     assert_non_null(html);
     assert_string_equal(html, "<p><strong> asd</p>\n");
     free(html);
-    html = blogc_content_parse("** asd\n");
+    html = blogc_content_parse("** asd\n", NULL);
     assert_non_null(html);
     assert_string_equal(html, "<p><strong> asd</p>\n");
     free(html);
@@ -486,7 +604,7 @@ test_content_parse_invalid_unordered_list(void **state)
     // more invalid html
     char *html = blogc_content_parse(
         "*  asd\n"
-        "1. qwe");
+        "1. qwe", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p><em>  asd\n"
@@ -495,7 +613,7 @@ test_content_parse_invalid_unordered_list(void **state)
     html = blogc_content_parse(
         "*  asd\n"
         "1. qwe\n"
-        "\n");
+        "\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p><em>  asd\n"
@@ -503,7 +621,7 @@ test_content_parse_invalid_unordered_list(void **state)
     free(html);
     html = blogc_content_parse(
         "*  asd\n"
-        "1. qwe\n");
+        "1. qwe\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p><em>  asd\n"
@@ -511,7 +629,7 @@ test_content_parse_invalid_unordered_list(void **state)
     free(html);
     html = blogc_content_parse(
         "* asd\n"
-        "1. qwe\n");
+        "1. qwe\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p><em> asd\n"
@@ -523,7 +641,7 @@ test_content_parse_invalid_unordered_list(void **state)
         "* asd\n"
         "1. qwe\n"
         "\n"
-        "poi\n");
+        "poi\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>chunda</p>\n"
@@ -540,7 +658,7 @@ test_content_parse_invalid_ordered_list(void **state)
     // more invalid html
     char *html = blogc_content_parse(
         "1. asd\n"
-        "*  qwe");
+        "*  qwe", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
@@ -549,7 +667,7 @@ test_content_parse_invalid_ordered_list(void **state)
     html = blogc_content_parse(
         "1. asd\n"
         "*  qwe\n"
-        "\n");
+        "\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
@@ -557,7 +675,7 @@ test_content_parse_invalid_ordered_list(void **state)
     free(html);
     html = blogc_content_parse(
         "1. asd\n"
-        "*  qwe\n");
+        "*  qwe\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
@@ -565,7 +683,7 @@ test_content_parse_invalid_ordered_list(void **state)
     free(html);
     html = blogc_content_parse(
         "1. asd\n"
-        "*  qwe\n");
+        "*  qwe\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
@@ -577,7 +695,7 @@ test_content_parse_invalid_ordered_list(void **state)
         "1. asd\n"
         "*  qwe\n"
         "\n"
-        "poi\n");
+        "poi\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>chunda</p>\n"
@@ -587,7 +705,7 @@ test_content_parse_invalid_ordered_list(void **state)
     free(html);
     html = blogc_content_parse(
         "1 asd\n"
-        "* qwe\n");
+        "* qwe\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1 asd\n"
@@ -595,7 +713,7 @@ test_content_parse_invalid_ordered_list(void **state)
     free(html);
     html = blogc_content_parse(
         "a. asd\n"
-        "2. qwe\n");
+        "2. qwe\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>a. asd\n"
@@ -913,6 +1031,7 @@ main(void)
 {
     const UnitTest tests[] = {
         unit_test(test_content_parse),
+        unit_test(test_content_parse_with_excerpt),
         unit_test(test_content_parse_header),
         unit_test(test_content_parse_html),
         unit_test(test_content_parse_blockquote),
@@ -920,6 +1039,7 @@ main(void)
         unit_test(test_content_parse_horizontal_rule),
         unit_test(test_content_parse_unordered_list),
         unit_test(test_content_parse_ordered_list),
+        unit_test(test_content_parse_invalid_excerpt),
         unit_test(test_content_parse_invalid_header),
         unit_test(test_content_parse_invalid_header_empty),
         unit_test(test_content_parse_invalid_blockquote),

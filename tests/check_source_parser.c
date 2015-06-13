@@ -34,9 +34,12 @@ test_source_parse(void **state)
     b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(b_trie_size(source), 4);
+    assert_int_equal(b_trie_size(source), 5);
     assert_string_equal(b_trie_lookup(source, "VAR1"), "asd asd");
     assert_string_equal(b_trie_lookup(source, "VAR2"), "123chunda");
+    assert_string_equal(b_trie_lookup(source, "EXCERPT"),
+        "<h1>This is a test</h1>\n"
+        "<p>bola</p>\n");
     assert_string_equal(b_trie_lookup(source, "CONTENT"),
         "<h1>This is a test</h1>\n"
         "<p>bola</p>\n");
@@ -64,9 +67,12 @@ test_source_parse_with_spaces(void **state)
     b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(b_trie_size(source), 4);
+    assert_int_equal(b_trie_size(source), 5);
     assert_string_equal(b_trie_lookup(source, "VAR1"), "chunda");
     assert_string_equal(b_trie_lookup(source, "BOLA"), "guda");
+    assert_string_equal(b_trie_lookup(source, "EXCERPT"),
+        "<h1>This is a test</h1>\n"
+        "<p>bola</p>\n");
     assert_string_equal(b_trie_lookup(source, "CONTENT"),
         "<h1>This is a test</h1>\n"
         "<p>bola</p>\n");
@@ -74,6 +80,49 @@ test_source_parse_with_spaces(void **state)
         "# This is a test\n"
         "\n"
         "bola\n");
+    b_trie_free(source);
+}
+
+
+static void
+test_source_parse_with_excerpt(void **state)
+{
+    const char *a =
+        "VAR1: asd asd\n"
+        "VAR2: 123chunda\n"
+        "----------\n"
+        "# This is a test\n"
+        "\n"
+        "bola\n"
+        "\n"
+        "...\n"
+        "\n"
+        "guda\n"
+        "yay";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(source);
+    assert_int_equal(b_trie_size(source), 5);
+    assert_string_equal(b_trie_lookup(source, "VAR1"), "asd asd");
+    assert_string_equal(b_trie_lookup(source, "VAR2"), "123chunda");
+    assert_string_equal(b_trie_lookup(source, "EXCERPT"),
+        "<h1>This is a test</h1>\n"
+        "<p>bola</p>\n");
+    assert_string_equal(b_trie_lookup(source, "CONTENT"),
+        "<h1>This is a test</h1>\n"
+        "<p>bola</p>\n"
+        "<p>guda\n"
+        "yay</p>\n");
+    assert_string_equal(b_trie_lookup(source, "RAW_CONTENT"),
+        "# This is a test\n"
+        "\n"
+        "bola\n"
+        "\n"
+        "...\n"
+        "\n"
+        "guda\n"
+        "yay");
     b_trie_free(source);
 }
 
@@ -381,6 +430,7 @@ main(void)
     const UnitTest tests[] = {
         unit_test(test_source_parse),
         unit_test(test_source_parse_with_spaces),
+        unit_test(test_source_parse_with_excerpt),
         unit_test(test_source_parse_config_empty),
         unit_test(test_source_parse_config_invalid_key),
         unit_test(test_source_parse_config_no_key),
