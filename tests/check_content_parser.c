@@ -139,7 +139,7 @@ test_content_parse_with_excerpt(void **state)
 }
 
 
-void
+static void
 test_content_parse_header(void **state)
 {
     char *html = blogc_content_parse("## bola", NULL);
@@ -165,7 +165,7 @@ test_content_parse_header(void **state)
 }
 
 
-void
+static void
 test_content_parse_html(void **state)
 {
     char *html = blogc_content_parse("<div>\n</div>", NULL);
@@ -192,7 +192,7 @@ test_content_parse_html(void **state)
 }
 
 
-void
+static void
 test_content_parse_blockquote(void **state)
 {
     char *html = blogc_content_parse(">  bola\n>  guda", NULL);
@@ -227,7 +227,7 @@ test_content_parse_blockquote(void **state)
 }
 
 
-void
+static void
 test_content_parse_code(void **state)
 {
     char *html = blogc_content_parse("  bola\n  guda", NULL);
@@ -259,7 +259,7 @@ test_content_parse_code(void **state)
 }
 
 
-void
+static void
 test_content_parse_horizontal_rule(void **state)
 {
     char *html = blogc_content_parse("bola\nguda\n\n**", NULL);
@@ -317,7 +317,7 @@ test_content_parse_horizontal_rule(void **state)
 }
 
 
-void
+static void
 test_content_parse_unordered_list(void **state)
 {
     char *html = blogc_content_parse(
@@ -371,7 +371,7 @@ test_content_parse_unordered_list(void **state)
 }
 
 
-void
+static void
 test_content_parse_ordered_list(void **state)
 {
     char *html = blogc_content_parse(
@@ -517,7 +517,7 @@ test_content_parse_invalid_excerpt(void **state)
 }
 
 
-void
+static void
 test_content_parse_invalid_header(void **state)
 {
     char *html = blogc_content_parse(
@@ -532,7 +532,7 @@ test_content_parse_invalid_header(void **state)
 }
 
 
-void
+static void
 test_content_parse_invalid_header_empty(void **state)
 {
     char *html = blogc_content_parse(
@@ -551,7 +551,7 @@ test_content_parse_invalid_header_empty(void **state)
 }
 
 
-void
+static void
 test_content_parse_invalid_blockquote(void **state)
 {
     char *html = blogc_content_parse(
@@ -567,7 +567,7 @@ test_content_parse_invalid_blockquote(void **state)
 }
 
 
-void
+static void
 test_content_parse_invalid_code(void **state)
 {
     char *html = blogc_content_parse(
@@ -583,7 +583,7 @@ test_content_parse_invalid_code(void **state)
 }
 
 
-void
+static void
 test_content_parse_invalid_horizontal_rule(void **state)
 {
     // this generates invalid html, but...
@@ -598,7 +598,7 @@ test_content_parse_invalid_horizontal_rule(void **state)
 }
 
 
-void
+static void
 test_content_parse_invalid_unordered_list(void **state)
 {
     // more invalid html
@@ -652,7 +652,7 @@ test_content_parse_invalid_unordered_list(void **state)
 }
 
 
-void
+static void
 test_content_parse_invalid_ordered_list(void **state)
 {
     // more invalid html
@@ -722,7 +722,7 @@ test_content_parse_invalid_ordered_list(void **state)
 }
 
 
-void
+static void
 test_content_parse_inline(void **state)
 {
     char *html = blogc_content_parse_inline(
@@ -742,7 +742,7 @@ test_content_parse_inline(void **state)
 }
 
 
-void
+static void
 test_content_parse_inline_em(void **state)
 {
     char *html = blogc_content_parse_inline("*bola*");
@@ -773,7 +773,7 @@ test_content_parse_inline_em(void **state)
 }
 
 
-void
+static void
 test_content_parse_inline_strong(void **state)
 {
     char *html = blogc_content_parse_inline("**bola**");
@@ -804,7 +804,7 @@ test_content_parse_inline_strong(void **state)
 }
 
 
-void
+static void
 test_content_parse_inline_code(void **state)
 {
     char *html = blogc_content_parse_inline("``bola``");
@@ -843,7 +843,7 @@ test_content_parse_inline_code(void **state)
 }
 
 
-void
+static void
 test_content_parse_inline_link(void **state)
 {
     char *html = blogc_content_parse_inline("[bola](http://example.org/)");
@@ -898,7 +898,7 @@ test_content_parse_inline_link(void **state)
 }
 
 
-void
+static void
 test_content_parse_inline_link_auto(void **state)
 {
     char *html = blogc_content_parse_inline("[[guda]]");
@@ -928,7 +928,7 @@ test_content_parse_inline_link_auto(void **state)
 }
 
 
-void
+static void
 test_content_parse_inline_image(void **state)
 {
     char *html = blogc_content_parse_inline("![bola](http://example.org/)");
@@ -999,7 +999,7 @@ test_content_parse_inline_image(void **state)
 }
 
 
-void
+static void
 test_content_parse_inline_line_break(void **state)
 {
     char *html = blogc_content_parse_inline("asd  \n");
