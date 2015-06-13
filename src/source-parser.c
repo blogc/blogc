@@ -42,6 +42,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
 
     char *key = NULL;
     char *tmp = NULL;
+    char *content = NULL;
     b_trie_t *rv = b_trie_new(free);
 
     blogc_source_parser_state_t state = SOURCE_START;
@@ -149,13 +150,10 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                 if (current == (src_len - 1)) {
                     tmp = b_strndup(src + start, src_len - start);
                     b_trie_insert(rv, "RAW_CONTENT", tmp);
-                    b_trie_insert(rv, "CONTENT", blogc_content_parse(tmp, &end_excerpt));
-                    if (end_excerpt != 0)
-                        b_trie_insert(rv, "EXCERPT",
-                            b_strndup(b_trie_lookup(rv, "CONTENT"), end_excerpt));
-                    else
-                        b_trie_insert(rv, "EXCERPT",
-                            b_strdup(b_trie_lookup(rv, "CONTENT")));
+                    content = blogc_content_parse(tmp, &end_excerpt);
+                    b_trie_insert(rv, "CONTENT", content);
+                    b_trie_insert(rv, "EXCERPT", end_excerpt == 0 ?
+                        b_strdup(content) : b_strndup(content, end_excerpt));
                 }
                 break;
         }
