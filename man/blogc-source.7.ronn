@@ -1,11 +1,36 @@
 blogc-source(7) -- blogc's source file format
 =============================================
 
-## SYNOPSIS
-
-TODO
-
 ## DESCRIPTION
+
+Source files are used as input data to the blogc(1) compiler. They provide
+variables and content, that are used by the compiler to fill the gaps available
+in the templates (see blogc-template(7)).
+
+The syntax of the source files is designed to be as simple as possible. The
+variables are defined in the top of the file as key-value lines, and the
+content is defined right after the variables.
+
+Content is written in a markup language that is similar to John Gruber's
+Markdown, but that is NOT Markdown. This language is very simple, while
+powerful enough to write big posts.
+
+## SOURCE VARIABLES
+
+Variables are key-value lines. The variable name must be upper-case, starting
+with a letter and following with one or more letters and/or underscores. The
+value is separated from the variable name with a ':' and finishes in the end
+of the line. Multi-line values are not supported.
+
+    VARIABLE1: Value of variable one
+    VARIABLE2: Value of variable two
+    --------------------------------
+
+All the variables defined in the source files are local and will override
+global variables provided to blogc(1) in the command-line, but just inside
+blocks that handle local variables. See blogc-template(7) for details.
+
+## SOURCE CONTENT
 
 TODO
 
@@ -15,4 +40,4 @@ Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
 
 ## SEE ALSO
 
-blogc(1), strptime(3)
+blogc(1), blogc-template(7), strptime(3)

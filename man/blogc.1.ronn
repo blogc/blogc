@@ -44,7 +44,7 @@ designed to be used with make(1).
   * `-p` <KEY>:
     Show the value of a global configuration parameter right after the source
     parsing and exits. This is useful to get parameters for your `Makefile`,
-    like the last page when using pagination support.
+    like the last page when using pagination.
 
   * `-t` <TEMPLATE>:
     Template file. It is a required option, if `blogc` needs to render something.
@@ -68,7 +68,7 @@ source files blogc-source(7) and an output file, if wanted.
 ## ENVIRONMENT
 
 No environment variables are required by `blogc`, but global timezone will
-be used by locale-dependant datetime input field descriptors (like `%c`, and
+be used by locale-dependant datetime input field descriptors (like `%c`), and
 can be overridden using environment variables. See strptime(3).
 
 ## EXAMPLES
