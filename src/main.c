@@ -206,12 +206,14 @@ main(int argc, char **argv)
     b_slist_t *s = blogc_source_parse_from_files(config, sources, &err);
     if (err != NULL) {
         blogc_error_print(err);
+        rv = 2;
         goto cleanup2;
     }
 
     b_slist_t* l = blogc_template_parse_from_file(template, &err);
     if (err != NULL) {
         blogc_error_print(err);
+        rv = 2;
         goto cleanup3;
     }
 
