@@ -30,9 +30,121 @@ All the variables defined in the source files are local and will override
 global variables provided to blogc(1) in the command-line, but just inside
 blocks that handle local variables. See blogc-template(7) for details.
 
-## SOURCE CONTENT
+## SOURCE CONTENT - BLOCK ELEMENTS
+
+### Paragraphs
+
+Paragraphs are simple blocks of text.
+
+    This is a paragraph.
+
+    This is another paragraph.
+
+### Headers
+
+Headers are defined starting with '#' characters, then number of characters is
+the level of the header.
+
+    # H1
+
+    ## H2
+
+    ### H3
+
+    #### H4
+
+### Blockquotes
+
+Blockquotes are defined with lines starting with '>' characters. Content defined
+inside a blockquote is parsed again, so all the block elements are allowed inside
+blockquotes. The indentation after the '>' character must be preserved in the
+begin of each blockquote line.
+
+    > Hello,
+    > 
+    > This is the blockquote example!
+
+### Unordered Lists
+
+Unordered lists are defined with lines starting with '*', '+' or '-'. The same
+starting character must be used for all the list items, and the indentation after
+the starting character must be preserved in the begin of each line.
+
+    * First item
+    * Second item
+    * Third item
+
+### Ordered Lists
+
+Ordered lists are defined with lines starting with a number and a '.' character.
+The indentation after the starting character must be preserved in the begin of
+each line, meaning that the content of the items must be aligned. The order and
+value of the numbers is ignored.
+
+    1.  First item
+    2.  Second item
+    10. Tenth item
+
+To use numbers with '.' character in a non-list string, you must escape the '.'.
+
+    1234\. This is not a list
+
+### Code Blocks
+
+Code blocs are defined by indenting the lines with one or more whitespace characters.
+
+    This is a paragraph.
+
+        This is a code block.
+        Some more code.
+
+    This is another paragraph.
+
+### Horizontal Rules
+
+Horizontal rules are defined as a paragraph with a sequence of 2 or more '*', '+'
+or '-' characters.
+
+    This is a paragraph before horizontal rule
+
+    ***
+
+    This is a paragraph after horizontal rule
+
+The horizontal rule must not be on its own paragraph, otherwise it will be parsed
+as a continuation of the previous paragraph.
+
+### HTML Blocks
+
+HTML blocks are paragraphs started with '<' character. Everything is kept untouched
+in HTML blocks, until the next paragraph.
+
+    <p>This is raw HTML</p>
+
+    This is an usual paragraph
+
+    <p>This is more raw HTML</p>
+
+### Excerpt Separator
+
+The excerpt is separated from the full content of a page/post using a paragraph with
+a sequence of 2 or more '.' characters.
+
+After parsing, the excerpt will be part of the full content as well.
+
+## SOURCE CONTENT - INLINE ELEMENTS
 
 TODO
+
+## BUGS
+
+The source content is handled by handwritten parsers, that even being well
+tested, may be subject of parsing bugs. Please report any issues to:
+<https://github.com/rafaelmartins/blogc>
+
+At least one bug is known at this point: ``\r\n`` character sequences are
+handled like 2 line breaks. The parsers won't work properly with files edited
+on Windows editors like Notepad.
 
 ## AUTHOR
 
