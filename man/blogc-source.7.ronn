@@ -30,6 +30,10 @@ All the variables defined in the source files are local and will override
 global variables provided to blogc(1) in the command-line, but just inside
 blocks that handle local variables. See blogc-template(7) for details.
 
+The ``DATE`` variable is special, and represents the publishing date of the
+post. It may be formatted with the ``DATE_FORMAT`` variable, if provided,
+otherwise will be kept as is. See blogc(1).
+
 ## SOURCE CONTENT - BLOCK ELEMENTS
 
 ### Paragraphs
