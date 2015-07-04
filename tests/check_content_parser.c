@@ -862,6 +862,14 @@ test_content_parse_inline_link(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<a href=\"http://example.org/\">bo\nla</a>\n");
     free(html);
+    html = blogc_content_parse_inline("[``bola``](http://example.org/)\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"http://example.org/\"><code>bola</code></a>\n");
+    free(html);
+    html = blogc_content_parse_inline("[``bola(2)[3]**!\\``](http://example.org/)\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"http://example.org/\"><code>bola(2)[3]**!\\</code></a>\n");
+    free(html);
     // "invalid"
     html = blogc_content_parse_inline("[bola](\nhttp://example.org/)\n");
     assert_non_null(html);

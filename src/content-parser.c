@@ -109,7 +109,7 @@ blogc_content_parse_inline(const char *src)
         switch (c) {
 
             case '\\':
-                if (open_code || open_code_double) {
+                if (state == LINK_CLOSED && (open_code || open_code_double)) {
                     b_string_append_c(rv, c);
                     break;
                 }
@@ -119,7 +119,7 @@ blogc_content_parse_inline(const char *src)
 
             case '*':
             case '_':
-                if (open_code || open_code_double) {
+                if (state == LINK_CLOSED && (open_code || open_code_double)) {
                     b_string_append_c(rv, c);
                     break;
                 }
@@ -176,7 +176,7 @@ blogc_content_parse_inline(const char *src)
                 break;
 
             case '!':
-                if (open_code || open_code_double) {
+                if (state == LINK_CLOSED && (open_code || open_code_double)) {
                     b_string_append_c(rv, c);
                     break;
                 }
@@ -188,7 +188,7 @@ blogc_content_parse_inline(const char *src)
                 break;
 
             case '[':
-                if (open_code || open_code_double) {
+                if (state == LINK_CLOSED && (open_code || open_code_double)) {
                     b_string_append_c(rv, c);
                     break;
                 }
@@ -212,7 +212,7 @@ blogc_content_parse_inline(const char *src)
                 break;
 
             case ']':
-                if (open_code || open_code_double) {
+                if (state == LINK_CLOSED && (open_code || open_code_double)) {
                     b_string_append_c(rv, c);
                     break;
                 }
@@ -246,7 +246,7 @@ blogc_content_parse_inline(const char *src)
                 break;
 
             case '(':
-                if (open_code || open_code_double) {
+                if (state == LINK_CLOSED && (open_code || open_code_double)) {
                     b_string_append_c(rv, c);
                     break;
                 }
@@ -260,7 +260,7 @@ blogc_content_parse_inline(const char *src)
                 break;
 
             case ')':
-                if (open_code || open_code_double) {
+                if (state == LINK_CLOSED && (open_code || open_code_double)) {
                     b_string_append_c(rv, c);
                     break;
                 }
