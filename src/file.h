@@ -11,7 +11,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "utils/utils.h"
 #include "error.h"
 
 #define BLOGC_FILE_CHUNK_SIZE 1024

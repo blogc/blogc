@@ -11,7 +11,6 @@
 
 #include <stdlib.h>
 #include <stdarg.h>
-#include "utils/utils.h"
 
 typedef enum {
     BLOGC_ERROR_SOURCE_PARSER = 1,
