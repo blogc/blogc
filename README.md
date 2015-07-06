@@ -1,6 +1,6 @@
 # blogc
 
-[![Build Status](https://semaphoreci.com/api/v1/projects/bd67545c-8593-4a37-ba94-ef1187a6d58d/402577/badge.svg)](https://semaphoreci.com/rafaelmartins/blogc)
+[![Build Status](https://semaphoreci.com/api/v1/projects/bd67545c-8593-4a37-ba94-ef1187a6d58d/402577/badge.svg)](https://semaphoreci.com/blogc/blogc)
 
 A blog compiler.
 

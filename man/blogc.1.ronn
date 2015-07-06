@@ -85,7 +85,7 @@ Build entry page from source file:
 
 **blogc** is based in handwritten parsers, that even being well tested, may be
 subject of parsing bugs. Please report any issues to:
-<https://github.com/rafaelmartins/blogc>
+<https://github.com/blogc/blogc>
 
 ## AUTHOR
 
