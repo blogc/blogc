@@ -193,11 +193,11 @@ blogc_content_parse_inline(const char *src)
                     break;
                 }
                 if (state == LINK_CLOSED || state == LINK_IMAGE) {
+                    if (state == LINK_CLOSED)
+                        start_state = current;
                     state = LINK_TEXT;
                     start = current + 1;
                     open_bracket = 0;
-                    if (state == LINK_CLOSED)
-                        start_state = current;
                     break;
                 }
                 if (state == LINK_TEXT) {

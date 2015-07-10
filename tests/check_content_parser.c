@@ -727,13 +727,13 @@ test_content_parse_inline(void **state)
 {
     char *html = blogc_content_parse_inline(
         "**bola***asd* [![lol](http://google.com/lol.png) **lol** "
-        "\\[asd\\]\\(qwe\\)](http://google.com) ``chunda`` [[bola]]");
+        "\\[asd\\]\\(qwe\\)](http://google.com) ``chunda`` [[bola]] chunda[9]");
     assert_non_null(html);
     assert_string_equal(html,
         "<strong>bola</strong><em>asd</em> "
         "<a href=\"http://google.com\"><img src=\"http://google.com/lol.png\" "
         "alt=\"lol\"> <strong>lol</strong> [asd](qwe)</a> "
-        "<code>chunda</code> <a href=\"bola\">bola</a>");
+        "<code>chunda</code> <a href=\"bola\">bola</a> chunda[9]");
     free(html);
     html = blogc_content_parse_inline("*bola*");
     assert_non_null(html);
