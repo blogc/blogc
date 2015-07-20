@@ -137,14 +137,14 @@ b_str_split(const char *str, char c, unsigned int max_pieces)
         if (str[0] == '\0')
             break;
         if ((str[i] == c && (!max_pieces || count + 1 < max_pieces)) || str[i] == '\0') {
-            rv = realloc(rv, (count + 1) * sizeof(char*));
+            rv = b_realloc(rv, (count + 1) * sizeof(char*));
             rv[count] = b_malloc(i - start + 1);
             memcpy(rv[count], str + start, i - start);
             rv[count++][i - start] = '\0';
             start = i + 1;
         }
     }
-    rv = realloc(rv, (count + 1) * sizeof(char*));
+    rv = b_realloc(rv, (count + 1) * sizeof(char*));
     rv[count] = NULL;
     return rv;
 }
@@ -238,7 +238,7 @@ b_string_append_len(b_string_t *str, const char *suffix, size_t len)
     str->len += len;
     if (str->len + 1 > str->allocated_len) {
         str->allocated_len = (((str->len + 1) / B_STRING_CHUNK_SIZE) + 1) * B_STRING_CHUNK_SIZE;
-        str->str = realloc(str->str, str->allocated_len);
+        str->str = b_realloc(str->str, str->allocated_len);
     }
     memcpy(str->str + old_len, suffix, len);
     str->str[str->len] = '\0';
@@ -262,7 +262,7 @@ b_string_append_c(b_string_t *str, char c)
     str->len += 1;
     if (str->len + 1 > str->allocated_len) {
         str->allocated_len = (((str->len + 1) / B_STRING_CHUNK_SIZE) + 1) * B_STRING_CHUNK_SIZE;
-        str->str = realloc(str->str, str->allocated_len);
+        str->str = b_realloc(str->str, str->allocated_len);
     }
     str->str[old_len] = c;
     str->str[str->len] = '\0';

@@ -26,3 +26,17 @@ b_malloc(size_t size)
     }
     return rv;
 }
+
+
+void*
+b_realloc(void *ptr, size_t size)
+{
+    // simple things even simpler :P
+    void *rv = realloc(ptr, size);
+    if (rv == NULL && size != 0) {
+        fprintf(stderr, "fatal error: Failed to reallocate memory!\n");
+        free(ptr);
+        exit(1);
+    }
+    return rv;
+}
