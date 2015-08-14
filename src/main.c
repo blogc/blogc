@@ -30,6 +30,10 @@
 #include "renderer.h"
 #include "error.h"
 
+#ifndef PACKAGE_VERSION
+#define PACKAGE_VERSION "Unknown"
+#endif
+
 
 static void
 blogc_print_help(void)
@@ -108,6 +112,7 @@ main(int argc, char **argv)
 
     b_slist_t *sources = NULL;
     b_trie_t *config = b_trie_new(free);
+    b_trie_insert(config, "BLOGC_VERSION", b_strdup(PACKAGE_VERSION));
 
     for (unsigned int i = 1; i < argc; i++) {
         tmp = NULL;
