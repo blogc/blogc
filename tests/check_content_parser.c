@@ -20,6 +20,24 @@
 
 
 static void
+test_is_ordered_list_item(void **state)
+{
+    assert_true(blogc_is_ordered_list_item("1.bola", 2));
+    assert_true(blogc_is_ordered_list_item("1. bola", 3));
+    assert_true(blogc_is_ordered_list_item("12. bola", 4));
+    assert_true(blogc_is_ordered_list_item("123. bola", 5));
+    assert_true(blogc_is_ordered_list_item("1.    bola", 6));
+    assert_true(blogc_is_ordered_list_item("1.    bola", 5));
+    assert_false(blogc_is_ordered_list_item("1bola", 1));
+    assert_false(blogc_is_ordered_list_item("12bola", 2));
+    assert_false(blogc_is_ordered_list_item("1 .   bola", 6));
+    assert_false(blogc_is_ordered_list_item("1.   bola", 6));
+    assert_false(blogc_is_ordered_list_item("1.", 2));
+    assert_false(blogc_is_ordered_list_item(NULL, 2));
+}
+
+
+static void
 test_content_parse(void **state)
 {
     size_t l = 0;
@@ -368,6 +386,40 @@ test_content_parse_unordered_list(void **state)
         "</ul>\n"
         "<p>fuuuu</p>\n");
     free(html);
+    html = blogc_content_parse(
+        "lol\n"
+        "\n"
+        "*  asd\n"
+        "   cvb\n"
+        "*  qwe\n"
+        "*  zxc\n"
+        "   1234\n"
+        "\n"
+        "fuuuu\n", NULL);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>lol</p>\n"
+        "<ul>\n"
+        "<li>asd\n"
+        "cvb</li>\n"
+        "<li>qwe</li>\n"
+        "<li>zxc\n"
+        "1234</li>\n"
+        "</ul>\n"
+        "<p>fuuuu</p>\n");
+    free(html);
+    html = blogc_content_parse(
+        "*  asd\n"
+        "*   qwe\n"
+        "*    zxc", NULL);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<ul>\n"
+        "<li>asd</li>\n"
+        "<li> qwe</li>\n"
+        "<li>  zxc</li>\n"
+        "</ul>\n");
+    free(html);
 }
 
 
@@ -423,21 +475,37 @@ test_content_parse_ordered_list(void **state)
         "<p>fuuuu</p>\n");
     free(html);
     html = blogc_content_parse(
-        "1.\nasd\n"
-        "2. qwe\n", NULL);
+        "lol\n"
+        "\n"
+        "1.  asd\n"
+        "    cvb\n"
+        "2.  qwe\n"
+        "3.  zxc\n"
+        "    1234\n"
+        "\n"
+        "fuuuu\n", NULL);
     assert_non_null(html);
     assert_string_equal(html,
-        "<p>1.\n"
-        "asd</p>\n"
+        "<p>lol</p>\n"
         "<ol>\n"
+        "<li>asd\n"
+        "cvb</li>\n"
         "<li>qwe</li>\n"
-        "</ol>\n");
+        "<li>zxc\n"
+        "1234</li>\n"
+        "</ol>\n"
+        "<p>fuuuu</p>\n");
     free(html);
-    html = blogc_content_parse("1.\n", NULL);
+    html = blogc_content_parse(
+        "1.  asd\n"
+        "2.   qwe\n"
+        "3.    zxc", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<ol>\n"
-        "<li></li>\n"
+        "<li>asd</li>\n"
+        "<li> qwe</li>\n"
+        "<li>  zxc</li>\n"
         "</ol>\n");
     free(html);
 }
@@ -718,6 +786,19 @@ test_content_parse_invalid_ordered_list(void **state)
     assert_string_equal(html,
         "<p>a. asd\n"
         "2. qwe</p>\n");
+    free(html);
+    html = blogc_content_parse(
+        "1.\nasd\n"
+        "2. qwe\n", NULL);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>1.\n"
+        "asd\n"
+        "2. qwe</p>\n");
+    free(html);
+    html = blogc_content_parse("1.\n", NULL);
+    assert_non_null(html);
+    assert_string_equal(html, "<p>1.</p>\n");
     free(html);
 }
 
@@ -1038,6 +1119,7 @@ int
 main(void)
 {
     const UnitTest tests[] = {
+        unit_test(test_is_ordered_list_item),
         unit_test(test_content_parse),
         unit_test(test_content_parse_with_excerpt),
         unit_test(test_content_parse_header),

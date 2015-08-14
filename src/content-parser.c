@@ -17,7 +17,7 @@
 #include "content-parser.h"
 
 // this is a half ass implementation of a markdown-like syntax. bugs are
-// expected. feel free to improve the parser and and new features.
+// expected. feel free to improve the parser and add new features.
 
 
 typedef enum {
@@ -356,6 +356,33 @@ blogc_content_parse_inline(const char *src)
 }
 
 
+bool
+blogc_is_ordered_list_item(const char *str, size_t prefix_len)
+{
+    if (str == NULL)
+        return false;
+
+    if (strlen(str) < 2)
+        return false;
+
+    size_t i;
+
+    for (i = 0; str[i] >= '0' && str[i] <= '9'; i++);
+
+    if (i == 0)
+        return false;
+    if (str[i] != '.')
+        return false;
+
+    for (i++; i < prefix_len && (str[i] == ' ' || str[i] == '\t'); i++);
+
+    if (str[i] == '\0')
+        return false;
+
+    return i == prefix_len;
+}
+
+
 char*
 blogc_content_parse(const char *src, size_t *end_excerpt)
 {
@@ -373,13 +400,12 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
     size_t prefix_len = 0;
     char *tmp = NULL;
     char *tmp2 = NULL;
-    char *tmp3 = NULL;
     char *parsed = NULL;
-    char **tmpv = NULL;
 
     char d = '\0';
 
     b_slist_t *lines = NULL;
+    b_slist_t *lines2 = NULL;
 
     b_string_t *rv = b_string_new();
     b_string_t *tmp_str = NULL;
@@ -664,22 +690,39 @@ hr:
                 if (c == '\n' || c == '\r' || is_last) {
                     end = is_last && c != '\n' && c != '\r' ? src_len : current;
                     tmp = b_strndup(src + start2, end - start2);
+                    tmp2 = b_strdup_printf("%-*s", strlen(prefix), "");
                     if (b_str_starts_with(tmp, prefix)) {
-                        tmp3 = b_strdup(tmp + strlen(prefix));
-                        parsed = blogc_content_parse_inline(tmp3);
-                        free(tmp3);
-                        tmp3 = NULL;
-                        lines = b_slist_append(lines, b_strdup(parsed));
-                        free(parsed);
-                        parsed = NULL;
+                        if (lines2 != NULL) {
+                            tmp_str = b_string_new();
+                            for (b_slist_t *l = lines2; l != NULL; l = l->next) {
+                                if (l->next == NULL)
+                                    b_string_append_printf(tmp_str, "%s", l->data);
+                                else
+                                    b_string_append_printf(tmp_str, "%s\n", l->data);
+                            }
+                            b_slist_free_full(lines2, free);
+                            lines2 = NULL;
+                            parsed = blogc_content_parse_inline(tmp_str->str);
+                            b_string_free(tmp_str, true);
+                            lines = b_slist_append(lines, b_strdup(parsed));
+                            free(parsed);
+                            parsed = NULL;
+                        }
+                        lines2 = b_slist_append(lines2, b_strdup(tmp + strlen(prefix)));
+                    }
+                    else if (b_str_starts_with(tmp, tmp2)) {
+                        lines2 = b_slist_append(lines2, b_strdup(tmp + strlen(prefix)));
                     }
                     else {
                         state = CONTENT_PARAGRAPH_END;
                         free(tmp);
                         tmp = NULL;
+                        free(tmp2);
+                        tmp2 = NULL;
                         free(prefix);
                         prefix = NULL;
                         b_slist_free_full(lines, free);
+                        b_slist_free_full(lines2, free);
                         lines = NULL;
                         if (is_last)
                             goto para;
@@ -687,6 +730,8 @@ hr:
                     }
                     free(tmp);
                     tmp = NULL;
+                    free(tmp2);
+                    tmp2 = NULL;
                     state = CONTENT_UNORDERED_LIST_END;
                 }
                 if (!is_last)
@@ -694,6 +739,23 @@ hr:
 
             case CONTENT_UNORDERED_LIST_END:
                 if (c == '\n' || c == '\r' || is_last) {
+                    if (lines2 != NULL) {
+                        // FIXME: avoid repeting the code below
+                        tmp_str = b_string_new();
+                        for (b_slist_t *l = lines2; l != NULL; l = l->next) {
+                            if (l->next == NULL)
+                                b_string_append_printf(tmp_str, "%s", l->data);
+                            else
+                                b_string_append_printf(tmp_str, "%s\n", l->data);
+                        }
+                        b_slist_free_full(lines2, free);
+                        lines2 = NULL;
+                        parsed = blogc_content_parse_inline(tmp_str->str);
+                        b_string_free(tmp_str, true);
+                        lines = b_slist_append(lines, b_strdup(parsed));
+                        free(parsed);
+                        parsed = NULL;
+                    }
                     b_string_append(rv, "<ul>\n");
                     for (b_slist_t *l = lines; l != NULL; l = l->next)
                         b_string_append_printf(rv, "<li>%s</li>\n", l->data);
@@ -733,52 +795,72 @@ hr:
                 if (c == '\n' || c == '\r' || is_last) {
                     end = is_last && c != '\n' && c != '\r' ? src_len : current;
                     tmp = b_strndup(src + start2, end - start2);
-                    if (strlen(tmp) >= prefix_len) {
-                        tmp2 = b_strndup(tmp, prefix_len);
-                        tmpv = b_str_split(tmp2, '.', 2);
+                    tmp2 = b_strdup_printf("%-*s", prefix_len, "");
+                    if (blogc_is_ordered_list_item(tmp, prefix_len)) {
+                        if (lines2 != NULL) {
+                            tmp_str = b_string_new();
+                            for (b_slist_t *l = lines2; l != NULL; l = l->next) {
+                                if (l->next == NULL)
+                                    b_string_append_printf(tmp_str, "%s", l->data);
+                                else
+                                    b_string_append_printf(tmp_str, "%s\n", l->data);
+                            }
+                            b_slist_free_full(lines2, free);
+                            lines2 = NULL;
+                            parsed = blogc_content_parse_inline(tmp_str->str);
+                            b_string_free(tmp_str, true);
+                            lines = b_slist_append(lines, b_strdup(parsed));
+                            free(parsed);
+                            parsed = NULL;
+                        }
+                        lines2 = b_slist_append(lines2, b_strdup(tmp + prefix_len));
+                    }
+                    else if (b_str_starts_with(tmp, tmp2)) {
+                        lines2 = b_slist_append(lines2, b_strdup(tmp + prefix_len));
+                    }
+                    else {
+                        state = CONTENT_PARAGRAPH_END;
+                        free(tmp);
+                        tmp = NULL;
                         free(tmp2);
                         tmp2 = NULL;
-                        if (b_strv_length(tmpv) != 2) {
-                            state = CONTENT_PARAGRAPH_END;
-                            b_strv_free(tmpv);
-                            tmpv = NULL;
-                            free(tmp);
-                            tmp = NULL;
-                            b_slist_free_full(lines, free);
-                            lines = NULL;
-                            goto para;
-                        }
-                        for (unsigned int i = 0; tmpv[0][i] != '\0'; i++) {
-                            if (!(tmpv[0][i] >= '0' && tmpv[0][i] <= '9')) {
-                                state = CONTENT_PARAGRAPH_END;
-                                b_strv_free(tmpv);
-                                tmpv = NULL;
-                                free(tmp);
-                                tmp = NULL;
-                                b_slist_free_full(lines, free);
-                                lines = NULL;
-                                goto para;
-                            }
-                        }
-                        tmp3 = b_strdup(tmp + prefix_len);
-                        parsed = blogc_content_parse_inline(tmp3);
-                        free(tmp3);
-                        tmp3 = NULL;
-                        lines = b_slist_append(lines, b_strdup(parsed));
-                        state = CONTENT_ORDERED_LIST_END;
                         free(parsed);
                         parsed = NULL;
-                        b_strv_free(tmpv);
-                        tmpv = NULL;
+                        b_slist_free_full(lines, free);
+                        b_slist_free_full(lines2, free);
+                        lines = NULL;
+                        if (is_last)
+                            goto para;
+                        break;
                     }
                     free(tmp);
                     tmp = NULL;
+                    free(tmp2);
+                    tmp2 = NULL;
+                    state = CONTENT_ORDERED_LIST_END;
                 }
-                if (state == CONTENT_PARAGRAPH || !is_last)
+                if (!is_last)
                     break;
 
             case CONTENT_ORDERED_LIST_END:
                 if (c == '\n' || c == '\r' || is_last) {
+                    if (lines2 != NULL) {
+                        // FIXME: avoid repeting the code below
+                        tmp_str = b_string_new();
+                        for (b_slist_t *l = lines2; l != NULL; l = l->next) {
+                            if (l->next == NULL)
+                                b_string_append_printf(tmp_str, "%s", l->data);
+                            else
+                                b_string_append_printf(tmp_str, "%s\n", l->data);
+                        }
+                        b_slist_free_full(lines2, free);
+                        lines2 = NULL;
+                        parsed = blogc_content_parse_inline(tmp_str->str);
+                        b_string_free(tmp_str, true);
+                        lines = b_slist_append(lines, b_strdup(parsed));
+                        free(parsed);
+                        parsed = NULL;
+                    }
                     b_string_append(rv, "<ol>\n");
                     for (b_slist_t *l = lines; l != NULL; l = l->next)
                         b_string_append_printf(rv, "<li>%s</li>\n", l->data);
