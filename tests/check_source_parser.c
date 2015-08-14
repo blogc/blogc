@@ -392,6 +392,23 @@ test_source_parse_config_reserved_name10(void **state)
 
 
 static void
+test_source_parse_config_reserved_name11(void **state)
+{
+    const char *a = "BLOGC_VERSION: 1.0\r\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(source);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "'BLOGC_VERSION' variable is forbidden in source files. It will be set "
+        "for you by the compiler.");
+    blogc_error_free(err);
+    b_trie_free(source);
+}
+
+
+static void
 test_source_parse_config_value_no_line_ending(void **state)
 {
     const char *a = "BOLA: asd";
@@ -447,6 +464,7 @@ main(void)
         unit_test(test_source_parse_config_reserved_name8),
         unit_test(test_source_parse_config_reserved_name9),
         unit_test(test_source_parse_config_reserved_name10),
+        unit_test(test_source_parse_config_reserved_name11),
         unit_test(test_source_parse_config_value_no_line_ending),
         unit_test(test_source_parse_invalid_separator),
     };
