@@ -18,6 +18,8 @@ AS_IF([test "x$ac_cv_prog_cc_c99" = "xno"], [
   AC_MSG_ERROR([no C99 compiler found, blogc requires a C99 compiler.])
 ])
 
+PKG_PROG_PKG_CONFIG
+
 AC_ARG_ENABLE([ronn], AS_HELP_STRING([--disable-ronn],
               [ignore presence of ronn and disable man pages generation]))
 AS_IF([test "x$enable_ronn" != "xno"], [
@@ -60,7 +62,6 @@ TESTS="disabled"
 AC_ARG_ENABLE([tests], AS_HELP_STRING([--disable-tests],
               [disable unit tests, ignoring presence of cmocka]))
 AS_IF([test "x$enable_tests" != "xno"], [
-  PKG_PROG_PKG_CONFIG
   PKG_CHECK_MODULES([CMOCKA], [cmocka], [
     AC_MSG_CHECKING([whether the linker supports -wrap])
     save_LDFLAGS="$LDFLAGS"
