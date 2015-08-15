@@ -78,6 +78,13 @@ the starting character must be preserved in the begin of each line.
     * Second item
     * Third item
 
+Multi-line items are supported. Content must be aligned properly:
+
+    * First item
+      Continuation of first item
+    * Second item
+    * Third item
+
 ### Ordered Lists
 
 Ordered lists are defined with lines starting with a number and a '.' character.
@@ -86,6 +93,13 @@ each line, meaning that the content of the items must be aligned. The order and
 value of the numbers is ignored.
 
     1.  First item
+    2.  Second item
+    10. Tenth item
+
+Multi-line items are supported. Content must be aligned properly:
+
+    1.  First item
+        Continuation of first item
     2.  Second item
     10. Tenth item
 
@@ -138,7 +152,65 @@ After parsing, the excerpt will be part of the full content as well.
 
 ## SOURCE CONTENT - INLINE ELEMENTS
 
-TODO
+### Bold
+
+Bold text is defined with 2 '*' or '_' before and after the text.
+
+    Bold text: **text**
+    Bold text: __text__
+
+### Italic
+
+Italic text is defined with 1 '*' or '_' before and after the text.
+
+    Italic text: *text*
+    Italic text: _text_
+
+### Bold and Italic
+
+Bold and italic text is defined mixing markers, like:
+
+    Italic and bold text: _**text**_
+    Italic and bold text: *__text__*
+    Italic and bold text: __*text*__
+    Italic and bold text: **_text_**
+
+### Code
+
+Code is defined with 1 or 2 '`' before and after the text.
+
+    This is inline code: `code`
+    This is inline code: ``code``
+
+### Images
+
+Images are defined using the following syntax:
+
+    This is an image: ![This is the image alt text](picture.jpg)
+
+### Links
+
+Links are defined using the following syntax:
+
+    To learn more about blogc, [click here](http://blogc.org).
+
+### Image Links
+
+Links can be combined with images:
+
+    [![This is the image alt text](picture.jpg)](http://blogc.org)
+
+### Automatic Links
+
+Automatic link is defined with 2 '[' before and 2 ']' after the URL.
+
+    To learn more about blogc, visit [[http://blogc.org]].
+
+### Line break
+
+Line breaks can be added after a paragraph line adding 2 or morewhite spaces
+to the end of the line.
+
 
 ## BUGS
 
