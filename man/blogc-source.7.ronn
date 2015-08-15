@@ -208,7 +208,7 @@ Automatic link is defined with 2 '[' before and 2 ']' after the URL.
 
 ### Line break
 
-Line breaks can be added after a paragraph line adding 2 or morewhite spaces
+Line breaks can be added after a paragraph line adding 2 or more white spaces
 to the end of the line.
 
 
