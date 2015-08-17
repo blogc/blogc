@@ -155,7 +155,7 @@ This is how an `if` conditional is defined in a template:
 
 ## BUGS
 
-The source content is handled by handwritten parsers, that even being well
+The template content is handled by handwritten parsers, that even being well
 tested, may be subject of parsing bugs. Please report any issues to:
 <https://github.com/blogc/blogc>
 
@@ -169,4 +169,4 @@ Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
 
 ## SEE ALSO
 
-blogc(1), blogc-source(7)
+blogc(1), blogc-source(7), strcmp(3)
