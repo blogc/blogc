@@ -32,7 +32,10 @@ blocks that handle local variables. See blogc-template(7) for details.
 
 The ``DATE`` variable is special, and represents the publishing date of the
 post. It may be formatted with the ``DATE_FORMAT`` variable, if provided,
-otherwise will be kept as is. See blogc(1).
+otherwise will be kept as is.
+
+The ``DATE_FORMAT`` variable should be passed to blogc(1) as a global
+variable. Its value must be a valid strptime(3) format.
 
 ## SOURCE CONTENT - BLOCK ELEMENTS
 
