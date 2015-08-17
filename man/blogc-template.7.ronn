@@ -138,7 +138,7 @@ This is how an `ifndef` conditional is defined in a template:
 
 In this case, if the `TITLE` variable is not defined, the content is included.
 
-### if confitional
+### if conditional
 
 The content of an `if` conditional is included in the output file when
 the comparision between the given variable and the static string evaluates to
