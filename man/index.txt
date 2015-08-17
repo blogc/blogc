@@ -5,4 +5,5 @@ blogc-template(7)   blogc-template.7.ronn
 
 # external manuals
 make(1)             http://man.cx/make(1)
+strcmp(3)           http://man.cx/strcmp(3)
 strptime(3)         http://man.cx/strptime(3)

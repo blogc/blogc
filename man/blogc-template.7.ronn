@@ -1,13 +1,167 @@
 blogc-template(7) -- blogc's template format
 ============================================
 
-## SYNOPSIS
-
-TODO
-
 ## DESCRIPTION
 
-TODO
+Template files are used as base to build output files by blogc(1). These files
+can include variables, blocks and conditionals, that will directly affect the
+output files.
+
+The syntax of the template files is defined to be simple, without affecting the
+content output. The syntax is somewhat inspired by Jinja2 syntax.
+
+This manual describes the basic syntax and functionalities of template files.
+
+## TEMPLATE BLOCKS
+
+Template blocks are used to delimit content. The content inside a block will
+be included in the output file (or not) if the parameters passed to blogc(1)
+matches the requirements of the given block.
+
+Blocks can be defined more than once, but can't be nested.
+
+The available blocks are: `entry`, `listing` and `listing_once`.
+
+### entry block
+
+The content of an `entry` block is included in the output file when blogc(1)
+is called without `-l` option, and with only one source file. It is used to
+render a single entry of your blog/website. All the variables defined in the
+source file are available inside this block (see blogc-source(7)), and will
+override global variables (see blogc(1)).
+
+This is how an `entry` block is defined:
+
+    {% block entry %}
+    This content will only be included when rendering a single entry.
+    {% endblock %}
+
+### listing block
+
+The content of a `listing` block is included in the output file when blogc(1)
+is called with `-l` option, and with one or more source files. It is used
+to create a listing of entries, and its content will be included once for
+each given source file (in the order that the source files were provided to
+blogc(1)). All the variables defined in the source files are available
+inside this block (see blogc-source(7)), and will override global variables
+(see blogc(1)). The variables will be provided by each file, when blogc(1)
+iterates over them.
+
+This is how a `listing` block is defined:
+
+    {% block listing %}
+    This content will be only included when rendering an entry listing, and
+    will be included once for each entry.
+    {% endblock %}
+
+### listing_once block
+
+The content of a `listing_once` block is included in the output file when
+blogc(1) is called with `-l` option, and with one or more source files. It is
+like a `listing` block, but is only called once, and does not have access
+to the local variables defined in the source files. It is useful to add
+something before an entry listing.
+
+This is how a `listing_once` block is defined:
+
+    {% block listing_once %}
+    This content will be only included when rendering an entry listing, but
+    will be included only once.
+    {% endblock %}
+
+This is a 'real life' usage example of a `listing_once` block, supposing
+that each source file defines a `TITLE` variable:
+
+    {% block listing_once %}
+    <ul>
+    {% endblock %}
+    {% block listing %}
+    <li>{{ TITLE }}</li>
+    {% endblock %}
+    {% block listing_once %}
+    </ul>
+    {% endblock %}
+
+## TEMPLATE VARIABLES
+
+Template variables are used to provide content to templates from blogc(1)
+command-line and from source files.
+
+This is how a variable is defined in a template:
+
+    {{ VARIABLE_NAME }}
+
+The value of a variable will depends of its scope. Global variables provided
+to blogc(1) are available everywhere in the templates. Local variables
+provided in the source files are available only inside `entry` and `listing`
+blocks, and will override global variables.
+
+If a variable is not defined, it will be replaced by an empty string. blogc(1)
+won't raise any error in this case.
+
+Variables are always strings, even if the value of the variable is a number,
+it is handled as a string by blogc(1).
+
+## TEMPLATE CONDITIONALS
+
+Template conditionals are used to include content to the output, or not,
+based on the value and existence of variables in the current scope.
+
+The implementation of conditionals is simple, and each will just evaluate the
+value of a single variable.
+
+The available conditionals are: `ifdef`, `ifndef` and `if`.
+
+### ifdef conditional
+
+The content of an `ifdef` conditional is included in the output file when
+the given variable is defined in the current scope.
+
+This is how an `ifdef` conditional is defined in a template:
+
+    {% ifdef TITLE %}
+    This is title: {{ TITLE }}
+    {% endif %}
+
+In this case, if the `TITLE` variable is defined, the content is included.
+
+### ifndef conditional
+
+The content of an `ifndef` conditional is included in the output file when
+the given variable is not defined in the current scope.
+
+This is how an `ifndef` conditional is defined in a template:
+
+    {% ifndef TITLE %}
+    Untitled entry
+    {% endif %}
+
+In this case, if the `TITLE` variable is not defined, the content is included.
+
+### if confitional
+
+The content of an `if` conditional is included in the output file when
+the comparision between the given variable and the static string evaluates to
+true in the current scope.
+
+The available operators are: `==`, `!=`, `<`, `>`, `<=` and `>=`. The
+comparisions are strcmp(3)-like.
+
+This is how an `if` conditional is defined in a template:
+
+    {% if TITLE == "My Title" %}
+    Title is "My Title"
+    {% endif %}
+
+## BUGS
+
+The source content is handled by handwritten parsers, that even being well
+tested, may be subject of parsing bugs. Please report any issues to:
+<https://github.com/blogc/blogc>
+
+At least one bug is known at this point: ``\r\n`` character sequences are
+handled like 2 line breaks. The parsers won't work properly with files edited
+on Windows editors like Notepad.
 
 ## AUTHOR
 
@@ -15,4 +169,4 @@ Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
 
 ## SEE ALSO
 
-blogc(1)
+blogc(1), blogc-source(7)
