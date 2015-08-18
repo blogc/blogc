@@ -88,8 +88,6 @@ blogc_LDADD = \
 
 ## Build rules: man pages
 
-if USE_RONN
-
 EXTRA_DIST += \
 	man/blogc.1.ronn \
 	man/blogc-source.7.ronn \
@@ -106,6 +104,8 @@ dist_man_MANS = \
 MAINTAINERCLEANFILES += \
 	$(dist_man_MANS) \
 	$(NULL)
+
+if USE_RONN
 
 man/blogc.1: man/blogc.1.ronn
 	$(AM_V_GEN)$(RONN) \
