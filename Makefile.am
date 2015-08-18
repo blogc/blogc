@@ -96,9 +96,9 @@ EXTRA_DIST += \
 	$(NULL)
 
 dist_man_MANS = \
-	man/blogc.1 \
-	man/blogc-source.7 \
-	man/blogc-template.7 \
+	blogc.1 \
+	blogc-source.7 \
+	blogc-template.7 \
 	$(NULL)
 
 MAINTAINERCLEANFILES += \
@@ -107,7 +107,7 @@ MAINTAINERCLEANFILES += \
 
 if USE_RONN
 
-man/blogc.1: man/blogc.1.ronn
+blogc.1: man/blogc.1.ronn
 	$(AM_V_GEN)$(RONN) \
 		--roff \
 		--pipe \
@@ -115,7 +115,7 @@ man/blogc.1: man/blogc.1.ronn
 		--manual "$(PACKAGE_NAME) Manual" \
 		$< > $@
 
-man/blogc%.7: man/blogc%.7.ronn
+blogc%.7: man/blogc%.7.ronn
 	$(AM_V_GEN)$(RONN) \
 		--roff \
 		--pipe \
