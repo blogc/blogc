@@ -107,7 +107,7 @@ MAINTAINERCLEANFILES += \
 
 if USE_RONN
 
-man/blogc.1: $(top_srcdir)/man/blogc.1.ronn
+man/blogc.1: man/blogc.1.ronn
 	$(AM_V_GEN)$(RONN) \
 		--roff \
 		--pipe \
@@ -115,7 +115,7 @@ man/blogc.1: $(top_srcdir)/man/blogc.1.ronn
 		--manual "$(PACKAGE_NAME) Manual" \
 		$< > $@
 
-man/blogc%.7: $(top_srcdir)/man/blogc%.7.ronn
+man/blogc%.7: man/blogc%.7.ronn
 	$(AM_V_GEN)$(RONN) \
 		--roff \
 		--pipe \
