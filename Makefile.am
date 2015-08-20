@@ -123,6 +123,14 @@ blogc%.7: man/blogc%.7.ronn
 		--manual "$(PACKAGE_NAME) Manual" \
 		$< > $@
 
+else
+
+blogc.1:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
+blogc%.7:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
 endif
 
 
