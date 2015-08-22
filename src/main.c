@@ -40,7 +40,8 @@ blogc_print_help(void)
 {
     printf(
         "usage:\n"
-        "    blogc [-h] [-v] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE] [-o OUTPUT] SOURCE [SOURCE ...] - A blog compiler.\n"
+        "    blogc [-h] [-v] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
+        "          [-o OUTPUT] SOURCE [SOURCE ...] - A blog compiler.\n"
         "\n"
         "positional arguments:\n"
         "    SOURCE        source file(s)\n"
@@ -50,7 +51,8 @@ blogc_print_help(void)
         "    -v            show version and exit\n"
         "    -l            build listing page, from multiple source files\n"
         "    -D KEY=VALUE  set global configuration parameter\n"
-        "    -p KEY        show the value of a global configuration parameter after source parsing and exit\n"
+        "    -p KEY        show the value of a global configuration parameter\n"
+        "                  after source parsing and exit\n"
         "    -t TEMPLATE   template file\n"
         "    -o OUTPUT     output file\n");
 }
@@ -59,7 +61,9 @@ blogc_print_help(void)
 static void
 blogc_print_usage(void)
 {
-    printf("usage: blogc [-h] [-v] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE] [-o OUTPUT] SOURCE [SOURCE ...]\n");
+    printf(
+        "usage: blogc [-h] [-v] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
+        "             [-o OUTPUT] SOURCE [SOURCE ...]\n");
 }
 
 
@@ -75,24 +79,27 @@ blogc_mkdir_recursive(const char *filename)
     char *fname = b_strdup(filename);
 
     for (char *tmp = fname; *tmp != '\0'; tmp++) {
-        if (*tmp == '/' || *tmp == '\\') {
+        if (*tmp != '/' && *tmp != '\\')
+            continue;
 #if defined(HAVE_SYS_STAT_H) && defined(HAVE_SYS_TYPES_H)
-            char bkp = *tmp;
-            *tmp = '\0';
-            if ((strlen(fname) > 0) && (-1 == mkdir(fname, mode)) && (errno != EEXIST)) {
-                fprintf(stderr, "blogc: error: failed to create output "
-                    "directory (%s): %s\n", fname, strerror(errno));
-                free(fname);
-                exit(2);
-            }
-            *tmp = bkp;
-#else
-            // FIXME: show this warning only if actually trying to create a directory.
-            fprintf(stderr, "blogc: warning: can't create output directories "
-                "for your platform. please create the directories yourself.\n");
-            break;
-#endif
+        char bkp = *tmp;
+        *tmp = '\0';
+        if ((strlen(fname) > 0) &&
+            (-1 == mkdir(fname, mode)) &&
+            (errno != EEXIST))
+        {
+            fprintf(stderr, "blogc: error: failed to create output "
+                "directory (%s): %s\n", fname, strerror(errno));
+            free(fname);
+            exit(2);
         }
+        *tmp = bkp;
+#else
+        // FIXME: show this warning only if actually trying to create a directory.
+        fprintf(stderr, "blogc: warning: can't create output directories "
+            "for your platform. please create the directories yourself.\n");
+        break;
+#endif
     }
     free(fname);
 }
