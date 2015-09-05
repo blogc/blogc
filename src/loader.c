@@ -11,6 +11,7 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include "utils/utils.h"
@@ -30,8 +31,9 @@ blogc_get_filename(const char *f)
     if (strlen(f) == 0)
         return NULL;
 
-    // keep a pointer to original string
     char *filename = b_strdup(f);
+
+    // keep a pointer to original string
     char *tmp = filename;
 
     bool removed_dot = false;
