@@ -69,6 +69,7 @@ libblogc_la_CFLAGS = \
 	$(NULL)
 
 libblogc_la_LIBADD = \
+	$(LIBM) \
 	$(NULL)
 
 
