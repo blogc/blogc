@@ -212,10 +212,6 @@ blogc_content_parse_inline(const char *src)
                 break;
 
             case ']':
-                if (state == LINK_CLOSED && (open_code || open_code_double)) {
-                    b_string_append_c(rv, c);
-                    break;
-                }
                 if (state == LINK_AUTO) {
                     end = current;
                     state = LINK_AUTO_CLOSE;
@@ -246,10 +242,6 @@ blogc_content_parse_inline(const char *src)
                 break;
 
             case '(':
-                if (state == LINK_CLOSED && (open_code || open_code_double)) {
-                    b_string_append_c(rv, c);
-                    break;
-                }
                 if (state == LINK_TEXT_CLOSE) {
                     state = LINK_URL;
                     start = current + 1;
@@ -260,10 +252,6 @@ blogc_content_parse_inline(const char *src)
                 break;
 
             case ')':
-                if (state == LINK_CLOSED && (open_code || open_code_double)) {
-                    b_string_append_c(rv, c);
-                    break;
-                }
                 if (state == LINK_URL) {
                     state = LINK_CLOSED;
                     tmp = b_strndup(src + start, current - start);
@@ -467,8 +455,6 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                     if (c == '.')
                         break;
                     if (c == '\n' || c == '\r') {
-                        //*end_excerpt = eend;
-                        //state = CONTENT_START_LINE;
                         state = CONTENT_EXCERPT_END;
                         break;
                     }
