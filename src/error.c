@@ -84,25 +84,19 @@ blogc_error_print(blogc_error_t *err)
     if (err == NULL)
         return;
 
-    char *tmp = NULL;
-
     switch(err->type) {
         case BLOGC_ERROR_SOURCE_PARSER:
-            tmp = b_strdup("Source parser error");
+            fprintf(stderr, "Source parser error: %s\n", err->msg);
             break;
         case BLOGC_ERROR_TEMPLATE_PARSER:
-            tmp = b_strdup("Template parser error");
+            fprintf(stderr, "Template parser error: %s\n", err->msg);
             break;
         case BLOGC_ERROR_LOADER:
-            tmp = b_strdup("Loader error");
+            fprintf(stderr, "Loader error: %s\n", err->msg);
             break;
         default:
-            tmp = b_strdup("Unknown error");
+            fprintf(stderr, "Unknown error: %s\n", err->msg);
     }
-
-    fprintf(stderr, "%s: %s\n", tmp, err->msg);
-
-    free(tmp);
 }
 
 
