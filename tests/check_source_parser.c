@@ -136,7 +136,7 @@ test_source_parse_config_empty(void **state)
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
-    assert_string_equal(err->msg, "Your config file is empty.");
+    assert_string_equal(err->msg, "Your source file is empty.");
     blogc_error_free(err);
     b_trie_free(source);
 }

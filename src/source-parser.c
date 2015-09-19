@@ -174,7 +174,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
         switch (state) {
             case SOURCE_START:
                 *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
-                    current, "Your config file is empty.");
+                    current, "Your source file is empty.");
                 break;
             case SOURCE_CONFIG_KEY:
                 *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
