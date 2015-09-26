@@ -95,7 +95,7 @@ AM_CONDITIONAL([USE_CMOCKA], [test "x$have_cmocka" = "xyes"])
 
 AC_CHECK_HEADERS([sys/types.h sys/stat.h time.h])
 
-AC_CHECK_LIBM
+LT_LIB_M
 AC_SUBST(LIBM)
 
 AC_CONFIG_FILES([
