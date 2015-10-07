@@ -71,7 +71,7 @@ blogc_format_date(const char *date, b_trie_t *global, b_trie_t *local)
 char*
 blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing)
 {
-    if (tmpl == NULL || sources == NULL)
+    if (tmpl == NULL)
         return NULL;
 
     b_slist_t *current_source = NULL;
@@ -136,6 +136,16 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                     }
                 }
                 if (0 == strcmp("listing", stmt->value)) {
+                    if (sources == NULL) {
+
+                        // we can just skip anything and walk until the next
+                        // 'endblock'
+                        while (stmt->type != BLOGC_TEMPLATE_ENDBLOCK_STMT) {
+                            tmp = tmp->next;
+                            stmt = tmp->data;
+                        }
+                        break;
+                    }
                     if (current_source == NULL) {
                         listing_start = tmp;
                         current_source = sources;

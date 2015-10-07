@@ -195,12 +195,9 @@ main(int argc, char **argv)
             sources = b_slist_append(sources, b_strdup(argv[i]));
     }
 
-    if (b_slist_length(sources) == 0) {
+    if (!listing && b_slist_length(sources) == 0) {
         blogc_print_usage();
-        if (listing)
-            fprintf(stderr, "blogc: error: at least one source file is required\n");
-        else
-            fprintf(stderr, "blogc: error: one source file is required\n");
+        fprintf(stderr, "blogc: error: one source file is required\n");
         rv = 2;
         goto cleanup;
     }

@@ -143,6 +143,35 @@ test_render_listing(void **state)
 
 
 static void
+test_render_listing_empty(void **state)
+{
+    const char *str =
+        "foo\n"
+        "{% block listing_once %}fuuu{% endblock %}\n"
+        "{% block entry %}\n"
+        "{% ifdef GUDA %}{{ GUDA }}{% endif %}\n"
+        "{% ifdef CHUNDA %}{{ CHUNDA }}{% endif %}\n"
+        "{% endblock %}\n"
+        "{% block listing %}\n"
+        "{% ifdef DATE_FORMATTED %}{{ DATE_FORMATTED }}{% endif %}\n"
+        "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    char *out = blogc_render(l, NULL, NULL, true);
+    assert_string_equal(out,
+        "foo\n"
+        "fuuu\n"
+        "\n"
+        "\n");
+    blogc_template_free_stmts(l);
+    free(out);
+}
+
+
+static void
 test_render_ifdef(void **state)
 {
     const char *str =
@@ -685,6 +714,7 @@ main(void)
     const UnitTest tests[] = {
         unit_test(test_render_entry),
         unit_test(test_render_listing),
+        unit_test(test_render_listing_empty),
         unit_test(test_render_ifdef),
         unit_test(test_render_ifdef2),
         unit_test(test_render_ifdef3),
