@@ -39,7 +39,7 @@ This is how an `entry` block is defined:
 ### listing block
 
 The content of a `listing` block is included in the output file when blogc(1)
-is called with `-l` option, and with one or more source files. It is used
+is called with `-l` option, and with zero or more source files. It is used
 to create a listing of entries, and its content will be included once for
 each given source file (in the order that the source files were provided to
 blogc(1)). All the variables defined in the source files are available
@@ -57,10 +57,13 @@ This is how a `listing` block is defined:
 ### listing_once block
 
 The content of a `listing_once` block is included in the output file when
-blogc(1) is called with `-l` option, and with one or more source files. It is
+blogc(1) is called with `-l` option, and with zero or more source files. It is
 like a `listing` block, but is only called once, and does not have access
 to the local variables defined in the source files. It is useful to add
 something before an entry listing.
+
+The content of a `listing_once` block is included even if no source file is
+provided.
 
 This is how a `listing_once` block is defined:
 

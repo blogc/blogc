@@ -41,7 +41,7 @@ blogc_print_help(void)
     printf(
         "usage:\n"
         "    blogc [-h] [-v] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
-        "          [-o OUTPUT] SOURCE [SOURCE ...] - A blog compiler.\n"
+        "          [-o OUTPUT] [SOURCE ...] - A blog compiler.\n"
         "\n"
         "positional arguments:\n"
         "    SOURCE        source file(s)\n"
@@ -63,7 +63,7 @@ blogc_print_usage(void)
 {
     printf(
         "usage: blogc [-h] [-v] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
-        "             [-o OUTPUT] SOURCE [SOURCE ...]\n");
+        "             [-o OUTPUT] [SOURCE ...]\n");
 }
 
 

@@ -4,8 +4,8 @@ blogc(1) -- a blog compiler
 ## SYNOPSIS
 
 `blogc` [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] <SOURCE><br>
-`blogc` `-l` [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] <SOURCE> [<SOURCE> ...]<br>
-`blogc` `-l` `-p` <KEY> [`-D` <KEY>=<VALUE> ...] <SOURCE> [<SOURCE> ...]<br>
+`blogc` `-l` [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] [<SOURCE> ...]<br>
+`blogc` `-l` `-p` <KEY> [`-D` <KEY>=<VALUE> ...] [<SOURCE> ...]<br>
 `blogc` [`-h`|`-v`]
 
 ## DESCRIPTION
