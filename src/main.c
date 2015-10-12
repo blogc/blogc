@@ -70,14 +70,7 @@ blogc_print_usage(void)
 static void
 blogc_mkdir_recursive(const char *filename)
 {
-#if defined(HAVE_SYS_STAT_H) && defined(HAVE_SYS_TYPES_H)
-    // honor umask if possible
-    mode_t m = umask(0);
-    umask(m);
-    mode_t mode = (S_IRWXU | S_IRWXG | S_IRWXO) & ~m;
-#endif
     char *fname = b_strdup(filename);
-
     for (char *tmp = fname; *tmp != '\0'; tmp++) {
         if (*tmp != '/' && *tmp != '\\')
             continue;
@@ -85,7 +78,7 @@ blogc_mkdir_recursive(const char *filename)
         char bkp = *tmp;
         *tmp = '\0';
         if ((strlen(fname) > 0) &&
-            (-1 == mkdir(fname, mode)) &&
+            (-1 == mkdir(fname, 0777)) &&
             (errno != EEXIST))
         {
             fprintf(stderr, "blogc: error: failed to create output "
