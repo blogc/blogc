@@ -38,10 +38,10 @@ test_source_parse(void **state)
     assert_string_equal(b_trie_lookup(source, "VAR1"), "asd asd");
     assert_string_equal(b_trie_lookup(source, "VAR2"), "123chunda");
     assert_string_equal(b_trie_lookup(source, "EXCERPT"),
-        "<h1>This is a test</h1>\n"
+        "<h1 id=\"this-is-a-test\">This is a test</h1>\n"
         "<p>bola</p>\n");
     assert_string_equal(b_trie_lookup(source, "CONTENT"),
-        "<h1>This is a test</h1>\n"
+        "<h1 id=\"this-is-a-test\">This is a test</h1>\n"
         "<p>bola</p>\n");
     assert_string_equal(b_trie_lookup(source, "RAW_CONTENT"),
         "# This is a test\n"
@@ -71,10 +71,10 @@ test_source_parse_with_spaces(void **state)
     assert_string_equal(b_trie_lookup(source, "VAR1"), "chunda");
     assert_string_equal(b_trie_lookup(source, "BOLA"), "guda");
     assert_string_equal(b_trie_lookup(source, "EXCERPT"),
-        "<h1>This is a test</h1>\n"
+        "<h1 id=\"this-is-a-test\">This is a test</h1>\n"
         "<p>bola</p>\n");
     assert_string_equal(b_trie_lookup(source, "CONTENT"),
-        "<h1>This is a test</h1>\n"
+        "<h1 id=\"this-is-a-test\">This is a test</h1>\n"
         "<p>bola</p>\n");
     assert_string_equal(b_trie_lookup(source, "RAW_CONTENT"),
         "# This is a test\n"
@@ -107,10 +107,10 @@ test_source_parse_with_excerpt(void **state)
     assert_string_equal(b_trie_lookup(source, "VAR1"), "asd asd");
     assert_string_equal(b_trie_lookup(source, "VAR2"), "123chunda");
     assert_string_equal(b_trie_lookup(source, "EXCERPT"),
-        "<h1>This is a test</h1>\n"
+        "<h1 id=\"this-is-a-test\">This is a test</h1>\n"
         "<p>bola</p>\n");
     assert_string_equal(b_trie_lookup(source, "CONTENT"),
-        "<h1>This is a test</h1>\n"
+        "<h1 id=\"this-is-a-test\">This is a test</h1>\n"
         "<p>bola</p>\n"
         "<p>guda\n"
         "yay</p>\n");

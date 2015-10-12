@@ -20,6 +20,27 @@
 // expected. feel free to improve the parser and add new features.
 
 
+char*
+blogc_slugify(const char *str)
+{
+    if (str == NULL)
+        return NULL;
+    char *new_str = b_strdup(str);
+    int diff = 'a' - 'A';  // just to avoid magic numbers
+    for (unsigned int i = 0; new_str[i] != '\0'; i++) {
+        if (new_str[i] >= 'a' && new_str[i] <= 'z')
+            continue;
+        if (new_str[i] >= '0' && new_str[i] <= '9')
+            continue;
+        if (new_str[i] >= 'A' && new_str[i] <= 'Z')
+            new_str[i] += diff;
+        else
+            new_str[i] = '-';
+    }
+    return new_str;
+}
+
+
 typedef enum {
     CONTENT_START_LINE = 1,
     CONTENT_EXCERPT,
@@ -389,6 +410,7 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
     char *tmp = NULL;
     char *tmp2 = NULL;
     char *parsed = NULL;
+    char *slug = NULL;
 
     char d = '\0';
 
@@ -501,8 +523,14 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                     end = is_last && c != '\n' && c != '\r' ? src_len : current;
                     tmp = b_strndup(src + start, end - start);
                     parsed = blogc_content_parse_inline(tmp);
-                    b_string_append_printf(rv, "<h%d>%s</h%d>\n", header_level,
-                        parsed, header_level);
+                    slug = blogc_slugify(tmp);
+                    if (slug == NULL)
+                        b_string_append_printf(rv, "<h%d>%s</h%d>\n",
+                            header_level, parsed, header_level);
+                    else
+                        b_string_append_printf(rv, "<h%d id=\"%s\">%s</h%d>\n",
+                            header_level, slug, parsed, header_level);
+                    free(slug);
                     free(parsed);
                     parsed = NULL;
                     free(tmp);

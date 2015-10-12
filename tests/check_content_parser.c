@@ -20,6 +20,33 @@
 
 
 static void
+test_slugify(void **state)
+{
+    char *s = blogc_slugify("bola");
+    assert_string_equal(s, "bola");
+    free(s);
+    s = blogc_slugify("bola o");
+    assert_string_equal(s, "bola-o");
+    free(s);
+    s = blogc_slugify("Bola O");
+    assert_string_equal(s, "bola-o");
+    free(s);
+    s = blogc_slugify("bola 0");
+    assert_string_equal(s, "bola-0");
+    free(s);
+    s = blogc_slugify("bola  () o");
+    assert_string_equal(s, "bola-----o");
+    free(s);
+    s = blogc_slugify("Bola O");
+    assert_string_equal(s, "bola-o");
+    free(s);
+    s = blogc_slugify("bolaço");
+    assert_string_equal(s, "bola--o");
+    free(s);
+}
+
+
+static void
 test_is_ordered_list_item(void **state)
 {
     assert_true(blogc_is_ordered_list_item("1.bola", 2));
@@ -80,12 +107,12 @@ test_content_parse(void **state)
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_string_equal(html,
-        "<h1>um</h1>\n"
-        "<h2>dois</h2>\n"
-        "<h3>tres</h3>\n"
-        "<h4>quatro</h4>\n"
-        "<h5>cinco</h5>\n"
-        "<h6>seis</h6>\n"
+        "<h1 id=\"um\">um</h1>\n"
+        "<h2 id=\"dois\">dois</h2>\n"
+        "<h3 id=\"tres\">tres</h3>\n"
+        "<h4 id=\"quatro\">quatro</h4>\n"
+        "<h5 id=\"cinco\">cinco</h5>\n"
+        "<h6 id=\"seis\">seis</h6>\n"
         "<p>bola\n"
         "chunda</p>\n"
         "<blockquote><p>bola  <br />\n"
@@ -129,9 +156,9 @@ test_content_parse_with_excerpt(void **state)
         "guda\n"
         "lol", &l);
     assert_non_null(html);
-    assert_int_equal(l, 28);
+    assert_int_equal(l, 38);
     assert_string_equal(html,
-        "<h1>test</h1>\n"
+        "<h1 id=\"test\">test</h1>\n"
         "<p>chunda</p>\n"
         "<p>guda\n"
         "lol</p>\n");
@@ -147,9 +174,9 @@ test_content_parse_with_excerpt(void **state)
         "guda\n"
         "lol", &l);
     assert_non_null(html);
-    assert_int_equal(l, 28);
+    assert_int_equal(l, 38);
     assert_string_equal(html,
-        "<h1>test</h1>\n"
+        "<h1 id=\"test\">test</h1>\n"
         "<p>chunda</p>\n"
         "<p>guda\n"
         "lol</p>\n");
@@ -162,11 +189,11 @@ test_content_parse_header(void **state)
 {
     char *html = blogc_content_parse("## bola", NULL);
     assert_non_null(html);
-    assert_string_equal(html, "<h2>bola</h2>\n");
+    assert_string_equal(html, "<h2 id=\"bola\">bola</h2>\n");
     free(html);
     html = blogc_content_parse("## bola\n", NULL);
     assert_non_null(html);
-    assert_string_equal(html, "<h2>bola</h2>\n");
+    assert_string_equal(html, "<h2 id=\"bola\">bola</h2>\n");
     free(html);
     html = blogc_content_parse(
         "bola\n"
@@ -177,7 +204,7 @@ test_content_parse_header(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
-        "<h2>bola</h2>\n"
+        "<h2 id=\"bola\">bola</h2>\n"
         "<p>guda</p>\n");
     free(html);
 }
@@ -526,7 +553,7 @@ test_content_parse_invalid_excerpt(void **state)
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_string_equal(html,
-        "<h1>test</h1>\n"
+        "<h1 id=\"test\">test</h1>\n"
         "<p>chunda\n"
         "..</p>\n"
         "<p>guda\n"
@@ -544,7 +571,7 @@ test_content_parse_invalid_excerpt(void **state)
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_string_equal(html,
-        "<h1>test</h1>\n"
+        "<h1 id=\"test\">test</h1>\n"
         "<p>chunda</p>\n"
         "<p>...\n"
         "guda\n"
@@ -561,7 +588,7 @@ test_content_parse_invalid_excerpt(void **state)
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_string_equal(html,
-        "<h1>test</h1>\n"
+        "<h1 id=\"test\">test</h1>\n"
         "<p>chunda..</p>\n"
         "<p>guda\n"
         "lol</p>\n");
@@ -577,7 +604,7 @@ test_content_parse_invalid_excerpt(void **state)
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_string_equal(html,
-        "<h1>test</h1>\n"
+        "<h1 id=\"test\">test</h1>\n"
         "<p>chunda</p>\n"
         "<p>...guda\n"
         "lol</p>\n");
@@ -1119,6 +1146,7 @@ int
 main(void)
 {
     const UnitTest tests[] = {
+        unit_test(test_slugify),
         unit_test(test_is_ordered_list_item),
         unit_test(test_content_parse),
         unit_test(test_content_parse_with_excerpt),
