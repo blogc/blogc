@@ -11,6 +11,7 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include "utils/utils.h"
