@@ -22,7 +22,9 @@
 static void
 test_slugify(void **state)
 {
-    char *s = blogc_slugify("bola");
+    char *s = blogc_slugify(NULL);
+    assert_null(s);
+    s = blogc_slugify("bola");
     assert_string_equal(s, "bola");
     free(s);
     s = blogc_slugify("bola o");
