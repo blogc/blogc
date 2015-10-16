@@ -60,6 +60,10 @@ the level of the header.
 
     #### H4
 
+Each header will have an ``id`` attribute, that is a lowercase version of the
+unparsed header title, with non-alphanumeric characters replaced by '-'. These
+``id``s can be used to create anchor links to specific sections of your content.
+
 ### Blockquotes
 
 Blockquotes are defined with lines starting with '>' characters. Content defined
