@@ -417,7 +417,7 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
     // unlikely case when we need to print some line ending before evaluating
     // the "real" value.
     char line_ending[3] = "\n";
-    char l[2] = {0, 0};
+    bool line_ending_found = false;
 
     char d = '\0';
 
@@ -438,22 +438,21 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 if ((c == '\n' && src[current + 1] == '\r') ||
                     (c == '\r' && src[current + 1] == '\n'))
                 {
-                    if (l[0] == 0) {
-                        l[0] = c;
-                        l[1] = src[current + 1];
+                    if (!line_ending_found) {
                         line_ending[0] = c;
                         line_ending[1] = src[current + 1];
                         line_ending[2] = '\0';
+                        line_ending_found = true;
                     }
                     real_end = current;
                     c = src[++current];
                     is_last = current == src_len - 1;
                 }
             }
-            if (l[0] == 0) {
-                l[0] = c;
+            if (!line_ending_found) {
                 line_ending[0] = c;
                 line_ending[1] = '\0';
+                line_ending_found = true;
             }
         }
 
