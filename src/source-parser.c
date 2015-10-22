@@ -144,6 +144,8 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                 break;
 
             case SOURCE_CONTENT_START:
+                if (c == '\n' || c == '\r')
+                    break;
                 start = current;
                 state = SOURCE_CONTENT;
                 break;

@@ -52,6 +52,37 @@ test_source_parse(void **state)
 
 
 static void
+test_source_parse_crlf(void **state)
+{
+    const char *a =
+        "VAR1: asd asd\r\n"
+        "VAR2: 123chunda\r\n"
+        "----------\r\n"
+        "# This is a test\r\n"
+        "\r\n"
+        "bola\r\n";
+    blogc_error_t *err = NULL;
+    b_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(source);
+    assert_int_equal(b_trie_size(source), 5);
+    assert_string_equal(b_trie_lookup(source, "VAR1"), "asd asd");
+    assert_string_equal(b_trie_lookup(source, "VAR2"), "123chunda");
+    assert_string_equal(b_trie_lookup(source, "EXCERPT"),
+        "<h1 id=\"this-is-a-test\">This is a test</h1>\r\n"
+        "<p>bola</p>\r\n");
+    assert_string_equal(b_trie_lookup(source, "CONTENT"),
+        "<h1 id=\"this-is-a-test\">This is a test</h1>\r\n"
+        "<p>bola</p>\r\n");
+    assert_string_equal(b_trie_lookup(source, "RAW_CONTENT"),
+        "# This is a test\r\n"
+        "\r\n"
+        "bola\r\n");
+    b_trie_free(source);
+}
+
+
+static void
 test_source_parse_with_spaces(void **state)
 {
     const char *a =
@@ -446,6 +477,7 @@ main(void)
 {
     const UnitTest tests[] = {
         unit_test(test_source_parse),
+        unit_test(test_source_parse_crlf),
         unit_test(test_source_parse_with_spaces),
         unit_test(test_source_parse_with_excerpt),
         unit_test(test_source_parse_config_empty),
