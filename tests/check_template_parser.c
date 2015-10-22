@@ -116,6 +116,76 @@ test_template_parse(void **state)
 
 
 static void
+test_template_parse_crlf(void **state)
+{
+    const char *a =
+        "Test\r\n"
+        "\r\n"
+        "    {% block entry %}\r\n"
+        "{% ifdef CHUNDA %}\r\n"
+        "bola\r\n"
+        "{% endif %}\r\n"
+        "{% ifndef BOLA %}\r\n"
+        "bolao\r\n"
+        "{% endif %}\r\n"
+        "{% endblock %}\r\n"
+        "{% block listing %}{{ BOLA }}{% endblock %}\r\n"
+        "{% block listing_once %}asd{% endblock %}\r\n"
+        "{% if BOLA == \"1\\\"0\" %}aee{% endif %}";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(stmts);
+    blogc_assert_template_stmt(stmts, "Test\r\n\r\n    ",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(stmts->next, "entry",
+        BLOGC_TEMPLATE_BLOCK_STMT);
+    blogc_assert_template_stmt(stmts->next->next, "\r\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next, "CHUNDA",
+        BLOGC_TEMPLATE_IFDEF_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next->next, "\r\nbola\r\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next->next->next, NULL,
+        BLOGC_TEMPLATE_ENDIF_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next->next->next->next, "\r\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    b_slist_t *tmp = stmts->next->next->next->next->next->next->next;
+    blogc_assert_template_stmt(tmp, "BOLA", BLOGC_TEMPLATE_IFNDEF_STMT);
+    blogc_assert_template_stmt(tmp->next, "\r\nbolao\r\n", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next, NULL, BLOGC_TEMPLATE_ENDIF_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next, "\r\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    tmp = tmp->next->next->next->next;
+    blogc_assert_template_stmt(tmp, NULL, BLOGC_TEMPLATE_ENDBLOCK_STMT);
+    blogc_assert_template_stmt(tmp->next, "\r\n", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next, "listing",
+        BLOGC_TEMPLATE_BLOCK_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next, "BOLA",
+        BLOGC_TEMPLATE_VARIABLE_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next,
+        NULL, BLOGC_TEMPLATE_ENDBLOCK_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next, "\r\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next->next,
+        "listing_once", BLOGC_TEMPLATE_BLOCK_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next,
+        "asd", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next->next,
+        NULL, BLOGC_TEMPLATE_ENDBLOCK_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next->next->next,
+        "\r\n", BLOGC_TEMPLATE_CONTENT_STMT);
+    tmp = tmp->next->next->next->next->next->next->next->next->next->next;
+    blogc_assert_template_if_stmt(tmp, "BOLA", BLOGC_TEMPLATE_OP_EQ, "1\\\"0");
+    blogc_assert_template_stmt(tmp->next, "aee", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next, NULL,
+        BLOGC_TEMPLATE_ENDIF_STMT);
+    assert_null(tmp->next->next->next);
+    blogc_template_free_stmts(stmts);
+}
+
+
+static void
 test_template_parse_html(void **state)
 {
     const char *a =
@@ -602,6 +672,7 @@ main(void)
 {
     const UnitTest tests[] = {
         unit_test(test_template_parse),
+        unit_test(test_template_parse_crlf),
         unit_test(test_template_parse_html),
         unit_test(test_template_parse_ifdef_and_var_outside_block),
         unit_test(test_template_parse_invalid_block_start),

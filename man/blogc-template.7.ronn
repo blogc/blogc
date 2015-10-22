@@ -162,10 +162,6 @@ The template content is handled by handwritten parsers, that even being well
 tested, may be subject of parsing bugs. Please report any issues to:
 <https://github.com/blogc/blogc>
 
-At least one bug is known at this point: ``\r\n`` character sequences are
-handled like 2 line breaks. The parsers won't work properly with files edited
-on Windows editors like Notepad.
-
 ## AUTHOR
 
 Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
