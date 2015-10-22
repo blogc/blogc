@@ -414,7 +414,7 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
     char *slug = NULL;
 
     // this isn't empty because we need some reasonable default value in the
-    // unlikely case when we need to print some line ending before evaluating
+    // unlikely case that we need to print some line ending before evaluating
     // the "real" value.
     char line_ending[3] = "\n";
     bool line_ending_found = false;
