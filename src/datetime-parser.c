@@ -366,9 +366,10 @@ blogc_convert_datetime(const char *orig, const char *format,
 
     char buf[1024];
     if (0 == strftime(buf, sizeof(buf), format, &t)) {
-        fprintf(stderr, "blogc: warning: Failed to format DATE variable, "
-            "FORMAT is too long: %s\n", format);
-        return b_strdup(orig);
+        *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+            "Failed to format DATE variable, FORMAT is too long: %s",
+            format);
+        return NULL;
     }
 
     return b_strdup(buf);

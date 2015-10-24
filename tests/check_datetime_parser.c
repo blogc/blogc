@@ -591,6 +591,50 @@ test_convert_datetime_invalid_seconds(void **state)
 }
 
 
+static void
+test_convert_datetime_invalid_format_long(void **state)
+{
+    blogc_error_t *err = NULL;
+    char *dt = blogc_convert_datetime("2010-12-30 12:13:14",
+        "bovhsuhxwybfrxoluiejaoqpmoylgvkrjtnuntmcgtupwabexkapnklvkwmddmplfqopvb"
+        "yjsiimtfdeveeeayqvvnthimbqotumngxxenurxhsvyaftwsfdtxqnjluvtcwfkomfffrk"
+        "tywccrvnraagtnedwdjtfobinobbymanppwqxubxeepotdyxuvircyshpmtrqyvbivtycs"
+        "olwvqwdqaswdafohqkthraenpueuywbocrsbmmfoqwgbeixosyjljamcqwecfoxgolyxif"
+        "ltaoamuirnnsvoqcnboueqnnyksawwrdtcsiklanjxeavlaqsaswacmbvmselsnghiviet"
+        "wrftrfimjshrjlwxdhjkktivwmmesihlxkmqpmvfqjuimbmaucdxaqcgjdacgksqdseqko"
+        "prknyjylchdlijfgktveldlewixwrycytrjxxesrcbraydmbgitkldbxxhnjwqdmcwctat"
+        "rtjvrboulykkpvmsthontrunvkylwanwnnbpgwiwrgctfsvfgtxpifmpxhwikcylfeycjl"
+        "scmsjnvwfhlkwevcmvvoypmfqlnrwywkwvinkwbjpgxpdxfckghutcovrdhlatumhfvowb"
+        "fyiowyqpsbqhdxxauflpteyagsjtbulpktxmhkxxbgpetlwnckwsvhgmtasviemjeatejs"
+        "tslaivqeltycdgqylhqadxnrdlldbqdwuabdsrqwlxmetahvkrlvmyfgfftrlujfgktwve"
+        "vwidoqvigelfaohgjtaplygmmiwrcspaqntfhthikewunxhebqbkwiopplcmywvjeehslw"
+        "uaeruwnphdjonqagjatjladqhvlxppyaqgvwpjqggnsccmkjvbxqykaejvgeajqpitkwsq"
+        "gmjiaopomnnlewidhgbgqlblotrnuyokspuvbckqhwnhmgcwyyitmlelnehdvclojvyswj"
+        "jgipsincitulscikxviaruryfraeqssykeftcphtndlfhdxokg", &err);
+    assert_null(dt);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_DATETIME_PARSER);
+    assert_string_equal(err->msg,
+        "Failed to format DATE variable, FORMAT is too long: "
+        "bovhsuhxwybfrxoluiejaoqpmoylgvkrjtnuntmcgtupwabexkapnklvkwmddmplfqopvb"
+        "yjsiimtfdeveeeayqvvnthimbqotumngxxenurxhsvyaftwsfdtxqnjluvtcwfkomfffrk"
+        "tywccrvnraagtnedwdjtfobinobbymanppwqxubxeepotdyxuvircyshpmtrqyvbivtycs"
+        "olwvqwdqaswdafohqkthraenpueuywbocrsbmmfoqwgbeixosyjljamcqwecfoxgolyxif"
+        "ltaoamuirnnsvoqcnboueqnnyksawwrdtcsiklanjxeavlaqsaswacmbvmselsnghiviet"
+        "wrftrfimjshrjlwxdhjkktivwmmesihlxkmqpmvfqjuimbmaucdxaqcgjdacgksqdseqko"
+        "prknyjylchdlijfgktveldlewixwrycytrjxxesrcbraydmbgitkldbxxhnjwqdmcwctat"
+        "rtjvrboulykkpvmsthontrunvkylwanwnnbpgwiwrgctfsvfgtxpifmpxhwikcylfeycjl"
+        "scmsjnvwfhlkwevcmvvoypmfqlnrwywkwvinkwbjpgxpdxfckghutcovrdhlatumhfvowb"
+        "fyiowyqpsbqhdxxauflpteyagsjtbulpktxmhkxxbgpetlwnckwsvhgmtasviemjeatejs"
+        "tslaivqeltycdgqylhqadxnrdlldbqdwuabdsrqwlxmetahvkrlvmyfgfftrlujfgktwve"
+        "vwidoqvigelfaohgjtaplygmmiwrcspaqntfhthikewunxhebqbkwiopplcmywvjeehslw"
+        "uaeruwnphdjonqagjatjladqhvlxppyaqgvwpjqggnsccmkjvbxqykaejvgeajqpitkwsq"
+        "gmjiaopomnnlewidhgbgqlblotrnuyokspuvbckqhwnhmgcwyyitmlelnehdvclojvyswj"
+        "jgipsincitulscikxviaruryfraeqssykeftcphtndlfhdxokg");
+    blogc_error_free(err);
+}
+
+
 int
 main(void)
 {
@@ -626,6 +670,7 @@ main(void)
         unit_test(test_convert_datetime_invalid_1st_seconds),
         unit_test(test_convert_datetime_invalid_2nd_seconds),
         unit_test(test_convert_datetime_invalid_seconds),
+        unit_test(test_convert_datetime_invalid_format_long),
     };
     return run_tests(tests);
 }
