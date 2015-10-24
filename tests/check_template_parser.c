@@ -359,7 +359,7 @@ test_template_parse_invalid_block_start(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid statement syntax. Must begin with lowercase letter.\n"
-        "Error occurred near to 'ASD %}'");
+        "Error occurred near line 1, position 4: {% ASD %}");
     blogc_error_free(err);
 }
 
@@ -377,7 +377,7 @@ test_template_parse_invalid_block_nested(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Blocks can't be nested.\n"
-        "Error occurred near to ' listing %}'");
+        "Error occurred near line 2, position 9: {% block listing %}");
     blogc_error_free(err);
 }
 
@@ -393,7 +393,7 @@ test_template_parse_invalid_block_not_open(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "'endblock' statement without an open 'block' statement.\n"
-        "Error occurred near to ' %}'");
+        "Error occurred near line 1, position 12: {% endblock %}");
     blogc_error_free(err);
 }
 
@@ -409,7 +409,8 @@ test_template_parse_invalid_endif_not_open(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "'endif' statement without an open 'ifdef' or 'ifndef' statement.\n"
-        "Error occurred near to ' %}{% endblock %}'");
+        "Error occurred near line 1, position 28: "
+        "{% block listing %}{% endif %}{% endblock %}");
     blogc_error_free(err);
 }
 
@@ -425,7 +426,8 @@ test_template_parse_invalid_block_name(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid statement type: Allowed types are: 'block', 'endblock', 'ifdef', "
-        "'ifndef' and 'endif'.\nError occurred near to ' %}'");
+        "'ifndef' and 'endif'.\n"
+        "Error occurred near line 1, position 10: {% chunda %}");
     blogc_error_free(err);
 }
 
@@ -441,7 +443,7 @@ test_template_parse_invalid_block_type_start(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid block syntax. Must begin with lowercase letter.\n"
-        "Error occurred near to 'ENTRY %}'");
+        "Error occurred near line 1, position 10: {% block ENTRY %}");
     blogc_error_free(err);
 }
 
@@ -457,7 +459,7 @@ test_template_parse_invalid_block_type(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid block type. Allowed types are: 'entry', 'listing' and 'listing_once'.\n"
-        "Error occurred near to ' %}'");
+        "Error occurred near line 1, position 16: {% block chunda %}");
     blogc_error_free(err);
 }
 
@@ -473,7 +475,8 @@ test_template_parse_invalid_ifdef_start(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid variable name. Must begin with uppercase letter.\n"
-        "Error occurred near to 'guda %}'");
+        "Error occurred near line 1, position 27: "
+        "{% block entry %}{% ifdef guda %}");
     blogc_error_free(err);
 }
 
@@ -489,7 +492,8 @@ test_template_parse_invalid_ifdef_variable(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid variable name. Must be uppercase letter, number or '_'.\n"
-        "Error occurred near to 'oLA %}'");
+        "Error occurred near line 1, position 28: "
+        "{% block entry %}{% ifdef BoLA %}");
     blogc_error_free(err);
 }
 
@@ -505,7 +509,8 @@ test_template_parse_invalid_if_operator(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid 'if' operator. Must be '<', '>', '<=', '>=', '==' or '!='.\n"
-        "Error occurred near to '= \"asd\" %}'");
+        "Error occurred near line 1, position 29: "
+        "{% block entry %}{% if BOLA = \"asd\" %}");
     blogc_error_free(err);
 }
 
@@ -521,7 +526,8 @@ test_template_parse_invalid_if_operand(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid 'if' operand. Must be double-quoted static string.\n"
-        "Error occurred near to 'asd %}'");
+        "Error occurred near line 1, position 32: "
+        "{% block entry %}{% if BOLA == asd %}");
     blogc_error_free(err);
 }
 
@@ -537,7 +543,8 @@ test_template_parse_invalid_if_operand2(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Found an open double-quoted string.\n"
-        "Error occurred near to '\"asd %}'");
+        "Error occurred near line 1, position 32: "
+        "{% block entry %}{% if BOLA == \"asd %}");
     blogc_error_free(err);
 }
 
@@ -553,7 +560,7 @@ test_template_parse_invalid_block_end(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid statement syntax. Must end with '%}'.\n"
-        "Error occurred near to '}}'");
+        "Error occurred near line 1, position 16: {% block entry }}");
     blogc_error_free(err);
 }
 
@@ -569,7 +576,8 @@ test_template_parse_invalid_variable_name(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid variable name. Must begin with uppercase letter.\n"
-        "Error occurred near to 'bola }}{% endblock %}'");
+        "Error occurred near line 1, position 21: "
+        "{% block entry %}{{ bola }}{% endblock %}");
     blogc_error_free(err);
 }
 
@@ -585,7 +593,8 @@ test_template_parse_invalid_variable_name2(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid variable name. Must be uppercase letter, number or '_'.\n"
-        "Error occurred near to 'ola }}{% endblock %}'");
+        "Error occurred near line 1, position 22: "
+        "{% block entry %}{{ Bola }}{% endblock %}");
     blogc_error_free(err);
 }
 
@@ -601,7 +610,8 @@ test_template_parse_invalid_variable_end(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid statement syntax. Must end with '}}'.\n"
-        "Error occurred near to '%}{% endblock %}'");
+        "Error occurred near line 1, position 26: "
+        "{% block entry %}{{ BOLA %}{% endblock %}");
     blogc_error_free(err);
 }
 
@@ -617,7 +627,7 @@ test_template_parse_invalid_close(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid statement syntax. Must end with '}'.\n"
-        "Error occurred near to '%'");
+        "Error occurred near line 1, position 17: {% block entry %%");
     blogc_error_free(err);
 }
 
@@ -633,7 +643,8 @@ test_template_parse_invalid_close2(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid statement syntax. Must end with '}'.\n"
-        "Error occurred near to '%{% endblock %}'");
+        "Error occurred near line 1, position 27: "
+        "{% block entry %}{{ BOLA }%{% endblock %}");
     blogc_error_free(err);
 }
 

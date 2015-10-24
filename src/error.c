@@ -50,26 +50,54 @@ blogc_error_parser(blogc_error_type_t type, const char *src, size_t src_len,
     char *msg = b_strdup_vprintf(format, ap);
     va_end(ap);
 
-    b_string_t *str = b_string_new();
-    while (current < src_len) {
-        char c = src[current];
+    size_t lineno = 1;
+    size_t linestart = 0;
+    size_t lineend = 0;
+    size_t pos = 1;
 
-        if (c == '\r' || c == '\n')
+    for (size_t i = 0; i < src_len; i++) {
+        char c = src[i];
+        if (i < current) {
+            if ((i + 1) < src_len) {
+                if ((c == '\n' && src[i + 1] == '\r') ||
+                    (c == '\r' && src[i + 1] == '\n'))
+                {
+                    lineno++;
+                    pos = 1;
+                    c = src[++i];
+                    if ((i + 1) < src_len)
+                        linestart = i + 1;
+                    continue;
+                }
+            }
+            if (c == '\n' || c == '\r') {
+                lineno++;
+                pos = 1;
+                if ((i + 1) < src_len)
+                    linestart = i + 1;
+                continue;
+            }
+            pos++;
+        }
+        else if (c == '\n' || c == '\r') {
+            lineend = i;
             break;
-
-        b_string_append_c(str, c);
-
-        current++;
+        }
     }
-    char *line = b_string_free(str, false);
+
+    if (lineend <= linestart && src_len >= linestart)
+        lineend = src_len;
+
+    char *line = b_strndup(src + linestart, lineend - linestart);
 
     blogc_error_t *rv = NULL;
 
-    if (strlen(line) == 0)  // "near to" message isn't useful if line is empty
+    if (line[0] == '\0')  // "near" message isn't useful if line is empty
         rv = blogc_error_new(type, msg);
     else
         rv = blogc_error_new_printf(type,
-            "%s\nError occurred near to '%s'", msg, line);
+            "%s\nError occurred near line %d, position %d: %s", msg, lineno,
+            pos, line);
 
     free(msg);
     free(line);

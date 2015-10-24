@@ -48,7 +48,28 @@ test_error_parser(void **state)
     blogc_error_t *error = blogc_error_parser(1, a, strlen(a), 11, "asd %d", 10);
     assert_non_null(error);
     assert_int_equal(error->type, 1);
-    assert_string_equal(error->msg, "asd 10\nError occurred near to 'hunda'");
+    assert_string_equal(error->msg,
+        "asd 10\nError occurred near line 3, position 2: chunda");
+    blogc_error_free(error);
+    a = "bola\nguda\nchunda";
+    error = blogc_error_parser(1, a, strlen(a), 11, "asd %d", 10);
+    assert_non_null(error);
+    assert_int_equal(error->type, 1);
+    assert_string_equal(error->msg,
+        "asd 10\nError occurred near line 3, position 2: chunda");
+    blogc_error_free(error);
+    a = "bola\nguda\nchunda";
+    error = blogc_error_parser(1, a, strlen(a), 0, "asd %d", 10);
+    assert_non_null(error);
+    assert_int_equal(error->type, 1);
+    assert_string_equal(error->msg,
+        "asd 10\nError occurred near line 1, position 1: bola");
+    blogc_error_free(error);
+    a = "";
+    error = blogc_error_parser(1, a, strlen(a), 0, "asd %d", 10);
+    assert_non_null(error);
+    assert_int_equal(error->type, 1);
+    assert_string_equal(error->msg, "asd 10");
     blogc_error_free(error);
 }
 
@@ -60,7 +81,22 @@ test_error_parser_crlf(void **state)
     blogc_error_t *error = blogc_error_parser(1, a, strlen(a), 13, "asd %d", 10);
     assert_non_null(error);
     assert_int_equal(error->type, 1);
-    assert_string_equal(error->msg, "asd 10\nError occurred near to 'hunda'");
+    assert_string_equal(error->msg,
+        "asd 10\nError occurred near line 3, position 2: chunda");
+    blogc_error_free(error);
+    a = "bola\r\nguda\r\nchunda";
+    error = blogc_error_parser(1, a, strlen(a), 13, "asd %d", 10);
+    assert_non_null(error);
+    assert_int_equal(error->type, 1);
+    assert_string_equal(error->msg,
+        "asd 10\nError occurred near line 3, position 2: chunda");
+    blogc_error_free(error);
+    a = "bola\r\nguda\r\nchunda";
+    error = blogc_error_parser(1, a, strlen(a), 0, "asd %d", 10);
+    assert_non_null(error);
+    assert_int_equal(error->type, 1);
+    assert_string_equal(error->msg,
+        "asd 10\nError occurred near line 1, position 1: bola");
     blogc_error_free(error);
 }
 
