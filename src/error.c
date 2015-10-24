@@ -119,6 +119,9 @@ blogc_error_print(blogc_error_t *err)
         case BLOGC_ERROR_TEMPLATE_PARSER:
             fprintf(stderr, "Template parser error: %s\n", err->msg);
             break;
+        case BLOGC_ERROR_DATETIME_PARSER:
+            fprintf(stderr, "Datetime parser error: %s\n", err->msg);
+            break;
         case BLOGC_ERROR_LOADER:
             fprintf(stderr, "Loader error: %s\n", err->msg);
             break;

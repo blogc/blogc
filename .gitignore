@@ -46,6 +46,7 @@ blogc*.html
 
 # tests
 /tests/check_content_parser
+/tests/check_datetime_parser
 /tests/check_error
 /tests/check_loader
 /tests/check_renderer
