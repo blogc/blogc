@@ -10,13 +10,11 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif /* HAVE_TIME_H */
-
 #include <stdio.h>
 #include <string.h>
 #include "utils/utils.h"
+#include "datetime-parser.h"
+#include "error.h"
 #include "loader.h"
 #include "source-parser.h"
 #include "template-parser.h"
@@ -46,25 +44,15 @@ blogc_format_date(const char *date, b_trie_t *global, b_trie_t *local)
         return NULL;
     if (date_format == NULL)
         return b_strdup(date);
-#ifdef HAVE_TIME_H
-    struct tm tm;
-    memset(&tm, 0, sizeof(struct tm));
-    if (NULL == strptime(date, "%Y-%m-%d %H:%M:%S", &tm)) {
-        fprintf(stderr, "blogc: warning: Failed to parse DATE variable: %s\n",
-            date);
+
+    blogc_error_t *err = NULL;
+    char *rv = blogc_convert_datetime(date, date_format, &err);
+    if (err != NULL) {
+        blogc_error_print(err);
+        blogc_error_free(err);
         return b_strdup(date);
     }
-    char tmp[1024];
-    if (0 == strftime(tmp, sizeof(tmp), date_format, &tm)) {
-        fprintf(stderr, "blogc: warning: Failed to format DATE variable, "
-            "FORMAT is too long: %s\n", date_format);
-        return b_strdup(date);
-    }
-    return b_strdup(tmp);
-#else
-    fprintf(stderr, "blogc: warning: Can't pre-process DATE variable.\n");
-    return NULL;
-#endif
+    return rv;
 }
 
 

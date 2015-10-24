@@ -53,6 +53,15 @@ blogc_convert_datetime(const char *orig, const char *format,
     if (err == NULL || *err != NULL)
         return NULL;
 
+#ifndef HAVE_TIME_H
+
+    *err = blogc_error_new(BLOGC_WARNING_DATETIME_PARSER,
+        "Your operating system does not supports the datetime functionalities "
+        "used by blogc. Sorry.");
+    return NULL;
+
+#else
+
     struct tm t;
     memset(&t, 0, sizeof(struct tm));
     t.tm_isdst = -1;
@@ -72,7 +81,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_SECOND_YEAR;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid first digit of year. "
                     "Found '%c', must be integer >= 0 and <= 9.", c);
                 break;
@@ -83,7 +92,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_THIRD_YEAR;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid second digit of year. "
                     "Found '%c', must be integer >= 0 and <= 9.", c);
                 break;
@@ -94,7 +103,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_FOURTH_YEAR;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid third digit of year. "
                     "Found '%c', must be integer >= 0 and <= 9.", c);
                 break;
@@ -103,7 +112,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                 if (c >= '0' && c <= '9') {
                     tmp += c - diff - 1900;
                     if (tmp < 0) {
-                        *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                        *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                             "Invalid year. Found %d, must be >= 1900.",
                             tmp + 1900);
                         break;
@@ -112,7 +121,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_FIRST_HYPHEN;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid fourth digit of year. "
                     "Found '%c', must be integer >= 0 and <= 9.", c);
                 break;
@@ -123,7 +132,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_FIRST_MONTH;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid separator between year and month. "
                     "Found '%c', must be '-'.", c);
                 break;
@@ -134,7 +143,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_SECOND_MONTH;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid first digit of month. "
                     "Found '%c', must be integer >= 0 and <= 1.", c);
                 break;
@@ -143,7 +152,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                 if (c >= '0' && c <= '9') {
                     tmp += c - diff - 1;
                     if (tmp < 0 || tmp > 11) {
-                        *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                        *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                             "Invalid month. Found %d, must be >= 1 and <= 12.",
                             tmp + 1);
                         break;
@@ -152,7 +161,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_SECOND_HYPHEN;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid second digit of month. "
                     "Found '%c', must be integer >= 0 and <= 9.", c);
                 break;
@@ -163,7 +172,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_FIRST_DAY;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid separator between month and day. "
                     "Found '%c', must be '-'.", c);
                 break;
@@ -174,7 +183,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_SECOND_DAY;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid first digit of day. "
                     "Found '%c', must be integer >= 0 and <= 3.", c);
                 break;
@@ -183,7 +192,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                 if (c >= '0' && c <= '9') {
                     tmp += c - diff;
                     if (tmp < 1 || tmp > 31) {
-                        *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                        *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                             "Invalid day. Found %d, must be >= 1 and <= 31.",
                             tmp);
                         break;
@@ -192,7 +201,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_SPACE;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid second digit of day. "
                     "Found '%c', must be integer >= 0 and <= 9.", c);
                 break;
@@ -203,7 +212,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_FIRST_HOUR;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid separator between date and time. "
                     "Found '%c', must be ' ' (empty space).", c);
                 break;
@@ -214,7 +223,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_SECOND_HOUR;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid first digit of hours. "
                     "Found '%c', must be integer >= 0 and <= 2.", c);
                 break;
@@ -223,7 +232,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                 if (c >= '0' && c <= '9') {
                     tmp += c - diff;
                     if (tmp < 0 || tmp > 23) {
-                        *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                        *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                             "Invalid hours. Found %d, must be >= 0 and <= 23.",
                             tmp);
                         break;
@@ -232,7 +241,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_FIRST_COLON;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid second digit of hours. "
                     "Found '%c', must be integer >= 0 and <= 9.", c);
                 break;
@@ -243,7 +252,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_FIRST_MINUTE;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid separator between hours and minutes. "
                     "Found '%c', must be ':'.", c);
                 break;
@@ -254,7 +263,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_SECOND_MINUTE;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid first digit of minutes. "
                     "Found '%c', must be integer >= 0 and <= 5.", c);
                 break;
@@ -266,7 +275,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                         // this won't happen because we are restricting the digits
                         // to 00-59 already, but lets keep the code here for
                         // reference.
-                        *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                        *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                             "Invalid minutes. Found %d, must be >= 0 and <= 59.",
                             tmp);
                         break;
@@ -275,7 +284,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_SECOND_COLON;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid second digit of minutes. "
                     "Found '%c', must be integer >= 0 and <= 9.", c);
                 break;
@@ -286,7 +295,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_FIRST_SECOND;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid separator between minutes and seconds. "
                     "Found '%c', must be ':'.", c);
                 break;
@@ -297,7 +306,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_SECOND_SECOND;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid first digit of seconds. "
                     "Found '%c', must be integer >= 0 and <= 6.", c);
                 break;
@@ -306,7 +315,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                 if (c >= '0' && c <= '9') {
                     tmp += c - diff;
                     if (tmp < 0 || tmp > 60) {
-                        *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                        *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                             "Invalid seconds. Found %d, must be >= 0 and <= 60.",
                             tmp);
                         break;
@@ -315,7 +324,7 @@ blogc_convert_datetime(const char *orig, const char *format,
                     state = DATETIME_DONE;
                     break;
                 }
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid second digit of seconds. "
                     "Found '%c', must be integer >= 0 and <= 9.", c);
                 break;
@@ -347,7 +356,7 @@ blogc_convert_datetime(const char *orig, const char *format,
             case DATETIME_SECOND_MINUTE:
             case DATETIME_FIRST_SECOND:
             case DATETIME_SECOND_SECOND:
-                *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+                *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
                     "Invalid datetime string. "
                     "Found '%s', formats allowed are: 'yyyy-mm-dd hh:mm:ss', "
                     "'yyyy-mm-dd hh:ss', 'yyyy-mm-dd hh' and 'yyyy-mm-dd'.",
@@ -366,11 +375,13 @@ blogc_convert_datetime(const char *orig, const char *format,
 
     char buf[1024];
     if (0 == strftime(buf, sizeof(buf), format, &t)) {
-        *err = blogc_error_new_printf(BLOGC_ERROR_DATETIME_PARSER,
+        *err = blogc_error_new_printf(BLOGC_WARNING_DATETIME_PARSER,
             "Failed to format DATE variable, FORMAT is too long: %s",
             format);
         return NULL;
     }
 
     return b_strdup(buf);
+
+#endif
 }

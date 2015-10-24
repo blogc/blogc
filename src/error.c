@@ -114,19 +114,19 @@ blogc_error_print(blogc_error_t *err)
 
     switch(err->type) {
         case BLOGC_ERROR_SOURCE_PARSER:
-            fprintf(stderr, "Source parser error: %s\n", err->msg);
+            fprintf(stderr, "blogc: error: source: %s\n", err->msg);
             break;
         case BLOGC_ERROR_TEMPLATE_PARSER:
-            fprintf(stderr, "Template parser error: %s\n", err->msg);
-            break;
-        case BLOGC_ERROR_DATETIME_PARSER:
-            fprintf(stderr, "Datetime parser error: %s\n", err->msg);
+            fprintf(stderr, "blogc: error: template: %s\n", err->msg);
             break;
         case BLOGC_ERROR_LOADER:
-            fprintf(stderr, "Loader error: %s\n", err->msg);
+            fprintf(stderr, "blogc: error: loader: %s\n", err->msg);
+            break;
+        case BLOGC_WARNING_DATETIME_PARSER:
+            fprintf(stderr, "blogc: warning: datetime: %s\n", err->msg);
             break;
         default:
-            fprintf(stderr, "Unknown error: %s\n", err->msg);
+            fprintf(stderr, "blogc: error: %s\n", err->msg);
     }
 }
 
