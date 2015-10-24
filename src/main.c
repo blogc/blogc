@@ -78,7 +78,11 @@ blogc_mkdir_recursive(const char *filename)
         char bkp = *tmp;
         *tmp = '\0';
         if ((strlen(fname) > 0) &&
+#if defined(WIN32) || defined(_WIN32)
+            (-1 == mkdir(fname)) &&
+#else
             (-1 == mkdir(fname, 0777)) &&
+#endif
             (errno != EEXIST))
         {
             fprintf(stderr, "blogc: error: failed to create output "
