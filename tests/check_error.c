@@ -53,6 +53,18 @@ test_error_parser(void **state)
 }
 
 
+static void
+test_error_parser_crlf(void **state)
+{
+    const char *a = "bola\r\nguda\r\nchunda\r\n";
+    blogc_error_t *error = blogc_error_parser(1, a, strlen(a), 13, "asd %d", 10);
+    assert_non_null(error);
+    assert_int_equal(error->type, 1);
+    assert_string_equal(error->msg, "asd 10\nError occurred near to 'hunda'");
+    blogc_error_free(error);
+}
+
+
 int
 main(void)
 {
@@ -60,6 +72,7 @@ main(void)
         unit_test(test_error_new),
         unit_test(test_error_new_printf),
         unit_test(test_error_parser),
+        unit_test(test_error_parser_crlf),
     };
     return run_tests(tests);
 }
