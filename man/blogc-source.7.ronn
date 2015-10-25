@@ -32,7 +32,15 @@ blocks that handle local variables. See blogc-template(7) for details.
 
 The ``DATE`` variable is special, and represents the publishing date of the
 post. It may be formatted with the ``DATE_FORMAT`` variable, if provided,
-otherwise will be kept as is.
+otherwise will be kept as is. The proper way to access the date from the
+template is to use the ``DATE_FORMATTED`` variable, that will contain the
+formatted date, or the original date, depending on whether the ``DATE_FORMAT``
+variable is provided or not.
+
+The ``DATE`` variable should be in the following format: ``yyyy-mm-dd hh:mm:ss``.
+You can omit seconds, minutes and hours if you want, they will be filled with
+'0'. Allowed formats are ``yyyy-mm-dd hh:mm:ss``, ``yyyy-mm-dd hh:mm``,
+``yyyy-mm-dd hh`` and ``yyyy-mm-dd``
 
 The ``DATE_FORMAT`` variable should be passed to blogc(1) as a global
 variable. Its value must be a valid strptime(3) format.
