@@ -4,7 +4,7 @@ AC_INIT([blogc], [0.4], [https://github.com/blogc/blogc], [blogc], [http://blogc
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE([1.13 foreign dist-bzip2 dist-xz subdir-objects serial-tests])
+AM_INIT_AUTOMAKE([1.13 foreign dist-bzip2 dist-xz dist-zip subdir-objects serial-tests])
 AC_CONFIG_HEADERS([config.h])
 AM_SILENT_RULES([yes])
 AM_MAINTAINER_MODE([enable])
