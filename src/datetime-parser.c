@@ -15,7 +15,6 @@
 #endif /* HAVE_TIME_H */
 
 #include <string.h>
-#include <stdio.h>
 
 #include "error.h"
 #include "utils/utils.h"
