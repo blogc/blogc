@@ -63,8 +63,8 @@ blogc_error_parser(blogc_error_type_t type, const char *src, size_t src_len,
                     (c == '\r' && src[i + 1] == '\n'))
                 {
                     lineno++;
+                    i++;
                     pos = 1;
-                    c = src[++i];
                     if ((i + 1) < src_len)
                         linestart = i + 1;
                     continue;
