@@ -30,7 +30,8 @@ typedef enum {
     TEMPLATE_BLOCK_IF_OPERATOR_START,
     TEMPLATE_BLOCK_IF_OPERATOR,
     TEMPLATE_BLOCK_IF_OPERAND_START,
-    TEMPLATE_BLOCK_IF_OPERAND,
+    TEMPLATE_BLOCK_IF_STRING_OPERAND,
+    TEMPLATE_BLOCK_IF_VARIABLE_OPERAND,
     TEMPLATE_BLOCK_END,
     TEMPLATE_VARIABLE_START,
     TEMPLATE_VARIABLE,
@@ -303,6 +304,11 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
             case TEMPLATE_BLOCK_IF_OPERAND_START:
                 if (c == ' ')
                     break;
+                if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
+                    state = TEMPLATE_BLOCK_IF_VARIABLE_OPERAND;
+                    start2 = current;
+                    break;
+                }
                 if (c != '"') {
                     op_start = 0;
                     op_end = 0;
@@ -311,14 +317,21 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         "Invalid 'if' operand. Must be double-quoted static string.");
                     break;
                 }
-                state = TEMPLATE_BLOCK_IF_OPERAND;
-                start2 = current + 1;
+                state = TEMPLATE_BLOCK_IF_STRING_OPERAND;
+                start2 = current;
                 break;
 
-            case TEMPLATE_BLOCK_IF_OPERAND:
+            case TEMPLATE_BLOCK_IF_STRING_OPERAND:
                 if (c != '"')
                     break;
                 if (c == '"' && src[current - 1] == '\\')
+                    break;
+                state = TEMPLATE_BLOCK_END;
+                end2 = current + 1;
+                break;
+
+           case TEMPLATE_BLOCK_IF_VARIABLE_OPERAND:
+                if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
                     break;
                 state = TEMPLATE_BLOCK_END;
                 end2 = current;
@@ -446,7 +459,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     }
 
     if (*err == NULL) {
-        if (state == TEMPLATE_BLOCK_IF_OPERAND)
+        if (state == TEMPLATE_BLOCK_IF_STRING_OPERAND)
             *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src, src_len,
                 start2 - 1, "Found an open double-quoted string.");
         else if (if_count != 0)

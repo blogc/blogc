@@ -215,8 +215,24 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                 }
                 evaluate = false;
                 if (stmt->op != 0) {
-                    if (defined != NULL && stmt->value2 != NULL) {
-                        cmp = strcmp(defined, stmt->value2);
+                    // Strings that start with a '"' are actually strings, the
+                    // others are meant to be looked up as a second variable
+                    // check.
+                    char *defined2 = NULL;
+                    if (stmt->value2[0] != '"') {
+                        defined2 =
+                            b_strdup(blogc_get_variable(stmt->value2,
+                                                        config,
+                                                        inside_block ? tmp_source
+                                                                     : NULL)
+                            );
+                    } else {
+                        defined2 = b_strndup(stmt->value2 + 1,
+                                             strlen(stmt->value2) - 2);
+                    }
+
+                    if (defined != NULL && defined2 != NULL) {
+                        cmp = strcmp(defined, defined2);
                         if (cmp != 0 && stmt->op & BLOGC_TEMPLATE_OP_NEQ)
                             evaluate = true;
                         else if (cmp == 0 && stmt->op & BLOGC_TEMPLATE_OP_EQ)
@@ -226,6 +242,8 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                         else if (cmp > 0 && stmt->op & BLOGC_TEMPLATE_OP_GT)
                             evaluate = true;
                     }
+
+                    free(defined2);
                 }
                 else {
                     if (if_not && defined == NULL)

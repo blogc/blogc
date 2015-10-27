@@ -106,7 +106,7 @@ test_template_parse(void **state)
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next->next->next,
         "\n", BLOGC_TEMPLATE_CONTENT_STMT);
     tmp = tmp->next->next->next->next->next->next->next->next->next->next;
-    blogc_assert_template_if_stmt(tmp, "BOLA", BLOGC_TEMPLATE_OP_EQ, "1\\\"0");
+    blogc_assert_template_if_stmt(tmp, "BOLA", BLOGC_TEMPLATE_OP_EQ, "\"1\\\"0\"");
     blogc_assert_template_stmt(tmp->next, "aee", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next, NULL,
         BLOGC_TEMPLATE_ENDIF_STMT);
@@ -176,7 +176,7 @@ test_template_parse_crlf(void **state)
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next->next->next,
         "\r\n", BLOGC_TEMPLATE_CONTENT_STMT);
     tmp = tmp->next->next->next->next->next->next->next->next->next->next;
-    blogc_assert_template_if_stmt(tmp, "BOLA", BLOGC_TEMPLATE_OP_EQ, "1\\\"0");
+    blogc_assert_template_if_stmt(tmp, "BOLA", BLOGC_TEMPLATE_OP_EQ, "\"1\\\"0\"");
     blogc_assert_template_stmt(tmp->next, "aee", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next, NULL,
         BLOGC_TEMPLATE_ENDIF_STMT);
@@ -543,7 +543,7 @@ test_template_parse_invalid_if_operand2(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Found an open double-quoted string.\n"
-        "Error occurred near line 1, position 32: "
+        "Error occurred near line 1, position 31: "
         "{% block entry %}{% if BOLA == \"asd %}");
     blogc_error_free(err);
 }
