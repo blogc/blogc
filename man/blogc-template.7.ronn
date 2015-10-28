@@ -144,8 +144,8 @@ In this case, if the `TITLE` variable is not defined, the content is included.
 ### if conditional
 
 The content of an `if` conditional is included in the output file when
-the comparision between the given variable and the static string evaluates to
-true in the current scope.
+the comparision between the given variable and the given static string or
+variable evaluates to true in the current scope.
 
 The available operators are: `==`, `!=`, `<`, `>`, `<=` and `>=`. The
 comparisions are strcmp(3)-like.
@@ -154,6 +154,12 @@ This is how an `if` conditional is defined in a template:
 
     {% if TITLE == "My Title" %}
     Title is "My Title"
+    {% endif %}
+
+Or:
+
+    {% if TITLE == DEFAULT_TITLE %}
+    Title is the default title
     {% endif %}
 
 ## BUGS
