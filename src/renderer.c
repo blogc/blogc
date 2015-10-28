@@ -10,6 +10,7 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include "utils/utils.h"
@@ -57,6 +58,37 @@ blogc_format_date(const char *date, b_trie_t *global, b_trie_t *local)
 
 
 char*
+blogc_format_variable(const char *name, b_trie_t *global, b_trie_t *local)
+{
+    char *var = NULL;
+    bool must_format = false;
+    if (b_str_ends_with(name, "_FORMATTED")) {
+        var = b_strndup(name, strlen(name) - 10);
+        must_format = true;
+    }
+    if (var == NULL)
+        var = b_strdup(name);
+
+    const char *value = blogc_get_variable(var, global, local);
+    free(var);
+
+    if (value == NULL)
+        return NULL;
+
+    char *rv = NULL;
+    if (must_format) {
+        if (b_str_starts_with(name, "DATE_")) {
+            rv = blogc_format_date(value, global, local);
+        }
+    }
+
+    if (rv == NULL)
+        return b_strdup(value);
+    return rv;
+}
+
+
+char*
 blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing)
 {
     if (tmpl == NULL)
@@ -68,9 +100,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
     b_string_t *str = b_string_new();
 
     b_trie_t *tmp_source = NULL;
-    const char *config_value = NULL;
-    const char *config_var = NULL;
-    char *config_value2 = NULL;
+    char *config_value = NULL;
     char *defined = NULL;
 
     unsigned int if_count = 0;
@@ -144,30 +174,13 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
 
             case BLOGC_TEMPLATE_VARIABLE_STMT:
                 if (stmt->value != NULL) {
-                    config_var = NULL;
-                    if (0 == strcmp(stmt->value, "DATE_FORMATTED"))
-                        config_var = "DATE";
-                    else if (0 == strcmp(stmt->value, "DATE_FIRST_FORMATTED"))
-                        config_var = "DATE_FIRST";
-                    else if (0 == strcmp(stmt->value, "DATE_LAST_FORMATTED"))
-                        config_var = "DATE_LAST";
-                    if (config_var != NULL) {
-                        config_value2 = blogc_format_date(
-                            blogc_get_variable(config_var, config,
-                                inside_block ? tmp_source : NULL),
-                            config, inside_block ? tmp_source : NULL);
-                        if (config_value2 != NULL) {
-                            b_string_append(str, config_value2);
-                            free(config_value2);
-                            config_value2 = NULL;
-                            break;
-                        }
-                    }
-                    else {
-                        config_value = blogc_get_variable(stmt->value, config,
-                            inside_block ? tmp_source : NULL);
-                        if (config_value != NULL)
-                            b_string_append(str, config_value);
+                    config_value = blogc_format_variable(stmt->value,
+                        config, inside_block ? tmp_source : NULL);
+                    if (config_value != NULL) {
+                        b_string_append(str, config_value);
+                        free(config_value);
+                        config_value = NULL;
+                        break;
                     }
                 }
                 break;
@@ -191,44 +204,27 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
             case BLOGC_TEMPLATE_IF_STMT:
             case BLOGC_TEMPLATE_IFDEF_STMT:
                 defined = NULL;
-                if (stmt->value != NULL) {
-                    config_var = NULL;
-                    if (0 == strcmp(stmt->value, "DATE_FORMATTED"))
-                        config_var = "DATE";
-                    else if (0 == strcmp(stmt->value, "DATE_FIRST_FORMATTED"))
-                        config_var = "DATE_FIRST";
-                    else if (0 == strcmp(stmt->value, "DATE_LAST_FORMATTED"))
-                        config_var = "DATE_LAST";
-                    if (config_var != NULL) {
-                        config_value2 = blogc_format_date(
-                            blogc_get_variable(config_var, config,
-                                inside_block ? tmp_source : NULL),
-                            config, inside_block ? tmp_source : NULL);
-                        if (config_value2 != NULL) {
-                            defined = config_value2;
-                            config_value2 = NULL;
-                        }
-                    }
-                    else
-                        defined = b_strdup(blogc_get_variable(stmt->value,
-                            config, inside_block ? tmp_source : NULL));
-                }
+                if (stmt->value != NULL)
+                    defined = blogc_format_variable(stmt->value, config,
+                        inside_block ? tmp_source : NULL);
                 evaluate = false;
                 if (stmt->op != 0) {
                     // Strings that start with a '"' are actually strings, the
                     // others are meant to be looked up as a second variable
                     // check.
                     char *defined2 = NULL;
-                    if (stmt->value2[0] != '"') {
-                        defined2 =
-                            b_strdup(blogc_get_variable(stmt->value2,
-                                                        config,
-                                                        inside_block ? tmp_source
-                                                                     : NULL)
-                            );
-                    } else {
-                        defined2 = b_strndup(stmt->value2 + 1,
-                                             strlen(stmt->value2) - 2);
+                    if (stmt->value2 != NULL) {
+                        if ((strlen(stmt->value2) >= 2) &&
+                            (stmt->value2[0] == '"') &&
+                            (stmt->value2[strlen(stmt->value2) - 1] == '"'))
+                        {
+                            defined2 = b_strndup(stmt->value2 + 1,
+                                strlen(stmt->value2) - 2);
+                        }
+                        else {
+                            defined2 = blogc_format_variable(stmt->value2,
+                                config, inside_block ? tmp_source : NULL);
+                        }
                     }
 
                     if (defined != NULL && defined2 != NULL) {

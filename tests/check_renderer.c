@@ -28,6 +28,7 @@ create_sources(unsigned int count)
     const char *s[] = {
         "BOLA: asd\n"
         "GUDA: zxc\n"
+        "GUDA2: zxc\n"
         "DATE: 2015-01-02 03:04:05\n"
         "DATE_FORMAT: %R\n"
         "-----\n"
@@ -68,6 +69,7 @@ test_render_entry(void **state)
         "{% ifdef CHUNDA %}{{ CHUNDA }}{% endif %}\n"
         "{% endblock %}\n"
         "{% block listing %}lol{% endblock %}\n"
+        "{% if GUDA == GUDA2 %}gudabola{% endif %}\n"
         "{% if GUDA == \"zxc\" %}LOL{% endif %}\n"
         "{% if GUDA != \"bola\" %}HEHE{% endif %}\n"
         "{% if GUDA < \"zxd\" %}LOL2{% endif %}\n"
@@ -90,6 +92,7 @@ test_render_entry(void **state)
         "\n"
         "\n"
         "\n"
+        "gudabola\n"
         "LOL\n"
         "HEHE\n"
         "LOL2\n"
@@ -302,6 +305,7 @@ test_render_if_eq(void **state)
 {
     const char *str =
         "{% block entry %}\n"
+        "{% if GUDA == GUDA2 %}gudabola{% endif %}\n"
         "{% if GUDA == \"zxc\" %}guda\n"
         "{% ifdef BOLA %}bola\n"
         "{% if GUDA > \"zxc\" %}asd\n"
@@ -318,6 +322,7 @@ test_render_if_eq(void **state)
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
         "\n"
+        "gudabola\n"
         "guda\n"
         "bola\n"
         "\n"
@@ -335,6 +340,7 @@ test_render_if_neq(void **state)
 {
     const char *str =
         "{% block entry %}\n"
+        "{% if GUDA != BOLA %}gudabola{% endif %}\n"
         "{% if GUDA != \"zxa\" %}guda\n"
         "{% ifdef BOLA %}bola\n"
         "{% if GUDA > \"zxc\" %}asd\n"
@@ -351,6 +357,7 @@ test_render_if_neq(void **state)
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
         "\n"
+        "gudabola\n"
         "guda\n"
         "bola\n"
         "\n"
@@ -368,6 +375,7 @@ test_render_if_lt(void **state)
 {
     const char *str =
         "{% block entry %}\n"
+        "{% if BOLA < GUDA %}gudabola{% endif %}\n"
         "{% if GUDA < \"zxe\" %}guda\n"
         "{% ifdef BOLA %}bola\n"
         "{% if GUDA > \"zxc\" %}asd\n"
@@ -384,6 +392,7 @@ test_render_if_lt(void **state)
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
         "\n"
+        "gudabola\n"
         "guda\n"
         "bola\n"
         "\n"
@@ -401,6 +410,7 @@ test_render_if_gt(void **state)
 {
     const char *str =
         "{% block entry %}\n"
+        "{% if GUDA > BOLA %}gudabola{% endif %}\n"
         "{% if GUDA > \"zxa\" %}guda\n"
         "{% ifdef BOLA %}bola\n"
         "{% if GUDA > \"zxc\" %}asd\n"
@@ -417,6 +427,7 @@ test_render_if_gt(void **state)
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
         "\n"
+        "gudabola\n"
         "guda\n"
         "bola\n"
         "\n"
@@ -434,6 +445,7 @@ test_render_if_lt_eq(void **state)
 {
     const char *str =
         "{% block entry %}\n"
+        "{% if BOLA <= GUDA %}gudabola{% endif %}\n"
         "{% if GUDA <= \"zxc\" %}guda\n"
         "{% if GUDA <= \"zxe\" %}guda2\n"
         "{% ifdef BOLA %}bola\n"
@@ -452,6 +464,7 @@ test_render_if_lt_eq(void **state)
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
         "\n"
+        "gudabola\n"
         "guda\n"
         "guda2\n"
         "bola\n"
@@ -471,6 +484,7 @@ test_render_if_gt_eq(void **state)
 {
     const char *str =
         "{% block entry %}\n"
+        "{% if GUDA >= BOLA %}gudabola{% endif %}\n"
         "{% if GUDA >= \"zxc\" %}guda\n"
         "{% if GUDA >= \"zxa\" %}guda2\n"
         "{% ifdef BOLA %}bola\n"
@@ -489,6 +503,7 @@ test_render_if_gt_eq(void **state)
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
         "\n"
+        "gudabola\n"
         "guda\n"
         "guda2\n"
         "bola\n"
@@ -708,6 +723,43 @@ test_format_date_without_date(void **state)
 }
 
 
+static void
+test_format_variable(void **state)
+{
+    b_trie_t *g = b_trie_new(free);
+    b_trie_insert(g, "NAME", b_strdup("bola"));
+    b_trie_insert(g, "TITLE", b_strdup("bola2"));
+    b_trie_t *l = b_trie_new(free);
+    b_trie_insert(l, "NAME", b_strdup("chunda"));
+    b_trie_insert(l, "TITLE", b_strdup("chunda2"));
+    char *tmp = blogc_format_variable("NAME", g, l);
+    assert_string_equal(tmp, "chunda");
+    free(tmp);
+    tmp = blogc_format_variable("TITLE", g, l);
+    assert_string_equal(tmp, "chunda2");
+    free(tmp);
+    assert_null(blogc_format_variable("BOLA", g, l));
+    b_trie_free(g);
+    b_trie_free(l);
+}
+
+
+static void
+test_format_variable_with_date(void **state)
+{
+    b_trie_t *g = b_trie_new(free);
+    b_trie_insert(g, "DATE", b_strdup("2010-11-12 13:14:15"));
+    b_trie_insert(g, "DATE_FORMAT", b_strdup("%R"));
+    b_trie_t *l = b_trie_new(free);
+    b_trie_insert(l, "DATE", b_strdup("2011-12-13 14:15:16"));
+    char *tmp = blogc_format_variable("DATE_FORMATTED", g, l);
+    assert_string_equal(tmp, "14:15");
+    free(tmp);
+    b_trie_free(g);
+    b_trie_free(l);
+}
+
+
 int
 main(void)
 {
@@ -736,6 +788,8 @@ main(void)
         unit_test(test_format_date_with_global_format),
         unit_test(test_format_date_without_format),
         unit_test(test_format_date_without_date),
+        unit_test(test_format_variable),
+        unit_test(test_format_variable_with_date),
     };
     return run_tests(tests);
 }
