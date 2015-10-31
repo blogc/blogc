@@ -145,7 +145,8 @@ In this case, if the `TITLE` variable is not defined, the content is included.
 
 The content of an `if` conditional is included in the output file when
 the comparision between the given variable and the given static string or
-variable evaluates to true in the current scope.
+variable evaluates to true in the current scope. The left operand of the
+comparision *must* be a variable.
 
 The available operators are: `==`, `!=`, `<`, `>`, `<=` and `>=`. The
 comparisions are strcmp(3)-like.
