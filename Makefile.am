@@ -26,6 +26,7 @@ MAINTAINERCLEANFILES = \
 noinst_HEADERS = \
 	src/content-parser.h \
 	src/datetime-parser.h \
+	src/directives.h \
 	src/file.h \
 	src/error.h \
 	src/loader.h \
@@ -53,6 +54,7 @@ check_PROGRAMS = \
 libblogc_la_SOURCES = \
 	src/content-parser.c \
 	src/datetime-parser.c \
+	src/directives.c \
 	src/file.c \
 	src/error.c \
 	src/loader.c \
@@ -198,6 +200,7 @@ tests_check_content_parser_CFLAGS = \
 
 tests_check_content_parser_LDFLAGS = \
 	-no-install \
+	-Wl,--wrap=blogc_directive_loader \
 	$(NULL)
 
 tests_check_content_parser_LDADD = \
