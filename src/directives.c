@@ -11,10 +11,11 @@
 #endif /* HAVE_CONFIG_H */
 
 #include "utils/utils.h"
-
+#include "error.h"
 
 char*
-blogc_directive_loader(const char *name, const char *argument, b_trie_t *params)
+blogc_directive_loader(const char *name, const char *argument, b_trie_t *params,
+    blogc_error_t **err)
 {
     // TODO: implement me!
     return b_strdup("TODO\n");
