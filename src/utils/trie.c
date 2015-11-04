@@ -110,7 +110,7 @@ clean:
 void*
 b_trie_lookup(b_trie_t *trie, const char *key)
 {
-    if (trie->root == NULL || key == NULL)
+    if (trie == NULL || trie->root == NULL || key == NULL)
         return NULL;
 
     b_trie_node_t *parent = trie->root;
