@@ -1109,7 +1109,7 @@ param_end:
                 if (c == '\n' || c == '\r' || is_last) {
                     char *rv_d = blogc_directive_loader(directive_name,
                         directive_argument, directive_params);
-                    if (rv_d)
+                    if (rv_d != NULL)
                         b_string_append(rv, rv_d);
                     free(rv_d);
                     state = CONTENT_START_LINE;
