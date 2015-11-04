@@ -1129,7 +1129,7 @@ test_content_parse_directive(void **state)
     will_return(__wrap_blogc_directive_loader, "qwe");
     html = blogc_content_parse(
         ".. bola::\r\n"
-        "\t:asd: qwe\r\n",
+        "   :asd: qwe\r\n",
         NULL);
     assert_non_null(html);
     assert_string_equal(html,
@@ -1145,8 +1145,8 @@ test_content_parse_directive(void **state)
     will_return(__wrap_blogc_directive_loader, "vbn");
     html = blogc_content_parse(
         ".. bola::\n"
-        "\t\t:asd: qwe\n"
-        "\t\t:zxc: vbn",
+        "   :asd: qwe\n"
+        "   :zxc: vbn",
         NULL);
     assert_non_null(html);
     assert_string_equal(html,
@@ -1162,8 +1162,8 @@ test_content_parse_directive(void **state)
     will_return(__wrap_blogc_directive_loader, "vbn");
     html = blogc_content_parse(
         ".. bola::\n"
-        " :asd: qwe\n"
-        " :zxc: vbn\n",
+        "   :asd: qwe\n"
+        "   :zxc: vbn\n",
         NULL);
     assert_non_null(html);
     assert_string_equal(html,
@@ -1409,43 +1409,6 @@ test_content_parse_directive(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\r\n"
-        "CHUNDA\n"
-        "<p>bola</p>\r\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, "chunda");
-    will_return(__wrap_blogc_directive_loader, 3);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "ert");
-    will_return(__wrap_blogc_directive_loader, "zxvc");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, "bolao");
-    will_return(__wrap_blogc_directive_loader, "chund");
-    will_return(__wrap_blogc_directive_loader, 2);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "ert");
-    will_return(__wrap_blogc_directive_loader, "zxvc");
-    html = blogc_content_parse(
-        "# foo\r\n"
-        "\r\n"
-        ".. bola:: chunda\r\n"
-        "   :asd: qwe\r\n"
-        "   :ert: zxvc\r\n"
-        "   :qwe: bola\r\n"
-        "\r\n"
-        ".. bolao:: chund\r\n"
-        "    :asd: qwe\r\n"
-        "    :ert: zxvc\r\n"
-        "\r\n"
-        "bola", NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<h1 id=\"foo\">foo</h1>\r\n"
-        "CHUNDA\n"
         "CHUNDA\n"
         "<p>bola</p>\r\n");
     free(html);
