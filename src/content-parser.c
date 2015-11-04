@@ -405,6 +405,8 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
     size_t eend = 0;
     size_t real_end = 0;
 
+    bool no_jump = false;
+
     unsigned int header_level = 0;
     char *prefix = NULL;
     size_t prefix_len = 0;
@@ -616,6 +618,11 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                         prefix = NULL;
                         b_slist_free_full(lines, free);
                         lines = NULL;
+                        if (is_last) {
+                            free(tmp);
+                            tmp = NULL;
+                            goto para;
+                        }
                     }
                     free(tmp);
                     tmp = NULL;
@@ -677,6 +684,8 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                         lines = NULL;
                         free(tmp);
                         tmp = NULL;
+                        if (is_last)
+                            goto para;
                         break;
                     }
                     free(tmp);
@@ -836,6 +845,8 @@ hr:
                     break;
                 }
                 state = CONTENT_PARAGRAPH;
+                if (is_last)
+                    goto para;
                 break;
 
             case CONTENT_ORDERED_LIST_SPACE:
@@ -947,8 +958,15 @@ hr:
                     break;
 
             case CONTENT_PARAGRAPH_END:
+                no_jump = true;
 para:
                 if (c == '\n' || c == '\r' || is_last) {
+                    if (!no_jump && is_last) {
+                        if (c == '\n' || c == '\r')
+                            end = src_len - 1;
+                        else
+                            end = src_len;
+                    }
                     tmp = b_strndup(src + start, end - start);
                     parsed = blogc_content_parse_inline(tmp);
                     b_string_append_printf(rv, "<p>%s</p>%s", parsed,

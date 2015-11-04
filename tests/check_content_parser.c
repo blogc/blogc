@@ -1135,6 +1135,14 @@ test_content_parse_invalid_blockquote(void **state)
         "&gt; bola\n"
         "&gt;   foo</p>\n");
     free(html);
+    html = blogc_content_parse(
+        ">   asd\n"
+        "> bola", NULL);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>&gt;   asd\n"
+        "&gt; bola</p>\n");
+    free(html);
 }
 
 
@@ -1145,6 +1153,16 @@ test_content_parse_invalid_code(void **state)
         "    asd\n"
         "  bola\n"
         "    foo\n", NULL);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<p>    asd\n"
+        "  bola\n"
+        "    foo</p>\n");
+    free(html);
+    html = blogc_content_parse(
+        "    asd\n"
+        "  bola\n"
+        "    foo", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>    asd\n"
@@ -1196,7 +1214,8 @@ test_content_parse_invalid_unordered_list(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<p><em>  asd\n"
-        "1. qwe</p>\n");
+        "1. qwe"
+        "</p>\n");
     free(html);
     html = blogc_content_parse(
         "* asd\n"
@@ -1204,7 +1223,8 @@ test_content_parse_invalid_unordered_list(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<p><em> asd\n"
-        "1. qwe</p>\n");
+        "1. qwe"
+        "</p>\n");
     free(html);
     html = blogc_content_parse(
         "chunda\n"
@@ -1250,7 +1270,8 @@ test_content_parse_invalid_ordered_list(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
-        "<em>  qwe</p>\n");
+        "<em>  qwe"
+        "</p>\n");
     free(html);
     html = blogc_content_parse(
         "1. asd\n"
@@ -1258,7 +1279,8 @@ test_content_parse_invalid_ordered_list(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
-        "<em>  qwe</p>\n");
+        "<em>  qwe"
+        "</p>\n");
     free(html);
     html = blogc_content_parse(
         "chunda\n"
@@ -1302,6 +1324,10 @@ test_content_parse_invalid_ordered_list(void **state)
     html = blogc_content_parse("1.\n", NULL);
     assert_non_null(html);
     assert_string_equal(html, "<p>1.</p>\n");
+    free(html);
+    html = blogc_content_parse("1 ", NULL);
+    assert_non_null(html);
+    assert_string_equal(html, "<p>1 </p>\n");
     free(html);
 }
 
