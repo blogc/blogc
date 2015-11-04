@@ -70,6 +70,7 @@ typedef enum {
     CONTENT_DIRECTIVE_COLON,
     CONTENT_DIRECTIVE_ARGUMENT_START,
     CONTENT_DIRECTIVE_ARGUMENT,
+    CONTENT_DIRECTIVE_PARAM_PREFIX_START,
     CONTENT_DIRECTIVE_PARAM_PREFIX,
     CONTENT_DIRECTIVE_PARAM_KEY_START,
     CONTENT_DIRECTIVE_PARAM_KEY,
@@ -416,7 +417,6 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
     size_t end = 0;
     size_t eend = 0;
     size_t real_end = 0;
-    size_t spaces = 0;
 
     bool no_jump = false;
 
@@ -523,7 +523,7 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
             case CONTENT_EXCERPT_OR_DIRECTIVE:
                 if (c == '.')
                     break;
-                if (c == ' ' && current - start == 2) {
+                if ((c == ' ' || c == '\t') && current - start == 2) {
                     state = CONTENT_DIRECTIVE_NAME_START;
                     if (is_last)
                         goto para;
@@ -1006,16 +1006,18 @@ hr:
                 break;
 
             case CONTENT_DIRECTIVE_ARGUMENT_START:
-                if (c == ' ') {
+                if (c == ' ' || c == '\t') {
                     if (is_last)
                         goto param_end;
                     break;
                 }
                 if (c == '\n' || c == '\r' || is_last) {
-                    state = CONTENT_DIRECTIVE_PARAM_PREFIX;
+                    state = CONTENT_DIRECTIVE_PARAM_PREFIX_START;
                     directive_argument = NULL;
                     if (is_last)
                         goto param_end;
+                    else
+                        start2 = current + 1;
                     break;
                 }
                 start2 = current;
@@ -1024,29 +1026,32 @@ hr:
 
             case CONTENT_DIRECTIVE_ARGUMENT:
                 if (c == '\n' || c == '\r' || is_last) {
-                    spaces = 0;
-                    state = CONTENT_DIRECTIVE_PARAM_PREFIX;
+                    state = CONTENT_DIRECTIVE_PARAM_PREFIX_START;
                     end = is_last && c != '\n' && c != '\r' ? src_len :
                         (real_end != 0 ? real_end : current);
                     free(directive_argument);
                     directive_argument = b_strndup(src + start2, end - start2);
                     if (is_last)
                         goto param_end;
+                    else
+                        start2 = current + 1;
                 }
                 break;
 
+            case CONTENT_DIRECTIVE_PARAM_PREFIX_START:
+                if (is_last)
+                    goto para;
+                if (c == ' ' || c == '\t')
+                    break;
+                prefix = b_strndup(src + start2, current - start2);
+                state = CONTENT_DIRECTIVE_PARAM_PREFIX;
+                current--;
+                break;
+
             case CONTENT_DIRECTIVE_PARAM_PREFIX:
-                if (c == ' ') {
-                    spaces++;
+                if (c == ' ' || c == '\t')
                     break;
-                }
-                if ((c == '\n' || c == '\r') && spaces == 0) {
-                    state = CONTENT_DIRECTIVE_PARAM_END;
-                    if (is_last)
-                        goto param_end;
-                    break;
-                }
-                if (c == ':' && spaces == 3) {
+                if (c == ':' && b_str_starts_with(src + start2, prefix)) {
                     state = CONTENT_DIRECTIVE_PARAM_KEY_START;
                     break;
                 }
@@ -1083,7 +1088,7 @@ hr:
             case CONTENT_DIRECTIVE_PARAM_VALUE_START:
                 if (is_last)
                     goto para;
-                if (c == ' ')
+                if (c == ' ' || c == '\t')
                     break;
                 start2 = current;
                 state = CONTENT_DIRECTIVE_PARAM_VALUE;
@@ -1100,6 +1105,8 @@ hr:
                         b_strndup(src + start2, end - start2));
                     free(directive_key);
                     directive_key = NULL;
+                    if (!is_last)
+                        start2 = current + 1;
                 }
                 if (!is_last)
                     break;
@@ -1120,11 +1127,12 @@ param_end:
                     directive_argument = NULL;
                     b_trie_free(directive_params);
                     directive_params = NULL;
+                    free(prefix);
+                    prefix = NULL;
                     break;
                 }
-                if (c == ' ') {
+                if (c == ' ' || c == '\t') {
                     start2 = current;
-                    spaces = 1;
                     state = CONTENT_DIRECTIVE_PARAM_PREFIX;
                     break;
                 }
@@ -1176,6 +1184,7 @@ para:
     free(directive_argument);
     free(directive_key);
     b_trie_free(directive_params);
+    free(prefix);
 
     return b_string_free(rv, false);
 }
