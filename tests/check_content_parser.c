@@ -1026,11 +1026,9 @@ __wrap_blogc_directive_loader(const char *name, const char *argument,
         assert_string_equal(argument, arg);
     assert_int_equal(b_trie_size(params), mock_type(unsigned int));
 
-    for (unsigned int i = 0; i < b_trie_size(params); i++) {
-        const char *key = mock_type(const char*);
-        const char *value = mock_type(const char*);
-        assert_string_equal(b_trie_lookup(params, key), value);
-    }
+    for (unsigned int i = 0; i < b_trie_size(params); i++)
+        assert_string_equal(b_trie_lookup(params, mock_type(const char*)),
+            mock_type(const char*));
 
     return b_strdup("CHUNDA\n");
 }
