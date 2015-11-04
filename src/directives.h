@@ -10,8 +10,9 @@
 #define _DIRECTIVES_H
 
 #include "utils/utils.h"
+#include "error.h"
 
 char* blogc_directive_loader(const char *name, const char *argument,
-    b_trie_t *params);
+    b_trie_t *params, blogc_error_t **err);
 
 #endif /* _DIRECTIVES_H */
