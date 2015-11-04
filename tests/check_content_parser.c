@@ -1014,405 +1014,6 @@ test_content_parse_ordered_list_crlf(void **state)
 }
 
 
-char*
-__wrap_blogc_directive_loader(const char *name, const char *argument,
-    b_trie_t *params)
-{
-    assert_string_equal(name, mock_type(const char*));
-    const char *arg = mock_type(const char*);
-    if (arg == NULL)
-        assert_null(argument);
-    else
-        assert_string_equal(argument, arg);
-    assert_int_equal(b_trie_size(params), mock_type(unsigned int));
-
-    for (unsigned int i = 0; i < b_trie_size(params); i++)
-        assert_string_equal(b_trie_lookup(params, mock_type(const char*)),
-            mock_type(const char*));
-
-    return b_strdup("CHUNDA\n");
-}
-
-
-static void
-test_content_parse_directive(void **state)
-{
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, NULL);
-    will_return(__wrap_blogc_directive_loader, 0);
-    char *html = blogc_content_parse(
-        ".. bola::",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, NULL);
-    will_return(__wrap_blogc_directive_loader, 0);
-    html = blogc_content_parse(
-        ".. bola::\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, NULL);
-    will_return(__wrap_blogc_directive_loader, 0);
-    html = blogc_content_parse(
-        ".. bola:: ",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, NULL);
-    will_return(__wrap_blogc_directive_loader, 0);
-    html = blogc_content_parse(
-        ".. bola:: \n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, NULL);
-    will_return(__wrap_blogc_directive_loader, 0);
-    html = blogc_content_parse(
-        ".. bola::\r\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, NULL);
-    will_return(__wrap_blogc_directive_loader, 1);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    html = blogc_content_parse(
-        ".. bola::\n"
-        "   :asd: qwe",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, NULL);
-    will_return(__wrap_blogc_directive_loader, 1);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    html = blogc_content_parse(
-        ".. bola::\n"
-        "   :asd: qwe\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, NULL);
-    will_return(__wrap_blogc_directive_loader, 1);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    html = blogc_content_parse(
-        ".. bola::\r\n"
-        "   :asd: qwe\r\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, NULL);
-    will_return(__wrap_blogc_directive_loader, 2);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "zxc");
-    will_return(__wrap_blogc_directive_loader, "vbn");
-    html = blogc_content_parse(
-        ".. bola::\n"
-        "   :asd: qwe\n"
-        "   :zxc: vbn",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, NULL);
-    will_return(__wrap_blogc_directive_loader, 2);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "zxc");
-    will_return(__wrap_blogc_directive_loader, "vbn");
-    html = blogc_content_parse(
-        ".. bola::\n"
-        "   :asd: qwe\n"
-        "   :zxc: vbn\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, NULL);
-    will_return(__wrap_blogc_directive_loader, 2);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "zxc");
-    will_return(__wrap_blogc_directive_loader, "vbn");
-    html = blogc_content_parse(
-        ".. bola::\r\n"
-        "   :asd: qwe\r\n"
-        "   :zxc: vbn\r\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, NULL);
-    will_return(__wrap_blogc_directive_loader, 3);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "ert");
-    will_return(__wrap_blogc_directive_loader, "zxvc");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "bola");
-    html = blogc_content_parse(
-        "# foo\n"
-        "\n"
-        ".. bola::\n"
-        "   :asd: qwe\n"
-        "   :ert: zxvc\n"
-        "   :qwe: bola\n"
-        "\n"
-        "bola", NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<h1 id=\"foo\">foo</h1>\n"
-        "CHUNDA\n"
-        "<p>bola</p>\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, NULL);
-    will_return(__wrap_blogc_directive_loader, 3);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "ert");
-    will_return(__wrap_blogc_directive_loader, "zxvc");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "bola");
-    html = blogc_content_parse(
-        "# foo\r\n"
-        "\r\n"
-        ".. bola::\r\n"
-        "   :asd: qwe\r\n"
-        "   :ert: zxvc\r\n"
-        "   :qwe: bola\r\n"
-        "\r\n"
-        "bola", NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<h1 id=\"foo\">foo</h1>\r\n"
-        "CHUNDA\n"
-        "<p>bola</p>\r\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, "chunda");
-    will_return(__wrap_blogc_directive_loader, 0);
-    html = blogc_content_parse(
-        ".. bola:: chunda",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, "chunda");
-    will_return(__wrap_blogc_directive_loader, 0);
-    html = blogc_content_parse(
-        ".. bola:: chunda\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, "chunda");
-    will_return(__wrap_blogc_directive_loader, 0);
-    html = blogc_content_parse(
-        ".. bola:: chunda\r\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, "chunda");
-    will_return(__wrap_blogc_directive_loader, 1);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    html = blogc_content_parse(
-        ".. bola:: chunda\n"
-        "   :asd: qwe",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, "chunda");
-    will_return(__wrap_blogc_directive_loader, 1);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    html = blogc_content_parse(
-        ".. bola:: chunda\n"
-        "   :asd: qwe\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, "chunda");
-    will_return(__wrap_blogc_directive_loader, 1);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    html = blogc_content_parse(
-        ".. bola:: chunda\r\n"
-        "   :asd: qwe\r\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, "chunda");
-    will_return(__wrap_blogc_directive_loader, 2);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "zxc");
-    will_return(__wrap_blogc_directive_loader, "vbn");
-    html = blogc_content_parse(
-        ".. bola:: chunda\n"
-        "   :asd: qwe\n"
-        "   :zxc: vbn",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, "chunda");
-    will_return(__wrap_blogc_directive_loader, 2);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "zxc");
-    will_return(__wrap_blogc_directive_loader, "vbn");
-    html = blogc_content_parse(
-        ".. bola:: chunda\n"
-        "   :asd: qwe\n"
-        "   :zxc: vbn\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, "chunda");
-    will_return(__wrap_blogc_directive_loader, 2);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "zxc");
-    will_return(__wrap_blogc_directive_loader, "vbn");
-    html = blogc_content_parse(
-        ".. bola:: chunda\r\n"
-        "   :asd: qwe\r\n"
-        "   :zxc: vbn\r\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "CHUNDA\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, "chunda");
-    will_return(__wrap_blogc_directive_loader, 3);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "ert");
-    will_return(__wrap_blogc_directive_loader, "zxvc");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "bola");
-    html = blogc_content_parse(
-        "# foo\n"
-        "\n"
-        ".. bola:: chunda\n"
-        "   :asd: qwe\n"
-        "   :ert: zxvc\n"
-        "   :qwe: bola\n"
-        "\n"
-        "bola", NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<h1 id=\"foo\">foo</h1>\n"
-        "CHUNDA\n"
-        "<p>bola</p>\n");
-    free(html);
-
-    will_return(__wrap_blogc_directive_loader, "bola");
-    will_return(__wrap_blogc_directive_loader, "chunda");
-    will_return(__wrap_blogc_directive_loader, 3);
-    will_return(__wrap_blogc_directive_loader, "asd");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "ert");
-    will_return(__wrap_blogc_directive_loader, "zxvc");
-    will_return(__wrap_blogc_directive_loader, "qwe");
-    will_return(__wrap_blogc_directive_loader, "bola");
-    html = blogc_content_parse(
-        "# foo\r\n"
-        "\r\n"
-        ".. bola:: chunda\r\n"
-        "   :asd: qwe\r\n"
-        "   :ert: zxvc\r\n"
-        "   :qwe: bola\r\n"
-        "\r\n"
-        "bola", NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<h1 id=\"foo\">foo</h1>\r\n"
-        "CHUNDA\n"
-        "<p>bola</p>\r\n");
-    free(html);
-}
-
-
 static void
 test_content_parse_invalid_excerpt(void **state)
 {
@@ -1534,14 +1135,6 @@ test_content_parse_invalid_blockquote(void **state)
         "&gt; bola\n"
         "&gt;   foo</p>\n");
     free(html);
-    html = blogc_content_parse(
-        ">   asd\n"
-        "> bola", NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>&gt;   asd\n"
-        "&gt; bola</p>\n");
-    free(html);
 }
 
 
@@ -1552,16 +1145,6 @@ test_content_parse_invalid_code(void **state)
         "    asd\n"
         "  bola\n"
         "    foo\n", NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>    asd\n"
-        "  bola\n"
-        "    foo</p>\n");
-    free(html);
-    html = blogc_content_parse(
-        "    asd\n"
-        "  bola\n"
-        "    foo", NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>    asd\n"
@@ -1613,8 +1196,7 @@ test_content_parse_invalid_unordered_list(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<p><em>  asd\n"
-        "1. qwe"
-        "</p>\n");
+        "1. qwe</p>\n");
     free(html);
     html = blogc_content_parse(
         "* asd\n"
@@ -1622,8 +1204,7 @@ test_content_parse_invalid_unordered_list(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<p><em> asd\n"
-        "1. qwe"
-        "</p>\n");
+        "1. qwe</p>\n");
     free(html);
     html = blogc_content_parse(
         "chunda\n"
@@ -1669,8 +1250,7 @@ test_content_parse_invalid_ordered_list(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
-        "<em>  qwe"
-        "</p>\n");
+        "<em>  qwe</p>\n");
     free(html);
     html = blogc_content_parse(
         "1. asd\n"
@@ -1678,8 +1258,7 @@ test_content_parse_invalid_ordered_list(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
-        "<em>  qwe"
-        "</p>\n");
+        "<em>  qwe</p>\n");
     free(html);
     html = blogc_content_parse(
         "chunda\n"
@@ -1723,195 +1302,6 @@ test_content_parse_invalid_ordered_list(void **state)
     html = blogc_content_parse("1.\n", NULL);
     assert_non_null(html);
     assert_string_equal(html, "<p>1.</p>\n");
-    free(html);
-    html = blogc_content_parse("1 ", NULL);
-    assert_non_null(html);
-    assert_string_equal(html, "<p>1 </p>\n");
-    free(html);
-}
-
-
-static void
-test_content_parse_invalid_directive(void **state)
-{
-    char *html = blogc_content_parse(
-        ".. ",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. </p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. \n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. </p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        "..  ",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>..  <br /></p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        "..  \n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>..  <br /></p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. a",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. a</p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. a\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. a</p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. asd",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. asd</p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. asd\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. asd</p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. asd:",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. asd:</p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. asd:\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. asd:</p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. asd::\n"
-        "    :",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. asd::\n"
-        "    :</p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. asd::\n"
-        "    :\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. asd::\n"
-        "    :</p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. asd::\n"
-        "    :a",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. asd::\n"
-        "    :a</p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. asd::\n"
-        "    :a\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. asd::\n"
-        "    :a</p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. asd::\n"
-        "    :as",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. asd::\n"
-        "    :as</p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. asd::\n"
-        "    :as\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. asd::\n"
-        "    :as</p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. asd::\n"
-        "    :as:",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. asd::\n"
-        "    :as:</p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. asd::\n"
-        "    :as:\n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. asd::\n"
-        "    :as:</p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. asd::\n"
-        "    :as: ",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. asd::\n"
-        "    :as: </p>\n");
-    free(html);
-
-    html = blogc_content_parse(
-        ".. asd::\n"
-        "    :as: \n",
-        NULL);
-    assert_non_null(html);
-    assert_string_equal(html,
-        "<p>.. asd::\n"
-        "    :as: </p>\n");
     free(html);
 }
 
@@ -2266,7 +1656,6 @@ main(void)
         unit_test(test_content_parse_unordered_list_crlf),
         unit_test(test_content_parse_ordered_list),
         unit_test(test_content_parse_ordered_list_crlf),
-        unit_test(test_content_parse_directive),
         unit_test(test_content_parse_invalid_excerpt),
         unit_test(test_content_parse_invalid_header),
         unit_test(test_content_parse_invalid_header_empty),
@@ -2275,7 +1664,6 @@ main(void)
         unit_test(test_content_parse_invalid_horizontal_rule),
         unit_test(test_content_parse_invalid_unordered_list),
         unit_test(test_content_parse_invalid_ordered_list),
-        unit_test(test_content_parse_invalid_directive),
         unit_test(test_content_parse_inline),
         unit_test(test_content_parse_inline_em),
         unit_test(test_content_parse_inline_strong),

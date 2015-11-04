@@ -15,7 +15,6 @@
 
 #include "utils/utils.h"
 #include "content-parser.h"
-#include "directives.h"
 
 // this is a half ass implementation of a markdown-like syntax. bugs are
 // expected. feel free to improve the parser and add new features.
@@ -44,7 +43,7 @@ blogc_slugify(const char *str)
 
 typedef enum {
     CONTENT_START_LINE = 1,
-    CONTENT_EXCERPT_OR_DIRECTIVE,
+    CONTENT_EXCERPT,
     CONTENT_EXCERPT_END,
     CONTENT_HEADER,
     CONTENT_HEADER_TITLE_START,
@@ -65,17 +64,6 @@ typedef enum {
     CONTENT_ORDERED_LIST_SPACE,
     CONTENT_ORDERED_LIST_START,
     CONTENT_ORDERED_LIST_END,
-    CONTENT_DIRECTIVE_NAME_START,
-    CONTENT_DIRECTIVE_NAME,
-    CONTENT_DIRECTIVE_COLON,
-    CONTENT_DIRECTIVE_ARGUMENT_START,
-    CONTENT_DIRECTIVE_ARGUMENT,
-    CONTENT_DIRECTIVE_PARAM_PREFIX,
-    CONTENT_DIRECTIVE_PARAM_KEY_START,
-    CONTENT_DIRECTIVE_PARAM_KEY,
-    CONTENT_DIRECTIVE_PARAM_VALUE_START,
-    CONTENT_DIRECTIVE_PARAM_VALUE,
-    CONTENT_DIRECTIVE_PARAM_END,
     CONTENT_PARAGRAPH,
     CONTENT_PARAGRAPH_END,
 } blogc_content_parser_state_t;
@@ -416,9 +404,6 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
     size_t end = 0;
     size_t eend = 0;
     size_t real_end = 0;
-    size_t spaces = 0;
-
-    bool no_jump = false;
 
     unsigned int header_level = 0;
     char *prefix = NULL;
@@ -427,11 +412,6 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
     char *tmp2 = NULL;
     char *parsed = NULL;
     char *slug = NULL;
-
-    char *directive_name = NULL;
-    char *directive_argument = NULL;
-    char *directive_key = NULL;
-    b_trie_t *directive_params = NULL;
 
     // this isn't empty because we need some reasonable default value in the
     // unlikely case that we need to print some line ending before evaluating
@@ -483,9 +463,11 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                     break;
                 start = current;
                 if (c == '.') {
-                    eend = rv->len;  // fuck it
-                    state = CONTENT_EXCERPT_OR_DIRECTIVE;
-                    break;
+                    if (end_excerpt != NULL) {
+                        eend = rv->len;  // fuck it
+                        state = CONTENT_EXCERPT;
+                        break;
+                    }
                 }
                 if (c == '#') {
                     header_level = 1;
@@ -520,29 +502,26 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 state = CONTENT_PARAGRAPH;
                 break;
 
-            case CONTENT_EXCERPT_OR_DIRECTIVE:
-                if (c == '.')
-                    break;
-                if (c == ' ' && current - start == 2) {
-                    state = CONTENT_DIRECTIVE_NAME_START;
-                    if (is_last)
-                        goto para;
-                    break;
-                }
-                if (c == '\n' || c == '\r') {
-                    state = CONTENT_EXCERPT_END;
-                    break;
+            case CONTENT_EXCERPT:
+                if (end_excerpt != NULL) {
+                    if (c == '.')
+                        break;
+                    if (c == '\n' || c == '\r') {
+                        state = CONTENT_EXCERPT_END;
+                        break;
+                    }
                 }
                 eend = 0;
                 state = CONTENT_PARAGRAPH;
                 break;
 
             case CONTENT_EXCERPT_END:
-                if (c == '\n' || c == '\r') {
-                    if (end_excerpt != NULL)
+                if (end_excerpt != NULL) {
+                    if (c == '\n' || c == '\r') {
                         *end_excerpt = eend;
-                    state = CONTENT_START_LINE;
-                    break;
+                        state = CONTENT_START_LINE;
+                        break;
+                    }
                 }
                 eend = 0;
                 state = CONTENT_PARAGRAPH_END;
@@ -637,11 +616,6 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                         prefix = NULL;
                         b_slist_free_full(lines, free);
                         lines = NULL;
-                        if (is_last) {
-                            free(tmp);
-                            tmp = NULL;
-                            goto para;
-                        }
                     }
                     free(tmp);
                     tmp = NULL;
@@ -703,8 +677,6 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                         lines = NULL;
                         free(tmp);
                         tmp = NULL;
-                        if (is_last)
-                            goto para;
                         break;
                     }
                     free(tmp);
@@ -864,8 +836,6 @@ hr:
                     break;
                 }
                 state = CONTENT_PARAGRAPH;
-                if (is_last)
-                    goto para;
                 break;
 
             case CONTENT_ORDERED_LIST_SPACE:
@@ -967,172 +937,6 @@ hr:
                 }
                 break;
 
-            case CONTENT_DIRECTIVE_NAME_START:
-                if (is_last)
-                    goto para;
-                if (c >= 'a' && c <= 'z') {
-                    start2 = current;
-                    state = CONTENT_DIRECTIVE_NAME;
-                    break;
-                }
-                state = CONTENT_PARAGRAPH;
-                break;
-
-            case CONTENT_DIRECTIVE_NAME:
-                if (is_last)
-                    goto para;
-                if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_')
-                    break;
-                if (c == ':') {
-                    end = current;
-                    state = CONTENT_DIRECTIVE_COLON;
-                    break;
-                }
-                state = CONTENT_PARAGRAPH;
-                break;
-
-            case CONTENT_DIRECTIVE_COLON:
-                if (c == ':') {
-                    free(directive_name);
-                    directive_name = b_strndup(src + start2, end - start2);
-                    state = CONTENT_DIRECTIVE_ARGUMENT_START;
-                    if (is_last)
-                        goto param_end;
-                    break;
-                }
-                if (is_last)
-                    goto para;
-                state = CONTENT_PARAGRAPH;
-                break;
-
-            case CONTENT_DIRECTIVE_ARGUMENT_START:
-                if (c == ' ') {
-                    if (is_last)
-                        goto param_end;
-                    break;
-                }
-                if (c == '\n' || c == '\r' || is_last) {
-                    state = CONTENT_DIRECTIVE_PARAM_PREFIX;
-                    directive_argument = NULL;
-                    if (is_last)
-                        goto param_end;
-                    break;
-                }
-                start2 = current;
-                state = CONTENT_DIRECTIVE_ARGUMENT;
-                break;
-
-            case CONTENT_DIRECTIVE_ARGUMENT:
-                if (c == '\n' || c == '\r' || is_last) {
-                    spaces = 0;
-                    state = CONTENT_DIRECTIVE_PARAM_PREFIX;
-                    end = is_last && c != '\n' && c != '\r' ? src_len :
-                        (real_end != 0 ? real_end : current);
-                    free(directive_argument);
-                    directive_argument = b_strndup(src + start2, end - start2);
-                    if (is_last)
-                        goto param_end;
-                }
-                break;
-
-            case CONTENT_DIRECTIVE_PARAM_PREFIX:
-                if (c == ' ') {
-                    spaces++;
-                    break;
-                }
-                if ((c == '\n' || c == '\r') && spaces == 0) {
-                    state = CONTENT_DIRECTIVE_PARAM_END;
-                    if (is_last)
-                        goto param_end;
-                    break;
-                }
-                if (c == ':' && spaces == 3) {
-                    state = CONTENT_DIRECTIVE_PARAM_KEY_START;
-                    break;
-                }
-                state = CONTENT_PARAGRAPH;
-                if (is_last)
-                    goto para;
-                break;
-
-            case CONTENT_DIRECTIVE_PARAM_KEY_START:
-                if (is_last)
-                    goto para;
-                if (c >= 'a' && c <= 'z') {
-                    start2 = current;
-                    state = CONTENT_DIRECTIVE_PARAM_KEY;
-                    break;
-                }
-                state = CONTENT_PARAGRAPH;
-                break;
-
-            case CONTENT_DIRECTIVE_PARAM_KEY:
-                if (is_last)
-                    goto para;
-                if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_')
-                    break;
-                if (c == ':') {
-                    free(directive_key);
-                    directive_key = b_strndup(src + start2, current - start2);
-                    state = CONTENT_DIRECTIVE_PARAM_VALUE_START;
-                    break;
-                }
-                state = CONTENT_PARAGRAPH;
-                break;
-
-            case CONTENT_DIRECTIVE_PARAM_VALUE_START:
-                if (is_last)
-                    goto para;
-                if (c == ' ')
-                    break;
-                start2 = current;
-                state = CONTENT_DIRECTIVE_PARAM_VALUE;
-                break;
-
-            case CONTENT_DIRECTIVE_PARAM_VALUE:
-                if (c == '\n' || c == '\r' || is_last) {
-                    state = CONTENT_DIRECTIVE_PARAM_END;
-                    end = is_last && c != '\n' && c != '\r' ? src_len :
-                        (real_end != 0 ? real_end : current);
-                    if (directive_params == NULL)
-                        directive_params = b_trie_new(free);
-                    b_trie_insert(directive_params, directive_key,
-                        b_strndup(src + start2, end - start2));
-                    free(directive_key);
-                    directive_key = NULL;
-                }
-                if (!is_last)
-                    break;
-
-            case CONTENT_DIRECTIVE_PARAM_END:
-param_end:
-                if (c == '\n' || c == '\r' || is_last) {
-                    char *rv_d = blogc_directive_loader(directive_name,
-                        directive_argument, directive_params);
-                    if (rv_d)
-                        b_string_append(rv, rv_d);
-                    free(rv_d);
-                    state = CONTENT_START_LINE;
-                    start = current;
-                    free(directive_name);
-                    directive_name = NULL;
-                    free(directive_argument);
-                    directive_argument = NULL;
-                    b_trie_free(directive_params);
-                    directive_params = NULL;
-                    break;
-                }
-                if (c == ' ') {
-                    start2 = current;
-                    spaces = 1;
-                    state = CONTENT_DIRECTIVE_PARAM_PREFIX;
-                    break;
-                }
-                state = CONTENT_PARAGRAPH;
-                if (is_last)
-                    goto para;
-                break;
-
             case CONTENT_PARAGRAPH:
                 if (c == '\n' || c == '\r' || is_last) {
                     state = CONTENT_PARAGRAPH_END;
@@ -1143,15 +947,8 @@ param_end:
                     break;
 
             case CONTENT_PARAGRAPH_END:
-                no_jump = true;
 para:
                 if (c == '\n' || c == '\r' || is_last) {
-                    if (!no_jump && is_last) {
-                        if (c == '\n' || c == '\r')
-                            end = src_len - 1;
-                        else
-                            end = src_len;
-                    }
                     tmp = b_strndup(src + start, end - start);
                     parsed = blogc_content_parse_inline(tmp);
                     b_string_append_printf(rv, "<p>%s</p>%s", parsed,
@@ -1171,11 +968,6 @@ para:
 
         current++;
     }
-
-    free(directive_name);
-    free(directive_argument);
-    free(directive_key);
-    b_trie_free(directive_params);
 
     return b_string_free(rv, false);
 }
