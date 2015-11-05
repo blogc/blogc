@@ -58,3 +58,6 @@ blogc*.html
 # tarballs
 blogc-*.tar.*
 blogc-*.zip
+
+# rpms
+blogc-*.rpm
