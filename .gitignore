@@ -32,6 +32,7 @@ Makefile.in
 /stamp-h1
 .dirstamp
 /build-aux/*
+!/build-aux/build-windows.sh
 
 # installed .m4 files
 /m4/*.m4
@@ -57,3 +58,6 @@ blogc*.html
 # tarballs
 blogc-*.tar.*
 blogc-*.zip
+
+# rpms
+blogc-*.rpm

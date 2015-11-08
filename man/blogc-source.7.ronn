@@ -207,19 +207,19 @@ Images are defined using the following syntax:
 
 Links are defined using the following syntax:
 
-    To learn more about blogc, [click here](http://blogc.org).
+    To learn more about blogc, [click here](https://blogc.rgm.io).
 
 ### Image Links
 
 Links can be combined with images:
 
-    [![This is the image alt text](picture.jpg)](http://blogc.org)
+    [![This is the image alt text](picture.jpg)](https://blogc.rgm.io)
 
 ### Automatic Links
 
 Automatic link is defined with 2 '[' before and 2 ']' after the URL.
 
-    To learn more about blogc, visit [[http://blogc.org]].
+    To learn more about blogc, visit [[https://blogc.rgm.io]].
 
 ### Line break
 
