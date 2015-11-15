@@ -1043,6 +1043,8 @@ hr:
                     goto para;
                 if (c == ' ' || c == '\t')
                     break;
+                if (c == '\n' || c == '\r')
+                    goto param_end;
                 prefix = b_strndup(src + start2, current - start2);
                 state = CONTENT_DIRECTIVE_PARAM_PREFIX;
                 current--;
