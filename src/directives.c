@@ -17,7 +17,7 @@
 #include "error.h"
 
 
-blogc_directive_t registry[] = {
+const static blogc_directive_t registry[] = {
     {"youtube", blogc_directive_youtube},
     {NULL, NULL},
 };
@@ -28,14 +28,13 @@ blogc_directive_loader(blogc_directive_ctx_t *ctx, blogc_error_t **err)
 {
     if (ctx == NULL)
         return NULL;
-    for (unsigned int i = 0; registry[i].name != NULL; i++) {
-        if (0 == strcmp(ctx->name, registry[i].name)) {
-            if (err != NULL && *err != NULL) {
-                return NULL;
-            }
+    if (err == NULL || *err != NULL)
+        return NULL;
+    for (unsigned int i = 0; registry[i].name != NULL; i++)
+        if (0 == strcmp(ctx->name, registry[i].name))
             return registry[i].callback(ctx, err);
-        }
-    }
+    *err = blogc_error_new_printf(BLOGC_WARNING_CONTENT_PARSER,
+        "Directive not found: %s", ctx->name);
     return NULL;
 }
 
@@ -45,7 +44,7 @@ blogc_directive_youtube(blogc_directive_ctx_t *ctx, blogc_error_t **err)
 {
     if (ctx->argument == NULL) {
         *err = blogc_error_new_printf(BLOGC_WARNING_CONTENT_PARSER,
-            "youtube: Invalid video ID: %s", ctx->argument);
+            "youtube: video ID must be provided as argument");
         return NULL;
     }
 
