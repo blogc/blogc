@@ -1118,8 +1118,14 @@ param_end:
                 if (c == '\n' || c == '\r' || is_last) {
                     // FIXME: handle errors in the rest of the parser.
                     blogc_error_t *err = NULL;
-                    char *rv_d = blogc_directive_loader(directive_name,
-                        directive_argument, directive_params, &err);
+                    blogc_directive_ctx_t *ctx = b_malloc(
+                        sizeof(blogc_directive_ctx_t));
+                    ctx->name = directive_name;
+                    ctx->argument = directive_argument;
+                    ctx->params = directive_params;
+                    ctx->eol = line_ending;
+                    char *rv_d = blogc_directive_loader(ctx, &err);
+                    free(ctx);
                     blogc_error_print(err);
                     if (rv_d != NULL)
                         b_string_append(rv, rv_d);

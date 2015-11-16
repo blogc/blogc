@@ -12,7 +12,14 @@
 #include "utils/utils.h"
 #include "error.h"
 
-typedef char* (*blogc_directive_func_t)(const char *argument, b_trie_t *params,
+typedef struct {
+    const char *name;
+    const char *argument;
+    b_trie_t *params;
+    const char *eol;
+} blogc_directive_ctx_t;
+
+typedef char* (*blogc_directive_func_t)(blogc_directive_ctx_t *ctx,
     blogc_error_t **err);
 
 typedef struct {
@@ -20,12 +27,10 @@ typedef struct {
     blogc_directive_func_t callback;
 } blogc_directive_t;
 
-char* blogc_directive_loader(const char *name, const char *argument,
-    b_trie_t *params, blogc_error_t **err);
+char* blogc_directive_loader(blogc_directive_ctx_t *ctx, blogc_error_t **err);
 
 
 // built-in directives (that are everything we support right now
-char* blogc_directive_youtube(const char *argument, b_trie_t *params,
-    blogc_error_t **err);
+char* blogc_directive_youtube(blogc_directive_ctx_t *ctx, blogc_error_t **err);
 
 #endif /* _DIRECTIVES_H */

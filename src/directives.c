@@ -24,36 +24,40 @@ blogc_directive_t registry[] = {
 
 
 char*
-blogc_directive_loader(const char *name, const char *argument, b_trie_t *params,
-    blogc_error_t **err)
+blogc_directive_loader(blogc_directive_ctx_t *ctx, blogc_error_t **err)
 {
-    for (unsigned int i = 0; registry[i].name != NULL; i++)
-        if (0 == strcmp(name, registry[i].name))
-            return registry[i].callback(argument, params, err);
+    if (ctx == NULL)
+        return NULL;
+    for (unsigned int i = 0; registry[i].name != NULL; i++) {
+        if (0 == strcmp(ctx->name, registry[i].name)) {
+            if (err != NULL && *err != NULL) {
+                return NULL;
+            }
+            return registry[i].callback(ctx, err);
+        }
+    }
     return NULL;
 }
 
 
 char*
-blogc_directive_youtube(const char *argument, b_trie_t *params, blogc_error_t **err)
+blogc_directive_youtube(blogc_directive_ctx_t *ctx, blogc_error_t **err)
 {
-    if (err != NULL && *err != NULL)
-        return NULL;
-    if (argument == NULL) {
+    if (ctx->argument == NULL) {
         *err = blogc_error_new_printf(BLOGC_WARNING_CONTENT_PARSER,
-            "youtube: Invalid video ID: %s", argument);
+            "youtube: Invalid video ID: %s", ctx->argument);
         return NULL;
     }
 
-    char *width = b_trie_lookup(params, "width");
-    char *height = b_trie_lookup(params, "height");
+    char *width = b_trie_lookup(ctx->params, "width");
+    char *height = b_trie_lookup(ctx->params, "height");
 
     // using default 16:9 sizes provided by youtube as of 2015-11-04
     return b_strdup_printf(
         "<iframe width=\"%s\" height=\"%s\" "
         "src=\"https://www.youtube.com/embed/%s\" frameborder=\"0\" "
-        "allowfullscreen></iframe>\n",
+        "allowfullscreen></iframe>%s",
         width == NULL ? "560" : width,
         height == NULL ? "315" : height,
-        argument);
+        ctx->argument, ctx->eol);
 }

@@ -16,6 +16,7 @@
 #include <cmocka.h>
 #include <string.h>
 #include "../src/content-parser.h"
+#include "../src/directives.h"
 #include "../src/utils/utils.h"
 
 
@@ -1015,21 +1016,22 @@ test_content_parse_ordered_list_crlf(void **state)
 
 
 char*
-__wrap_blogc_directive_loader(const char *name, const char *argument,
-    b_trie_t *params)
+__wrap_blogc_directive_loader(blogc_directive_ctx_t *ctx, blogc_error_t **err)
 {
-    assert_string_equal(name, mock_type(const char*));
+    assert_non_null(err);
+    assert_null(*err);
+    assert_string_equal(ctx->name, mock_type(const char*));
     const char *arg = mock_type(const char*);
     if (arg == NULL)
-        assert_null(argument);
+        assert_null(ctx->argument);
     else
-        assert_string_equal(argument, arg);
-    assert_int_equal(b_trie_size(params), mock_type(unsigned int));
+        assert_string_equal(ctx->argument, arg);
+    assert_int_equal(b_trie_size(ctx->params), mock_type(unsigned int));
 
-    for (unsigned int i = 0; i < b_trie_size(params); i++) {
+    for (unsigned int i = 0; i < b_trie_size(ctx->params); i++) {
         const char *key = mock_type(const char*);
         const char *value = mock_type(const char*);
-        assert_string_equal(b_trie_lookup(params, key), value);
+        assert_string_equal(b_trie_lookup(ctx->params, key), value);
     }
 
     return b_strdup("CHUNDA\n");
