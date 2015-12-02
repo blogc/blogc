@@ -19,6 +19,7 @@
 #endif /* HAVE_SYS_TYPES_H */
 
 #include <errno.h>
+#include <locale.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -105,6 +106,8 @@ blogc_mkdir_recursive(const char *filename)
 int
 main(int argc, char **argv)
 {
+    setlocale(LC_ALL, "");
+
     int rv = 0;
 
     bool listing = false;
