@@ -9,7 +9,7 @@
 #ifndef _TEMPLATE_PARSER_H
 #define _TEMPLATE_PARSER_H
 
-#include <squareball.h>
+#include "utils/utils.h"
 #include "error.h"
 
 typedef enum {
@@ -37,8 +37,8 @@ typedef struct {
     blogc_template_stmt_operator_t op;
 } blogc_template_stmt_t;
 
-sb_slist_t* blogc_template_parse(const char *src, size_t src_len,
+b_slist_t* blogc_template_parse(const char *src, size_t src_len,
     blogc_error_t **err);
-void blogc_template_free_stmts(sb_slist_t *stmts);
+void blogc_template_free_stmts(b_slist_t *stmts);
 
 #endif /* _TEMPLATE_GRAMMAR_H */

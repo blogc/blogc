@@ -12,8 +12,8 @@
 
 #include <stdbool.h>
 #include <string.h>
-#include <squareball.h>
 
+#include "utils/utils.h"
 #include "content-parser.h"
 
 // this is a half ass implementation of a markdown-like syntax. bugs are
@@ -25,7 +25,7 @@ blogc_slugify(const char *str)
 {
     if (str == NULL)
         return NULL;
-    char *new_str = sb_strdup(str);
+    char *new_str = b_strdup(str);
     int diff = 'a' - 'A';  // just to avoid magic numbers
     for (unsigned int i = 0; new_str[i] != '\0'; i++) {
         if (new_str[i] >= 'a' && new_str[i] <= 'z')
@@ -92,7 +92,7 @@ blogc_content_parse_inline(const char *src)
     size_t start_state = 0;
     size_t end = 0;
 
-    sb_string_t *rv = sb_string_new();
+    b_string_t *rv = b_string_new();
 
     bool open_em_ast = false;
     bool open_strong_ast = false;
@@ -118,7 +118,7 @@ blogc_content_parse_inline(const char *src)
 
         if (escape) {
             if (state == LINK_CLOSED)
-                sb_string_append_c(rv, c);
+                b_string_append_c(rv, c);
             current++;
             escape = false;
             continue;
@@ -131,7 +131,7 @@ blogc_content_parse_inline(const char *src)
 
             case '\\':
                 if (state == LINK_CLOSED && (open_code || open_code_double)) {
-                    sb_string_append_c(rv, c);
+                    b_string_append_c(rv, c);
                     break;
                 }
                 if (!escape)
@@ -141,7 +141,7 @@ blogc_content_parse_inline(const char *src)
             case '*':
             case '_':
                 if (state == LINK_CLOSED && (open_code || open_code_double)) {
-                    sb_string_append_c(rv, c);
+                    b_string_append_c(rv, c);
                     break;
                 }
                 if (!is_last && src[current + 1] == c) {
@@ -150,7 +150,7 @@ blogc_content_parse_inline(const char *src)
                         (c == '_' && open_strong_und))
                     {
                         if (state == LINK_CLOSED)
-                            sb_string_append(rv, "</strong>");
+                            b_string_append(rv, "</strong>");
                         if (c == '*')
                             open_strong_ast = false;
                         else
@@ -158,7 +158,7 @@ blogc_content_parse_inline(const char *src)
                         break;
                     }
                     if (state == LINK_CLOSED)
-                        sb_string_append(rv, "<strong>");
+                        b_string_append(rv, "<strong>");
                     if (c == '*')
                         open_strong_ast = true;
                     else
@@ -167,7 +167,7 @@ blogc_content_parse_inline(const char *src)
                 }
                 if ((c == '*' && open_em_ast) || (c == '_' && open_em_und)) {
                     if (state == LINK_CLOSED)
-                        sb_string_append(rv, "</em>");
+                        b_string_append(rv, "</em>");
                     if (c == '*')
                         open_em_ast = false;
                     else
@@ -175,7 +175,7 @@ blogc_content_parse_inline(const char *src)
                     break;
                 }
                 if (state == LINK_CLOSED)
-                    sb_string_append(rv, "<em>");
+                    b_string_append(rv, "<em>");
                 if (c == '*')
                     open_em_ast = true;
                 else
@@ -186,19 +186,19 @@ blogc_content_parse_inline(const char *src)
                 if (!is_last && src[current + 1] == c) {
                     current++;
                     if (state == LINK_CLOSED)
-                        sb_string_append_printf(rv, "<%scode>",
+                        b_string_append_printf(rv, "<%scode>",
                             open_code_double ? "/" : "");
                     open_code_double = !open_code_double;
                     break;
                 }
                 if (state == LINK_CLOSED)
-                    sb_string_append_printf(rv, "<%scode>", open_code ? "/" : "");
+                    b_string_append_printf(rv, "<%scode>", open_code ? "/" : "");
                 open_code = !open_code;
                 break;
 
             case '!':
                 if (state == LINK_CLOSED && (open_code || open_code_double)) {
-                    sb_string_append_c(rv, c);
+                    b_string_append_c(rv, c);
                     break;
                 }
                 if (state == LINK_CLOSED) {
@@ -210,7 +210,7 @@ blogc_content_parse_inline(const char *src)
 
             case '[':
                 if (state == LINK_CLOSED && (open_code || open_code_double)) {
-                    sb_string_append_c(rv, c);
+                    b_string_append_c(rv, c);
                     break;
                 }
                 if (state == LINK_CLOSED || state == LINK_IMAGE) {
@@ -240,8 +240,8 @@ blogc_content_parse_inline(const char *src)
                 }
                 if (state == LINK_AUTO_CLOSE) {
                     state = LINK_CLOSED;
-                    tmp = sb_strndup(src + start, end - start);
-                    sb_string_append_printf(rv, "<a href=\"%s\">%s</a>", tmp, tmp);
+                    tmp = b_strndup(src + start, end - start);
+                    b_string_append_printf(rv, "<a href=\"%s\">%s</a>", tmp, tmp);
                     end = 0;
                     free(tmp);
                     tmp = NULL;
@@ -251,7 +251,7 @@ blogc_content_parse_inline(const char *src)
                 if (state == LINK_TEXT) {
                     if (open_bracket-- == 0) {
                         state = LINK_TEXT_CLOSE;
-                        tmp = sb_strndup(src + start, current - start);
+                        tmp = b_strndup(src + start, current - start);
                         tmp2 = blogc_content_parse_inline(tmp);
                         free(tmp);
                         tmp = NULL;
@@ -259,7 +259,7 @@ blogc_content_parse_inline(const char *src)
                     break;
                 }
                 if (state == LINK_CLOSED)
-                    sb_string_append_c(rv, c);
+                    b_string_append_c(rv, c);
                 break;
 
             case '(':
@@ -269,18 +269,18 @@ blogc_content_parse_inline(const char *src)
                     break;
                 }
                 if (state == LINK_CLOSED)
-                    sb_string_append_c(rv, c);
+                    b_string_append_c(rv, c);
                 break;
 
             case ')':
                 if (state == LINK_URL) {
                     state = LINK_CLOSED;
-                    tmp = sb_strndup(src + start, current - start);
+                    tmp = b_strndup(src + start, current - start);
                     if (is_image)
-                        sb_string_append_printf(rv, "<img src=\"%s\" alt=\"%s\">",
+                        b_string_append_printf(rv, "<img src=\"%s\" alt=\"%s\">",
                             tmp, tmp2);
                     else
-                        sb_string_append_printf(rv, "<a href=\"%s\">%s</a>",
+                        b_string_append_printf(rv, "<a href=\"%s\">%s</a>",
                             tmp, tmp2);
                     free(tmp);
                     tmp = NULL;
@@ -290,13 +290,13 @@ blogc_content_parse_inline(const char *src)
                     break;
                 }
                 if (state == LINK_CLOSED)
-                    sb_string_append_c(rv, c);
+                    b_string_append_c(rv, c);
                 break;
 
             case ' ':
                 if (state == LINK_CLOSED) {
                     spaces++;
-                    sb_string_append_c(rv, c);
+                    b_string_append_c(rv, c);
                 }
                 if (!is_last)
                     break;
@@ -305,53 +305,53 @@ blogc_content_parse_inline(const char *src)
             case '\r':
                 if (state == LINK_CLOSED) {
                     if (spaces >= 2) {
-                        sb_string_append(rv, "<br />");
+                        b_string_append(rv, "<br />");
                         spaces = 0;
                     }
                     if (c == '\n' || c == '\r')
-                        sb_string_append_c(rv, c);
+                        b_string_append_c(rv, c);
                 }
                 break;
 
             case '&':
                 if (state == LINK_CLOSED)
-                    sb_string_append(rv, "&amp;");
+                    b_string_append(rv, "&amp;");
                 break;
 
             case '<':
                 if (state == LINK_CLOSED)
-                    sb_string_append(rv, "&lt;");
+                    b_string_append(rv, "&lt;");
                 break;
 
             case '>':
                 if (state == LINK_CLOSED)
-                    sb_string_append(rv, "&gt;");
+                    b_string_append(rv, "&gt;");
                 break;
 
             case '"':
                 if (state == LINK_CLOSED)
-                    sb_string_append(rv, "&quot;");
+                    b_string_append(rv, "&quot;");
                 break;
 
             case '\'':
                 if (state == LINK_CLOSED)
-                    sb_string_append(rv, "&#x27;");
+                    b_string_append(rv, "&#x27;");
                 break;
 
             case '/':
                 if (state == LINK_CLOSED)
-                    sb_string_append(rv, "&#x2F;");
+                    b_string_append(rv, "&#x2F;");
                 break;
 
             default:
                 if (state == LINK_CLOSED)
-                    sb_string_append_c(rv, c);
+                    b_string_append_c(rv, c);
         }
 
         if (is_last && state != LINK_CLOSED) {
-            sb_string_append_c(rv, src[start_state]);
+            b_string_append_c(rv, src[start_state]);
             tmp = blogc_content_parse_inline(src + start_state + 1);
-            sb_string_append(rv, tmp);
+            b_string_append(rv, tmp);
             free(tmp);
             tmp = NULL;
         }
@@ -361,7 +361,7 @@ blogc_content_parse_inline(const char *src)
     free(tmp);
     free(tmp2);
 
-    return sb_string_free(rv, false);
+    return b_string_free(rv, false);
 }
 
 
@@ -423,11 +423,11 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
 
     char d = '\0';
 
-    sb_slist_t *lines = NULL;
-    sb_slist_t *lines2 = NULL;
+    b_slist_t *lines = NULL;
+    b_slist_t *lines2 = NULL;
 
-    sb_string_t *rv = sb_string_new();
-    sb_string_t *tmp_str = NULL;
+    b_string_t *rv = b_string_new();
+    b_string_t *tmp_str = NULL;
 
     blogc_content_parser_state_t state = CONTENT_START_LINE;
 
@@ -554,14 +554,14 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 if (c == '\n' || c == '\r' || is_last) {
                     end = is_last && c != '\n' && c != '\r' ? src_len :
                         (real_end != 0 ? real_end : current);
-                    tmp = sb_strndup(src + start, end - start);
+                    tmp = b_strndup(src + start, end - start);
                     parsed = blogc_content_parse_inline(tmp);
                     slug = blogc_slugify(tmp);
                     if (slug == NULL)
-                        sb_string_append_printf(rv, "<h%d>%s</h%d>%s",
+                        b_string_append_printf(rv, "<h%d>%s</h%d>%s",
                             header_level, parsed, header_level, line_ending);
                     else
-                        sb_string_append_printf(rv, "<h%d id=\"%s\">%s</h%d>%s",
+                        b_string_append_printf(rv, "<h%d id=\"%s\">%s</h%d>%s",
                             header_level, slug, parsed, header_level,
                             line_ending);
                     free(slug);
@@ -585,8 +585,8 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
 
             case CONTENT_HTML_END:
                 if (c == '\n' || c == '\r' || is_last) {
-                    tmp = sb_strndup(src + start, end - start);
-                    sb_string_append_printf(rv, "%s%s", tmp, line_ending);
+                    tmp = b_strndup(src + start, end - start);
+                    b_string_append_printf(rv, "%s%s", tmp, line_ending);
                     free(tmp);
                     tmp = NULL;
                     state = CONTENT_START_LINE;
@@ -599,7 +599,7 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
             case CONTENT_BLOCKQUOTE:
                 if (c == ' ' || c == '\t')
                     break;
-                prefix = sb_strndup(src + start, current - start);
+                prefix = b_strndup(src + start, current - start);
                 state = CONTENT_BLOCKQUOTE_START;
                 break;
 
@@ -607,16 +607,16 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 if (c == '\n' || c == '\r' || is_last) {
                     end = is_last && c != '\n' && c != '\r' ? src_len :
                         (real_end != 0 ? real_end : current);
-                    tmp = sb_strndup(src + start2, end - start2);
-                    if (sb_str_starts_with(tmp, prefix)) {
-                        lines = sb_slist_append(lines, sb_strdup(tmp + strlen(prefix)));
+                    tmp = b_strndup(src + start2, end - start2);
+                    if (b_str_starts_with(tmp, prefix)) {
+                        lines = b_slist_append(lines, b_strdup(tmp + strlen(prefix)));
                         state = CONTENT_BLOCKQUOTE_END;
                     }
                     else {
                         state = CONTENT_PARAGRAPH;
                         free(prefix);
                         prefix = NULL;
-                        sb_slist_free_full(lines, free);
+                        b_slist_free_full(lines, free);
                         lines = NULL;
                         if (is_last) {
                             free(tmp);
@@ -632,22 +632,22 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
 
             case CONTENT_BLOCKQUOTE_END:
                 if (c == '\n' || c == '\r' || is_last) {
-                    tmp_str = sb_string_new();
-                    for (sb_slist_t *l = lines; l != NULL; l = l->next) {
+                    tmp_str = b_string_new();
+                    for (b_slist_t *l = lines; l != NULL; l = l->next) {
                         if (l->next == NULL)
-                            sb_string_append_printf(tmp_str, "%s", l->data);
+                            b_string_append_printf(tmp_str, "%s", l->data);
                         else
-                            sb_string_append_printf(tmp_str, "%s%s", l->data,
+                            b_string_append_printf(tmp_str, "%s%s", l->data,
                                 line_ending);
                     }
                     tmp = blogc_content_parse(tmp_str->str, NULL);
-                    sb_string_append_printf(rv, "<blockquote>%s</blockquote>%s",
+                    b_string_append_printf(rv, "<blockquote>%s</blockquote>%s",
                         tmp, line_ending);
                     free(tmp);
                     tmp = NULL;
-                    sb_string_free(tmp_str, true);
+                    b_string_free(tmp_str, true);
                     tmp_str = NULL;
-                    sb_slist_free_full(lines, free);
+                    b_slist_free_full(lines, free);
                     lines = NULL;
                     free(prefix);
                     prefix = NULL;
@@ -663,7 +663,7 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
             case CONTENT_CODE:
                 if (c == ' ' || c == '\t')
                     break;
-                prefix = sb_strndup(src + start, current - start);
+                prefix = b_strndup(src + start, current - start);
                 state = CONTENT_CODE_START;
                 break;
 
@@ -671,16 +671,16 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 if (c == '\n' || c == '\r' || is_last) {
                     end = is_last && c != '\n' && c != '\r' ? src_len :
                         (real_end != 0 ? real_end : current);
-                    tmp = sb_strndup(src + start2, end - start2);
-                    if (sb_str_starts_with(tmp, prefix)) {
-                        lines = sb_slist_append(lines, sb_strdup(tmp + strlen(prefix)));
+                    tmp = b_strndup(src + start2, end - start2);
+                    if (b_str_starts_with(tmp, prefix)) {
+                        lines = b_slist_append(lines, b_strdup(tmp + strlen(prefix)));
                         state = CONTENT_CODE_END;
                     }
                     else {
                         state = CONTENT_PARAGRAPH;
                         free(prefix);
                         prefix = NULL;
-                        sb_slist_free_full(lines, free);
+                        b_slist_free_full(lines, free);
                         lines = NULL;
                         free(tmp);
                         tmp = NULL;
@@ -696,16 +696,16 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
 
             case CONTENT_CODE_END:
                 if (c == '\n' || c == '\r' || is_last) {
-                    sb_string_append(rv, "<pre><code>");
-                    for (sb_slist_t *l = lines; l != NULL; l = l->next) {
+                    b_string_append(rv, "<pre><code>");
+                    for (b_slist_t *l = lines; l != NULL; l = l->next) {
                         if (l->next == NULL)
-                            sb_string_append_printf(rv, "%s", l->data);
+                            b_string_append_printf(rv, "%s", l->data);
                         else
-                            sb_string_append_printf(rv, "%s%s", l->data,
+                            b_string_append_printf(rv, "%s%s", l->data,
                                 line_ending);
                     }
-                    sb_string_append_printf(rv, "</code></pre>%s", line_ending);
-                    sb_slist_free_full(lines, free);
+                    b_string_append_printf(rv, "</code></pre>%s", line_ending);
+                    b_slist_free_full(lines, free);
                     lines = NULL;
                     free(prefix);
                     prefix = NULL;
@@ -727,7 +727,7 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 }
                 if (c == ' ' || c == '\t')
                     break;
-                prefix = sb_strndup(src + start, current - start);
+                prefix = b_strndup(src + start, current - start);
                 state = CONTENT_UNORDERED_LIST_START;
                 break;
 
@@ -737,7 +737,7 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 }
 hr:
                 if (c == '\n' || c == '\r' || is_last) {
-                    sb_string_append_printf(rv, "<hr />%s", line_ending);
+                    b_string_append_printf(rv, "<hr />%s", line_ending);
                     state = CONTENT_START_LINE;
                     start = current;
                     d = '\0';
@@ -750,30 +750,30 @@ hr:
                 if (c == '\n' || c == '\r' || is_last) {
                     end = is_last && c != '\n' && c != '\r' ? src_len :
                         (real_end != 0 ? real_end : current);
-                    tmp = sb_strndup(src + start2, end - start2);
-                    tmp2 = sb_strdup_printf("%-*s", strlen(prefix), "");
-                    if (sb_str_starts_with(tmp, prefix)) {
+                    tmp = b_strndup(src + start2, end - start2);
+                    tmp2 = b_strdup_printf("%-*s", strlen(prefix), "");
+                    if (b_str_starts_with(tmp, prefix)) {
                         if (lines2 != NULL) {
-                            tmp_str = sb_string_new();
-                            for (sb_slist_t *l = lines2; l != NULL; l = l->next) {
+                            tmp_str = b_string_new();
+                            for (b_slist_t *l = lines2; l != NULL; l = l->next) {
                                 if (l->next == NULL)
-                                    sb_string_append_printf(tmp_str, "%s", l->data);
+                                    b_string_append_printf(tmp_str, "%s", l->data);
                                 else
-                                    sb_string_append_printf(tmp_str, "%s%s", l->data,
+                                    b_string_append_printf(tmp_str, "%s%s", l->data,
                                         line_ending);
                             }
-                            sb_slist_free_full(lines2, free);
+                            b_slist_free_full(lines2, free);
                             lines2 = NULL;
                             parsed = blogc_content_parse_inline(tmp_str->str);
-                            sb_string_free(tmp_str, true);
-                            lines = sb_slist_append(lines, sb_strdup(parsed));
+                            b_string_free(tmp_str, true);
+                            lines = b_slist_append(lines, b_strdup(parsed));
                             free(parsed);
                             parsed = NULL;
                         }
-                        lines2 = sb_slist_append(lines2, sb_strdup(tmp + strlen(prefix)));
+                        lines2 = b_slist_append(lines2, b_strdup(tmp + strlen(prefix)));
                     }
-                    else if (sb_str_starts_with(tmp, tmp2)) {
-                        lines2 = sb_slist_append(lines2, sb_strdup(tmp + strlen(prefix)));
+                    else if (b_str_starts_with(tmp, tmp2)) {
+                        lines2 = b_slist_append(lines2, b_strdup(tmp + strlen(prefix)));
                     }
                     else {
                         state = CONTENT_PARAGRAPH_END;
@@ -783,8 +783,8 @@ hr:
                         tmp2 = NULL;
                         free(prefix);
                         prefix = NULL;
-                        sb_slist_free_full(lines, free);
-                        sb_slist_free_full(lines2, free);
+                        b_slist_free_full(lines, free);
+                        b_slist_free_full(lines2, free);
                         lines = NULL;
                         if (is_last)
                             goto para;
@@ -803,28 +803,28 @@ hr:
                 if (c == '\n' || c == '\r' || is_last) {
                     if (lines2 != NULL) {
                         // FIXME: avoid repeting the code below
-                        tmp_str = sb_string_new();
-                        for (sb_slist_t *l = lines2; l != NULL; l = l->next) {
+                        tmp_str = b_string_new();
+                        for (b_slist_t *l = lines2; l != NULL; l = l->next) {
                             if (l->next == NULL)
-                                sb_string_append_printf(tmp_str, "%s", l->data);
+                                b_string_append_printf(tmp_str, "%s", l->data);
                             else
-                                sb_string_append_printf(tmp_str, "%s%s", l->data,
+                                b_string_append_printf(tmp_str, "%s%s", l->data,
                                     line_ending);
                         }
-                        sb_slist_free_full(lines2, free);
+                        b_slist_free_full(lines2, free);
                         lines2 = NULL;
                         parsed = blogc_content_parse_inline(tmp_str->str);
-                        sb_string_free(tmp_str, true);
-                        lines = sb_slist_append(lines, sb_strdup(parsed));
+                        b_string_free(tmp_str, true);
+                        lines = b_slist_append(lines, b_strdup(parsed));
                         free(parsed);
                         parsed = NULL;
                     }
-                    sb_string_append_printf(rv, "<ul>%s", line_ending);
-                    for (sb_slist_t *l = lines; l != NULL; l = l->next)
-                        sb_string_append_printf(rv, "<li>%s</li>%s", l->data,
+                    b_string_append_printf(rv, "<ul>%s", line_ending);
+                    for (b_slist_t *l = lines; l != NULL; l = l->next)
+                        b_string_append_printf(rv, "<li>%s</li>%s", l->data,
                             line_ending);
-                    sb_string_append_printf(rv, "</ul>%s", line_ending);
-                    sb_slist_free_full(lines, free);
+                    b_string_append_printf(rv, "</ul>%s", line_ending);
+                    b_slist_free_full(lines, free);
                     lines = NULL;
                     free(prefix);
                     prefix = NULL;
@@ -861,30 +861,30 @@ hr:
                 if (c == '\n' || c == '\r' || is_last) {
                     end = is_last && c != '\n' && c != '\r' ? src_len :
                         (real_end != 0 ? real_end : current);
-                    tmp = sb_strndup(src + start2, end - start2);
-                    tmp2 = sb_strdup_printf("%-*s", prefix_len, "");
+                    tmp = b_strndup(src + start2, end - start2);
+                    tmp2 = b_strdup_printf("%-*s", prefix_len, "");
                     if (blogc_is_ordered_list_item(tmp, prefix_len)) {
                         if (lines2 != NULL) {
-                            tmp_str = sb_string_new();
-                            for (sb_slist_t *l = lines2; l != NULL; l = l->next) {
+                            tmp_str = b_string_new();
+                            for (b_slist_t *l = lines2; l != NULL; l = l->next) {
                                 if (l->next == NULL)
-                                    sb_string_append_printf(tmp_str, "%s", l->data);
+                                    b_string_append_printf(tmp_str, "%s", l->data);
                                 else
-                                    sb_string_append_printf(tmp_str, "%s%s", l->data,
+                                    b_string_append_printf(tmp_str, "%s%s", l->data,
                                         line_ending);
                             }
-                            sb_slist_free_full(lines2, free);
+                            b_slist_free_full(lines2, free);
                             lines2 = NULL;
                             parsed = blogc_content_parse_inline(tmp_str->str);
-                            sb_string_free(tmp_str, true);
-                            lines = sb_slist_append(lines, sb_strdup(parsed));
+                            b_string_free(tmp_str, true);
+                            lines = b_slist_append(lines, b_strdup(parsed));
                             free(parsed);
                             parsed = NULL;
                         }
-                        lines2 = sb_slist_append(lines2, sb_strdup(tmp + prefix_len));
+                        lines2 = b_slist_append(lines2, b_strdup(tmp + prefix_len));
                     }
-                    else if (sb_str_starts_with(tmp, tmp2)) {
-                        lines2 = sb_slist_append(lines2, sb_strdup(tmp + prefix_len));
+                    else if (b_str_starts_with(tmp, tmp2)) {
+                        lines2 = b_slist_append(lines2, b_strdup(tmp + prefix_len));
                     }
                     else {
                         state = CONTENT_PARAGRAPH_END;
@@ -894,8 +894,8 @@ hr:
                         tmp2 = NULL;
                         free(parsed);
                         parsed = NULL;
-                        sb_slist_free_full(lines, free);
-                        sb_slist_free_full(lines2, free);
+                        b_slist_free_full(lines, free);
+                        b_slist_free_full(lines2, free);
                         lines = NULL;
                         if (is_last)
                             goto para;
@@ -914,28 +914,28 @@ hr:
                 if (c == '\n' || c == '\r' || is_last) {
                     if (lines2 != NULL) {
                         // FIXME: avoid repeting the code below
-                        tmp_str = sb_string_new();
-                        for (sb_slist_t *l = lines2; l != NULL; l = l->next) {
+                        tmp_str = b_string_new();
+                        for (b_slist_t *l = lines2; l != NULL; l = l->next) {
                             if (l->next == NULL)
-                                sb_string_append_printf(tmp_str, "%s", l->data);
+                                b_string_append_printf(tmp_str, "%s", l->data);
                             else
-                                sb_string_append_printf(tmp_str, "%s%s", l->data,
+                                b_string_append_printf(tmp_str, "%s%s", l->data,
                                     line_ending);
                         }
-                        sb_slist_free_full(lines2, free);
+                        b_slist_free_full(lines2, free);
                         lines2 = NULL;
                         parsed = blogc_content_parse_inline(tmp_str->str);
-                        sb_string_free(tmp_str, true);
-                        lines = sb_slist_append(lines, sb_strdup(parsed));
+                        b_string_free(tmp_str, true);
+                        lines = b_slist_append(lines, b_strdup(parsed));
                         free(parsed);
                         parsed = NULL;
                     }
-                    sb_string_append_printf(rv, "<ol>%s", line_ending);
-                    for (sb_slist_t *l = lines; l != NULL; l = l->next)
-                        sb_string_append_printf(rv, "<li>%s</li>%s", l->data,
+                    b_string_append_printf(rv, "<ol>%s", line_ending);
+                    for (b_slist_t *l = lines; l != NULL; l = l->next)
+                        b_string_append_printf(rv, "<li>%s</li>%s", l->data,
                             line_ending);
-                    sb_string_append_printf(rv, "</ol>%s", line_ending);
-                    sb_slist_free_full(lines, free);
+                    b_string_append_printf(rv, "</ol>%s", line_ending);
+                    b_slist_free_full(lines, free);
                     lines = NULL;
                     free(prefix);
                     prefix = NULL;
@@ -967,9 +967,9 @@ para:
                         else
                             end = src_len;
                     }
-                    tmp = sb_strndup(src + start, end - start);
+                    tmp = b_strndup(src + start, end - start);
                     parsed = blogc_content_parse_inline(tmp);
-                    sb_string_append_printf(rv, "<p>%s</p>%s", parsed,
+                    b_string_append_printf(rv, "<p>%s</p>%s", parsed,
                         line_ending);
                     free(parsed);
                     parsed = NULL;
@@ -987,5 +987,5 @@ para:
         current++;
     }
 
-    return sb_string_free(rv, false);
+    return b_string_free(rv, false);
 }

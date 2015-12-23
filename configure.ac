@@ -22,18 +22,6 @@ AS_IF([test "x$ac_cv_prog_cc_c99" = "xno"], [
 
 PKG_PROG_PKG_CONFIG
 
-SQUAREBALL="internal"
-AC_ARG_WITH([squareball], [AS_HELP_STRING([--with-squareball=@<:@internal/system@:>@],
-            [whether to use library squareball from system [default=internal]])])
-AS_IF([test "x$with_squareball" = "xsystem"], [
-  PKG_CHECK_MODULES([SQUAREBALL], [squareball], [
-    SQUAREBALL="system"
-  ], [
-    AC_MSG_ERROR([library squareball requested from system but not found])
-  ])
-])
-AM_CONDITIONAL(USE_SYSTEM_SQUAREBALL, [test "x$with_squareball" = "xsystem"])
-
 AC_ARG_ENABLE([ronn], AS_HELP_STRING([--disable-ronn],
               [ignore presence of ronn and disable man pages generation]))
 AS_IF([test "x$enable_ronn" != "xno"], [
@@ -129,7 +117,6 @@ AS_ECHO("
 
         tests:        ${TESTS}
 
-        squareball:   ${SQUAREBALL}
         ronn:         ${RONN}
         valgrind:     ${VALGRIND}
 ")

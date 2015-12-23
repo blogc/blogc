@@ -16,7 +16,7 @@
 #include <cmocka.h>
 #include <string.h>
 #include "../src/error.h"
-#include <squareball.h>
+#include "../src/utils/utils.h"
 
 
 static void

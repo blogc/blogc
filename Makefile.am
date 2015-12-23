@@ -6,56 +6,7 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-tests \
 	--enable-ronn \
 	--disable-valgrind \
-	--with-squareball=internal \
 	$(NULL)
-
-
-## squareball stuff
-
-SQUAREBALL_EXTRA_DIST_ = \
-	squareball/LICENSE \
-	squareball/README.md \
-	$(NULL)
-
-if USE_SYSTEM_SQUAREBALL
-
-SQUAREBALL_HEADERS_ =
-
-SQUAREBALL_SOURCES_ =
-
-SQUAREBALL_CFLAGS_ = \
-	$(SQUAREBALL_CFLAGS) \
-	$(NULL)
-
-SQUAREBALL_LIBS_ = \
-	$(SQUAREBALL_LIBS) \
-	$(NULL)
-
-else
-
-SQUAREBALL_HEADERS_ = \
-	squareball/src/squareball.h \
-	squareball/src/squareball/sb-mem.h \
-	squareball/src/squareball/sb-slist.h \
-	squareball/src/squareball/sb-string.h \
-	squareball/src/squareball/sb-trie.h \
-	squareball/src/squareball/sb-trie-private.h \
-	$(NULL)
-
-SQUAREBALL_SOURCES_ = \
-	squareball/src/sb-mem.c \
-	squareball/src/sb-slist.c \
-	squareball/src/sb-string.c \
-	squareball/src/sb-trie.c \
-	$(NULL)
-
-SQUAREBALL_CFLAGS_ = \
-	-I$(top_srcdir)/squareball/src \
-	$(NULL)
-
-SQUAREBALL_LIBS_ =
-
-endif
 
 
 ## File listings
@@ -64,7 +15,6 @@ EXTRA_DIST = \
 	autogen.sh \
 	LICENSE \
 	README.md \
-	$(SQUAREBALL_EXTRA_DIST_)
 	$(NULL)
 
 CLEANFILES = \
@@ -82,7 +32,7 @@ noinst_HEADERS = \
 	src/renderer.h \
 	src/source-parser.h \
 	src/template-parser.h \
-	$(SQUAREBALL_HEADERS_)
+	src/utils/utils.h \
 	$(NULL)
 
 noinst_LTLIBRARIES = \
@@ -109,19 +59,21 @@ libblogc_la_SOURCES = \
 	src/renderer.c \
 	src/source-parser.c \
 	src/template-parser.c \
-	$(SQUAREBALL_SOURCES_) \
+	src/utils/mem.c \
+	src/utils/slist.c \
+	src/utils/strings.c \
+	src/utils/trie.c \
 	$(NULL)
 
 libblogc_la_CFLAGS = \
 	$(AM_CFLAGS) \
 	-I$(top_srcdir)/src \
-	$(SQUAREBALL_CFLAGS_) \
 	$(NULL)
 
 libblogc_la_LIBADD = \
 	$(LIBM) \
-	$(SQUAREBALL_LIBS_) \
 	$(NULL)
+
 
 blogc_SOURCES = \
 	src/main.c \
@@ -130,12 +82,10 @@ blogc_SOURCES = \
 blogc_CFLAGS = \
 	$(AM_CFLAGS) \
 	-I$(top_srcdir)/src \
-	$(SQUAREBALL_CFLAGS_) \
 	$(NULL)
 
 blogc_LDADD = \
 	libblogc.la \
-	$(SQUAREBALL_LIBS_) \
 	$(NULL)
 
 
@@ -210,6 +160,7 @@ check_PROGRAMS += \
 	tests/check_renderer \
 	tests/check_source_parser \
 	tests/check_template_parser \
+	tests/check_utils \
 	$(NULL)
 
 tests_check_error_SOURCES = \
@@ -218,7 +169,6 @@ tests_check_error_SOURCES = \
 
 tests_check_error_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
-	$(SQUAREBALL_CFLAGS_) \
 	$(NULL)
 
 tests_check_error_LDFLAGS = \
@@ -227,7 +177,6 @@ tests_check_error_LDFLAGS = \
 
 tests_check_error_LDADD = \
 	$(CMOCKA_LIBS) \
-	$(SQUAREBALL_LIBS_) \
 	libblogc.la \
 	$(NULL)
 
@@ -237,7 +186,6 @@ tests_check_loader_SOURCES = \
 
 tests_check_loader_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
-	$(SQUAREBALL_CFLAGS_) \
 	$(NULL)
 
 tests_check_loader_LDFLAGS = \
@@ -248,7 +196,6 @@ tests_check_loader_LDFLAGS = \
 
 tests_check_loader_LDADD = \
 	$(CMOCKA_LIBS) \
-	$(SQUAREBALL_LIBS_) \
 	libblogc.la \
 	$(NULL)
 
@@ -258,7 +205,6 @@ tests_check_content_parser_SOURCES = \
 
 tests_check_content_parser_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
-	$(SQUAREBALL_CFLAGS_) \
 	$(NULL)
 
 tests_check_content_parser_LDFLAGS = \
@@ -267,7 +213,6 @@ tests_check_content_parser_LDFLAGS = \
 
 tests_check_content_parser_LDADD = \
 	$(CMOCKA_LIBS) \
-	$(SQUAREBALL_LIBS_) \
 	libblogc.la \
 	$(NULL)
 
@@ -277,7 +222,6 @@ tests_check_datetime_parser_SOURCES = \
 
 tests_check_datetime_parser_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
-	$(SQUAREBALL_CFLAGS_) \
 	$(NULL)
 
 tests_check_datetime_parser_LDFLAGS = \
@@ -286,7 +230,6 @@ tests_check_datetime_parser_LDFLAGS = \
 
 tests_check_datetime_parser_LDADD = \
 	$(CMOCKA_LIBS) \
-	$(SQUAREBALL_LIBS_) \
 	libblogc.la \
 	$(NULL)
 
@@ -296,7 +239,6 @@ tests_check_renderer_SOURCES = \
 
 tests_check_renderer_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
-	$(SQUAREBALL_CFLAGS_) \
 	$(NULL)
 
 tests_check_renderer_LDFLAGS = \
@@ -305,7 +247,6 @@ tests_check_renderer_LDFLAGS = \
 
 tests_check_renderer_LDADD = \
 	$(CMOCKA_LIBS) \
-	$(SQUAREBALL_LIBS_) \
 	libblogc.la \
 	$(NULL)
 
@@ -315,7 +256,6 @@ tests_check_source_parser_SOURCES = \
 
 tests_check_source_parser_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
-	$(SQUAREBALL_CFLAGS_) \
 	$(NULL)
 
 tests_check_source_parser_LDFLAGS = \
@@ -324,7 +264,6 @@ tests_check_source_parser_LDFLAGS = \
 
 tests_check_source_parser_LDADD = \
 	$(CMOCKA_LIBS) \
-	$(SQUAREBALL_LIBS_) \
 	libblogc.la \
 	$(NULL)
 
@@ -334,7 +273,6 @@ tests_check_template_parser_SOURCES = \
 
 tests_check_template_parser_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
-	$(SQUAREBALL_CFLAGS_) \
 	$(NULL)
 
 tests_check_template_parser_LDFLAGS = \
@@ -343,7 +281,23 @@ tests_check_template_parser_LDFLAGS = \
 
 tests_check_template_parser_LDADD = \
 	$(CMOCKA_LIBS) \
-	$(SQUAREBALL_LIBS_) \
+	libblogc.la \
+	$(NULL)
+
+tests_check_utils_SOURCES = \
+	tests/check_utils.c \
+	$(NULL)
+
+tests_check_utils_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_check_utils_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_check_utils_LDADD = \
+	$(CMOCKA_LIBS) \
 	libblogc.la \
 	$(NULL)
 
