@@ -12,12 +12,9 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 
 ## squareball stuff
 
-SQUAREBALL_EXTRA_DIST_ = \
-	squareball/LICENSE \
-	squareball/README.md \
-	$(NULL)
-
 if USE_SYSTEM_SQUAREBALL
+
+SQUAREBALL_EXTRA_DIST_ =
 
 SQUAREBALL_HEADERS_ =
 
@@ -32,6 +29,11 @@ SQUAREBALL_LIBS_ = \
 	$(NULL)
 
 else
+
+SQUAREBALL_EXTRA_DIST_ = \
+	squareball/LICENSE \
+	squareball/README.md \
+	$(NULL)
 
 SQUAREBALL_HEADERS_ = \
 	squareball/src/squareball.h \
