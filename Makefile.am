@@ -120,7 +120,15 @@ blogc.1: man/blogc.1.ronn
 		--manual "$(PACKAGE_NAME) Manual" \
 		$< > $@
 
-blogc%.7: man/blogc%.7.ronn
+blogc-source.7: man/blogc-source.7.ronn
+	$(AM_V_GEN)$(RONN) \
+		--roff \
+		--pipe \
+		--organization "Rafael G. Martins" \
+		--manual "$(PACKAGE_NAME) Manual" \
+		$< > $@
+
+blogc-template.7: man/blogc-template.7.ronn
 	$(AM_V_GEN)$(RONN) \
 		--roff \
 		--pipe \
@@ -133,7 +141,10 @@ else
 blogc.1:
 	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
 
-blogc%.7:
+blogc-source.7:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
+blogc-template.7:
 	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
 
 endif
