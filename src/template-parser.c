@@ -32,6 +32,8 @@ typedef enum {
     TEMPLATE_BLOCK_IF_OPERAND_START,
     TEMPLATE_BLOCK_IF_STRING_OPERAND,
     TEMPLATE_BLOCK_IF_VARIABLE_OPERAND,
+    TEMPLATE_BLOCK_FOREACH_START,
+    TEMPLATE_BLOCK_FOREACH_VARIABLE,
     TEMPLATE_BLOCK_END,
     TEMPLATE_VARIABLE_START,
     TEMPLATE_VARIABLE,
@@ -65,6 +67,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     blogc_template_stmt_operator_t tmp_op = 0;
 
     unsigned int if_count = 0;
+    bool foreach_open = false;
 
     b_slist_t *stmts = NULL;
     blogc_template_stmt_t *stmt = NULL;
@@ -201,11 +204,42 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                             "statement.");
                         break;
                     }
+                    else if ((current - start == 7) &&
+                        (0 == strncmp("foreach", src + start, 7)))
+                    {
+                        if (!foreach_open) {
+                            state = TEMPLATE_BLOCK_FOREACH_START;
+                            type = BLOGC_TEMPLATE_FOREACH_STMT;
+                            start = current;
+                            foreach_open = true;
+                            break;
+                        }
+                        *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
+                            src, src_len, current, "'foreach' statements can't "
+                            "be nested.");
+                        break;
+                    }
+                    else if ((current - start == 10) &&
+                        (0 == strncmp("endforeach", src + start, 10)))
+                    {
+                        if (foreach_open) {
+                            state = TEMPLATE_BLOCK_END;
+                            type = BLOGC_TEMPLATE_ENDFOREACH_STMT;
+                            foreach_open = false;
+                            break;
+                        }
+                        *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
+                            src, src_len, current,
+                            "'endforeach' statement without an open 'foreach' "
+                            "statement.");
+                        break;
+                    }
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
                     src_len, current,
                     "Invalid statement type: Allowed types are: 'block', "
-                    "'endblock', 'ifdef', 'ifndef' and 'endif'.");
+                    "'endblock', 'ifdef', 'ifndef', 'endif', 'foreach' and "
+                    "'endforeach'.");
                 break;
 
             case TEMPLATE_BLOCK_BLOCK_TYPE_START:
@@ -335,6 +369,34 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     break;
                 state = TEMPLATE_BLOCK_END;
                 end2 = current;
+                break;
+
+            case TEMPLATE_BLOCK_FOREACH_START:
+                if (c == ' ')
+                    break;
+                if (c >= 'A' && c <= 'Z') {
+                    state = TEMPLATE_BLOCK_FOREACH_VARIABLE;
+                    start = current;
+                    break;
+                }
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid foreach variable name. Must begin with uppercase "
+                    "letter.");
+                break;
+
+            case TEMPLATE_BLOCK_FOREACH_VARIABLE:
+                if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
+                    break;
+                if (c == ' ') {
+                    end = current;
+                    state = TEMPLATE_BLOCK_END;
+                    break;
+                }
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid foreach variable name. Must be uppercase letter, "
+                    "number or '_'.");
                 break;
 
             case TEMPLATE_BLOCK_END:
@@ -469,6 +531,9 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
         else if (block_state != BLOCK_CLOSED)
             *err = blogc_error_new(BLOGC_ERROR_TEMPLATE_PARSER,
                 "An open block was not closed!");
+        else if (foreach_open)
+            *err = blogc_error_new(BLOGC_ERROR_TEMPLATE_PARSER,
+                "An open 'foreach' statement was not closed!");
     }
 
     if (*err != NULL) {

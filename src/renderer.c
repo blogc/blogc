@@ -88,6 +88,24 @@ blogc_format_variable(const char *name, b_trie_t *global, b_trie_t *local)
 }
 
 
+b_slist_t*
+blogc_split_list_variable(const char *name, b_trie_t *global, b_trie_t *local)
+{
+    const char *value = blogc_get_variable(name, global, local);
+    if (value == NULL)
+        return NULL;
+
+    b_slist_t *rv = NULL;
+
+    char **tmp = b_str_split(value, ',', 0);
+    for (unsigned int i = 0; tmp[i] != NULL; i++)
+        rv = b_slist_append(rv, b_strdup(b_str_strip(tmp[i])));
+    b_strv_free(tmp);
+
+    return rv;
+}
+
+
 char*
 blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing)
 {
@@ -105,6 +123,10 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
 
     unsigned int if_count = 0;
     unsigned int if_skip = 0;
+
+    b_slist_t *foreach_var = NULL;
+    b_slist_t *foreach_var_start = NULL;
+    b_slist_t *foreach_start = NULL;
 
     bool if_not = false;
     bool inside_block = false;
@@ -174,6 +196,11 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
 
             case BLOGC_TEMPLATE_VARIABLE_STMT:
                 if (stmt->value != NULL) {
+                    if (0 == strcmp(stmt->value, "FOREACH_ITEM")) {  // foreach
+                        if (foreach_var != NULL && foreach_var->data != NULL)
+                            b_string_append(str, foreach_var->data);
+                        break;
+                    }
                     config_value = blogc_format_variable(stmt->value,
                         config, inside_block ? tmp_source : NULL);
                     if (config_value != NULL) {
@@ -281,9 +308,53 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
             case BLOGC_TEMPLATE_ENDIF_STMT:
                 if_count--;
                 break;
+
+            case BLOGC_TEMPLATE_FOREACH_STMT:
+                if (foreach_var_start == NULL) {
+                    if (stmt->value != NULL)
+                        foreach_var_start = blogc_split_list_variable(stmt->value,
+                            config, inside_block ? tmp_source : NULL);
+
+                    if (foreach_var_start != NULL) {
+                        foreach_var = foreach_var_start;
+                        foreach_start = tmp;
+                    }
+                    else {
+
+                        // we can just skip anything and walk until the next
+                        // 'endforeach'
+                        while (stmt->type != BLOGC_TEMPLATE_ENDFOREACH_STMT) {
+                            tmp = tmp->next;
+                            stmt = tmp->data;
+                        }
+                        break;
+                    }
+                }
+
+                if (foreach_var == NULL) {
+                    foreach_start = tmp;
+                    foreach_var = foreach_var_start;
+                }
+                break;
+
+            case BLOGC_TEMPLATE_ENDFOREACH_STMT:
+                if (foreach_start != NULL && foreach_var != NULL) {
+                    foreach_var = foreach_var->next;
+                    if (foreach_var != NULL) {
+                        tmp = foreach_start;
+                        continue;
+                    }
+                }
+                foreach_start = NULL;
+                b_slist_free_full(foreach_var_start, free);
+                foreach_var_start = NULL;
+                break;
         }
         tmp = tmp->next;
     }
+
+    // no need to free temporary variables here. the template parser makes sure
+    // that templates are sane and statements are closed.
 
     return b_string_free(str, false);
 }

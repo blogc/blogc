@@ -163,6 +163,44 @@ Or:
     Title is the default title
     {% endif %}
 
+## TEMPLATE ITERATORS
+
+Template iterators are used to iterate over the value of a variable, that is handled
+as a list.
+
+The available conditionals are: `foreach`.
+
+### foreach iterator
+
+The content of a `foreach` iterator is included in the output file when the target
+variable is defined, and is repeated for each item in the list parsed from the variable
+value.
+
+The variable value should be formatted as a comma-separated list of items. Quotes are
+not supported, as this is intended to work with identifiers, like slugs, and not with
+arbitrary strings.
+
+Spaces and tabs before and after list items are stripped for consistency.
+
+This is how a variable would be formatted:
+
+    item1, item2, item3
+
+For more info about how to define variables, see blogc(1) and blogc-source(7).
+
+This is how a `foreach` iterator is defined in a template:
+
+    {% foreach TAGS %}
+    <a href="/tag/{{ FOREACH_ITEM }}/">{{ FOREACH_ITEM }}</a>
+    {% endforeach %}
+
+Where `TAGS` is the variable with comma-separated list of items, and `FOREACH_ITEM`
+is the variable defined by blogc(1), that will store the item value for a given
+iteration.
+
+If the value of the `TAGS` variable is "item1, item2, item3", this template would be
+rendered as 3 times, one for each item value.
+
 ## BUGS
 
 The template content is handled by handwritten parsers, that even being well
