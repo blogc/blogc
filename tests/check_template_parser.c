@@ -570,6 +570,23 @@ test_template_parse_invalid_ifdef_variable(void **state)
 
 
 static void
+test_template_parse_invalid_ifdef_variable2(void **state)
+{
+    const char *a = "{% block entry %}{% ifdef 0123 %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid variable name. Must begin with uppercase letter.\n"
+        "Error occurred near line 1, position 27: "
+        "{% block entry %}{% ifdef 0123 %}");
+    blogc_error_free(err);
+}
+
+
+static void
 test_template_parse_invalid_foreach_variable(void **state)
 {
     const char *a = "{% block entry %}{% foreach BoLA %}\n";
@@ -582,6 +599,23 @@ test_template_parse_invalid_foreach_variable(void **state)
         "Invalid foreach variable name. Must be uppercase letter, number or '_'.\n"
         "Error occurred near line 1, position 30: "
         "{% block entry %}{% foreach BoLA %}");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_foreach_variable2(void **state)
+{
+    const char *a = "{% block entry %}{% foreach 0123 %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid foreach variable name. Must begin with uppercase letter.\n"
+        "Error occurred near line 1, position 29: {% block entry %}"
+        "{% foreach 0123 %}");
     blogc_error_free(err);
 }
 
@@ -613,7 +647,7 @@ test_template_parse_invalid_if_operand(void **state)
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
-        "Invalid 'if' operand. Must be double-quoted static string.\n"
+        "Invalid 'if' operand. Must be double-quoted static string or variable.\n"
         "Error occurred near line 1, position 32: "
         "{% block entry %}{% if BOLA == asd %}");
     blogc_error_free(err);
@@ -633,6 +667,23 @@ test_template_parse_invalid_if_operand2(void **state)
         "Found an open double-quoted string.\n"
         "Error occurred near line 1, position 31: "
         "{% block entry %}{% if BOLA == \"asd %}");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_if_operand3(void **state)
+{
+    const char *a = "{% block entry %}{% if BOLA == 0123 %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid 'if' operand. Must be double-quoted static string or variable.\n"
+        "Error occurred near line 1, position 32: "
+        "{% block entry %}{% if BOLA == 0123 %}");
     blogc_error_free(err);
 }
 
@@ -683,6 +734,23 @@ test_template_parse_invalid_variable_name2(void **state)
         "Invalid variable name. Must be uppercase letter, number or '_'.\n"
         "Error occurred near line 1, position 22: "
         "{% block entry %}{{ Bola }}{% endblock %}");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_variable_name3(void **state)
+{
+    const char *a = "{% block entry %}{{ 0123 }}{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid variable name. Must begin with uppercase letter.\n"
+        "Error occurred near line 1, position 21: {% block entry %}{{ 0123 }}"
+        "{% endblock %}");
     blogc_error_free(err);
 }
 
@@ -800,13 +868,17 @@ main(void)
         unit_test(test_template_parse_invalid_ifdef_start),
         unit_test(test_template_parse_invalid_foreach_start),
         unit_test(test_template_parse_invalid_ifdef_variable),
+        unit_test(test_template_parse_invalid_ifdef_variable2),
         unit_test(test_template_parse_invalid_foreach_variable),
+        unit_test(test_template_parse_invalid_foreach_variable2),
         unit_test(test_template_parse_invalid_if_operator),
         unit_test(test_template_parse_invalid_if_operand),
         unit_test(test_template_parse_invalid_if_operand2),
+        unit_test(test_template_parse_invalid_if_operand3),
         unit_test(test_template_parse_invalid_block_end),
         unit_test(test_template_parse_invalid_variable_name),
         unit_test(test_template_parse_invalid_variable_name2),
+        unit_test(test_template_parse_invalid_variable_name3),
         unit_test(test_template_parse_invalid_variable_end),
         unit_test(test_template_parse_invalid_close),
         unit_test(test_template_parse_invalid_close2),

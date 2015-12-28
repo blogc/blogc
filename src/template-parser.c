@@ -338,21 +338,22 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
             case TEMPLATE_BLOCK_IF_OPERAND_START:
                 if (c == ' ')
                     break;
-                if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
+                if (c >= 'A' && c <= 'Z') {
                     state = TEMPLATE_BLOCK_IF_VARIABLE_OPERAND;
                     start2 = current;
                     break;
                 }
-                if (c != '"') {
-                    op_start = 0;
-                    op_end = 0;
-                    *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                        src_len, current,
-                        "Invalid 'if' operand. Must be double-quoted static string.");
+                if (c == '"') {
+                    state = TEMPLATE_BLOCK_IF_STRING_OPERAND;
+                    start2 = current;
                     break;
                 }
-                state = TEMPLATE_BLOCK_IF_STRING_OPERAND;
-                start2 = current;
+                op_start = 0;
+                op_end = 0;
+                *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                    src_len, current,
+                    "Invalid 'if' operand. Must be double-quoted static "
+                    "string or variable.");
                 break;
 
             case TEMPLATE_BLOCK_IF_STRING_OPERAND:
