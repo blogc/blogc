@@ -97,10 +97,14 @@ blogc_split_list_variable(const char *name, b_trie_t *global, b_trie_t *local)
 
     b_slist_t *rv = NULL;
 
-    char **tmp = b_str_split(value, ',', 0);
-    for (unsigned int i = 0; tmp[i] != NULL; i++)
-        rv = b_slist_append(rv, b_strdup(b_str_strip(tmp[i])));
-    b_strv_free(tmp);
+    char **tmp = b_str_split(value, ' ', 0);
+    for (unsigned int i = 0; tmp[i] != NULL; i++) {
+        if (tmp[i][0] != '\0')  // ignore empty strings
+            rv = b_slist_append(rv, tmp[i]);
+        else
+            free(tmp[i]);
+    }
+    free(tmp);
 
     return rv;
 }

@@ -31,7 +31,7 @@ create_sources(unsigned int count)
         "GUDA2: zxc\n"
         "DATE: 2015-01-02 03:04:05\n"
         "DATE_FORMAT: %R\n"
-        "TAGS: foo, bar,baz\n"
+        "TAGS: foo   bar baz\n"
         "-----\n"
         "ahahahahahahahaha",
         "BOLA: asd2\n"
@@ -796,9 +796,9 @@ static void
 test_split_list_variable(void **state)
 {
     b_trie_t *g = b_trie_new(free);
-    b_trie_insert(g, "TAGS", b_strdup("asd, lol,hehe"));
+    b_trie_insert(g, "TAGS", b_strdup("asd  lol hehe"));
     b_trie_t *l = b_trie_new(free);
-    b_trie_insert(l, "TAGS", b_strdup("asd, lol,XD"));
+    b_trie_insert(l, "TAGS", b_strdup("asd  lol XD"));
     b_slist_t *tmp = blogc_split_list_variable("TAGS", g, l);
     assert_string_equal(tmp->data, "asd");
     assert_string_equal(tmp->next->data, "lol");
@@ -813,9 +813,9 @@ static void
 test_split_list_variable_not_found(void **state)
 {
     b_trie_t *g = b_trie_new(free);
-    b_trie_insert(g, "TAGS", b_strdup("asd, lol,hehe"));
+    b_trie_insert(g, "TAGS", b_strdup("asd  lol hehe"));
     b_trie_t *l = b_trie_new(free);
-    b_trie_insert(l, "TAGS", b_strdup("asd, lol,XD"));
+    b_trie_insert(l, "TAGS", b_strdup("asd  lol XD"));
     b_slist_t *tmp = blogc_split_list_variable("TAG", g, l);
     assert_null(tmp);
     b_trie_free(g);
