@@ -4,8 +4,8 @@ blogc-template(7) -- blogc's template format
 ## DESCRIPTION
 
 Template files are used as base to build output files by blogc(1). These files
-can include variables, blocks and conditionals, that will directly affect the
-output files.
+can include variables, blocks, conditionals and iterators, that will directly
+affect the output files.
 
 The syntax of the template files is defined to be simple, without affecting the
 content output. The syntax is somewhat inspired by Jinja2 syntax.
