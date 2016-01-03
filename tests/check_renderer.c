@@ -76,7 +76,8 @@ test_render_entry(void **state)
         "{% if GUDA < \"zxd\" %}LOL2{% endif %}\n"
         "{% if GUDA > \"zxd\" %}LOL3{% endif %}\n"
         "{% if GUDA <= \"zxc\" %}LOL4{% endif %}\n"
-        "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n";
+        "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
+        "{% foreach TAGS_ASD %}yay{% endforeach %}\n";
     blogc_error_t *err = NULL;
     b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
@@ -100,7 +101,8 @@ test_render_entry(void **state)
         "LOL2\n"
         "\n"
         "LOL4\n"
-        "lol foo haha lol bar haha lol baz haha \n");
+        "lol foo haha lol bar haha lol baz haha \n"
+        "\n");
     blogc_template_free_stmts(l);
     b_slist_free_full(s, (b_free_func_t) b_trie_free);
     free(out);
@@ -121,6 +123,7 @@ test_render_listing(void **state)
         "{% ifdef DATE_FORMATTED %}{{ DATE_FORMATTED }}{% endif %}\n"
         "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
         "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
+        "{% foreach TAGS_ASD %}yay{% endforeach %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
     b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
@@ -138,12 +141,15 @@ test_render_listing(void **state)
         "bola: asd\n"
         "lol foo haha lol bar haha lol baz haha \n"
         "\n"
+        "\n"
         "2014-02-03 04:05:06\n"
         "bola: asd2\n"
         "\n"
         "\n"
+        "\n"
         "2013-01-02 03:04:05\n"
         "bola: asd3\n"
+        "\n"
         "\n"
         "\n");
     blogc_template_free_stmts(l);
