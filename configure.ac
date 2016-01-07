@@ -1,6 +1,6 @@
 AC_PREREQ([2.69])
 
-AC_INIT([blogc], [0.5.1], [https://github.com/blogc/blogc], [blogc],
+AC_INIT([blogc], [0.6], [https://github.com/blogc/blogc], [blogc],
         [https://blogc.rgm.io])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
