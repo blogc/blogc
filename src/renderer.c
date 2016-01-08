@@ -58,8 +58,16 @@ blogc_format_date(const char *date, b_trie_t *global, b_trie_t *local)
 
 
 char*
-blogc_format_variable(const char *name, b_trie_t *global, b_trie_t *local)
+blogc_format_variable(const char *name, b_trie_t *global, b_trie_t *local,
+    b_slist_t *foreach_var)
 {
+    if (0 == strcmp(name, "FOREACH_ITEM")) {
+        if (foreach_var != NULL && foreach_var->data != NULL) {
+            return b_strdup(foreach_var->data);
+        }
+        return NULL;
+    }
+
     char *var = NULL;
     bool must_format = false;
     if (b_str_ends_with(name, "_FORMATTED")) {
@@ -200,13 +208,8 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
 
             case BLOGC_TEMPLATE_VARIABLE_STMT:
                 if (stmt->value != NULL) {
-                    if (0 == strcmp(stmt->value, "FOREACH_ITEM")) {  // foreach
-                        if (foreach_var != NULL && foreach_var->data != NULL)
-                            b_string_append(str, foreach_var->data);
-                        break;
-                    }
                     config_value = blogc_format_variable(stmt->value,
-                        config, inside_block ? tmp_source : NULL);
+                        config, inside_block ? tmp_source : NULL, foreach_var);
                     if (config_value != NULL) {
                         b_string_append(str, config_value);
                         free(config_value);
@@ -237,7 +240,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                 defined = NULL;
                 if (stmt->value != NULL)
                     defined = blogc_format_variable(stmt->value, config,
-                        inside_block ? tmp_source : NULL);
+                        inside_block ? tmp_source : NULL, foreach_var);
                 evaluate = false;
                 if (stmt->op != 0) {
                     // Strings that start with a '"' are actually strings, the
@@ -254,7 +257,8 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                         }
                         else {
                             defined2 = blogc_format_variable(stmt->value2,
-                                config, inside_block ? tmp_source : NULL);
+                                config, inside_block ? tmp_source : NULL,
+                                foreach_var);
                         }
                     }
 

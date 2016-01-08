@@ -14,7 +14,8 @@
 
 const char* blogc_get_variable(const char *name, b_trie_t *global, b_trie_t *local);
 char* blogc_format_date(const char *date, b_trie_t *global, b_trie_t *local);
-char* blogc_format_variable(const char *name, b_trie_t *global, b_trie_t *local);
+char* blogc_format_variable(const char *name, b_trie_t *global, b_trie_t *local,
+    b_slist_t *foreach_var);
 b_slist_t* blogc_split_list_variable(const char *name, b_trie_t *global,
     b_trie_t *local);
 char* blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config,
