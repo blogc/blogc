@@ -12,6 +12,7 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 ## File listings
 
 EXTRA_DIST = \
+	build-aux/build-windows.sh \
 	autogen.sh \
 	LICENSE \
 	README.md \
