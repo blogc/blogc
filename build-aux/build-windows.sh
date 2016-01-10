@@ -5,24 +5,18 @@
 #
 # mingw32-gcc mingw64-gcc zip
 #
-# This script must be called with the xz source tarball as argument.
+# This script must be called with the xz source tarball and the target version
+# as arguments.
 
 
 set -ex
 
-[[ $# -eq 1 ]]
-
-
-get_version() {
-    local a=$(basename "${1}")
-    a="${a%.tar.xz}"
-    echo "${a#blogc-}"
-}
+[[ $# -eq 2 ]]
 
 
 build() {
-    local version=$(get_version "${1}")
-    local arch=${2}
+    local version=${2}
+    local arch=${3}
     local build_dir="/tmp/blogc_build_${version}_${arch}"
     local dest_dir="/tmp/blogc-${version}-w${arch}"
 
@@ -50,5 +44,5 @@ build() {
 
 
 for arch in 32 64; do
-    build "$1" "${arch}"
+    build "$1" "$2" "${arch}"
 done
