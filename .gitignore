@@ -60,4 +60,5 @@ blogc-*.tar.*
 blogc-*.zip
 
 # rpms
+blogc.spec
 blogc-*.rpm

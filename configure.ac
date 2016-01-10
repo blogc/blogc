@@ -101,6 +101,7 @@ LT_LIB_M
 
 AC_CONFIG_FILES([
     Makefile
+    blogc.spec
 ])
 AC_OUTPUT
 
