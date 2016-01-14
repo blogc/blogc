@@ -111,7 +111,8 @@ b_str_lstrip(char *str)
     size_t str_len = strlen(str);
     for (i = 0; i < str_len; i++) {
         if ((str[i] != ' ') && (str[i] != '\t') && (str[i] != '\n') &&
-            (str[i] != '\r') && (str[i] != '\t'))
+            (str[i] != '\r') && (str[i] != '\t') && (str[i] != '\f') &&
+            (str[i] != '\v'))
         {
             str += i;
             break;
@@ -134,7 +135,8 @@ b_str_rstrip(char *str)
     size_t str_len = strlen(str);
     for (i = str_len - 1; i >= 0; i--) {
         if ((str[i] != ' ') && (str[i] != '\t') && (str[i] != '\n') &&
-            (str[i] != '\r') && (str[i] != '\t'))
+            (str[i] != '\r') && (str[i] != '\t') && (str[i] != '\f') &&
+            (str[i] != '\v'))
         {
             str[i + 1] = '\0';
             break;
