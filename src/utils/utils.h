@@ -50,6 +50,8 @@ char* b_strdup_vprintf(const char *format, va_list ap);
 char* b_strdup_printf(const char *format, ...);
 bool b_str_starts_with(const char *str, const char *prefix);
 bool b_str_ends_with(const char *str, const char *suffix);
+char* b_str_lstrip(char *str);
+char* b_str_rstrip(char *str);
 char* b_str_strip(char *str);
 char** b_str_split(const char *str, char c, unsigned int max_pieces);
 char* b_str_replace(const char *str, const char search, const char *replace);

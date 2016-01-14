@@ -12,6 +12,11 @@
 #include "utils/utils.h"
 #include "error.h"
 
+/*
+ * note: whitespace cleaners are NOT added to ast. we fix strings right during
+ * template parsing. renderer does not need to care about it, for the sake of
+ * simplicity.
+ */
 typedef enum {
     BLOGC_TEMPLATE_IFDEF_STMT = 1,
     BLOGC_TEMPLATE_IFNDEF_STMT,

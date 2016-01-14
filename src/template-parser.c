@@ -22,6 +22,7 @@ typedef enum {
     TEMPLATE_START = 1,
     TEMPLATE_OPEN_BRACKET,
     TEMPLATE_BLOCK_START,
+    TEMPLATE_BLOCK_START_WHITESPACE_CLEANER,
     TEMPLATE_BLOCK_TYPE,
     TEMPLATE_BLOCK_BLOCK_TYPE_START,
     TEMPLATE_BLOCK_BLOCK_TYPE,
@@ -34,6 +35,7 @@ typedef enum {
     TEMPLATE_BLOCK_IF_VARIABLE_OPERAND,
     TEMPLATE_BLOCK_FOREACH_START,
     TEMPLATE_BLOCK_FOREACH_VARIABLE,
+    TEMPLATE_BLOCK_END_WHITESPACE_CLEANER,
     TEMPLATE_BLOCK_END,
     TEMPLATE_VARIABLE_START,
     TEMPLATE_VARIABLE,
@@ -72,6 +74,20 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     b_slist_t *stmts = NULL;
     blogc_template_stmt_t *stmt = NULL;
 
+    /*
+     * this is a reference to the content of previous node in the singly-linked
+     * list. The "correct" solution here would be implement a doubly-linked
+     * list, but here are a few reasons to avoid it:
+     *
+     * - i'm too tired to implement it :P
+     * - template parser never walk backwards, then the list itself does not
+     *   need to know its previous node.
+     */
+    blogc_template_stmt_t *previous = NULL;
+
+    bool lstrip_next = false;
+    char *tmp = NULL;
+
     blogc_template_parser_state_t state = TEMPLATE_START;
     blogc_template_parser_block_state_t block_state = BLOCK_CLOSED;
     blogc_template_stmt_type_t type = BLOGC_TEMPLATE_CONTENT_STMT;
@@ -86,10 +102,20 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 if (last) {
                     stmt = b_malloc(sizeof(blogc_template_stmt_t));
                     stmt->type = type;
-                    stmt->value = b_strndup(src + start, src_len - start);
+                    if (lstrip_next) {
+                        tmp = b_strndup(src + start, src_len - start);
+                        stmt->value = b_strdup(b_str_lstrip(tmp));
+                        free(tmp);
+                        tmp = NULL;
+                        lstrip_next = false;
+                    }
+                    else {
+                        stmt->value = b_strndup(src + start, src_len - start);
+                    }
                     stmt->op = 0;
                     stmt->value2 = NULL;
                     stmts = b_slist_append(stmts, stmt);
+                    previous = stmt;
                     stmt = NULL;
                 }
                 if (c == '{') {
@@ -101,16 +127,26 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
             case TEMPLATE_OPEN_BRACKET:
                 if (c == '%' || c == '{') {
                     if (c == '%')
-                        state = TEMPLATE_BLOCK_START;
+                        state = TEMPLATE_BLOCK_START_WHITESPACE_CLEANER;
                     else
                         state = TEMPLATE_VARIABLE_START;
                     if (end > start) {
                         stmt = b_malloc(sizeof(blogc_template_stmt_t));
                         stmt->type = type;
-                        stmt->value = b_strndup(src + start, end - start);
+                        if (lstrip_next) {
+                            tmp = b_strndup(src + start, end - start);
+                            stmt->value = b_strdup(b_str_lstrip(tmp));
+                            free(tmp);
+                            tmp = NULL;
+                            lstrip_next = false;
+                        }
+                        else {
+                            stmt->value = b_strndup(src + start, end - start);
+                        }
                         stmt->op = 0;
                         stmt->value2 = NULL;
                         stmts = b_slist_append(stmts, stmt);
+                        previous = stmt;
                         stmt = NULL;
                     }
                     break;
@@ -118,12 +154,31 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 state = TEMPLATE_START;
                 break;
 
+            case TEMPLATE_BLOCK_START_WHITESPACE_CLEANER:
+                if (c == '-') {
+                    if ((previous != NULL) &&
+                        (previous->type == BLOGC_TEMPLATE_CONTENT_STMT))
+                    {
+                        previous->value = b_str_rstrip(previous->value);  // does not need copy
+                    }
+                    state = TEMPLATE_BLOCK_START;
+                    break;
+                }
+                state = TEMPLATE_BLOCK_START;
+
             case TEMPLATE_BLOCK_START:
                 if (c == ' ')
                     break;
                 if (c >= 'a' && c <= 'z') {
                     state = TEMPLATE_BLOCK_TYPE;
                     start = current;
+                    break;
+                }
+                if (c == '-') {
+                    *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                        src_len, current,
+                        "Invalid statement syntax. Duplicated whitespace "
+                        "cleaner before statement.");
                     break;
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
@@ -152,7 +207,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         (0 == strncmp("endblock", src + start, 8)))
                     {
                         if (block_state != BLOCK_CLOSED) {
-                            state = TEMPLATE_BLOCK_END;
+                            state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                             type = BLOGC_TEMPLATE_ENDBLOCK_STMT;
                             block_state = BLOCK_CLOSED;
                             break;
@@ -193,7 +248,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         (0 == strncmp("endif", src + start, 5)))
                     {
                         if (if_count > 0) {
-                            state = TEMPLATE_BLOCK_END;
+                            state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                             type = BLOGC_TEMPLATE_ENDIF_STMT;
                             if_count--;
                             break;
@@ -223,7 +278,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         (0 == strncmp("endforeach", src + start, 10)))
                     {
                         if (foreach_open) {
-                            state = TEMPLATE_BLOCK_END;
+                            state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                             type = BLOGC_TEMPLATE_ENDFOREACH_STMT;
                             foreach_open = false;
                             break;
@@ -264,7 +319,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     {
                         block_state = BLOCK_ENTRY;
                         end = current;
-                        state = TEMPLATE_BLOCK_END;
+                        state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                         break;
                     }
                     else if ((current - start == 7) &&
@@ -272,7 +327,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     {
                         block_state = BLOCK_LISTING;
                         end = current;
-                        state = TEMPLATE_BLOCK_END;
+                        state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                         break;
                     }
                     else if ((current - start == 12) &&
@@ -280,7 +335,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     {
                         block_state = BLOCK_LISTING_ONCE;
                         end = current;
-                        state = TEMPLATE_BLOCK_END;
+                        state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                         break;
                     }
                 }
@@ -311,7 +366,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     if (type == BLOGC_TEMPLATE_IF_STMT)
                         state = TEMPLATE_BLOCK_IF_OPERATOR_START;
                     else
-                        state = TEMPLATE_BLOCK_END;
+                        state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                     break;
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
@@ -361,14 +416,14 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     break;
                 if (c == '"' && src[current - 1] == '\\')
                     break;
-                state = TEMPLATE_BLOCK_END;
+                state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                 end2 = current + 1;
                 break;
 
            case TEMPLATE_BLOCK_IF_VARIABLE_OPERAND:
                 if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
                     break;
-                state = TEMPLATE_BLOCK_END;
+                state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                 end2 = current;
                 break;
 
@@ -391,7 +446,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     break;
                 if (c == ' ') {
                     end = current;
-                    state = TEMPLATE_BLOCK_END;
+                    state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                     break;
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
@@ -400,11 +455,26 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     "number or '_'.");
                 break;
 
-            case TEMPLATE_BLOCK_END:
+            case TEMPLATE_BLOCK_END_WHITESPACE_CLEANER:
                 if (c == ' ')
                     break;
+                if (c == '-') {
+                    lstrip_next = true;
+                    state = TEMPLATE_BLOCK_END;
+                    break;
+                }
+                state = TEMPLATE_BLOCK_END;
+
+            case TEMPLATE_BLOCK_END:
                 if (c == '%') {
                     state = TEMPLATE_CLOSE_BRACKET;
+                    break;
+                }
+                if (c == '-') {
+                    *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
+                        src_len, current,
+                        "Invalid statement syntax. Duplicated whitespace "
+                        "cleaner after statement.");
                     break;
                 }
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
@@ -502,6 +572,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         end2 = 0;
                     }
                     stmts = b_slist_append(stmts, stmt);
+                    previous = stmt;
                     stmt = NULL;
                     state = TEMPLATE_START;
                     type = BLOGC_TEMPLATE_CONTENT_STMT;

@@ -129,6 +129,50 @@ test_str_ends_with(void **state)
 
 
 static void
+test_str_lstrip(void **state)
+{
+    char *str = b_strdup("  \tbola\n  \t");
+    assert_string_equal(b_str_lstrip(str), "bola\n  \t");
+    free(str);
+    str = b_strdup("guda");
+    assert_string_equal(b_str_lstrip(str), "guda");
+    free(str);
+    str = b_strdup("\n");
+    assert_string_equal(b_str_lstrip(str), "");
+    free(str);
+    str = b_strdup("\t \n");
+    assert_string_equal(b_str_lstrip(str), "");
+    free(str);
+    str = b_strdup("");
+    assert_string_equal(b_str_lstrip(str), "");
+    free(str);
+    assert_null(b_str_lstrip(NULL));
+}
+
+
+static void
+test_str_rstrip(void **state)
+{
+    char *str = b_strdup("  \tbola\n  \t");
+    assert_string_equal(b_str_rstrip(str), "  \tbola");
+    free(str);
+    str = b_strdup("guda");
+    assert_string_equal(b_str_rstrip(str), "guda");
+    free(str);
+    str = b_strdup("\n");
+    assert_string_equal(b_str_rstrip(str), "");
+    free(str);
+    str = b_strdup("\t \n");
+    assert_string_equal(b_str_rstrip(str), "");
+    free(str);
+    str = b_strdup("");
+    assert_string_equal(b_str_rstrip(str), "");
+    free(str);
+    assert_null(b_str_rstrip(NULL));
+}
+
+
+static void
 test_str_strip(void **state)
 {
     char *str = b_strdup("  \tbola\n  \t");
@@ -136,6 +180,15 @@ test_str_strip(void **state)
     free(str);
     str = b_strdup("guda");
     assert_string_equal(b_str_strip(str), "guda");
+    free(str);
+    str = b_strdup("\n");
+    assert_string_equal(b_str_strip(str), "");
+    free(str);
+    str = b_strdup("\t \n");
+    assert_string_equal(b_str_strip(str), "");
+    free(str);
+    str = b_strdup("");
+    assert_string_equal(b_str_strip(str), "");
     free(str);
     assert_null(b_str_strip(NULL));
 }
@@ -799,6 +852,8 @@ main(void)
         unit_test(test_strdup_printf),
         unit_test(test_str_starts_with),
         unit_test(test_str_ends_with),
+        unit_test(test_str_lstrip),
+        unit_test(test_str_rstrip),
         unit_test(test_str_strip),
         unit_test(test_str_split),
         unit_test(test_str_replace),
