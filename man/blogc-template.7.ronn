@@ -199,6 +199,19 @@ iteration.
 If the value of the `TAGS` variable is "item1 item2 item3", this template is
 rendered 3 times, one for each item value.
 
+## WHITESPACE CONTROL
+
+Users can control how whitespaces (space, form-feed (`\f`), newline (`\n`),
+carriage return (`\r`), horizontal tab (`\t`), and vertical tab (`\v`)) are
+handled before and after statements delimited with `{%` and `%}` sequences,
+respectively.
+
+Adding a minus sign (`-`)  after a `{%` sequence (`{%-`) will remove whitespaces
+before the sequence and after the last non-whitespace character before the sequence.
+
+Adding a minus sign (`-`)  before a `%}` sequence (`-%}`) will remove whitespaces
+after the sequence and before the first non-whitespace character after the sequence.
+
 ## BUGS
 
 The template content is handled by handwritten parsers, that even being well
