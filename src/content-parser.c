@@ -41,6 +41,40 @@ blogc_slugify(const char *str)
 }
 
 
+char*
+blogc_htmlentities(const char *str)
+{
+    if (str == NULL)
+        return NULL;
+    b_string_t *rv = b_string_new();
+    for (unsigned int i = 0; str[i] != '\0'; i++) {
+        switch (str[i]) {
+            case '&':
+                b_string_append(rv, "&amp;");
+                break;
+            case '<':
+                b_string_append(rv, "&lt;");
+                break;
+            case '>':
+                b_string_append(rv, "&gt;");
+                break;
+            case '"':
+                b_string_append(rv, "&quot;");
+                break;
+            case '\'':
+                b_string_append(rv, "&#x27;");
+                break;
+            case '/':
+                b_string_append(rv, "&#x2F;");
+                break;
+            default:
+                b_string_append_c(rv, str[i]);
+        }
+    }
+    return b_string_free(rv, false);
+}
+
+
 typedef enum {
     CONTENT_START_LINE = 1,
     CONTENT_EXCERPT,
@@ -698,11 +732,13 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 if (c == '\n' || c == '\r' || is_last) {
                     b_string_append(rv, "<pre><code>");
                     for (b_slist_t *l = lines; l != NULL; l = l->next) {
+                        char *tmp_line = blogc_htmlentities(l->data);
                         if (l->next == NULL)
-                            b_string_append_printf(rv, "%s", l->data);
+                            b_string_append_printf(rv, "%s", tmp_line);
                         else
-                            b_string_append_printf(rv, "%s%s", l->data,
+                            b_string_append_printf(rv, "%s%s", tmp_line,
                                 line_ending);
+                        free(tmp_line);
                     }
                     b_string_append_printf(rv, "</code></pre>%s", line_ending);
                     b_slist_free_full(lines, free);
