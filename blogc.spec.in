@@ -38,6 +38,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Jan 22 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.7.1-1
+- New release.
+
 * Thu Jan 14 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.7-1
 - New release.
 
