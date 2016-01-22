@@ -27,7 +27,7 @@ blogc_slugify(const char *str)
         return NULL;
     char *new_str = b_strdup(str);
     int diff = 'a' - 'A';  // just to avoid magic numbers
-    for (unsigned int i = 0; new_str[i] != '\0'; i++) {
+    for (size_t i = 0; new_str[i] != '\0'; i++) {
         if (new_str[i] >= 'a' && new_str[i] <= 'z')
             continue;
         if (new_str[i] >= '0' && new_str[i] <= '9')
@@ -47,7 +47,7 @@ blogc_htmlentities(const char *str)
     if (str == NULL)
         return NULL;
     b_string_t *rv = b_string_new();
-    for (unsigned int i = 0; str[i] != '\0'; i++) {
+    for (size_t i = 0; str[i] != '\0'; i++) {
         switch (str[i]) {
             case '&':
                 b_string_append(rv, "&amp;");
