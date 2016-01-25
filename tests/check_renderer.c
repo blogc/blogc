@@ -687,6 +687,37 @@ test_render_respect_variable_scope(void **state)
 
 
 static void
+test_render_ifcount_bug(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% ifdef TITLE %}<h3>{{ TITLE }}</h3>{% endif %}\n"
+        "{% ifdef IS_POST %}\n"
+        "{% ifdef ASD %}ASD{% endif %}\n"
+        "{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    b_slist_t *s = NULL;
+    s = b_slist_append(s, b_trie_new(free));
+    b_trie_insert(s->data, "TITLE", b_strdup("bola"));
+    b_trie_t *c = b_trie_new(free);
+    char *out = blogc_render(l, s, c, false);
+    assert_string_equal(out,
+        "\n"
+        "<h3>bola</h3>\n"
+        "\n"
+        "\n");
+    b_trie_free(c);
+    blogc_template_free_stmts(l);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
+    free(out);
+}
+
+
+static void
 test_get_variable(void **state)
 {
     b_trie_t *g = b_trie_new(free);
@@ -897,6 +928,7 @@ main(void)
         unit_test(test_render_outside_block),
         unit_test(test_render_prefer_local_variable),
         unit_test(test_render_respect_variable_scope),
+        unit_test(test_render_ifcount_bug),
         unit_test(test_get_variable),
         unit_test(test_get_variable_only_local),
         unit_test(test_get_variable_only_global),

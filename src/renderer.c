@@ -134,7 +134,6 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
     char *defined = NULL;
 
     unsigned int if_count = 0;
-    unsigned int if_skip = 0;
 
     b_slist_t *foreach_var = NULL;
     b_slist_t *foreach_var_start = NULL;
@@ -237,6 +236,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
 
             case BLOGC_TEMPLATE_IF_STMT:
             case BLOGC_TEMPLATE_IFDEF_STMT:
+                if_count = 0;
                 defined = NULL;
                 if (stmt->value != NULL)
                     defined = blogc_format_variable(stmt->value, config,
@@ -283,7 +283,6 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                         evaluate = true;
                 }
                 if (!evaluate) {
-                    if_skip = if_count;
 
                     // at this point we can just skip anything, counting the
                     // number of 'if's, to know how many 'endif's we need to
@@ -299,11 +298,11 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                             continue;
                         }
                         if (stmt->type == BLOGC_TEMPLATE_ENDIF_STMT) {
-                            if (if_count > if_skip) {
+                            if (if_count > 0) {
                                 if_count--;
                                 continue;
                             }
-                            if (if_count == if_skip)
+                            if (if_count == 0)
                                 break;
                         }
                     }
@@ -314,7 +313,8 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                 break;
 
             case BLOGC_TEMPLATE_ENDIF_STMT:
-                if_count--;
+                if (if_count > 0)
+                    if_count--;
                 break;
 
             case BLOGC_TEMPLATE_FOREACH_STMT:
