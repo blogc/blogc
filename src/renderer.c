@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2015 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2015-2016 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -58,8 +58,16 @@ blogc_format_date(const char *date, b_trie_t *global, b_trie_t *local)
 
 
 char*
-blogc_format_variable(const char *name, b_trie_t *global, b_trie_t *local)
+blogc_format_variable(const char *name, b_trie_t *global, b_trie_t *local,
+    b_slist_t *foreach_var)
 {
+    if (0 == strcmp(name, "FOREACH_ITEM")) {
+        if (foreach_var != NULL && foreach_var->data != NULL) {
+            return b_strdup(foreach_var->data);
+        }
+        return NULL;
+    }
+
     char *var = NULL;
     bool must_format = false;
     if (b_str_ends_with(name, "_FORMATTED")) {
@@ -88,6 +96,28 @@ blogc_format_variable(const char *name, b_trie_t *global, b_trie_t *local)
 }
 
 
+b_slist_t*
+blogc_split_list_variable(const char *name, b_trie_t *global, b_trie_t *local)
+{
+    const char *value = blogc_get_variable(name, global, local);
+    if (value == NULL)
+        return NULL;
+
+    b_slist_t *rv = NULL;
+
+    char **tmp = b_str_split(value, ' ', 0);
+    for (unsigned int i = 0; tmp[i] != NULL; i++) {
+        if (tmp[i][0] != '\0')  // ignore empty strings
+            rv = b_slist_append(rv, tmp[i]);
+        else
+            free(tmp[i]);
+    }
+    free(tmp);
+
+    return rv;
+}
+
+
 char*
 blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing)
 {
@@ -104,7 +134,10 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
     char *defined = NULL;
 
     unsigned int if_count = 0;
-    unsigned int if_skip = 0;
+
+    b_slist_t *foreach_var = NULL;
+    b_slist_t *foreach_var_start = NULL;
+    b_slist_t *foreach_start = NULL;
 
     bool if_not = false;
     bool inside_block = false;
@@ -175,7 +208,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
             case BLOGC_TEMPLATE_VARIABLE_STMT:
                 if (stmt->value != NULL) {
                     config_value = blogc_format_variable(stmt->value,
-                        config, inside_block ? tmp_source : NULL);
+                        config, inside_block ? tmp_source : NULL, foreach_var);
                     if (config_value != NULL) {
                         b_string_append(str, config_value);
                         free(config_value);
@@ -203,10 +236,11 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
 
             case BLOGC_TEMPLATE_IF_STMT:
             case BLOGC_TEMPLATE_IFDEF_STMT:
+                if_count = 0;
                 defined = NULL;
                 if (stmt->value != NULL)
                     defined = blogc_format_variable(stmt->value, config,
-                        inside_block ? tmp_source : NULL);
+                        inside_block ? tmp_source : NULL, foreach_var);
                 evaluate = false;
                 if (stmt->op != 0) {
                     // Strings that start with a '"' are actually strings, the
@@ -223,7 +257,8 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                         }
                         else {
                             defined2 = blogc_format_variable(stmt->value2,
-                                config, inside_block ? tmp_source : NULL);
+                                config, inside_block ? tmp_source : NULL,
+                                foreach_var);
                         }
                     }
 
@@ -248,7 +283,6 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                         evaluate = true;
                 }
                 if (!evaluate) {
-                    if_skip = if_count;
 
                     // at this point we can just skip anything, counting the
                     // number of 'if's, to know how many 'endif's we need to
@@ -264,11 +298,11 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                             continue;
                         }
                         if (stmt->type == BLOGC_TEMPLATE_ENDIF_STMT) {
-                            if (if_count > if_skip) {
+                            if (if_count > 0) {
                                 if_count--;
                                 continue;
                             }
-                            if (if_count == if_skip)
+                            if (if_count == 0)
                                 break;
                         }
                     }
@@ -279,11 +313,56 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                 break;
 
             case BLOGC_TEMPLATE_ENDIF_STMT:
-                if_count--;
+                if (if_count > 0)
+                    if_count--;
+                break;
+
+            case BLOGC_TEMPLATE_FOREACH_STMT:
+                if (foreach_var_start == NULL) {
+                    if (stmt->value != NULL)
+                        foreach_var_start = blogc_split_list_variable(stmt->value,
+                            config, inside_block ? tmp_source : NULL);
+
+                    if (foreach_var_start != NULL) {
+                        foreach_var = foreach_var_start;
+                        foreach_start = tmp;
+                    }
+                    else {
+
+                        // we can just skip anything and walk until the next
+                        // 'endforeach'
+                        while (stmt->type != BLOGC_TEMPLATE_ENDFOREACH_STMT) {
+                            tmp = tmp->next;
+                            stmt = tmp->data;
+                        }
+                        break;
+                    }
+                }
+
+                if (foreach_var == NULL) {
+                    foreach_start = tmp;
+                    foreach_var = foreach_var_start;
+                }
+                break;
+
+            case BLOGC_TEMPLATE_ENDFOREACH_STMT:
+                if (foreach_start != NULL && foreach_var != NULL) {
+                    foreach_var = foreach_var->next;
+                    if (foreach_var != NULL) {
+                        tmp = foreach_start;
+                        continue;
+                    }
+                }
+                foreach_start = NULL;
+                b_slist_free_full(foreach_var_start, free);
+                foreach_var_start = NULL;
                 break;
         }
         tmp = tmp->next;
     }
+
+    // no need to free temporary variables here. the template parser makes sure
+    // that templates are sane and statements are closed.
 
     return b_string_free(str, false);
 }

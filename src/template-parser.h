@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2015 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2015-2016 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -12,11 +12,18 @@
 #include "utils/utils.h"
 #include "error.h"
 
+/*
+ * note: whitespace cleaners are NOT added to ast. we fix strings right during
+ * template parsing. renderer does not need to care about it, for the sake of
+ * simplicity.
+ */
 typedef enum {
     BLOGC_TEMPLATE_IFDEF_STMT = 1,
     BLOGC_TEMPLATE_IFNDEF_STMT,
     BLOGC_TEMPLATE_IF_STMT,
     BLOGC_TEMPLATE_ENDIF_STMT,
+    BLOGC_TEMPLATE_FOREACH_STMT,
+    BLOGC_TEMPLATE_ENDFOREACH_STMT,
     BLOGC_TEMPLATE_BLOCK_STMT,
     BLOGC_TEMPLATE_ENDBLOCK_STMT,
     BLOGC_TEMPLATE_VARIABLE_STMT,

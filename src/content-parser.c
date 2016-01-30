@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2015 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2015-2016 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -28,7 +28,7 @@ blogc_slugify(const char *str)
         return NULL;
     char *new_str = b_strdup(str);
     int diff = 'a' - 'A';  // just to avoid magic numbers
-    for (unsigned int i = 0; new_str[i] != '\0'; i++) {
+    for (size_t i = 0; new_str[i] != '\0'; i++) {
         if (new_str[i] >= 'a' && new_str[i] <= 'z')
             continue;
         if (new_str[i] >= '0' && new_str[i] <= '9')
@@ -39,6 +39,40 @@ blogc_slugify(const char *str)
             new_str[i] = '-';
     }
     return new_str;
+}
+
+
+char*
+blogc_htmlentities(const char *str)
+{
+    if (str == NULL)
+        return NULL;
+    b_string_t *rv = b_string_new();
+    for (size_t i = 0; str[i] != '\0'; i++) {
+        switch (str[i]) {
+            case '&':
+                b_string_append(rv, "&amp;");
+                break;
+            case '<':
+                b_string_append(rv, "&lt;");
+                break;
+            case '>':
+                b_string_append(rv, "&gt;");
+                break;
+            case '"':
+                b_string_append(rv, "&quot;");
+                break;
+            case '\'':
+                b_string_append(rv, "&#x27;");
+                break;
+            case '/':
+                b_string_append(rv, "&#x2F;");
+                break;
+            default:
+                b_string_append_c(rv, str[i]);
+        }
+    }
+    return b_string_free(rv, false);
 }
 
 
@@ -717,11 +751,13 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 if (c == '\n' || c == '\r' || is_last) {
                     b_string_append(rv, "<pre><code>");
                     for (b_slist_t *l = lines; l != NULL; l = l->next) {
+                        char *tmp_line = blogc_htmlentities(l->data);
                         if (l->next == NULL)
-                            b_string_append_printf(rv, "%s", l->data);
+                            b_string_append_printf(rv, "%s", tmp_line);
                         else
-                            b_string_append_printf(rv, "%s%s", l->data,
+                            b_string_append_printf(rv, "%s%s", tmp_line,
                                 line_ending);
+                        free(tmp_line);
                     }
                     b_string_append_printf(rv, "</code></pre>%s", line_ending);
                     b_slist_free_full(lines, free);

@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2015 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2015-2016 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -51,26 +51,27 @@ test_template_parse(void **state)
     const char *a =
         "Test\n"
         "\n"
-        "    {% block entry %}\n"
+        "    {%- block entry -%}\n"
         "{% ifdef CHUNDA %}\n"
         "bola\n"
         "{% endif %}\n"
         "{% ifndef BOLA %}\n"
         "bolao\n"
-        "{% endif %}\n"
+        "{%- endif %}\n"
         "{% endblock %}\n"
         "{% block listing %}{{ BOLA }}{% endblock %}\n"
         "{% block listing_once %}asd{% endblock %}\n"
+        "{%- foreach BOLA %}hahaha{% endforeach %}\n"
         "{% if BOLA == \"1\\\"0\" %}aee{% endif %}";
     blogc_error_t *err = NULL;
     b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(stmts);
-    blogc_assert_template_stmt(stmts, "Test\n\n    ",
+    blogc_assert_template_stmt(stmts, "Test",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(stmts->next, "entry",
         BLOGC_TEMPLATE_BLOCK_STMT);
-    blogc_assert_template_stmt(stmts->next->next, "\n",
+    blogc_assert_template_stmt(stmts->next->next, "",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(stmts->next->next->next, "CHUNDA",
         BLOGC_TEMPLATE_IFDEF_STMT);
@@ -82,7 +83,7 @@ test_template_parse(void **state)
         BLOGC_TEMPLATE_CONTENT_STMT);
     b_slist_t *tmp = stmts->next->next->next->next->next->next->next;
     blogc_assert_template_stmt(tmp, "BOLA", BLOGC_TEMPLATE_IFNDEF_STMT);
-    blogc_assert_template_stmt(tmp->next, "\nbolao\n", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next, "\nbolao", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next, NULL, BLOGC_TEMPLATE_ENDIF_STMT);
     blogc_assert_template_stmt(tmp->next->next->next, "\n",
         BLOGC_TEMPLATE_CONTENT_STMT);
@@ -104,13 +105,22 @@ test_template_parse(void **state)
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next->next,
         NULL, BLOGC_TEMPLATE_ENDBLOCK_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next->next->next,
-        "\n", BLOGC_TEMPLATE_CONTENT_STMT);
+        "", BLOGC_TEMPLATE_CONTENT_STMT);
     tmp = tmp->next->next->next->next->next->next->next->next->next->next;
-    blogc_assert_template_if_stmt(tmp, "BOLA", BLOGC_TEMPLATE_OP_EQ, "\"1\\\"0\"");
-    blogc_assert_template_stmt(tmp->next, "aee", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp, "BOLA", BLOGC_TEMPLATE_FOREACH_STMT);
+    blogc_assert_template_stmt(tmp->next, "hahaha",
+        BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next, NULL,
+        BLOGC_TEMPLATE_ENDFOREACH_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next, "\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_if_stmt(tmp->next->next->next->next, "BOLA",
+        BLOGC_TEMPLATE_OP_EQ, "\"1\\\"0\"");
+    blogc_assert_template_stmt(tmp->next->next->next->next->next, "aee",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next->next, NULL,
         BLOGC_TEMPLATE_ENDIF_STMT);
-    assert_null(tmp->next->next->next);
+    assert_null(tmp->next->next->next->next->next->next->next);
     blogc_template_free_stmts(stmts);
 }
 
@@ -121,26 +131,27 @@ test_template_parse_crlf(void **state)
     const char *a =
         "Test\r\n"
         "\r\n"
-        "    {% block entry %}\r\n"
+        "    {%- block entry -%}\r\n"
         "{% ifdef CHUNDA %}\r\n"
         "bola\r\n"
         "{% endif %}\r\n"
         "{% ifndef BOLA %}\r\n"
         "bolao\r\n"
-        "{% endif %}\r\n"
+        "{%- endif %}\r\n"
         "{% endblock %}\r\n"
         "{% block listing %}{{ BOLA }}{% endblock %}\r\n"
         "{% block listing_once %}asd{% endblock %}\r\n"
+        "{%- foreach BOLA %}hahaha{% endforeach %}\r\n"
         "{% if BOLA == \"1\\\"0\" %}aee{% endif %}";
     blogc_error_t *err = NULL;
     b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(stmts);
-    blogc_assert_template_stmt(stmts, "Test\r\n\r\n    ",
+    blogc_assert_template_stmt(stmts, "Test",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(stmts->next, "entry",
         BLOGC_TEMPLATE_BLOCK_STMT);
-    blogc_assert_template_stmt(stmts->next->next, "\r\n",
+    blogc_assert_template_stmt(stmts->next->next, "",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(stmts->next->next->next, "CHUNDA",
         BLOGC_TEMPLATE_IFDEF_STMT);
@@ -152,7 +163,7 @@ test_template_parse_crlf(void **state)
         BLOGC_TEMPLATE_CONTENT_STMT);
     b_slist_t *tmp = stmts->next->next->next->next->next->next->next;
     blogc_assert_template_stmt(tmp, "BOLA", BLOGC_TEMPLATE_IFNDEF_STMT);
-    blogc_assert_template_stmt(tmp->next, "\r\nbolao\r\n", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next, "\r\nbolao", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next, NULL, BLOGC_TEMPLATE_ENDIF_STMT);
     blogc_assert_template_stmt(tmp->next->next->next, "\r\n",
         BLOGC_TEMPLATE_CONTENT_STMT);
@@ -174,13 +185,22 @@ test_template_parse_crlf(void **state)
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next->next,
         NULL, BLOGC_TEMPLATE_ENDBLOCK_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next->next->next,
-        "\r\n", BLOGC_TEMPLATE_CONTENT_STMT);
+        "", BLOGC_TEMPLATE_CONTENT_STMT);
     tmp = tmp->next->next->next->next->next->next->next->next->next->next;
-    blogc_assert_template_if_stmt(tmp, "BOLA", BLOGC_TEMPLATE_OP_EQ, "\"1\\\"0\"");
-    blogc_assert_template_stmt(tmp->next, "aee", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp, "BOLA", BLOGC_TEMPLATE_FOREACH_STMT);
+    blogc_assert_template_stmt(tmp->next, "hahaha",
+        BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next, NULL,
+        BLOGC_TEMPLATE_ENDFOREACH_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next, "\r\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_if_stmt(tmp->next->next->next->next, "BOLA",
+        BLOGC_TEMPLATE_OP_EQ, "\"1\\\"0\"");
+    blogc_assert_template_stmt(tmp->next->next->next->next->next, "aee",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next->next, NULL,
         BLOGC_TEMPLATE_ENDIF_STMT);
-    assert_null(tmp->next->next->next);
+    assert_null(tmp->next->next->next->next->next->next->next);
     blogc_template_free_stmts(stmts);
 }
 
@@ -361,6 +381,26 @@ test_template_parse_invalid_block_start(void **state)
         "Invalid statement syntax. Must begin with lowercase letter.\n"
         "Error occurred near line 1, position 4: {% ASD %}");
     blogc_error_free(err);
+    a = "{%-- block entry %}\n";
+    err = NULL;
+    stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid statement syntax. Duplicated whitespace cleaner before statement.\n"
+        "Error occurred near line 1, position 4: {%-- block entry %}");
+    blogc_error_free(err);
+    a = "{% block entry --%}\n";
+    err = NULL;
+    stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid statement syntax. Duplicated whitespace cleaner after statement.\n"
+        "Error occurred near line 1, position 17: {% block entry --%}");
+    blogc_error_free(err);
 }
 
 
@@ -378,6 +418,24 @@ test_template_parse_invalid_block_nested(void **state)
     assert_string_equal(err->msg,
         "Blocks can't be nested.\n"
         "Error occurred near line 2, position 9: {% block listing %}");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_foreach_nested(void **state)
+{
+    const char *a =
+        "{% foreach A %}\n"
+        "{% foreach B %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "'foreach' statements can't be nested.\n"
+        "Error occurred near line 2, position 11: {% foreach B %}");
     blogc_error_free(err);
 }
 
@@ -416,6 +474,22 @@ test_template_parse_invalid_endif_not_open(void **state)
 
 
 static void
+test_template_parse_invalid_endforeach_not_open(void **state)
+{
+    const char *a = "{% endforeach %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "'endforeach' statement without an open 'foreach' statement.\n"
+        "Error occurred near line 1, position 14: {% endforeach %}");
+    blogc_error_free(err);
+}
+
+
+static void
 test_template_parse_invalid_block_name(void **state)
 {
     const char *a = "{% chunda %}\n";
@@ -426,7 +500,7 @@ test_template_parse_invalid_block_name(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid statement type: Allowed types are: 'block', 'endblock', 'ifdef', "
-        "'ifndef' and 'endif'.\n"
+        "'ifndef', 'endif', 'foreach' and 'endforeach'.\n"
         "Error occurred near line 1, position 10: {% chunda %}");
     blogc_error_free(err);
 }
@@ -482,6 +556,23 @@ test_template_parse_invalid_ifdef_start(void **state)
 
 
 static void
+test_template_parse_invalid_foreach_start(void **state)
+{
+    const char *a = "{% block entry %}{% foreach guda %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid foreach variable name. Must begin with uppercase letter.\n"
+        "Error occurred near line 1, position 29: "
+        "{% block entry %}{% foreach guda %}");
+    blogc_error_free(err);
+}
+
+
+static void
 test_template_parse_invalid_ifdef_variable(void **state)
 {
     const char *a = "{% block entry %}{% ifdef BoLA %}\n";
@@ -494,6 +585,57 @@ test_template_parse_invalid_ifdef_variable(void **state)
         "Invalid variable name. Must be uppercase letter, number or '_'.\n"
         "Error occurred near line 1, position 28: "
         "{% block entry %}{% ifdef BoLA %}");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_ifdef_variable2(void **state)
+{
+    const char *a = "{% block entry %}{% ifdef 0123 %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid variable name. Must begin with uppercase letter.\n"
+        "Error occurred near line 1, position 27: "
+        "{% block entry %}{% ifdef 0123 %}");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_foreach_variable(void **state)
+{
+    const char *a = "{% block entry %}{% foreach BoLA %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid foreach variable name. Must be uppercase letter, number or '_'.\n"
+        "Error occurred near line 1, position 30: "
+        "{% block entry %}{% foreach BoLA %}");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_foreach_variable2(void **state)
+{
+    const char *a = "{% block entry %}{% foreach 0123 %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid foreach variable name. Must begin with uppercase letter.\n"
+        "Error occurred near line 1, position 29: {% block entry %}"
+        "{% foreach 0123 %}");
     blogc_error_free(err);
 }
 
@@ -525,7 +667,7 @@ test_template_parse_invalid_if_operand(void **state)
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
-        "Invalid 'if' operand. Must be double-quoted static string.\n"
+        "Invalid 'if' operand. Must be double-quoted static string or variable.\n"
         "Error occurred near line 1, position 32: "
         "{% block entry %}{% if BOLA == asd %}");
     blogc_error_free(err);
@@ -545,6 +687,23 @@ test_template_parse_invalid_if_operand2(void **state)
         "Found an open double-quoted string.\n"
         "Error occurred near line 1, position 31: "
         "{% block entry %}{% if BOLA == \"asd %}");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_if_operand3(void **state)
+{
+    const char *a = "{% block entry %}{% if BOLA == 0123 %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid 'if' operand. Must be double-quoted static string or variable.\n"
+        "Error occurred near line 1, position 32: "
+        "{% block entry %}{% if BOLA == 0123 %}");
     blogc_error_free(err);
 }
 
@@ -595,6 +754,23 @@ test_template_parse_invalid_variable_name2(void **state)
         "Invalid variable name. Must be uppercase letter, number or '_'.\n"
         "Error occurred near line 1, position 22: "
         "{% block entry %}{{ Bola }}{% endblock %}");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_variable_name3(void **state)
+{
+    const char *a = "{% block entry %}{{ 0123 }}{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid variable name. Must begin with uppercase letter.\n"
+        "Error occurred near line 1, position 21: {% block entry %}{{ 0123 }}"
+        "{% endblock %}");
     blogc_error_free(err);
 }
 
@@ -678,6 +854,20 @@ test_template_parse_invalid_block_not_closed(void **state)
 }
 
 
+static void
+test_template_parse_invalid_foreach_not_closed(void **state)
+{
+    const char *a = "{% foreach ASD %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg, "An open 'foreach' statement was not closed!");
+    blogc_error_free(err);
+}
+
+
 int
 main(void)
 {
@@ -688,24 +878,33 @@ main(void)
         unit_test(test_template_parse_ifdef_and_var_outside_block),
         unit_test(test_template_parse_invalid_block_start),
         unit_test(test_template_parse_invalid_block_nested),
+        unit_test(test_template_parse_invalid_foreach_nested),
         unit_test(test_template_parse_invalid_block_not_open),
         unit_test(test_template_parse_invalid_endif_not_open),
+        unit_test(test_template_parse_invalid_endforeach_not_open),
         unit_test(test_template_parse_invalid_block_name),
         unit_test(test_template_parse_invalid_block_type_start),
         unit_test(test_template_parse_invalid_block_type),
         unit_test(test_template_parse_invalid_ifdef_start),
+        unit_test(test_template_parse_invalid_foreach_start),
         unit_test(test_template_parse_invalid_ifdef_variable),
+        unit_test(test_template_parse_invalid_ifdef_variable2),
+        unit_test(test_template_parse_invalid_foreach_variable),
+        unit_test(test_template_parse_invalid_foreach_variable2),
         unit_test(test_template_parse_invalid_if_operator),
         unit_test(test_template_parse_invalid_if_operand),
         unit_test(test_template_parse_invalid_if_operand2),
+        unit_test(test_template_parse_invalid_if_operand3),
         unit_test(test_template_parse_invalid_block_end),
         unit_test(test_template_parse_invalid_variable_name),
         unit_test(test_template_parse_invalid_variable_name2),
+        unit_test(test_template_parse_invalid_variable_name3),
         unit_test(test_template_parse_invalid_variable_end),
         unit_test(test_template_parse_invalid_close),
         unit_test(test_template_parse_invalid_close2),
         unit_test(test_template_parse_invalid_if_not_closed),
         unit_test(test_template_parse_invalid_block_not_closed),
+        unit_test(test_template_parse_invalid_foreach_not_closed),
     };
     return run_tests(tests);
 }

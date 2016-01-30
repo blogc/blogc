@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2015 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2015-2016 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -141,11 +141,14 @@ blogc_source_parse_from_files(b_trie_t *conf, b_slist_t *l, blogc_error_t **err)
                 b_trie_free(s);
                 continue;
             }
-            char **tags = b_str_split(tags_str, ',', 0);
+            char **tags = b_str_split(tags_str, ' ', 0);
             bool found = false;
-            for (unsigned int i = 0; tags[i] != NULL; i++)
-                if (0 == strcmp(b_str_strip(tags[i]), filter_tag))
+            for (unsigned int i = 0; tags[i] != NULL; i++) {
+                if (tags[i][0] == '\0')
+                    continue;
+                if (0 == strcmp(tags[i], filter_tag))
                     found = true;
+            }
             b_strv_free(tags);
             if (!found) {
                 b_trie_free(s);

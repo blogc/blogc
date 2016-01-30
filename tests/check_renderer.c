@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2015 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2015-2016 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -31,6 +31,7 @@ create_sources(unsigned int count)
         "GUDA2: zxc\n"
         "DATE: 2015-01-02 03:04:05\n"
         "DATE_FORMAT: %R\n"
+        "TAGS: foo   bar baz\n"
         "-----\n"
         "ahahahahahahahaha",
         "BOLA: asd2\n"
@@ -74,7 +75,9 @@ test_render_entry(void **state)
         "{% if GUDA != \"bola\" %}HEHE{% endif %}\n"
         "{% if GUDA < \"zxd\" %}LOL2{% endif %}\n"
         "{% if GUDA > \"zxd\" %}LOL3{% endif %}\n"
-        "{% if GUDA <= \"zxc\" %}LOL4{% endif %}\n";
+        "{% if GUDA <= \"zxc\" %}LOL4{% endif %}\n"
+        "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
+        "{% foreach TAGS_ASD %}yay{% endforeach %}\n";
     blogc_error_t *err = NULL;
     b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
@@ -97,7 +100,9 @@ test_render_entry(void **state)
         "HEHE\n"
         "LOL2\n"
         "\n"
-        "LOL4\n");
+        "LOL4\n"
+        "lol foo haha lol bar haha lol baz haha \n"
+        "\n");
     blogc_template_free_stmts(l);
     b_slist_free_full(s, (b_free_func_t) b_trie_free);
     free(out);
@@ -117,6 +122,8 @@ test_render_listing(void **state)
         "{% block listing %}\n"
         "{% ifdef DATE_FORMATTED %}{{ DATE_FORMATTED }}{% endif %}\n"
         "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
+        "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
+        "{% foreach TAGS_ASD %}yay{% endforeach %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
     b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
@@ -132,12 +139,18 @@ test_render_listing(void **state)
         "\n"
         "03:04\n"
         "bola: asd\n"
+        "lol foo haha lol bar haha lol baz haha \n"
+        "\n"
         "\n"
         "2014-02-03 04:05:06\n"
         "bola: asd2\n"
         "\n"
+        "\n"
+        "\n"
         "2013-01-02 03:04:05\n"
         "bola: asd3\n"
+        "\n"
+        "\n"
         "\n");
     blogc_template_free_stmts(l);
     b_slist_free_full(s, (b_free_func_t) b_trie_free);
@@ -158,6 +171,7 @@ test_render_listing_empty(void **state)
         "{% block listing %}\n"
         "{% ifdef DATE_FORMATTED %}{{ DATE_FORMATTED }}{% endif %}\n"
         "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
+        "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
     b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
@@ -519,6 +533,55 @@ test_render_if_gt_eq(void **state)
 
 
 static void
+test_render_foreach(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% foreach TAGS %} {{ FOREACH_ITEM }} {% endforeach %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    b_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, NULL, false);
+    assert_string_equal(out,
+        "\n"
+        " foo  bar  baz \n"
+        "\n");
+    blogc_template_free_stmts(l);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_foreach_if(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% foreach TAGS %} {% if FOREACH_ITEM == \"bar\" %}{{ FOREACH_ITEM }}"
+        "{% endif %} {% endforeach %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    b_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, NULL, false);
+    assert_string_equal(out,
+        "\n"
+        "   bar   \n"
+        "\n");
+    blogc_template_free_stmts(l);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
+    free(out);
+}
+
+
+static void
 test_render_null(void **state)
 {
     assert_null(blogc_render(NULL, NULL, NULL, false));
@@ -615,6 +678,37 @@ test_render_respect_variable_scope(void **state)
         "\n"
         "\n"
         "asd\n"
+        "\n");
+    b_trie_free(c);
+    blogc_template_free_stmts(l);
+    b_slist_free_full(s, (b_free_func_t) b_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_ifcount_bug(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% ifdef TITLE %}<h3>{{ TITLE }}</h3>{% endif %}\n"
+        "{% ifdef IS_POST %}\n"
+        "{% ifdef ASD %}ASD{% endif %}\n"
+        "{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    b_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    b_slist_t *s = NULL;
+    s = b_slist_append(s, b_trie_new(free));
+    b_trie_insert(s->data, "TITLE", b_strdup("bola"));
+    b_trie_t *c = b_trie_new(free);
+    char *out = blogc_render(l, s, c, false);
+    assert_string_equal(out,
+        "\n"
+        "<h3>bola</h3>\n"
+        "\n"
         "\n");
     b_trie_free(c);
     blogc_template_free_stmts(l);
@@ -732,13 +826,13 @@ test_format_variable(void **state)
     b_trie_t *l = b_trie_new(free);
     b_trie_insert(l, "NAME", b_strdup("chunda"));
     b_trie_insert(l, "TITLE", b_strdup("chunda2"));
-    char *tmp = blogc_format_variable("NAME", g, l);
+    char *tmp = blogc_format_variable("NAME", g, l, NULL);
     assert_string_equal(tmp, "chunda");
     free(tmp);
-    tmp = blogc_format_variable("TITLE", g, l);
+    tmp = blogc_format_variable("TITLE", g, l, NULL);
     assert_string_equal(tmp, "chunda2");
     free(tmp);
-    assert_null(blogc_format_variable("BOLA", g, l));
+    assert_null(blogc_format_variable("BOLA", g, l, NULL));
     b_trie_free(g);
     b_trie_free(l);
 }
@@ -752,9 +846,60 @@ test_format_variable_with_date(void **state)
     b_trie_insert(g, "DATE_FORMAT", b_strdup("%R"));
     b_trie_t *l = b_trie_new(free);
     b_trie_insert(l, "DATE", b_strdup("2011-12-13 14:15:16"));
-    char *tmp = blogc_format_variable("DATE_FORMATTED", g, l);
+    char *tmp = blogc_format_variable("DATE_FORMATTED", g, l, NULL);
     assert_string_equal(tmp, "14:15");
     free(tmp);
+    b_trie_free(g);
+    b_trie_free(l);
+}
+
+
+static void
+test_format_variable_foreach(void **state)
+{
+    b_slist_t *l = NULL;
+    l = b_slist_append(l, b_strdup("asd"));
+    l = b_slist_append(l, b_strdup("qwe"));
+    char *tmp = blogc_format_variable("FOREACH_ITEM", NULL, NULL, l->next);
+    assert_string_equal(tmp, "qwe");
+    free(tmp);
+    b_slist_free_full(l, free);
+}
+
+
+static void
+test_format_variable_foreach_empty(void **state)
+{
+    assert_null(blogc_format_variable("FOREACH_ITEM", NULL, NULL, NULL));
+}
+
+
+static void
+test_split_list_variable(void **state)
+{
+    b_trie_t *g = b_trie_new(free);
+    b_trie_insert(g, "TAGS", b_strdup("asd  lol hehe"));
+    b_trie_t *l = b_trie_new(free);
+    b_trie_insert(l, "TAGS", b_strdup("asd  lol XD"));
+    b_slist_t *tmp = blogc_split_list_variable("TAGS", g, l);
+    assert_string_equal(tmp->data, "asd");
+    assert_string_equal(tmp->next->data, "lol");
+    assert_string_equal(tmp->next->next->data, "XD");
+    b_slist_free_full(tmp, free);
+    b_trie_free(g);
+    b_trie_free(l);
+}
+
+
+static void
+test_split_list_variable_not_found(void **state)
+{
+    b_trie_t *g = b_trie_new(free);
+    b_trie_insert(g, "TAGS", b_strdup("asd  lol hehe"));
+    b_trie_t *l = b_trie_new(free);
+    b_trie_insert(l, "TAGS", b_strdup("asd  lol XD"));
+    b_slist_t *tmp = blogc_split_list_variable("TAG", g, l);
+    assert_null(tmp);
     b_trie_free(g);
     b_trie_free(l);
 }
@@ -777,10 +922,13 @@ main(void)
         unit_test(test_render_if_gt),
         unit_test(test_render_if_lt_eq),
         unit_test(test_render_if_gt_eq),
+        unit_test(test_render_foreach),
+        unit_test(test_render_foreach_if),
         unit_test(test_render_null),
         unit_test(test_render_outside_block),
         unit_test(test_render_prefer_local_variable),
         unit_test(test_render_respect_variable_scope),
+        unit_test(test_render_ifcount_bug),
         unit_test(test_get_variable),
         unit_test(test_get_variable_only_local),
         unit_test(test_get_variable_only_global),
@@ -790,6 +938,10 @@ main(void)
         unit_test(test_format_date_without_date),
         unit_test(test_format_variable),
         unit_test(test_format_variable_with_date),
+        unit_test(test_format_variable_foreach),
+        unit_test(test_format_variable_foreach_empty),
+        unit_test(test_split_list_variable),
+        unit_test(test_split_list_variable_not_found),
     };
     return run_tests(tests);
 }

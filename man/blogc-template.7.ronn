@@ -4,8 +4,8 @@ blogc-template(7) -- blogc's template format
 ## DESCRIPTION
 
 Template files are used as base to build output files by blogc(1). These files
-can include variables, blocks and conditionals, that will directly affect the
-output files.
+can include variables, blocks, conditionals and iterators, that will directly
+affect the output files.
 
 The syntax of the template files is defined to be simple, without affecting the
 content output. The syntax is somewhat inspired by Jinja2 syntax.
@@ -162,6 +162,55 @@ Or:
     {% if TITLE == DEFAULT_TITLE %}
     Title is the default title
     {% endif %}
+
+## TEMPLATE ITERATORS
+
+Template iterators are used to iterate over the value of a variable, that is handled
+as a list.
+
+The available conditionals are: `foreach`.
+
+### foreach iterator
+
+The content of a `foreach` iterator is included in the output file when the target
+variable is defined, and is repeated for each item in the list parsed from the variable
+value.
+
+The variable value should be formatted as a space-separated list of items. Quotes are
+not supported, as this is intended to work with identifiers, like slugs, and not with
+arbitrary strings.
+
+This is how a variable value would be formatted:
+
+    item1 item2 item3
+
+For more info about how to define variables, see blogc(1) and blogc-source(7).
+
+This is how a `foreach` iterator is defined in a template:
+
+    {% foreach TAGS %}
+    <a href="/tag/{{ FOREACH_ITEM }}/">{{ FOREACH_ITEM }}</a>
+    {% endforeach %}
+
+Where `TAGS` is the variable with space-separated list of items, and `FOREACH_ITEM`
+is the variable defined by blogc(1), that will store the item value for a given
+iteration.
+
+If the value of the `TAGS` variable is "item1 item2 item3", this template is
+rendered 3 times, one for each item value.
+
+## WHITESPACE CONTROL
+
+Users can control how whitespaces (space, form-feed (`\f`), newline (`\n`),
+carriage return (`\r`), horizontal tab (`\t`), and vertical tab (`\v`)) are
+handled before and after statements delimited with `{%` and `%}` sequences,
+respectively.
+
+Adding a minus sign (`-`)  after a `{%` sequence (`{%-`) will remove whitespaces
+before the sequence and after the last non-whitespace character before the sequence.
+
+Adding a minus sign (`-`)  before a `%}` sequence (`-%}`) will remove whitespaces
+after the sequence and before the first non-whitespace character after the sequence.
 
 ## BUGS
 

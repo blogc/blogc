@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2015 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2015-2016 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -50,6 +50,17 @@ test_slugify(void **state)
 
 
 static void
+test_htmlentities(void **state)
+{
+    char *s = blogc_htmlentities(NULL);
+    assert_null(s);
+    s = blogc_htmlentities("asdxcv & < > \" 'sfd/gf");
+    assert_string_equal(s, "asdxcv &amp; &lt; &gt; &quot; &#x27;sfd&#x2F;gf");
+    free(s);
+}
+
+
+static void
 test_is_ordered_list_item(void **state)
 {
     assert_true(blogc_is_ordered_list_item("1.bola", 2));
@@ -88,7 +99,7 @@ test_content_parse(void **state)
         ">  \n"
         ">    asd\n"
         "\n"
-        "    bola\n"
+        "    <asd>bola</asd>\n"
         "     asd\n"
         "    qwewer\n"
         "\n"
@@ -123,7 +134,7 @@ test_content_parse(void **state)
         "buga</p>\n"
         "<pre><code>asd</code></pre>\n"
         "</blockquote>\n"
-        "<pre><code>bola\n"
+        "<pre><code>&lt;asd&gt;bola&lt;&#x2F;asd&gt;\n"
         " asd\n"
         "qwewer</code></pre>\n"
         "<hr />\n"
@@ -166,7 +177,7 @@ test_content_parse_crlf(void **state)
         ">  \r\n"
         ">    asd\r\n"
         "\r\n"
-        "    bola\r\n"
+        "    <asd>bola</asd>\r\n"
         "     asd\r\n"
         "    qwewer\r\n"
         "\r\n"
@@ -201,7 +212,7 @@ test_content_parse_crlf(void **state)
         "buga</p>\r\n"
         "<pre><code>asd</code></pre>\r\n"
         "</blockquote>\r\n"
-        "<pre><code>bola\r\n"
+        "<pre><code>&lt;asd&gt;bola&lt;&#x2F;asd&gt;\r\n"
         " asd\r\n"
         "qwewer</code></pre>\r\n"
         "<hr />\r\n"
@@ -2607,6 +2618,7 @@ main(void)
 {
     const UnitTest tests[] = {
         unit_test(test_slugify),
+        unit_test(test_htmlentities),
         unit_test(test_is_ordered_list_item),
         unit_test(test_content_parse),
         unit_test(test_content_parse_crlf),

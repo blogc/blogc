@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2015 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2015-2016 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -478,7 +478,7 @@ test_source_parse_from_files_filter_by_page_and_tag(void **state)
     will_return(__wrap_blogc_file_get_contents, b_strdup(
         "ASD: 789\n"
         "DATE: 2003-02-03 04:05:06\n"
-        "TAGS: chunda, bola\n"
+        "TAGS: chunda bola\n"
         "--------\n"
         "bola"));
     will_return(__wrap_blogc_file_get_contents, "bola4.txt");
@@ -505,7 +505,7 @@ test_source_parse_from_files_filter_by_page_and_tag(void **state)
     will_return(__wrap_blogc_file_get_contents, b_strdup(
         "ASD: 7894\n"
         "DATE: 2007-02-03 04:05:06\n"
-        "TAGS: yay, chunda\n"
+        "TAGS: yay chunda\n"
         "--------\n"
         "bola"));
     blogc_error_t *err = NULL;
