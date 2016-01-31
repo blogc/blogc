@@ -33,6 +33,7 @@ Makefile.in
 .dirstamp
 /build-aux/*
 !/build-aux/build-windows.sh
+!/build-aux/git-version-gen
 
 # installed .m4 files
 /m4/*.m4
@@ -62,3 +63,6 @@ blogc-*.zip
 # rpms
 blogc.spec
 blogc-*.rpm
+
+# git-version-gen
+/.version
