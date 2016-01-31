@@ -452,8 +452,6 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
     size_t eend = 0;
     size_t real_end = 0;
 
-    bool no_jump = false;
-
     unsigned int header_level = 0;
     char *prefix = NULL;
     size_t prefix_len = 0;
@@ -674,7 +672,7 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                         if (is_last) {
                             free(tmp);
                             tmp = NULL;
-                            goto para;
+                            continue;
                         }
                     }
                     free(tmp);
@@ -738,7 +736,7 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                         free(tmp);
                         tmp = NULL;
                         if (is_last)
-                            goto para;
+                            continue;
                         break;
                     }
                     free(tmp);
@@ -775,9 +773,9 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
 
             case CONTENT_UNORDERED_LIST_OR_HORIZONTAL_RULE:
                 if (c == d) {
-                    if (is_last)
-                        goto hr;
                     state = CONTENT_HORIZONTAL_RULE;
+                    if (is_last)
+                        continue;
                     break;
                 }
                 if (c == ' ' || c == '\t')
@@ -790,7 +788,6 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 if (c == d && !is_last) {
                     break;
                 }
-hr:
                 if (c == '\n' || c == '\r' || is_last) {
                     b_string_append_printf(rv, "<hr />%s", line_ending);
                     state = CONTENT_START_LINE;
@@ -842,7 +839,7 @@ hr:
                         b_slist_free_full(lines2, free);
                         lines = NULL;
                         if (is_last)
-                            goto para;
+                            continue;
                         break;
                     }
                     free(tmp);
@@ -901,7 +898,7 @@ hr:
                 }
                 state = CONTENT_PARAGRAPH;
                 if (is_last)
-                    goto para;
+                    continue;
                 break;
 
             case CONTENT_ORDERED_LIST_SPACE:
@@ -953,7 +950,7 @@ hr:
                         b_slist_free_full(lines2, free);
                         lines = NULL;
                         if (is_last)
-                            goto para;
+                            continue;
                         break;
                     }
                     free(tmp);
@@ -1198,15 +1195,7 @@ param_end:
                     break;
 
             case CONTENT_PARAGRAPH_END:
-                no_jump = true;
-para:
                 if (c == '\n' || c == '\r' || is_last) {
-                    if (!no_jump && is_last) {
-                        if (c == '\n' || c == '\r')
-                            end = src_len - 1;
-                        else
-                            end = src_len;
-                    }
                     tmp = b_strndup(src + start, end - start);
                     parsed = blogc_content_parse_inline(tmp);
                     b_string_append_printf(rv, "<p>%s</p>%s", parsed,
