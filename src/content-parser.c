@@ -557,8 +557,10 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                     break;
                 if ((c == ' ' || c == '\t') && current - start == 2) {
                     state = CONTENT_DIRECTIVE_NAME_START;
-                    if (is_last)
-                        goto para;
+                    if (is_last) {
+                        state = CONTENT_PARAGRAPH;
+                        continue;
+                    }
                     break;
                 }
                 if (c == '\n' || c == '\r') {
@@ -1001,8 +1003,10 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 break;
 
             case CONTENT_DIRECTIVE_NAME_START:
-                if (is_last)
-                    goto para;
+                if (is_last) {
+                    state = CONTENT_PARAGRAPH;
+                    continue;
+                }
                 if (c >= 'a' && c <= 'z') {
                     start2 = current;
                     state = CONTENT_DIRECTIVE_NAME;
@@ -1012,8 +1016,10 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 break;
 
             case CONTENT_DIRECTIVE_NAME:
-                if (is_last)
-                    goto para;
+                if (is_last) {
+                    state = CONTENT_PARAGRAPH;
+                    continue;
+                }
                 if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_')
                     break;
                 if (c == ':') {
@@ -1029,26 +1035,34 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                     free(directive_name);
                     directive_name = b_strndup(src + start2, end - start2);
                     state = CONTENT_DIRECTIVE_ARGUMENT_START;
-                    if (is_last)
-                        goto param_end;
+                    if (is_last) {
+                        state = CONTENT_DIRECTIVE_PARAM_END;
+                        continue;
+                    }
                     break;
                 }
-                if (is_last)
-                    goto para;
+                if (is_last) {
+                    state = CONTENT_PARAGRAPH;
+                    continue;
+                }
                 state = CONTENT_PARAGRAPH;
                 break;
 
             case CONTENT_DIRECTIVE_ARGUMENT_START:
                 if (c == ' ' || c == '\t') {
-                    if (is_last)
-                        goto param_end;
+                    if (is_last) {
+                        state = CONTENT_DIRECTIVE_PARAM_END;
+                        continue;
+                    }
                     break;
                 }
                 if (c == '\n' || c == '\r' || is_last) {
                     state = CONTENT_DIRECTIVE_PARAM_PREFIX_START;
                     directive_argument = NULL;
-                    if (is_last)
-                        goto param_end;
+                    if (is_last) {
+                        state = CONTENT_DIRECTIVE_PARAM_END;
+                        continue;
+                    }
                     else
                         start2 = current + 1;
                     break;
@@ -1064,20 +1078,26 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                         (real_end != 0 ? real_end : current);
                     free(directive_argument);
                     directive_argument = b_strndup(src + start2, end - start2);
-                    if (is_last)
-                        goto param_end;
+                    if (is_last) {
+                        state = CONTENT_DIRECTIVE_PARAM_END;
+                        continue;
+                    }
                     else
                         start2 = current + 1;
                 }
                 break;
 
             case CONTENT_DIRECTIVE_PARAM_PREFIX_START:
-                if (is_last)
-                    goto para;
+                if (is_last) {
+                    state = CONTENT_PARAGRAPH;
+                    continue;
+                }
                 if (c == ' ' || c == '\t')
                     break;
-                if (c == '\n' || c == '\r')
-                    goto param_end;
+                if (c == '\n' || c == '\r') {
+                    state = CONTENT_DIRECTIVE_PARAM_END;
+                    continue;
+                }
                 prefix = b_strndup(src + start2, current - start2);
                 state = CONTENT_DIRECTIVE_PARAM_PREFIX;
                 current--;
@@ -1092,12 +1112,14 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 }
                 state = CONTENT_PARAGRAPH;
                 if (is_last)
-                    goto para;
+                    continue;
                 break;
 
             case CONTENT_DIRECTIVE_PARAM_KEY_START:
-                if (is_last)
-                    goto para;
+                if (is_last) {
+                    state = CONTENT_PARAGRAPH;
+                    continue;
+                }
                 if (c >= 'a' && c <= 'z') {
                     start2 = current;
                     state = CONTENT_DIRECTIVE_PARAM_KEY;
@@ -1107,8 +1129,10 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 break;
 
             case CONTENT_DIRECTIVE_PARAM_KEY:
-                if (is_last)
-                    goto para;
+                if (is_last) {
+                    state = CONTENT_PARAGRAPH;
+                    continue;
+                }
                 if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_')
                     break;
                 if (c == ':') {
@@ -1121,8 +1145,10 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                 break;
 
             case CONTENT_DIRECTIVE_PARAM_VALUE_START:
-                if (is_last)
-                    goto para;
+                if (is_last) {
+                    state = CONTENT_PARAGRAPH;
+                    continue;
+                }
                 if (c == ' ' || c == '\t')
                     break;
                 start2 = current;
@@ -1147,7 +1173,6 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                     break;
 
             case CONTENT_DIRECTIVE_PARAM_END:
-param_end:
                 if (c == '\n' || c == '\r' || is_last) {
                     // FIXME: handle errors in the rest of the parser.
                     blogc_error_t *err = NULL;
@@ -1182,7 +1207,7 @@ param_end:
                 }
                 state = CONTENT_PARAGRAPH;
                 if (is_last)
-                    goto para;
+                    continue;
                 break;
 
             case CONTENT_PARAGRAPH:
