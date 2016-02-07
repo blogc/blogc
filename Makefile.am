@@ -13,6 +13,8 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 
 EXTRA_DIST = \
 	build-aux/build-windows.sh \
+	build-aux/git-version-gen \
+	$(top_srcdir)/.version \
 	autogen.sh \
 	LICENSE \
 	README.md \
@@ -22,6 +24,10 @@ CLEANFILES = \
 	$(NULL)
 
 MAINTAINERCLEANFILES = \
+	$(NULL)
+
+BUILT_SOURCES = \
+	$(top_srcdir)/.version \
 	$(NULL)
 
 noinst_HEADERS = \
@@ -309,6 +315,15 @@ endif
 
 TESTS = \
 	$(check_PROGRAMS)
+
+
+## Helpers: git-version-gen
+
+$(top_srcdir)/.version:
+	echo $(VERSION) > $@-t && mv $@-t $@
+
+dist-hook:
+	echo $(VERSION) > $(distdir)/.tarball-version
 
 
 ## Helpers: Valgrind runner
