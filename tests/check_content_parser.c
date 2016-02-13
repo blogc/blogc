@@ -1360,6 +1360,10 @@ test_content_parse_inline(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<em>bola</em>");
     free(html);
+    html = blogc_content_parse_inline("bola!");
+    assert_non_null(html);
+    assert_string_equal(html, "bola!");
+    free(html);
 }
 
 
@@ -1475,6 +1479,10 @@ test_content_parse_inline_link(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<a href=\"http://example.org/\">bola</a>\n");
     free(html);
+    html = blogc_content_parse_inline("[bola!](http://example.org/)\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"http://example.org/\">bola!</a>\n");
+    free(html);
     html = blogc_content_parse_inline("[bola]\n(http://example.org/)\n");
     assert_non_null(html);
     assert_string_equal(html, "<a href=\"http://example.org/\">bola</a>\n");
@@ -1490,6 +1498,12 @@ test_content_parse_inline_link(void **state)
     html = blogc_content_parse_inline("[``bola(2)[3]**!\\``](http://example.org/)\n");
     assert_non_null(html);
     assert_string_equal(html, "<a href=\"http://example.org/\"><code>bola(2)[3]**!\\</code></a>\n");
+    free(html);
+    html = blogc_content_parse_inline("test suite!)\n"
+        "depends on [cmocka](http://cmocka.org/), though.\n");
+    assert_non_null(html);
+    assert_string_equal(html, "test suite!)\n"
+        "depends on <a href=\"http://cmocka.org/\">cmocka</a>, though.\n");
     free(html);
     // "invalid"
     html = blogc_content_parse_inline("[bola](\nhttp://example.org/)\n");

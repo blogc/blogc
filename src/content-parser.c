@@ -231,11 +231,15 @@ blogc_content_parse_inline(const char *src)
                 break;
 
             case '!':
-                if (state == LINK_CLOSED && (open_code || open_code_double)) {
-                    b_string_append_c(rv, c);
-                    break;
-                }
                 if (state == LINK_CLOSED) {
+                    if (open_code || open_code_double) {
+                        b_string_append_c(rv, c);
+                        break;
+                    }
+                    if (!is_last && src[current + 1] != '[') {
+                        b_string_append_c(rv, c);
+                        break;
+                    }
                     state = LINK_IMAGE;
                     is_image = true;
                     start_state = current;
