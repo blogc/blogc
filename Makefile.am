@@ -123,7 +123,7 @@ blogc.1: man/blogc.1.ronn
 		--pipe \
 		--organization "Rafael G. Martins" \
 		--manual "$(PACKAGE_NAME) Manual" \
-		man/blogc.1.ronn > blogc.1
+		$(top_srcdir)/man/blogc.1.ronn > blogc.1
 
 blogc-source.7: man/blogc-source.7.ronn
 	$(AM_V_GEN)$(RONN) \
@@ -131,7 +131,7 @@ blogc-source.7: man/blogc-source.7.ronn
 		--pipe \
 		--organization "Rafael G. Martins" \
 		--manual "$(PACKAGE_NAME) Manual" \
-		man/blogc-source.7.ronn > blogc-source.7
+		$(top_srcdir)/man/blogc-source.7.ronn > blogc-source.7
 
 blogc-template.7: man/blogc-template.7.ronn
 	$(AM_V_GEN)$(RONN) \
@@ -139,7 +139,7 @@ blogc-template.7: man/blogc-template.7.ronn
 		--pipe \
 		--organization "Rafael G. Martins" \
 		--manual "$(PACKAGE_NAME) Manual" \
-		man/blogc-template.7.ronn > blogc-template.7
+		$(top_srcdir)/man/blogc-template.7.ronn > blogc-template.7
 
 else
 
