@@ -7,27 +7,20 @@ Summary:	A blog compiler
 URL:		@PACKAGE_URL@
 Source0:	https://github.com/blogc/blogc/releases/download/v%{version}/blogc-%{version}.tar.xz
 
-#BuildRequires:
-#Requires:
-
 %description
 blogc(1) is a blog compiler. It converts source files and templates into
 blog/website resources.
 
-
 %prep
-%setup -q -n blogc-%{version}
-
+%setup -q
 
 %build
 %configure
 make %{?_smp_mflags}
 
-
 %install
 rm -rf $RPM_BUILD_ROOT
 %make_install
-
 
 %files
 %{_mandir}/man*/blogc*
@@ -35,7 +28,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %doc README.md
 %license LICENSE
-
 
 %changelog
 * Mon Jan 25 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.7.2-1
