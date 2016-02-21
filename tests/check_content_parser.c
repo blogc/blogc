@@ -1606,6 +1606,21 @@ test_content_parse_inline_image(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<img src=\"http://example.org/\" alt=\"bola\">\n");
     free(html);
+    html = blogc_content_parse_inline(
+        "[![This is the image alt text](picture.jpg)](https://blogc.rgm.io)");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<a href=\"https://blogc.rgm.io\"><img src=\"picture.jpg\" "
+        "alt=\"This is the image alt text\"></a>");
+    free(html);
+    html = blogc_content_parse_inline(
+        "[![This is the image alt text]\n"
+        "(picture.jpg)](https://blogc.rgm.io)");
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<a href=\"https://blogc.rgm.io\"><img src=\"picture.jpg\" "
+        "alt=\"This is the image alt text\"></a>");
+    free(html);
     html = blogc_content_parse_inline("asd ![bola]chunda(1234)");
     assert_non_null(html);
     assert_string_equal(html, "asd ![bola]chunda(1234)");
