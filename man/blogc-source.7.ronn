@@ -203,6 +203,11 @@ Images are defined using the following syntax:
 
     This is an image: ![This is the image alt text](picture.jpg)
 
+Whitespace characters and new lines are allowed between alt text and image URL:
+
+    This is an image: ![This is the image alt text]
+    (picture.jpg)
+
 ### Links
 
 Links are defined using the following syntax:
@@ -220,10 +225,12 @@ Links can be combined with images:
 
     [![This is the image alt text](picture.jpg)](https://blogc.rgm.io)
 
-Whitespace characters and new lines are allowed between alt text and image URL:
+Whitespace characters and new lines are allowed between link text and link URL,
+and between alt text and image URL:
 
     [![This is the image alt text]
-    (picture.jpg)](https://blogc.rgm.io)
+    (picture.jpg)]
+    (https://blogc.rgm.io)
 
 ### Automatic Links
 
