@@ -161,6 +161,16 @@ blogc_content_parse_inline(const char *src)
         if (c != ' ' && c != '\n' && c != '\r')
             spaces = 0;
 
+        if (state == LINK_TEXT_CLOSE && c != ' ' && c != '\n' && c != '\r' &&
+            c != '(')
+        {
+            b_string_append_c(rv, src[start_state]);
+            tmp = blogc_content_parse_inline(src + start_state + 1);
+            b_string_append(rv, tmp);
+            // no need to free here, we will exit the loop!
+            break;
+        }
+
         switch (c) {
 
             case '\\':
@@ -390,8 +400,7 @@ blogc_content_parse_inline(const char *src)
             b_string_append_c(rv, src[start_state]);
             tmp = blogc_content_parse_inline(src + start_state + 1);
             b_string_append(rv, tmp);
-            free(tmp);
-            tmp = NULL;
+            // no need to free here, its the last iteration
         }
         current++;
     }
