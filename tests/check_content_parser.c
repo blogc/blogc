@@ -1598,6 +1598,18 @@ test_content_parse_inline_image(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<img src=\"http://example.org/\" alt=\"bola\">\n");
     free(html);
+    html = blogc_content_parse_inline("![bola]\r\n(http://example.org/)\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<img src=\"http://example.org/\" alt=\"bola\">\n");
+    free(html);
+    html = blogc_content_parse_inline("![bola] \r\n (http://example.org/)\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<img src=\"http://example.org/\" alt=\"bola\">\n");
+    free(html);
+    html = blogc_content_parse_inline("asd ![bola]chunda(1234)");
+    assert_non_null(html);
+    assert_string_equal(html, "asd ![bola]chunda(1234)");
+    free(html);
     // "invalid"
     html = blogc_content_parse_inline("![bo\nla](http://example.org/)\n");
     assert_non_null(html);
