@@ -209,11 +209,21 @@ Links are defined using the following syntax:
 
     To learn more about blogc, [click here](https://blogc.rgm.io).
 
+Whitespace characters and new lines are allowed between link text and link URL:
+
+    To learn more about blogc, [click here]
+    (https://blogc.rgm.io).
+
 ### Image Links
 
 Links can be combined with images:
 
     [![This is the image alt text](picture.jpg)](https://blogc.rgm.io)
+
+Whitespace characters and new lines are allowed between alt text and image URL:
+
+    [![This is the image alt text]
+    (picture.jpg)](https://blogc.rgm.io)
 
 ### Automatic Links
 
