@@ -99,12 +99,32 @@ AC_CHECK_HEADERS([sys/types.h sys/stat.h time.h])
 
 LT_LIB_M
 
-m4_include([squareball/squareball.m4])
-SQUAREBALL_INIT
+AC_ARG_WITH([squareball], [AS_HELP_STRING([--with-squareball=@<:@internal/system@:>@],
+            [whether to use library squareball from system [default=internal]])])
+AS_IF([test "x$with_squareball" = "xsystem"], [
+  SQUAREBALL="system"
+  PKG_CHECK_MODULES([SQUAREBALL], [squareball], , [
+    AC_MSG_ERROR([library squareball requested from system but not found])
+  ])
+], [
+  SQUAREBALL="internal"
+  SQUAREBALL_CFLAGS='-I$(top_srcdir)/squareball/src'
+  SQUAREBALL_LIBS='$(top_builddir)/squareball/libsquareball.la'
+  AC_SUBST(SQUAREBALL_LIBS)
+  AC_SUBST(SQUAREBALL_CFLAGS)
+  ac_configure_args_pre="$ac_configure_args"
+  ac_configure_args_post="$ac_configure_args --enable-bundleme"
+  ac_configure_args="$ac_configure_args_post"
+  AC_CONFIG_COMMANDS_PRE([ac_configure_args="$ac_configure_args_pre"])
+  AC_CONFIG_COMMANDS_POST([ac_configure_args="$ac_configure_args_post"])
+  AC_CONFIG_SUBDIRS([squareball])
+  ac_configure_args="$ac_configure_args_pre"
+])
+AM_CONDITIONAL(INTERNAL_SQUAREBALL, [test "x$with_squareball" != "xsystem"])
 
 AC_CONFIG_FILES([
-    Makefile
-    blogc.spec
+  Makefile
+  blogc.spec
 ])
 
 AC_OUTPUT
