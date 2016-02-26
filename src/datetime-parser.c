@@ -17,7 +17,7 @@
 #include <string.h>
 
 #include "error.h"
-#include "utils/utils.h"
+#include <squareball.h>
 #include "datetime-parser.h"
 
 
@@ -380,7 +380,7 @@ blogc_convert_datetime(const char *orig, const char *format,
         return NULL;
     }
 
-    return b_strdup(buf);
+    return sb_strdup(buf);
 
 #endif
 }
