@@ -17,7 +17,7 @@ blog/website resources.
 %setup -q
 
 %build
-%configure
+%configure --with-squareball=system
 make %{?_smp_mflags}
 
 %install
