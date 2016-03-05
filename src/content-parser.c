@@ -374,6 +374,9 @@ blogc_content_parse_inline(const char *src)
                         current += 1;
                     }
                 }
+                else {
+                    sb_string_append_c(rv, c);
+                }
                 break;
 
             case '&':
