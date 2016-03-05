@@ -243,6 +243,11 @@ Automatic link is defined with 2 '[' before and 2 ']' after the URL.
 Line breaks can be added after a paragraph line adding 2 or more white spaces
 to the end of the line.
 
+### En dashes and Em dashes
+
+Sequences of 2 '-' characters are converted to an En dash HTML entity.
+Sequences of 3 '-' characters are converted to an Em dash HTML entity.
+
 
 ## BUGS
 
