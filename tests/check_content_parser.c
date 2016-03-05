@@ -106,8 +106,8 @@ test_content_parse(void **state)
         "1. chunda\n"
         "3. fuuuu\n"
         "\n"
-        "+  chunda2\n"
-        "+  fuuuu2\n"
+        "-  chunda2\n"
+        "-  fuuuu2\n"
         "\n"
         "<style>\n"
         "   chunda\n"
@@ -116,7 +116,13 @@ test_content_parse(void **state)
         "guda\n"
         "yay\n"
         "\n"
-        "**bola**\n", &l);
+        "**bola**\n"
+        "-- foo\n"
+        "--- bar\n"
+        "\n"
+        "-- asd\n"
+        "\n"
+        "--- lol\n", &l);
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_string_equal(html,
@@ -150,7 +156,11 @@ test_content_parse(void **state)
         "</style>\n"
         "<p>guda\n"
         "yay</p>\n"
-        "<p><strong>bola</strong></p>\n");
+        "<p><strong>bola</strong>\n"
+        "&mdash; foo\n"
+        "&ndash; bar</p>\n"
+        "<p>&mdash; asd</p>\n"
+        "<p>&ndash; lol</p>\n");
     free(html);
 }
 
@@ -194,7 +204,13 @@ test_content_parse_crlf(void **state)
         "guda\r\n"
         "yay\r\n"
         "\r\n"
-        "**bola**\r\n", &l);
+        "**bola**\r\n"
+        "-- foo\r\n"
+        "--- bar\r\n"
+        "\r\n"
+        "-- asd\r\n"
+        "\r\n"
+        "--- lol\r\n", &l);
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_string_equal(html,
@@ -228,7 +244,11 @@ test_content_parse_crlf(void **state)
         "</style>\r\n"
         "<p>guda\r\n"
         "yay</p>\r\n"
-        "<p><strong>bola</strong></p>\r\n");
+        "<p><strong>bola</strong>\r\n"
+        "&mdash; foo\r\n"
+        "&ndash; bar</p>\r\n"
+        "<p>&mdash; asd</p>\r\n"
+        "<p>&ndash; lol</p>\r\n");
     free(html);
 }
 
