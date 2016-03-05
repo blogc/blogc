@@ -366,11 +366,11 @@ blogc_content_parse_inline(const char *src)
                     break;
                 if (current < (src_len - 1) && src[current + 1] == '-') {
                     if (current < (src_len - 2) && src[current + 2] == '-') {
-                        sb_string_append(rv, "&ndash;");
+                        sb_string_append(rv, "&mdash;");
                         current += 2;
                     }
                     else {
-                        sb_string_append(rv, "&mdash;");
+                        sb_string_append(rv, "&ndash;");
                         current += 1;
                     }
                 }

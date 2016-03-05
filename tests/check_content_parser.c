@@ -157,10 +157,10 @@ test_content_parse(void **state)
         "<p>guda\n"
         "yay</p>\n"
         "<p><strong>bola</strong>\n"
-        "&mdash; foo-bar\n"
-        "&ndash; bar</p>\n"
-        "<p>&mdash; asd</p>\n"
-        "<p>&ndash; lol</p>\n");
+        "&ndash; foo-bar\n"
+        "&mdash; bar</p>\n"
+        "<p>&ndash; asd</p>\n"
+        "<p>&mdash; lol</p>\n");
     free(html);
 }
 
@@ -245,10 +245,10 @@ test_content_parse_crlf(void **state)
         "<p>guda\r\n"
         "yay</p>\r\n"
         "<p><strong>bola</strong>\r\n"
-        "&mdash; foo-bar\r\n"
-        "&ndash; bar</p>\r\n"
-        "<p>&mdash; asd</p>\r\n"
-        "<p>&ndash; lol</p>\r\n");
+        "&ndash; foo-bar\r\n"
+        "&mdash; bar</p>\r\n"
+        "<p>&ndash; asd</p>\r\n"
+        "<p>&mdash; lol</p>\r\n");
     free(html);
 }
 
