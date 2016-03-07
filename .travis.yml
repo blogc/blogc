@@ -1,0 +1,28 @@
+dist: trusty
+sudo: required
+language: c
+
+addons:
+  apt:
+    packages:
+      - libcmocka-dev
+      - valgrind
+
+compiler:
+  - clang
+  - gcc
+
+env:
+  - TARGET=valgrind
+  - TARGET=distcheck
+
+install: gem install ronn
+
+before_script: ./autogen.sh
+
+script: |
+  mkdir build &&
+  pushd build > /dev/null &&
+  ../configure CFLAGS="-Wall" --enable-tests --enable-ronn --enable-valgrind --disable-silent-rules &&
+  make $TARGET &&
+  popd > /dev/null
