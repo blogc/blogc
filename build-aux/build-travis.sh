@@ -7,7 +7,7 @@ mkdir -p build
 
 MAKE_TARGET="${TARGET}"
 
-if test "x${TARGET}" = "xw*"; then
+if test "x${TARGET}" = xw*; then
     unset CC
     export CFLAGS="-O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4"
     export CHOST="x86_64-w64-mingw32"
