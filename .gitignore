@@ -32,6 +32,7 @@ Makefile.in
 /stamp-h1
 .dirstamp
 /build-aux/*
+!/build-aux/build-travis.sh
 !/build-aux/build-windows.sh
 !/build-aux/git-version-gen
 
