@@ -5,6 +5,8 @@ language: c
 addons:
   apt:
     packages:
+      - gcc-mingw-w64-i686
+      - gcc-mingw-w64-x86-64
       - libcmocka-dev
       - valgrind
 
@@ -15,14 +17,18 @@ compiler:
 env:
   - TARGET=valgrind
   - TARGET=distcheck
+  - TARGET=w32
+  - TARGET=w64
+
+matrix:
+  exclude:
+    - compiler: clang
+      env: TARGET=w32
+    - compiler: clang
+      env: TARGET=w64
 
 install: gem install ronn
 
 before_script: ./autogen.sh
 
-script: |
-  mkdir build &&
-  pushd build > /dev/null &&
-  ../configure CFLAGS="-Wall" --enable-tests --enable-ronn --enable-valgrind --disable-silent-rules &&
-  make $TARGET &&
-  popd > /dev/null
+script: ./build-aux/build-travis.sh
