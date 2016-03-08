@@ -17,7 +17,6 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 ## File listings
 
 EXTRA_DIST = \
-	build-aux/build-windows.sh \
 	build-aux/git-version-gen \
 	$(top_srcdir)/.version \
 	autogen.sh \

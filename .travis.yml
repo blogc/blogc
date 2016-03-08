@@ -22,6 +22,11 @@ env:
   - TARGET=w32
   - TARGET=w64
 
+global:
+  - secure: JCF5qRCiY+z7jwfCamG3v5xgQZ82MVvQPee6E3zhxMa6psp1wtPRJNx9MvXQxtjAvnOdHav5Ivo29JYFtxVdrzEM/J/R3FKRmgZ71nCw9Mf/iVjIrRHwW3ofQJ9sCwbWZi1tha7yD12qGlxDKA0cAwVuRpHy/MQDiBAmZxN7XCw=
+  - secure: YBCsXkVyv43DadU2xiplVPFZBRb4HXpb815he6672ESuoh5VAtIrRH7UlI5z/7BLtSv0Isb2X5rBlTWAzNM8y/Ec0cYlBlmMIBWdl2CvQQSZ8x+kIK0hkADzQboU0E7ZUw13xca1R3C88UpSKH69M8AUJpj+VPgEOT1NE+M9pfw=
+  - secure: Ct5BdBhRsa3cjJnPUQ48NdJR6Ih2GIJiUdJFhLxxRX4nEudVDfqFB1OOwTtbPO3/RBtPDEL8BzdnZzs7BDOOJKTpoljY4GyC7LsknNVAztWrIV9vh3K6c3UijPzIcoOxGFIPPvzAm37zyS4kzMP2+7r2mZjvr1TvmXlSL59Rruw=
+
 matrix:
   exclude:
     - compiler: clang
@@ -35,4 +40,12 @@ install: gem install ronn
 
 before_script: ./autogen.sh
 
-script: ./build-aux/build-travis.sh
+script: ./build-aux/travis-build.sh
+
+deploy:
+  provider: script
+  script: ./build-aux/travis-deploy.sh
+  skip_cleanup: true
+  on:
+    repo: blogc/blogc
+    branch: master

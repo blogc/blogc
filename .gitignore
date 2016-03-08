@@ -32,9 +32,9 @@ Makefile.in
 /stamp-h1
 .dirstamp
 /build-aux/*
-!/build-aux/build-travis.sh
-!/build-aux/build-windows.sh
 !/build-aux/git-version-gen
+!/build-aux/travis-build.sh
+!/build-aux/travis-deploy.sh
 
 # installed .m4 files
 /m4/*.m4
@@ -67,3 +67,5 @@ blogc-*.rpm
 
 # git-version-gen
 /.version
+
+/build/
