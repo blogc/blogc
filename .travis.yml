@@ -44,3 +44,4 @@ deploy:
   on:
     repo: blogc/blogc
     branch: master
+    condition: $CC = gcc

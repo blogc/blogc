@@ -2,7 +2,7 @@
 
 set -e
 
-if [[ "x${TARGET}" != xw* ]] && [[ "x${TARGET}" != xdist* ]] && [[ "x${CC}" != xgcc ]]; then
+if [[ "x${TARGET}" != xw* ]] && [[ "x${TARGET}" != xdist* ]]; then
     echo "Nothing to deploy."
     exit 0
 fi
