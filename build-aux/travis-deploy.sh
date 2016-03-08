@@ -25,7 +25,6 @@ VERSION="$(grep PACKAGE_VERSION build/config.h | cut -d\" -f2)"
 
 do_curl() {
     curl \
-        --silent \
         --ftp-create-dirs \
         --upload-file "${1}" \
         --user "${FTP_USER}:${FTP_PASSWORD}" \
