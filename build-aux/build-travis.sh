@@ -31,7 +31,7 @@ popd > /dev/null
 make -C build "${MAKE_TARGET}"
 
 if [[ "x${TARGET}" = xw* ]]; then
-    VERSION="$(grep PACKAGE_VERSION config.h | cut -d\" -f2)"
+    VERSION="$(grep PACKAGE_VERSION build/config.h | cut -d\" -f2)"
     DEST_DIR="blogc-${VERSION}-${TARGET}"
 
     rm -rf "${DEST_DIR}"
