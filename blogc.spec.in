@@ -1,11 +1,11 @@
 Name: @PACKAGE_NAME@
-Version: @PACKAGE_VERSION@
+Version: @RPM_VERSION@
 Release: 1%{?dist}
 License: BSD
 Group: Applications/Text
 Summary: A blog compiler
 URL: @PACKAGE_URL@
-Source0: https://github.com/blogc/blogc/releases/download/v%{version}/blogc-%{version}.tar.xz
+Source0: https://github.com/blogc/blogc/releases/download/v@PACKAGE_VERSION@/blogc-@PACKAGE_VERSION@.tar.xz
 
 BuildRequires: squareball-devel
 

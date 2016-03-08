@@ -22,6 +22,30 @@ AS_IF([test "x$ac_cv_prog_cc_c99" = "xno"], [
 
 PKG_PROG_PKG_CONFIG
 
+AC_PROG_SED
+
+RPM_VERSION=`echo ${PACKAGE_VERSION} | sed "s/-/./g"`
+AC_SUBST(RPM_VERSION)
+
+AC_ARG_ENABLE([rpmbuild], AS_HELP_STRING([--disable-rpmbuild],
+              [ignore presence of rpmbuild and disable srpm generation]))
+AS_IF([test "x$enable_rpmbuild" != "xno"], [
+  AC_PATH_PROG([rpmbuild], [rpmbuild])
+  AS_IF([test "x$ac_cv_path_rpmbuild" = "x"], [
+    have_rpmbuild=no
+  ], [
+    have_rpmbuild=yes
+  ])
+])
+AS_IF([test "x$have_rpmbuild" = "xyes"], , [
+  AS_IF([test "x$enable_rpmbuild" = "xyes"], [
+    AC_MSG_ERROR([rpmbuild requested but not found])
+  ])
+])
+AM_CONDITIONAL([USE_RPMBUILD], [test "x$ac_cv_path_rpmbuild" != "x"])
+RPMBUILD="$ac_cv_path_rpmbuild"
+AC_SUBST(RPMBUILD)
+
 AC_ARG_ENABLE([ronn], AS_HELP_STRING([--disable-ronn],
               [ignore presence of ronn and disable man pages generation]))
 AS_IF([test "x$enable_ronn" != "xno"], [
@@ -145,4 +169,5 @@ AS_ECHO("
 
         ronn:         ${RONN}
         valgrind:     ${VALGRIND}
+        rpmbuild:     ${RPMBUILD}
 ")

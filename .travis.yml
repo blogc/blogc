@@ -8,6 +8,7 @@ addons:
       - gcc-mingw-w64-i686
       - gcc-mingw-w64-x86-64
       - libcmocka-dev
+      - rpm
       - valgrind
 
 compiler:
@@ -17,6 +18,7 @@ compiler:
 env:
   - TARGET=valgrind
   - TARGET=distcheck
+  - TARGET=dist-srpm
   - TARGET=w32
   - TARGET=w64
 
@@ -26,6 +28,8 @@ matrix:
       env: TARGET=w32
     - compiler: clang
       env: TARGET=w64
+    - compiler: clang
+      env: TARGET=dist-srpm
 
 install: gem install ronn
 

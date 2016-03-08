@@ -314,6 +314,16 @@ TESTS = \
 	$(check_PROGRAMS)
 
 
+## Helpers: dist-srpm
+if USE_RPMBUILD
+dist-srpm: blogc.spec dist-xz
+	$(RPMBUILD) \
+		--define "_srcrpmdir $(top_builddir)" \
+		--define "_sourcedir $(top_builddir)" \
+		-bs blogc.spec
+endif
+
+
 ## Helpers: git-version-gen
 
 $(top_srcdir)/.version:
