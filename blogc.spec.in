@@ -14,7 +14,7 @@ blogc(1) is a blog compiler. It converts source files and templates into
 blog/website resources.
 
 %prep
-%setup -q
+%setup -q -n @PACKAGE_NAME@-@PACKAGE_VERSION@
 
 %build
 %configure --with-squareball=system

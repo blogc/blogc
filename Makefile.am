@@ -314,6 +314,7 @@ TESTS = \
 
 
 ## Helpers: dist-srpm
+
 if USE_RPMBUILD
 dist-srpm: blogc.spec dist-xz
 	$(RPMBUILD) \
