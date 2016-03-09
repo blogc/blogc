@@ -1,6 +1,6 @@
 # blogc
 
-[![Build Status](https://jenkins.rgm.io/buildStatus/icon?job=blogc-tests)](https://jenkins.rgm.io/job/blogc-tests/)
+[![Build Status](https://travis-ci.org/blogc/blogc.svg?branch=master)](https://travis-ci.org/blogc/blogc)
 
 A blog compiler.
 
