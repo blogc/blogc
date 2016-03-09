@@ -2,11 +2,6 @@
 
 set -e
 
-if [[ "x${TARGET}" != xw* ]] && [[ "x${TARGET}" != xdist* ]]; then
-    echo "Nothing to deploy."
-    exit 0
-fi
-
 if [[ ! -d build ]]; then
     echo "Build directory not found."
     exit 1
