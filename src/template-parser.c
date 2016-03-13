@@ -53,7 +53,7 @@ typedef enum {
 
 
 sb_slist_t*
-blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
+blogc_template_parse(const char *src, size_t src_len, sb_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -597,14 +597,14 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
             *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src, src_len,
                 start2 - 1, "Found an open double-quoted string.");
         else if (if_count != 0)
-            *err = blogc_error_new_printf(BLOGC_ERROR_TEMPLATE_PARSER,
+            *err = sb_error_new_printf(BLOGC_ERROR_TEMPLATE_PARSER,
                 "%d open 'ifdef' and/or 'ifndef' statements were not closed!",
                 if_count);
         else if (block_state != BLOCK_CLOSED)
-            *err = blogc_error_new(BLOGC_ERROR_TEMPLATE_PARSER,
+            *err = sb_error_new(BLOGC_ERROR_TEMPLATE_PARSER,
                 "An open block was not closed!");
         else if (foreach_open)
-            *err = blogc_error_new(BLOGC_ERROR_TEMPLATE_PARSER,
+            *err = sb_error_new(BLOGC_ERROR_TEMPLATE_PARSER,
                 "An open 'foreach' statement was not closed!");
     }
 

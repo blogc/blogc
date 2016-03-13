@@ -13,9 +13,9 @@
 #include "error.h"
 
 char* blogc_get_filename(const char *f);
-sb_slist_t* blogc_template_parse_from_file(const char *f, blogc_error_t **err);
-sb_trie_t* blogc_source_parse_from_file(const char *f, blogc_error_t **err);
+sb_slist_t* blogc_template_parse_from_file(const char *f, sb_error_t **err);
+sb_trie_t* blogc_source_parse_from_file(const char *f, sb_error_t **err);
 sb_slist_t* blogc_source_parse_from_files(sb_trie_t *conf, sb_slist_t *l,
-    blogc_error_t **err);
+    sb_error_t **err);
 
 #endif /* _LOADER_H */

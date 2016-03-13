@@ -15,7 +15,7 @@
 
 #define BLOGC_FILE_CHUNK_SIZE 1024
 
-char* blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err);
+char* blogc_file_get_contents(const char *path, size_t *len, sb_error_t **err);
 int blogc_fprintf(FILE *stream, const char *format, ...);
 
 #endif /* _FILE_H */

@@ -52,7 +52,7 @@ test_get_filename(void **state)
 
 
 char*
-__wrap_blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err)
+__wrap_blogc_file_get_contents(const char *path, size_t *len, sb_error_t **err)
 {
     assert_null(*err);
     const char *_path = mock_type(const char*);
@@ -78,7 +78,7 @@ __wrap_blogc_fprintf(FILE *stream, const char *format, ...)
 static void
 test_template_parse_from_file(void **state)
 {
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     will_return(__wrap_blogc_file_get_contents, "bola");
     will_return(__wrap_blogc_file_get_contents, sb_strdup("{{ BOLA }}\n"));
     sb_slist_t *l = blogc_template_parse_from_file("bola", &err);
@@ -92,7 +92,7 @@ test_template_parse_from_file(void **state)
 static void
 test_template_parse_from_file_null(void **state)
 {
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     will_return(__wrap_blogc_file_get_contents, "bola");
     will_return(__wrap_blogc_file_get_contents, NULL);
     sb_slist_t *l = blogc_template_parse_from_file("bola", &err);
@@ -104,7 +104,7 @@ test_template_parse_from_file_null(void **state)
 static void
 test_source_parse_from_file(void **state)
 {
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     will_return(__wrap_blogc_file_get_contents, "bola.txt");
     will_return(__wrap_blogc_file_get_contents, sb_strdup(
         "ASD: 123\n"
@@ -126,7 +126,7 @@ test_source_parse_from_file(void **state)
 static void
 test_source_parse_from_file_null(void **state)
 {
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     will_return(__wrap_blogc_file_get_contents, "bola.txt");
     will_return(__wrap_blogc_file_get_contents, NULL);
     sb_trie_t *t = blogc_source_parse_from_file("bola.txt", &err);
@@ -156,7 +156,7 @@ test_source_parse_from_files(void **state)
         "DATE: 2003-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *s = NULL;
     s = sb_slist_append(s, sb_strdup("bola1.txt"));
     s = sb_slist_append(s, sb_strdup("bola2.txt"));
@@ -200,7 +200,7 @@ test_source_parse_from_files_filter_by_tag(void **state)
         "DATE: 2003-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *s = NULL;
     s = sb_slist_append(s, sb_strdup("bola1.txt"));
     s = sb_slist_append(s, sb_strdup("bola2.txt"));
@@ -268,7 +268,7 @@ test_source_parse_from_files_filter_by_page(void **state)
         "DATE: 2007-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *s = NULL;
     s = sb_slist_append(s, sb_strdup("bola1.txt"));
     s = sb_slist_append(s, sb_strdup("bola2.txt"));
@@ -346,7 +346,7 @@ test_source_parse_from_files_filter_by_page2(void **state)
         "DATE: 2007-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *s = NULL;
     s = sb_slist_append(s, sb_strdup("bola1.txt"));
     s = sb_slist_append(s, sb_strdup("bola2.txt"));
@@ -425,7 +425,7 @@ test_source_parse_from_files_filter_by_page3(void **state)
         "DATE: 2007-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *s = NULL;
     s = sb_slist_append(s, sb_strdup("bola1.txt"));
     s = sb_slist_append(s, sb_strdup("bola2.txt"));
@@ -508,7 +508,7 @@ test_source_parse_from_files_filter_by_page_and_tag(void **state)
         "TAGS: yay chunda\n"
         "--------\n"
         "bola"));
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *s = NULL;
     s = sb_slist_append(s, sb_strdup("bola1.txt"));
     s = sb_slist_append(s, sb_strdup("bola2.txt"));
@@ -588,7 +588,7 @@ test_source_parse_from_files_filter_by_page_invalid(void **state)
         "DATE: 2007-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *s = NULL;
     s = sb_slist_append(s, sb_strdup("bola1.txt"));
     s = sb_slist_append(s, sb_strdup("bola2.txt"));
@@ -666,7 +666,7 @@ test_source_parse_from_files_filter_by_page_invalid2(void **state)
         "DATE: 2007-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *s = NULL;
     s = sb_slist_append(s, sb_strdup("bola1.txt"));
     s = sb_slist_append(s, sb_strdup("bola2.txt"));
@@ -711,7 +711,7 @@ test_source_parse_from_files_without_all_dates(void **state)
         "DATE: 2003-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *s = NULL;
     s = sb_slist_append(s, sb_strdup("bola1.txt"));
     s = sb_slist_append(s, sb_strdup("bola2.txt"));
@@ -734,7 +734,7 @@ test_source_parse_from_files_without_all_dates(void **state)
 static void
 test_source_parse_from_files_null(void **state)
 {
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *s = NULL;
     sb_trie_t *c = sb_trie_new(free);
     sb_slist_t *t = blogc_source_parse_from_files(c, s, &err);

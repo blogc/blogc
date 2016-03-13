@@ -46,7 +46,7 @@ create_sources(unsigned int count)
         "ahahahahahahahaha3",
     };
     assert_false(count > 3);
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = NULL;
     for (unsigned int i = 0; i < count; i++) {
         l = sb_slist_append(l, blogc_source_parse(s[i], strlen(s[i]), &err));
@@ -78,7 +78,7 @@ test_render_entry(void **state)
         "{% if GUDA <= \"zxc\" %}LOL4{% endif %}\n"
         "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
         "{% foreach TAGS_ASD %}yay{% endforeach %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -125,7 +125,7 @@ test_render_listing(void **state)
         "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
         "{% foreach TAGS_ASD %}yay{% endforeach %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -173,7 +173,7 @@ test_render_listing_empty(void **state)
         "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
         "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -200,7 +200,7 @@ test_render_ifdef(void **state)
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -229,7 +229,7 @@ test_render_ifdef2(void **state)
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -260,7 +260,7 @@ test_render_ifdef3(void **state)
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -293,7 +293,7 @@ test_render_ifndef(void **state)
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -327,7 +327,7 @@ test_render_if_eq(void **state)
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -362,7 +362,7 @@ test_render_if_neq(void **state)
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -397,7 +397,7 @@ test_render_if_lt(void **state)
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -432,7 +432,7 @@ test_render_if_gt(void **state)
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -469,7 +469,7 @@ test_render_if_lt_eq(void **state)
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -508,7 +508,7 @@ test_render_if_gt_eq(void **state)
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -539,7 +539,7 @@ test_render_foreach(void **state)
         "{% block entry %}\n"
         "{% foreach TAGS %} {{ FOREACH_ITEM }} {% endforeach %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -564,7 +564,7 @@ test_render_foreach_if(void **state)
         "{% foreach TAGS %} {% if FOREACH_ITEM == \"bar\" %}{{ FOREACH_ITEM }}"
         "{% endif %} {% endforeach %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -595,7 +595,7 @@ test_render_outside_block(void **state)
         "{% ifdef GUDA %}bola{% endif %}\n"
         "{{ BOLA }}\n"
         "{% ifndef CHUNDA %}lol{% endif %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -628,7 +628,7 @@ test_render_prefer_local_variable(void **state)
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -664,7 +664,7 @@ test_render_respect_variable_scope(void **state)
         "{% ifdef LOL %}{{ LOL }}{% endif %}\n"
         "{% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
@@ -696,7 +696,7 @@ test_render_ifcount_bug(void **state)
         "{% ifdef ASD %}ASD{% endif %}\n"
         "{% endif %}\n"
         "{% endblock %}\n";
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);

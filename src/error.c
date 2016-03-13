@@ -18,31 +18,8 @@
 #include "error.h"
 
 
-blogc_error_t*
-blogc_error_new(blogc_error_type_t type, const char *msg)
-{
-    blogc_error_t *err = sb_malloc(sizeof(blogc_error_t));
-    err->type = type;
-    err->msg = sb_strdup(msg);
-    return err;
-}
-
-
-blogc_error_t*
-blogc_error_new_printf(blogc_error_type_t type, const char *format, ...)
-{
-    va_list ap;
-    va_start(ap, format);
-    char *tmp = sb_strdup_vprintf(format, ap);
-    va_end(ap);
-    blogc_error_t *rv = blogc_error_new(type, tmp);
-    free(tmp);
-    return rv;
-}
-
-
-blogc_error_t*
-blogc_error_parser(blogc_error_type_t type, const char *src, size_t src_len,
+sb_error_t*
+blogc_error_parser(blogc_error_code_t type, const char *src, size_t src_len,
     size_t current, const char *format, ...)
 {
     va_list ap;
@@ -90,12 +67,12 @@ blogc_error_parser(blogc_error_type_t type, const char *src, size_t src_len,
 
     char *line = sb_strndup(src + linestart, lineend - linestart);
 
-    blogc_error_t *rv = NULL;
+    sb_error_t *rv = NULL;
 
     if (line[0] == '\0')  // "near" message isn't useful if line is empty
-        rv = blogc_error_new(type, msg);
+        rv = sb_error_new(type, msg);
     else
-        rv = blogc_error_new_printf(type,
+        rv = sb_error_new_printf(type,
             "%s\nError occurred near line %d, position %d: %s", msg, lineno,
             pos, line);
 
@@ -107,12 +84,12 @@ blogc_error_parser(blogc_error_type_t type, const char *src, size_t src_len,
 
 
 void
-blogc_error_print(blogc_error_t *err)
+blogc_error_print(sb_error_t *err)
 {
     if (err == NULL)
         return;
 
-    switch(err->type) {
+    switch(err->code) {
         case BLOGC_ERROR_SOURCE_PARSER:
             fprintf(stderr, "blogc: error: source: %s\n", err->msg);
             break;
@@ -128,14 +105,4 @@ blogc_error_print(blogc_error_t *err)
         default:
             fprintf(stderr, "blogc: error: %s\n", err->msg);
     }
-}
-
-
-void
-blogc_error_free(blogc_error_t *err)
-{
-    if (err == NULL)
-        return;
-    free(err->msg);
-    free(err);
 }

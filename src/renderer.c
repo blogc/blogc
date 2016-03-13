@@ -46,11 +46,11 @@ blogc_format_date(const char *date, sb_trie_t *global, sb_trie_t *local)
     if (date_format == NULL)
         return sb_strdup(date);
 
-    blogc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     char *rv = blogc_convert_datetime(date, date_format, &err);
     if (err != NULL) {
         blogc_error_print(err);
-        blogc_error_free(err);
+        sb_error_free(err);
         return sb_strdup(date);
     }
     return rv;
