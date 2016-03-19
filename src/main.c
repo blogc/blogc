@@ -18,6 +18,10 @@
 #include <sys/types.h>
 #endif /* HAVE_SYS_TYPES_H */
 
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
+#endif /* HAVE_LIBGEN_H */
+
 #include <errno.h>
 #include <locale.h>
 #include <stdbool.h>
@@ -65,41 +69,6 @@ blogc_print_usage(void)
     printf(
         "usage: blogc [-h] [-v] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
         "             [-o OUTPUT] [SOURCE ...]\n");
-}
-
-
-static void
-blogc_mkdir_recursive(const char *filename)
-{
-    char *fname = sb_strdup(filename);
-    for (char *tmp = fname; *tmp != '\0'; tmp++) {
-        if (*tmp != '/' && *tmp != '\\')
-            continue;
-#if defined(HAVE_SYS_STAT_H) && defined(HAVE_SYS_TYPES_H)
-        char bkp = *tmp;
-        *tmp = '\0';
-        if ((strlen(fname) > 0) &&
-#if defined(WIN32) || defined(_WIN32)
-            (-1 == mkdir(fname)) &&
-#else
-            (-1 == mkdir(fname, 0777)) &&
-#endif
-            (errno != EEXIST))
-        {
-            fprintf(stderr, "blogc: error: failed to create output "
-                "directory (%s): %s\n", fname, strerror(errno));
-            free(fname);
-            exit(2);
-        }
-        *tmp = bkp;
-#else
-        // FIXME: show this warning only if actually trying to create a directory.
-        fprintf(stderr, "blogc: warning: can't create output directories "
-            "for your platform. please create the directories yourself.\n");
-        break;
-#endif
-    }
-    free(fname);
 }
 
 
@@ -252,7 +221,18 @@ main(int argc, char **argv)
 
     FILE *fp = stdout;
     if (!write_to_stdout) {
-        blogc_mkdir_recursive(output);
+
+#ifdef HAVE_LIBGEN_H
+        char *_output = sb_strdup(output);
+        sb_mkdir_recursive(dirname(_output), &err);
+        free(_output);
+        if (err != NULL) {
+            blogc_error_print(err);
+            rv = 2;
+            goto cleanup4;
+        }
+#endif
+
         fp = fopen(output, "w");
         if (fp == NULL) {
             fprintf(stderr, "blogc: error: failed to open output file (%s): %s\n",
