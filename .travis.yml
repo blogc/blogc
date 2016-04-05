@@ -35,15 +35,6 @@ install: gem install ronn
 
 before_script: ./autogen.sh
 
-script: ./build-aux/travis-build.sh
-
-deploy:
-  provider: script
-  script: ./build-aux/travis-deploy.sh
-  skip_cleanup: true
-  on:
-    repo: blogc/blogc
-    branch: master
-    condition:
-      - $CC = gcc
-      - $TARGET != valgrind
+script:
+  - ./build-aux/travis-build.sh
+  - ./build-aux/travis-deploy.sh

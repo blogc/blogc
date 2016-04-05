@@ -2,6 +2,21 @@
 
 set -e
 
+if [[ "x${TRAVIS_PULL_REQUEST}" != "xfalse" ]]; then
+    echo "This is a pull request. skipping deploy ..."
+    exit 0
+fi
+
+if [[ "x${TRAVIS_BRANCH}" != "xmaster" ]] && [[ "x${TRAVIS_TAG}" != xv* ]]; then
+    echo "This isn't master branch nor a valid tag. skipping deploy ..."
+    exit 0
+fi
+
+if [[ "x${CC}" != "xgcc" ]] || [[ "x${TARGET}" = "xvalgrind" ]]; then
+    echo "Invalid target for deploy. skipping ..."
+    exit 0
+fi
+
 if [[ ! -d build ]]; then
     echo "Build directory not found."
     exit 1
