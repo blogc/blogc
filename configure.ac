@@ -127,7 +127,7 @@ AC_ARG_WITH([squareball], [AS_HELP_STRING([--with-squareball=@<:@internal/system
             [whether to use library squareball from system [default=internal]])])
 AS_IF([test "x$with_squareball" = "xsystem"], [
   SQUAREBALL="system"
-  PKG_CHECK_MODULES([SQUAREBALL], [squareball >= 0.1], , [
+  PKG_CHECK_MODULES([SQUAREBALL], [squareball >= 0.2.0], , [
     AC_MSG_ERROR([library squareball requested from system but not found or not new enough])
   ])
 ], [
