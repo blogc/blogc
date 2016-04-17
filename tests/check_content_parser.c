@@ -1751,6 +1751,36 @@ test_content_parse_inline_line_break_crlf(void **state)
 }
 
 
+static void
+test_content_parse_inline_endash_emdash(void **state)
+{
+    char *html = blogc_content_parse_inline("foo -- bar");
+    assert_non_null(html);
+    assert_string_equal(html, "foo &ndash; bar");
+    free(html);
+    html = blogc_content_parse_inline("foo --- bar");
+    assert_non_null(html);
+    assert_string_equal(html, "foo &mdash; bar");
+    free(html);
+    html = blogc_content_parse_inline("`foo -- bar`");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>foo -- bar</code>");
+    free(html);
+    html = blogc_content_parse_inline("`foo --- bar`");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>foo --- bar</code>");
+    free(html);
+    html = blogc_content_parse_inline("``foo -- bar``");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>foo -- bar</code>");
+    free(html);
+    html = blogc_content_parse_inline("``foo --- bar``");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>foo --- bar</code>");
+    free(html);
+}
+
+
 int
 main(void)
 {
@@ -1793,6 +1823,7 @@ main(void)
         unit_test(test_content_parse_inline_image),
         unit_test(test_content_parse_inline_line_break),
         unit_test(test_content_parse_inline_line_break_crlf),
+        unit_test(test_content_parse_inline_endash_emdash),
     };
     return run_tests(tests);
 }
