@@ -460,7 +460,7 @@ blogc_is_ordered_list_item(const char *str, size_t prefix_len)
 
 
 char*
-blogc_content_parse(const char *src, size_t *end_excerpt)
+blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
 {
     // src is always nul-terminated.
     size_t src_len = strlen(src);
@@ -698,14 +698,10 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
             case CONTENT_BLOCKQUOTE_END:
                 if (c == '\n' || c == '\r' || is_last) {
                     tmp_str = sb_string_new();
-                    for (sb_slist_t *l = lines; l != NULL; l = l->next) {
-                        if (l->next == NULL)
-                            sb_string_append_printf(tmp_str, "%s", l->data);
-                        else
-                            sb_string_append_printf(tmp_str, "%s%s", l->data,
-                                line_ending);
-                    }
-                    tmp = blogc_content_parse(tmp_str->str, NULL);
+                    for (sb_slist_t *l = lines; l != NULL; l = l->next)
+                        sb_string_append_printf(tmp_str, "%s%s", l->data,
+                            line_ending);
+                    tmp = blogc_content_parse(tmp_str->str, NULL, description);
                     sb_string_append_printf(rv, "<blockquote>%s</blockquote>%s",
                         tmp, line_ending);
                     free(tmp);
@@ -1019,6 +1015,8 @@ blogc_content_parse(const char *src, size_t *end_excerpt)
                     state = CONTENT_PARAGRAPH_END;
                     end = is_last && c != '\n' && c != '\r' ? src_len :
                         (real_end != 0 ? real_end : current);
+                    if (description != NULL && *description == NULL)
+                        *description = sb_strndup(src + start, end - start);
                 }
                 if (!is_last)
                     break;

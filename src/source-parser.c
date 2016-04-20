@@ -154,7 +154,19 @@ blogc_source_parse(const char *src, size_t src_len, sb_error_t **err)
                 if (current == (src_len - 1)) {
                     tmp = sb_strndup(src + start, src_len - start);
                     sb_trie_insert(rv, "RAW_CONTENT", tmp);
-                    content = blogc_content_parse(tmp, &end_excerpt);
+                    char *description = NULL;
+                    content = blogc_content_parse(tmp, &end_excerpt, &description);
+                    if (description != NULL) {
+                        // do not override source-provided description.
+                        if (NULL == sb_trie_lookup(rv, "DESCRIPTION")) {
+                            // no need to free, because we are transfering memory
+                            // ownership to the trie.
+                            sb_trie_insert(rv, "DESCRIPTION", description);
+                        }
+                        else {
+                            free(description);
+                        }
+                    }
                     sb_trie_insert(rv, "CONTENT", content);
                     sb_trie_insert(rv, "EXCERPT", end_excerpt == 0 ?
                         sb_strdup(content) : sb_strndup(content, end_excerpt));

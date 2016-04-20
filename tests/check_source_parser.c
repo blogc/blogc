@@ -34,7 +34,7 @@ test_source_parse(void **state)
     sb_trie_t *source = blogc_source_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(sb_trie_size(source), 5);
+    assert_int_equal(sb_trie_size(source), 6);
     assert_string_equal(sb_trie_lookup(source, "VAR1"), "asd asd");
     assert_string_equal(sb_trie_lookup(source, "VAR2"), "123chunda");
     assert_string_equal(sb_trie_lookup(source, "EXCERPT"),
@@ -47,6 +47,7 @@ test_source_parse(void **state)
         "# This is a test\n"
         "\n"
         "bola\n");
+    assert_string_equal(sb_trie_lookup(source, "DESCRIPTION"), "bola");
     sb_trie_free(source);
 }
 
@@ -65,7 +66,7 @@ test_source_parse_crlf(void **state)
     sb_trie_t *source = blogc_source_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(sb_trie_size(source), 5);
+    assert_int_equal(sb_trie_size(source), 6);
     assert_string_equal(sb_trie_lookup(source, "VAR1"), "asd asd");
     assert_string_equal(sb_trie_lookup(source, "VAR2"), "123chunda");
     assert_string_equal(sb_trie_lookup(source, "EXCERPT"),
@@ -78,6 +79,7 @@ test_source_parse_crlf(void **state)
         "# This is a test\r\n"
         "\r\n"
         "bola\r\n");
+    assert_string_equal(sb_trie_lookup(source, "DESCRIPTION"), "bola");
     sb_trie_free(source);
 }
 
@@ -98,7 +100,7 @@ test_source_parse_with_spaces(void **state)
     sb_trie_t *source = blogc_source_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(sb_trie_size(source), 5);
+    assert_int_equal(sb_trie_size(source), 6);
     assert_string_equal(sb_trie_lookup(source, "VAR1"), "chunda");
     assert_string_equal(sb_trie_lookup(source, "BOLA"), "guda");
     assert_string_equal(sb_trie_lookup(source, "EXCERPT"),
@@ -111,6 +113,7 @@ test_source_parse_with_spaces(void **state)
         "# This is a test\n"
         "\n"
         "bola\n");
+    assert_string_equal(sb_trie_lookup(source, "DESCRIPTION"), "bola");
     sb_trie_free(source);
 }
 
@@ -134,7 +137,7 @@ test_source_parse_with_excerpt(void **state)
     sb_trie_t *source = blogc_source_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(sb_trie_size(source), 5);
+    assert_int_equal(sb_trie_size(source), 6);
     assert_string_equal(sb_trie_lookup(source, "VAR1"), "asd asd");
     assert_string_equal(sb_trie_lookup(source, "VAR2"), "123chunda");
     assert_string_equal(sb_trie_lookup(source, "EXCERPT"),
@@ -154,6 +157,40 @@ test_source_parse_with_excerpt(void **state)
         "\n"
         "guda\n"
         "yay");
+    assert_string_equal(sb_trie_lookup(source, "DESCRIPTION"), "bola");
+    sb_trie_free(source);
+}
+
+
+static void
+test_source_parse_with_description(void **state)
+{
+    const char *a =
+        "VAR1: asd asd\n"
+        "VAR2: 123chunda\n"
+        "DESCRIPTION: huehuehuebrbr\n"
+        "----------\n"
+        "# This is a test\n"
+        "\n"
+        "bola\n";
+    sb_error_t *err = NULL;
+    sb_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(source);
+    assert_int_equal(sb_trie_size(source), 6);
+    assert_string_equal(sb_trie_lookup(source, "VAR1"), "asd asd");
+    assert_string_equal(sb_trie_lookup(source, "VAR2"), "123chunda");
+    assert_string_equal(sb_trie_lookup(source, "EXCERPT"),
+        "<h1 id=\"this-is-a-test\">This is a test</h1>\n"
+        "<p>bola</p>\n");
+    assert_string_equal(sb_trie_lookup(source, "CONTENT"),
+        "<h1 id=\"this-is-a-test\">This is a test</h1>\n"
+        "<p>bola</p>\n");
+    assert_string_equal(sb_trie_lookup(source, "RAW_CONTENT"),
+        "# This is a test\n"
+        "\n"
+        "bola\n");
+    assert_string_equal(sb_trie_lookup(source, "DESCRIPTION"), "huehuehuebrbr");
     sb_trie_free(source);
 }
 
@@ -484,6 +521,7 @@ main(void)
         unit_test(test_source_parse_crlf),
         unit_test(test_source_parse_with_spaces),
         unit_test(test_source_parse_with_excerpt),
+        unit_test(test_source_parse_with_description),
         unit_test(test_source_parse_config_empty),
         unit_test(test_source_parse_config_invalid_key),
         unit_test(test_source_parse_config_no_key),

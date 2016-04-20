@@ -113,12 +113,13 @@ test_source_parse_from_file(void **state)
     sb_trie_t *t = blogc_source_parse_from_file("bola.txt", &err);
     assert_null(err);
     assert_non_null(t);
-    assert_int_equal(sb_trie_size(t), 5);
+    assert_int_equal(sb_trie_size(t), 6);
     assert_string_equal(sb_trie_lookup(t, "ASD"), "123");
     assert_string_equal(sb_trie_lookup(t, "FILENAME"), "bola");
     assert_string_equal(sb_trie_lookup(t, "EXCERPT"), "<p>bola</p>\n");
     assert_string_equal(sb_trie_lookup(t, "CONTENT"), "<p>bola</p>\n");
     assert_string_equal(sb_trie_lookup(t, "RAW_CONTENT"), "bola");
+    assert_string_equal(sb_trie_lookup(t, "DESCRIPTION"), "bola");
     sb_trie_free(t);
 }
 

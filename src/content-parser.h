@@ -16,6 +16,7 @@ char* blogc_slugify(const char *str);
 char* blogc_htmlentities(const char *str);
 char* blogc_content_parse_inline(const char *src);
 bool blogc_is_ordered_list_item(const char *str, size_t prefix_len);
-char* blogc_content_parse(const char *src, size_t *end_excerpt);
+char* blogc_content_parse(const char *src, size_t *end_excerpt,
+    char **description);
 
 #endif /* _CONTENT_PARSER_H */
