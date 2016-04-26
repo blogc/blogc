@@ -23,7 +23,7 @@
 
 
 char*
-blogc_file_get_contents(const char *path, size_t *len, sb_error_t **err)
+blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err)
 {
     if (path == NULL || err == NULL || *err != NULL)
         return NULL;
@@ -33,7 +33,7 @@ blogc_file_get_contents(const char *path, size_t *len, sb_error_t **err)
 
     if (fp == NULL) {
         int tmp_errno = errno;
-        *err = sb_error_new_printf(BLOGC_ERROR_LOADER,
+        *err = blogc_error_new_printf(BLOGC_ERROR_LOADER,
             "Failed to open file (%s): %s", path, strerror(tmp_errno));
         return NULL;
     }

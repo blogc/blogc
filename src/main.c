@@ -210,7 +210,7 @@ main(int argc, char **argv)
         goto cleanup;
     }
 
-    sb_error_t *err = NULL;
+    blogc_error_t *err = NULL;
 
     sb_slist_t *s = blogc_source_parse_from_files(config, sources, &err);
     if (err != NULL) {
@@ -274,7 +274,7 @@ cleanup3:
     blogc_template_free_stmts(l);
 cleanup2:
     sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
-    sb_error_free(err);
+    blogc_error_free(err);
 cleanup:
     sb_trie_free(config);
     free(template);

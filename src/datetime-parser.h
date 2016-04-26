@@ -12,6 +12,6 @@
 #include "error.h"
 
 char* blogc_convert_datetime(const char *orig, const char *format,
-    sb_error_t **err);
+    blogc_error_t **err);
 
 #endif /* _DATETIME_H */

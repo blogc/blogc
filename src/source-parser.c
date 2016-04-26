@@ -31,7 +31,7 @@ typedef enum {
 
 
 sb_trie_t*
-blogc_source_parse(const char *src, size_t src_len, sb_error_t **err)
+blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -97,7 +97,7 @@ blogc_source_parse(const char *src, size_t src_len, sb_error_t **err)
                         ((current - start == 13) &&
                          (0 == strncmp("BLOGC_VERSION", src + start, 13))))
                     {
-                        *err = sb_error_new_printf(BLOGC_ERROR_SOURCE_PARSER,
+                        *err = blogc_error_new_printf(BLOGC_ERROR_SOURCE_PARSER,
                             "'%s' variable is forbidden in source files. It will "
                             "be set for you by the compiler.", key);
                         break;

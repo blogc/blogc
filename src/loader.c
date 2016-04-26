@@ -60,7 +60,7 @@ blogc_get_filename(const char *f)
 
 
 sb_slist_t*
-blogc_template_parse_from_file(const char *f, sb_error_t **err)
+blogc_template_parse_from_file(const char *f, blogc_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -75,7 +75,7 @@ blogc_template_parse_from_file(const char *f, sb_error_t **err)
 
 
 sb_trie_t*
-blogc_source_parse_from_file(const char *f, sb_error_t **err)
+blogc_source_parse_from_file(const char *f, blogc_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -98,9 +98,9 @@ blogc_source_parse_from_file(const char *f, sb_error_t **err)
 
 
 sb_slist_t*
-blogc_source_parse_from_files(sb_trie_t *conf, sb_slist_t *l, sb_error_t **err)
+blogc_source_parse_from_files(sb_trie_t *conf, sb_slist_t *l, blogc_error_t **err)
 {
-    sb_error_t *tmp_err = NULL;
+    blogc_error_t *tmp_err = NULL;
     sb_slist_t *rv = NULL;
     unsigned int with_date = 0;
 
@@ -125,10 +125,10 @@ blogc_source_parse_from_files(sb_trie_t *conf, sb_slist_t *l, sb_error_t **err)
         char *f = tmp->data;
         sb_trie_t *s = blogc_source_parse_from_file(f, &tmp_err);
         if (s == NULL) {
-            *err = sb_error_new_printf(BLOGC_ERROR_LOADER,
+            *err = blogc_error_new_printf(BLOGC_ERROR_LOADER,
                 "An error occurred while parsing source file: %s\n\n%s",
                 f, tmp_err->msg);
-            sb_error_free(tmp_err);
+            blogc_error_free(tmp_err);
             tmp_err = NULL;
             sb_slist_free_full(rv, (sb_free_func_t) sb_trie_free);
             rv = NULL;
