@@ -10,8 +10,10 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 #include <squareball.h>
 #include "file.h"
 #include "error.h"
@@ -23,7 +25,29 @@
 char*
 blogc_file_get_contents(const char *path, size_t *len, sb_error_t **err)
 {
-    return sb_file_get_contents(path, len, err);
+    if (path == NULL || err == NULL || *err != NULL)
+        return NULL;
+
+    *len = 0;
+    FILE *fp = fopen(path, "r");
+
+    if (fp == NULL) {
+        int tmp_errno = errno;
+        *err = sb_error_new_printf(BLOGC_ERROR_LOADER,
+            "Failed to open file (%s): %s", path, strerror(tmp_errno));
+        return NULL;
+    }
+
+    sb_string_t *str = sb_string_new();
+    char buffer[BLOGC_FILE_CHUNK_SIZE];
+
+    while (!feof(fp)) {
+        size_t read_len = fread(buffer, sizeof(char), BLOGC_FILE_CHUNK_SIZE, fp);
+        *len += read_len;
+        sb_string_append_len(str, buffer, read_len);
+    }
+    fclose(fp);
+    return sb_string_free(str, false);
 }
 
 
