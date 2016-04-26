@@ -173,7 +173,7 @@ test_source_parse_with_description(void **state)
         "# This is a test\n"
         "\n"
         "bola\n";
-    sb_error_t *err = NULL;
+    blogc_error_t *err = NULL;
     sb_trie_t *source = blogc_source_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(source);

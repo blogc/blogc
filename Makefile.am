@@ -1,16 +1,11 @@
 ## Autotools settings
 
-if INTERNAL_SQUAREBALL
-SUBDIRS = squareball
-endif
-
 ACLOCAL_AMFLAGS = -I m4
 
 AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-tests \
 	--enable-ronn \
 	--disable-valgrind \
-	--with-squareball=internal \
 	$(NULL)
 
 
@@ -43,6 +38,7 @@ noinst_HEADERS = \
 	src/renderer.h \
 	src/source-parser.h \
 	src/template-parser.h \
+	src/utils.h \
 	$(NULL)
 
 noinst_LTLIBRARIES = \
@@ -69,17 +65,16 @@ libblogc_la_SOURCES = \
 	src/renderer.c \
 	src/source-parser.c \
 	src/template-parser.c \
+	src/utils.c \
 	$(NULL)
 
 libblogc_la_CFLAGS = \
 	$(AM_CFLAGS) \
 	-I$(top_srcdir)/src \
-	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 libblogc_la_LIBADD = \
 	$(LIBM) \
-	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 
@@ -90,12 +85,10 @@ blogc_SOURCES = \
 blogc_CFLAGS = \
 	$(AM_CFLAGS) \
 	-I$(top_srcdir)/src \
-	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 blogc_LDADD = \
 	libblogc.la \
-	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 
@@ -170,6 +163,7 @@ check_PROGRAMS += \
 	tests/check_renderer \
 	tests/check_source_parser \
 	tests/check_template_parser \
+	tests/check_utils \
 	$(NULL)
 
 tests_check_error_SOURCES = \
@@ -177,7 +171,6 @@ tests_check_error_SOURCES = \
 	$(NULL)
 
 tests_check_error_CFLAGS = \
-	$(SQUAREBALL_CFLAGS) \
 	$(CMOCKA_CFLAGS) \
 	$(NULL)
 
@@ -186,7 +179,6 @@ tests_check_error_LDFLAGS = \
 	$(NULL)
 
 tests_check_error_LDADD = \
-	$(SQUAREBALL_LIBS) \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
 	$(NULL)
@@ -196,7 +188,6 @@ tests_check_loader_SOURCES = \
 	$(NULL)
 
 tests_check_loader_CFLAGS = \
-	$(SQUAREBALL_CFLAGS) \
 	$(CMOCKA_CFLAGS) \
 	$(NULL)
 
@@ -207,7 +198,6 @@ tests_check_loader_LDFLAGS = \
 	$(NULL)
 
 tests_check_loader_LDADD = \
-	$(SQUAREBALL_LIBS) \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
 	$(NULL)
@@ -217,7 +207,6 @@ tests_check_content_parser_SOURCES = \
 	$(NULL)
 
 tests_check_content_parser_CFLAGS = \
-	$(SQUAREBALL_CFLAGS) \
 	$(CMOCKA_CFLAGS) \
 	$(NULL)
 
@@ -226,7 +215,6 @@ tests_check_content_parser_LDFLAGS = \
 	$(NULL)
 
 tests_check_content_parser_LDADD = \
-	$(SQUAREBALL_LIBS) \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
 	$(NULL)
@@ -236,7 +224,6 @@ tests_check_datetime_parser_SOURCES = \
 	$(NULL)
 
 tests_check_datetime_parser_CFLAGS = \
-	$(SQUAREBALL_CFLAGS) \
 	$(CMOCKA_CFLAGS) \
 	$(NULL)
 
@@ -245,7 +232,6 @@ tests_check_datetime_parser_LDFLAGS = \
 	$(NULL)
 
 tests_check_datetime_parser_LDADD = \
-	$(SQUAREBALL_LIBS) \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
 	$(NULL)
@@ -255,7 +241,6 @@ tests_check_renderer_SOURCES = \
 	$(NULL)
 
 tests_check_renderer_CFLAGS = \
-	$(SQUAREBALL_CFLAGS) \
 	$(CMOCKA_CFLAGS) \
 	$(NULL)
 
@@ -264,7 +249,6 @@ tests_check_renderer_LDFLAGS = \
 	$(NULL)
 
 tests_check_renderer_LDADD = \
-	$(SQUAREBALL_LIBS) \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
 	$(NULL)
@@ -274,7 +258,6 @@ tests_check_source_parser_SOURCES = \
 	$(NULL)
 
 tests_check_source_parser_CFLAGS = \
-	$(SQUAREBALL_CFLAGS) \
 	$(CMOCKA_CFLAGS) \
 	$(NULL)
 
@@ -283,7 +266,6 @@ tests_check_source_parser_LDFLAGS = \
 	$(NULL)
 
 tests_check_source_parser_LDADD = \
-	$(SQUAREBALL_LIBS) \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
 	$(NULL)
@@ -293,7 +275,6 @@ tests_check_template_parser_SOURCES = \
 	$(NULL)
 
 tests_check_template_parser_CFLAGS = \
-	$(SQUAREBALL_CFLAGS) \
 	$(CMOCKA_CFLAGS) \
 	$(NULL)
 
@@ -302,7 +283,23 @@ tests_check_template_parser_LDFLAGS = \
 	$(NULL)
 
 tests_check_template_parser_LDADD = \
-	$(SQUAREBALL_LIBS) \
+	$(CMOCKA_LIBS) \
+	libblogc.la \
+	$(NULL)
+
+tests_check_utils_SOURCES = \
+	tests/check_utils.c \
+	$(NULL)
+
+tests_check_utils_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_check_utils_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_check_utils_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
 	$(NULL)
