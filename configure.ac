@@ -137,6 +137,34 @@ AS_IF([test "x$have_git_receiver" = "xyes"], , [
 ])
 AM_CONDITIONAL([BUILD_GIT_RECEIVER], [test "x$have_git_receiver" = "xyes"])
 
+RUNSERVER="disabled"
+AC_ARG_ENABLE([runserver], AS_HELP_STRING([--disable-runserver],
+              [disable blogc-runserver build]))
+AS_IF([test "x$enable_runserver" != "xno"], [
+  AC_CHECK_LIB(magic, [magic_open], [
+    MAGIC_LIBS="-lmagic"
+    PKG_CHECK_MODULES([LIBEVENT], [libevent >= 2.0], [
+      AC_CHECK_HEADERS([sys/types.h sys/stat.h signal.h stdarg.h fcntl.h unistd.h magic.h], [
+        AC_SUBST(MAGIC_LIBS)
+        RUNSERVER="enabled"
+        have_runserver=yes
+      ], [
+        have_runserver=no
+      ])
+    ], [
+      have_runserver=no
+    ])
+  ], [
+    have_runserver=no
+  ])
+])
+AS_IF([test "x$have_runserver" = "xyes"], , [
+  AS_IF([test "x$enable_runserver" = "xyes"], [
+    AC_MSG_ERROR([blogc-runserver requested but required dependencies not found])
+  ])
+])
+AM_CONDITIONAL([BUILD_RUNSERVER], [test "x$have_runserver" = "xyes"])
+
 AC_CHECK_HEADERS([sys/types.h sys/stat.h time.h])
 
 LT_LIB_M
@@ -160,6 +188,7 @@ AS_ECHO("
         ldflags:             ${LDFLAGS}
 
         blogc-git-receiver:  ${GIT_RECEIVER}
+        blogc-runserver:     ${RUNSERVER}
 
         tests:               ${TESTS}
 

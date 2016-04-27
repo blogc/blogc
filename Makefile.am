@@ -7,6 +7,7 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-ronn \
 	--disable-valgrind \
 	--enable-git-receiver \
+	--enable-runserver \
 	$(NULL)
 
 
@@ -57,6 +58,12 @@ bin_PROGRAMS = \
 if BUILD_GIT_RECEIVER
 bin_PROGRAMS += \
 	blogc-git-receiver \
+	$(NULL)
+endif
+
+if BUILD_RUNSERVER
+bin_PROGRAMS += \
+	blogc-runserver \
 	$(NULL)
 endif
 
@@ -126,6 +133,26 @@ blogc_git_receiver_LDADD = \
 endif
 
 
+if BUILD_RUNSERVER
+blogc_runserver_SOURCES = \
+	src/blogc-runserver.c \
+	$(NULL)
+
+blogc_runserver_CFLAGS = \
+	$(AM_CFLAGS) \
+	-I$(top_srcdir)/src \
+	$(LIBEVENT_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
+	$(NULL)
+
+blogc_runserver_LDADD = \
+	$(LIBEVENT_LIBS) \
+	$(MAGIC_LIBS) \
+	libblogc_utils.la \
+	$(NULL)
+endif
+
+
 ## Build rules: man pages
 
 EXTRA_DIST += \
@@ -142,6 +169,14 @@ dist_man_MANS = \
 	$(NULL)
 
 if BUILD_GIT_RECEIVER
+EXTRA_DIST += \
+	$(NULL)
+
+dist_man_MANS += \
+	$(NULL)
+endif
+
+if BUILD_RUNSERVER
 EXTRA_DIST += \
 	$(NULL)
 

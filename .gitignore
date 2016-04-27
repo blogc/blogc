@@ -47,6 +47,7 @@ blogc*.html
 # binaries
 /blogc
 /blogc-git-receiver
+/blogc-runserver
 
 # tests
 /tests/check_content_parser
