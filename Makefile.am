@@ -6,6 +6,7 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-tests \
 	--enable-ronn \
 	--disable-valgrind \
+	--enable-git-receiver \
 	$(NULL)
 
 
@@ -43,6 +44,7 @@ noinst_HEADERS = \
 
 noinst_LTLIBRARIES = \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 noinst_PROGRAMS = \
@@ -51,6 +53,12 @@ noinst_PROGRAMS = \
 bin_PROGRAMS = \
 	blogc \
 	$(NULL)
+
+if BUILD_GIT_RECEIVER
+bin_PROGRAMS += \
+	blogc-git-receiver \
+	$(NULL)
+endif
 
 check_PROGRAMS = \
 	$(NULL)
@@ -65,7 +73,6 @@ libblogc_la_SOURCES = \
 	src/renderer.c \
 	src/source-parser.c \
 	src/template-parser.c \
-	src/utils.c \
 	$(NULL)
 
 libblogc_la_CFLAGS = \
@@ -78,8 +85,18 @@ libblogc_la_LIBADD = \
 	$(NULL)
 
 
+libblogc_utils_la_SOURCES = \
+	src/utils.c \
+	$(NULL)
+
+libblogc_utils_la_CFLAGS = \
+	$(AM_CFLAGS) \
+	-I$(top_srcdir)/src \
+	$(NULL)
+
+
 blogc_SOURCES = \
-	src/main.c \
+	src/blogc.c \
 	$(NULL)
 
 blogc_CFLAGS = \
@@ -89,7 +106,24 @@ blogc_CFLAGS = \
 
 blogc_LDADD = \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
+
+
+if BUILD_GIT_RECEIVER
+blogc_git_receiver_SOURCES = \
+	src/blogc-git-receiver.c \
+	$(NULL)
+
+blogc_git_receiver_CFLAGS = \
+	$(AM_CFLAGS) \
+	-I$(top_srcdir)/src \
+	$(NULL)
+
+blogc_git_receiver_LDADD = \
+	libblogc_utils.la \
+	$(NULL)
+endif
 
 
 ## Build rules: man pages
@@ -106,6 +140,14 @@ dist_man_MANS = \
 	blogc-source.7 \
 	blogc-template.7 \
 	$(NULL)
+
+if BUILD_GIT_RECEIVER
+EXTRA_DIST += \
+	$(NULL)
+
+dist_man_MANS += \
+	$(NULL)
+endif
 
 MAINTAINERCLEANFILES += \
 	$(dist_man_MANS) \
@@ -181,6 +223,7 @@ tests_check_error_LDFLAGS = \
 tests_check_error_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 tests_check_loader_SOURCES = \
@@ -200,6 +243,7 @@ tests_check_loader_LDFLAGS = \
 tests_check_loader_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 tests_check_content_parser_SOURCES = \
@@ -217,6 +261,7 @@ tests_check_content_parser_LDFLAGS = \
 tests_check_content_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 tests_check_datetime_parser_SOURCES = \
@@ -234,6 +279,7 @@ tests_check_datetime_parser_LDFLAGS = \
 tests_check_datetime_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 tests_check_renderer_SOURCES = \
@@ -251,6 +297,7 @@ tests_check_renderer_LDFLAGS = \
 tests_check_renderer_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 tests_check_source_parser_SOURCES = \
@@ -268,6 +315,7 @@ tests_check_source_parser_LDFLAGS = \
 tests_check_source_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 tests_check_template_parser_SOURCES = \
@@ -285,6 +333,7 @@ tests_check_template_parser_LDFLAGS = \
 tests_check_template_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 tests_check_utils_SOURCES = \
@@ -301,7 +350,7 @@ tests_check_utils_LDFLAGS = \
 
 tests_check_utils_LDADD = \
 	$(CMOCKA_LIBS) \
-	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 endif

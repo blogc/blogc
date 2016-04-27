@@ -44,8 +44,9 @@ Makefile.in
 /blogc*.[17]
 blogc*.html
 
-# blogc
+# binaries
 /blogc
+/blogc-git-receiver
 
 # tests
 /tests/check_content_parser

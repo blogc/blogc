@@ -13,9 +13,10 @@ if [[ "x${TARGET}" = xw* ]]; then
     export CHOST="x86_64-w64-mingw32"
     [[ "x${TARGET}" = "xw32" ]] && export CHOST="i686-w64-mingw32"
     MAKE_TARGET="all"
+    CONFIGURE_ARGS="--disable-git-receiver"
 else
     export CFLAGS="-Wall -g"
-    export CONFIGURE_ARGS="--enable-tests --enable-valgrind"
+    CONFIGURE_ARGS="--enable-tests --enable-valgrind"
 fi
 
 pushd build > /dev/null

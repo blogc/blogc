@@ -119,6 +119,24 @@ AS_IF([test "x$have_cmocka" = "xyes"], , [
 ])
 AM_CONDITIONAL([USE_CMOCKA], [test "x$have_cmocka" = "xyes"])
 
+GIT_RECEIVER="disabled"
+AC_ARG_ENABLE([git-receiver], AS_HELP_STRING([--disable-git-receiver],
+              [disable blogc-git-receiver build]))
+AS_IF([test "x$enable_git_receiver" != "xno"], [
+  AC_CHECK_HEADERS([sys/types.h sys/stat.h time.h libgen.h unistd.h errno.h dirent.h], [
+    GIT_RECEIVER="enabled"
+    have_git_receiver=yes
+  ], [
+    have_git_receiver=no
+  ])
+])
+AS_IF([test "x$have_git_receiver" = "xyes"], , [
+  AS_IF([test "x$enable_git_receiver" = "xyes"], [
+    AC_MSG_ERROR([blogc-git-receiver requested but required headers not found])
+  ])
+])
+AM_CONDITIONAL([BUILD_GIT_RECEIVER], [test "x$have_git_receiver" = "xyes"])
+
 AC_CHECK_HEADERS([sys/types.h sys/stat.h time.h])
 
 LT_LIB_M
@@ -131,19 +149,21 @@ AC_CONFIG_FILES([
 AC_OUTPUT
 
 AS_ECHO("
-        ==== ${PACKAGE_STRING} ====
+        ====== ${PACKAGE_STRING} ======
 
-        prefix:       ${prefix}
-        exec_prefix:  ${exec_prefix}
-        bindir:       ${bindir}
+        prefix:              ${prefix}
+        exec_prefix:         ${exec_prefix}
+        bindir:              ${bindir}
 
-        compiler:     ${CC}
-        cflags:       ${CFLAGS}
-        ldflags:      ${LDFLAGS}
+        compiler:            ${CC}
+        cflags:              ${CFLAGS}
+        ldflags:             ${LDFLAGS}
 
-        tests:        ${TESTS}
+        blogc-git-receiver:  ${GIT_RECEIVER}
 
-        ronn:         ${RONN}
-        valgrind:     ${VALGRIND}
-        rpmbuild:     ${RPMBUILD}
+        tests:               ${TESTS}
+
+        ronn:                ${RONN}
+        valgrind:            ${VALGRIND}
+        rpmbuild:            ${RPMBUILD}
 ")
