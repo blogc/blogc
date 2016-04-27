@@ -14,9 +14,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include <squareball.h>
 #include "file.h"
 #include "error.h"
+#include "utils.h"
 
 // this would belong to loader.c, but we need it in a separated file to be
 // able to mock it when unit testing the loader functions.

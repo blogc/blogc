@@ -14,12 +14,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <squareball.h>
 #include "file.h"
 #include "source-parser.h"
 #include "template-parser.h"
 #include "loader.h"
 #include "error.h"
+#include "utils.h"
 
 
 char*

@@ -9,8 +9,8 @@
 #ifndef _LOADER_H
 #define _LOADER_H
 
-#include <squareball.h>
 #include "error.h"
+#include "utils.h"
 
 char* blogc_get_filename(const char *f);
 sb_slist_t* blogc_template_parse_from_file(const char *f, blogc_error_t **err);

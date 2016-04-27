@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include "../src/template-parser.h"
 #include "../src/loader.h"
-#include <squareball.h>
+#include "../src/utils.h"
 
 
 static void

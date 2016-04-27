@@ -17,8 +17,8 @@
 #include <string.h>
 
 #include "error.h"
-#include <squareball.h>
 #include "datetime-parser.h"
+#include "utils.h"
 
 
 typedef enum {

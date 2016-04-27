@@ -10,7 +10,7 @@
 #define _RENDERER_H
 
 #include <stdbool.h>
-#include <squareball.h>
+#include "utils.h"
 
 const char* blogc_get_variable(const char *name, sb_trie_t *global, sb_trie_t *local);
 char* blogc_format_date(const char *date, sb_trie_t *global, sb_trie_t *local);

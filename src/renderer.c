@@ -13,13 +13,13 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <squareball.h>
 #include "datetime-parser.h"
 #include "error.h"
 #include "loader.h"
 #include "source-parser.h"
 #include "template-parser.h"
 #include "renderer.h"
+#include "utils.h"
 
 
 const char*

@@ -9,8 +9,8 @@
 #ifndef _TEMPLATE_PARSER_H
 #define _TEMPLATE_PARSER_H
 
-#include <squareball.h>
 #include "error.h"
+#include "utils.h"
 
 /*
  * note: whitespace cleaners are NOT added to ast. we fix strings right during

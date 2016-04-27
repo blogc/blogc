@@ -13,8 +13,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include <squareball.h>
 #include "content-parser.h"
+#include "utils.h"
 
 // this is a half ass implementation of a markdown-like syntax. bugs are
 // expected. feel free to improve the parser and add new features.

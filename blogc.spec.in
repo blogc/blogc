@@ -7,8 +7,6 @@ Summary: A blog compiler
 URL: @PACKAGE_URL@
 Source0: https://github.com/blogc/blogc/releases/download/v@PACKAGE_VERSION@/blogc-@PACKAGE_VERSION@.tar.xz
 
-BuildRequires: squareball-devel >= 0.2.0
-
 %description
 blogc(1) is a blog compiler. It converts source files and templates into
 blog/website resources.
@@ -17,7 +15,7 @@ blog/website resources.
 %setup -q -n @PACKAGE_NAME@-@PACKAGE_VERSION@
 
 %build
-%configure --with-squareball=system
+%configure
 make %{?_smp_mflags}
 
 %install

@@ -14,8 +14,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <squareball.h>
 #include "error.h"
+#include "utils.h"
 
 
 blogc_error_t*

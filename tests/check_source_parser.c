@@ -17,7 +17,7 @@
 #include <string.h>
 #include "../src/source-parser.h"
 #include "../src/error.h"
-#include <squareball.h>
+#include "../src/utils.h"
 
 
 static void

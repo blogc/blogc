@@ -13,9 +13,9 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include <squareball.h>
 #include "template-parser.h"
 #include "error.h"
+#include "utils.h"
 
 
 typedef enum {

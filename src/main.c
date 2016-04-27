@@ -24,12 +24,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <squareball.h>
 #include "source-parser.h"
 #include "template-parser.h"
 #include "loader.h"
 #include "renderer.h"
 #include "error.h"
+#include "utils.h"
 
 #ifndef PACKAGE_VERSION
 #define PACKAGE_VERSION "Unknown"

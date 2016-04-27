@@ -23,7 +23,6 @@ pushd build > /dev/null
 ../configure \
     ${CHOST:+--host=${CHOST} --target=${CHOST}} \
     --enable-ronn \
-    --with-squareball=internal \
     --disable-silent-rules \
     ${CONFIGURE_ARGS}
 

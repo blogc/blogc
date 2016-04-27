@@ -13,10 +13,10 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include <squareball.h>
 #include "content-parser.h"
 #include "source-parser.h"
 #include "error.h"
+#include "utils.h"
 
 
 typedef enum {

@@ -19,7 +19,7 @@
 #include "../src/renderer.h"
 #include "../src/source-parser.h"
 #include "../src/template-parser.h"
-#include <squareball.h>
+#include "../src/utils.h"
 
 
 static sb_slist_t*
