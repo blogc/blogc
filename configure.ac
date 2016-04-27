@@ -120,48 +120,35 @@ AS_IF([test "x$have_cmocka" = "xyes"], , [
 AM_CONDITIONAL([USE_CMOCKA], [test "x$have_cmocka" = "xyes"])
 
 GIT_RECEIVER="disabled"
-AC_ARG_ENABLE([git-receiver], AS_HELP_STRING([--disable-git-receiver],
-              [disable blogc-git-receiver build]))
-AS_IF([test "x$enable_git_receiver" != "xno"], [
+AC_ARG_ENABLE([git-receiver], AS_HELP_STRING([--enable-git-receiver],
+              [build blogc-git-receiver tool]))
+AS_IF([test "x$enable_git_receiver" = "xyes"], [
   AC_CHECK_HEADERS([sys/types.h sys/stat.h time.h libgen.h unistd.h errno.h dirent.h], [
     GIT_RECEIVER="enabled"
     have_git_receiver=yes
   ], [
-    have_git_receiver=no
-  ])
-])
-AS_IF([test "x$have_git_receiver" = "xyes"], , [
-  AS_IF([test "x$enable_git_receiver" = "xyes"], [
-    AC_MSG_ERROR([blogc-git-receiver requested but required headers not found])
+    AC_MSG_ERROR([blogc-git-receiver tool requested but required headers not found])
   ])
 ])
 AM_CONDITIONAL([BUILD_GIT_RECEIVER], [test "x$have_git_receiver" = "xyes"])
 
 RUNSERVER="disabled"
-AC_ARG_ENABLE([runserver], AS_HELP_STRING([--disable-runserver],
-              [disable blogc-runserver build]))
-AS_IF([test "x$enable_runserver" != "xno"], [
-  AC_CHECK_LIB(magic, [magic_open], [
-    MAGIC_LIBS="-lmagic"
-    PKG_CHECK_MODULES([LIBEVENT], [libevent >= 2.0], [
-      AC_CHECK_HEADERS([sys/types.h sys/stat.h signal.h stdarg.h fcntl.h unistd.h magic.h], [
-        AC_SUBST(MAGIC_LIBS)
-        RUNSERVER="enabled"
-        have_runserver=yes
-      ], [
-        have_runserver=no
-      ])
-    ], [
-      have_runserver=no
-    ])
-  ], [
-    have_runserver=no
+AC_ARG_ENABLE([runserver], AS_HELP_STRING([--enable-runserver],
+              [build blogc-runserver tool]))
+AS_IF([test "x$enable_runserver" = "xyes"], [
+  AC_CHECK_HEADERS([signal.h stdarg.h fcntl.h unistd.h sys/stat.h sys/types.h],, [
+    AC_MSG_ERROR([blogc-runserver tool requested but required headers not found])
   ])
-])
-AS_IF([test "x$have_runserver" = "xyes"], , [
-  AS_IF([test "x$enable_runserver" = "xyes"], [
-    AC_MSG_ERROR([blogc-runserver requested but required dependencies not found])
+  AC_CHECK_HEADERS([magic.h],, [
+    AC_MSG_ERROR([blogc-runserver tool requested but libmagic headers not found])
   ])
+  AC_CHECK_LIB(magic, [magic_open], [MAGIC_LIBS="-lmagic"], [
+    AC_MSG_ERROR([blogc-runserver tool requested but libmagic library not found])
+  ])
+  AC_SUBST(MAGIC_LIBS)
+  PKG_CHECK_MODULES([LIBEVENT], [libevent >= 2.0])
+  RUNSERVER="enabled"
+  have_runserver=yes
 ])
 AM_CONDITIONAL([BUILD_RUNSERVER], [test "x$have_runserver" = "xyes"])
 
