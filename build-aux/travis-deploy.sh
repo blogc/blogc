@@ -22,9 +22,7 @@ if [[ ! -d build ]]; then
     exit 1
 fi
 
-if [[ "x${TARGET}" = xw* ]]; then
-    FILES=( build/*.zip )
-elif [[ "x${TARGET}" = "xdist-srpm" ]]; then
+if [[ "x${TARGET}" = "xdist-srpm" ]]; then
     FILES=( build/*.src.rpm )
 else
     FILES=( build/*.{*.tar.{gz,bz2,xz},zip} )
