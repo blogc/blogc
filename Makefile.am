@@ -4,7 +4,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-tests \
-	--enable-ronn \
+	--disable-ronn \
 	--disable-valgrind \
 	--enable-git-receiver \
 	--enable-runserver \
@@ -157,9 +157,13 @@ endif
 
 EXTRA_DIST += \
 	man/blogc.1.ronn \
+	man/blogc-git-receiver.1.ronn \
+	man/blogc-runserver.1.ronn \
 	man/blogc-source.7.ronn \
 	man/blogc-template.7.ronn \
 	man/index.txt \
+	blogc-git-receiver.1 \
+	blogc-runserver.1 \
 	$(NULL)
 
 dist_man_MANS = \
@@ -169,20 +173,12 @@ dist_man_MANS = \
 	$(NULL)
 
 if BUILD_GIT_RECEIVER
-EXTRA_DIST += \
-	man/blogc-git-receiver.1.ronn \
-	$(NULL)
-
 dist_man_MANS += \
 	blogc-git-receiver.1 \
 	$(NULL)
 endif
 
 if BUILD_RUNSERVER
-EXTRA_DIST += \
-	man/blogc-runserver.1.ronn \
-	$(NULL)
-
 dist_man_MANS += \
 	blogc-runserver.1 \
 	$(NULL)
