@@ -48,6 +48,7 @@ rm -rf $RPM_BUILD_ROOT
 %license LICENSE
 
 %files git-receiver
+%{_mandir}/man*/blogc-git-receiver.*
 %{_bindir}/blogc-git-receiver
 %license LICENSE
 
