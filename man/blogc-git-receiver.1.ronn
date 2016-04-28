@@ -1,4 +1,4 @@
-blogc-git-receiver(1) -- A simple login shell/git hook to deploy blogc websites
+blogc-git-receiver(1) -- a simple login shell/git hook to deploy blogc websites
 ===============================================================================
 
 ## SYNOPSIS

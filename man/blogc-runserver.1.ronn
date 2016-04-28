@@ -1,0 +1,48 @@
+blogc-runserver(1) -- a simple HTTP server to test blogc websites
+=================================================================
+
+## SYNOPSIS
+
+`blogc-runserver` [`-t` <HOST>] [`-p` <PORT>] <DOCROOT><br>
+`blogc-runserver` [`-h`|`-v`]
+
+## DESCRIPTION
+
+**blogc-runserver** is a simple HTTP server that makes it easy to test blogc websites.
+Users just need to point it to the directory where the target files where built. It
+comes with a few pre-defined rules, similar to production webservers, that allow users
+to quickly test their websites without configuring a webserver.
+
+`blogc-runserver` is part of `blogc` project, but isn't tied to blogc(1). It may be
+able to serve any website built by static site generators.
+
+## OPTIONS
+
+  * `-t` <HOST>:
+    HTTP server listen address, defaults to `127.0.0.1`.
+
+  * `-p` <PORT>:
+    HTTP server listen port, defaults to `8080`.
+
+  * `-v`:
+    Show program name, version and exit.
+
+  * `-h`:
+    Show help message and exit.
+
+## ARGUMENTS
+
+  * <DOCROOT>:
+    HTTP server document root.
+
+## BUGS
+
+Please report any issues to: <https://github.com/blogc/blogc>
+
+## AUTHOR
+
+Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
+
+## SEE ALSO
+
+blogc(1)

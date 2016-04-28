@@ -53,6 +53,7 @@ rm -rf $RPM_BUILD_ROOT
 %license LICENSE
 
 %files runserver
+%{_mandir}/man*/blogc-runserver.*
 %{_bindir}/blogc-runserver
 %license LICENSE
 
