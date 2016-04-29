@@ -26,7 +26,7 @@ To create your first blog, please clone our example repository and adapt it to y
     $ git init
     $ git commit -am 'initial commit'
 
-At this point you'll have an empty blog, that can be customized to suit your needs. You'll want to look at the 'post/' directory and edit your first post. Each new post, template or asset must be added to the Makefile. Please read it carefully.
+At this point you'll have an empty blog, that can be customized to suit your needs. You'll want to look at the `content/post/` directory and edit your first post. Each new post, template or asset must be added to the `Makefile`. Please read it carefully.
 
 If some unexpected error happened, please [file an issue](https://github.com/blogc/blogc/issues/new).
 
