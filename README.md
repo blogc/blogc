@@ -12,9 +12,11 @@ Clone the [Git repository](https://github.com/blogc/blogc) or grab the [latest r
 Inside the source directory, run the following commands:
 
     $ ./autogen.sh  # if installing from git
-    $ ./configure
+    $ ./configure [--enable-git-receiver] [--enable-runserver]
     $ make
     # make install
+
+The `./configure` options listed above will enable building of helper tools. To learn more about these tools, please read the man pages.
 
 To create your first blog, please clone our example repository and adapt it to your needs:
 
