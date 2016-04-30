@@ -45,6 +45,10 @@ You can omit seconds, minutes and hours if you want, they will be filled with
 The ``DATE_FORMAT`` variable should be passed to blogc(1) as a global
 variable. Its value must be a valid strptime(3) format.
 
+The source parser will also automatically generate a variable called `FILENAME`,
+that stores the name of the source file, without its extension. This is useful
+for building permalinks in templates.
+
 ## SOURCE CONTENT - BLOCK ELEMENTS
 
 ### Paragraphs

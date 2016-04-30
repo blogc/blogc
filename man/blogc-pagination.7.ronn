@@ -1,0 +1,122 @@
+blogc-pagination(7) -- blogc's pagination support
+=================================================
+
+## DESCRIPTION
+
+blogc(1) supports some basic pagination and post filtering, when running on
+`listing` mode. Files are listed in the order that they are provided to
+blogc(1) in the command line, no sorting is done.
+
+## PAGINATION PARAMETERS
+
+blogc(1) accepts some variables as `-D` options, that are used to filter the
+files passed as arguments to it:
+
+  * `FILTER_PER_PAGE`:
+    Integer, limits the maximum number of files to be listed.
+
+  * `FILTER_PAGE`:
+    Integer, current page. If calling blogc(1) with 10 files,
+    `FILTER_PER_PAGE`=4 and `FILTER_PAGE`=3, it will return just the 2 last
+    files, skipping the first 2 pages with 4 files each one.
+
+  * `FILTER_TAG`:
+    String, if defined, blogc(1) will only list files that declare a `TAGS`
+    variable, as a space-separated list of tags (tags can't have spaces,
+    obviously). See blogc-source(7) for details about how to define source
+    variables. The pagination filters will only act on the files with the
+    provided tag, instead of filtering the whole file set.
+
+## TEMPLATE VARIABLES
+
+blogc(1) will export some global blogc-template(7) variables, that can be used
+to build links for next and previous page.
+
+  * `CURRENT_PAGE`:
+    Integer, usually the same value of `FILTER_PAGE` pagination paramenter, if
+    defined, or 1.
+
+  * `FIRST_PAGE`:
+    Integer, 1 if more than zero files were listed.
+
+  * `LAST_PAGE`:
+    Integer, last page available if more than zero files were listed.
+
+  * `PREVIOUS_PAGE`:
+    Integer, `CURRENT_PAGE` minus 1, if `CURRENT_PAGE` is bigger than 1.
+
+  * `NEXT_PAGE`:
+    Integer, `CURRENT_PAGE` plus 1, if `LAST_PAGE` is bigger than `CURRENT_PAGE`.
+
+blogc(1) can output the value of the variables after evaluation, instead of
+actually rendering the files, using the `-p` option. See blogc(1) for details.
+This is useful to know the last page that needs to be built, using `-p LAST_PAGE`,
+for example.
+
+### Date variables
+
+blogc(1) will also export some global blogc-template(7) variables related to
+the `DATE` variable, as specified in blogc-source(7).
+
+  * `DATE_FIRST`:
+    String, `DATE` variable from the first file in the listing.
+  * `DATE_LAST`:
+    String, `DATE` variable from the last file in the listing.
+
+These variables can be also formatted with `DATE_FORMAT` global blogc(1) parameter,
+if provided, using `DATE_FIRST_FORMATTED` and `DATE_LAST_FORMATTED` global
+template variables.
+
+### File name variables
+
+blogc(1) will also export some global blogc-template(7) variables related to
+the `FILENAME` variable, as automatically exported by the source file parser,
+see blogc-source(7) for details.
+
+  * `FILENAME_FIRST`:
+    String, `FILENAME` variable from the first file in the listing.
+  * `FILENAME_LAST`:
+    String, `FILENAME` variable from the last file in the listing.
+
+## EXAMPLES
+
+### Source file with tags
+
+    TITLE: My post
+    TAGS: foo bar baz
+    -----------------
+    Post content
+
+This source file defines 3 tags: `foo`, `bar` and `baz`.
+
+### Template with pagination
+
+    {% block listing_once %}
+    <ul class="pager">
+        {% ifdef PREVIOUS_PAGE %}
+        <li class="previous">
+            <a href="/page/{{ PREVIOUS_PAGE }}/">&larr; Newer</a>
+        </li>
+        {% endif %}
+        {% ifdef NEXT_PAGE %}
+        <li class="next">
+            <a href="/page/{{ NEXT_PAGE }}/">Older &rarr;</a>
+        </li>
+        {% endif %}
+    </ul>
+    {% endblock %}
+
+This example does not uses all the variables, but the concept is the same for
+all of them.
+
+## BUGS
+
+Please report any issues to: <https://github.com/blogc/blogc>
+
+## AUTHOR
+
+Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
+
+## SEE ALSO
+
+blogc(1), blogc-source(7), blogc-template(7)

@@ -44,7 +44,7 @@ designed to be used with make(1).
   * `-p` <KEY>:
     Show the value of a global configuration parameter right after the source
     parsing and exits. This is useful to get parameters for your `Makefile`,
-    like the last page when using pagination.
+    like the last page when using pagination, see blogc-pagination(7) for details.
 
   * `-t` <TEMPLATE>:
     Template file. It is a required option, if `blogc` needs to render something.
@@ -93,4 +93,4 @@ Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
 
 ## SEE ALSO
 
-blogc-source(7), blogc-template(7), make(1), strptime(3)
+blogc-source(7), blogc-template(7), blogc-pagination(7) make(1), strptime(3)
