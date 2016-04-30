@@ -58,6 +58,9 @@ rm -rf $RPM_BUILD_ROOT
 %license LICENSE
 
 %changelog
+* Sat Apr 30 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.9.0-1
+- New release. Merged blogc-git-receiver and blogc-runserver.
+
 * Sun Apr 17 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.8.1-1
 - New release.
 
