@@ -43,6 +43,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man*/blogc.*
 %{_mandir}/man*/blogc-source.*
 %{_mandir}/man*/blogc-template.*
+%{_mandir}/man*/blogc-pagination.*
 %{_bindir}/blogc
 %doc README.md
 %license LICENSE
