@@ -47,7 +47,12 @@ variable. Its value must be a valid strptime(3) format.
 
 The source parser will also automatically generate a variable called `FILENAME`,
 that stores the name of the source file, without its extension. This is useful
-for building permalinks in templates.
+for building permalinks in templates. This variable can't be overriden by an
+explicit definition in source file.
+
+Another variable, `DESCRIPTION`, will be automatically created by the source
+parser. Its content is the first line of the first paragraph of the content.
+This variable can be overriden by an explicit definition in source file.
 
 ## SOURCE CONTENT - BLOCK ELEMENTS
 
