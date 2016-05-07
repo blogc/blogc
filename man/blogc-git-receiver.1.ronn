@@ -1,0 +1,126 @@
+blogc-git-receiver(1) -- a simple login shell/git hook to deploy blogc websites
+===============================================================================
+
+## SYNOPSIS
+
+chsh -s $(command -v `blogc-git-receiver`) <user>
+
+## DESCRIPTION
+
+**blogc-git-receiver** provides a PaaS-like way to deploy blogc(1) websites.
+When used as a login shell, it will accept git payloads, creating bare repositories
+as needed, and installing a hook, that will take care of rebuilding the website each
+time someone push something to the `master` branch.
+
+The git repository must provide a `Makefile` (or a `GNUMakefile`), that should
+accept the `OUTPUT_DIR` variable, and install built files in the directory pointed
+by this variable.
+
+`blogc-git-receiver` is part of `blogc` project, but isn't tied to blogc(1). Any
+repository with `Makefile` that builds content and install it to `OUTPUT_DIR`
+should works with `blogc-git-receiver`.
+
+## SETUP
+
+After creating an user (`blogc` for the examples), change its shell to
+blogc-git-receiver(1):
+
+    # chsh -s $(command -v blogc-git-receiver) blogc
+
+Now add ssh keys to `/home/blogc/.ssh/authorized_keys`. Every key in
+`authorized_keys` will be allowed to push to the git repositories, and even
+create new ones.
+
+Also, make sure to install all the dependencies required by the websites,
+including a web server. `blogc-git-receiver` can't handle web server virtual hosts.
+
+To deploy a website (e.g. blogc example repository):
+
+    $ git clone https://github.com/blogc/blogc-example.git
+    $ cd blogc-example
+    $ git remote add blogc blogc@${SERVER_IP}:blogs/blogc-example.git
+    $ git push blogc master
+
+This will deploy the example to the server, creating a symlink to the built content
+in `/home/blogc/repos/blogs/blogc-example.git/htdocs`. This symlink should be used
+as the document root for the web server virtual host.
+
+### Setup with SELinux enabled (Fedora)
+
+Supposing the usage of nginx as webserver, running as the `nginx` user:
+
+    # dnf install -y nginx policycoreutils-python-utils
+    # useradd -m -s $(command -v blogc-git-receiver) blogc
+    # gpasswd -a nginx blogc
+    # chmod -R g+rx /home/blogc
+    # su -c "mkdir /home/blogc/{builds,repos}" -s /bin/sh blogc
+    # semanage fcontext -a -t httpd_sys_content_t "/home/blogc/(builds|repos)(/.*)?"
+    # restorecon -R -v /home/blogc
+    # systemctl restart nginx
+
+After running these commands, the machine is ready to be used.
+
+## REPOSITORY MIRRORING
+
+Users can rely on `blogc-git-receiver` to mirror repositories to a remote Git
+repository (e.g. a free Bitbucket private repository). This feature just requires
+adding a remote called `mirror` to the bare repository in the server. If such remote
+exists, `blogc-git-receiver` will `git push --mirror` to it.
+
+Please note that the `blogc` user must be able to push to the remote repository, and
+that any content manually pushed to the remote repository is overwritten by
+`blogc-git-receiver`.
+
+Some reasonable ways to allow the `blogc` user to push to the remote repository are:
+
+- Create a password-less SSH key. The key *must* be password-less, because the push
+  is automatic, and remote git hooks can't be interactive.
+- Create an oauth token in the hosting service (if it supports oauth authentication
+  in git, e.g. GitHub) and add it to the git URL.
+
+The mirroring feature wont't block a `git push`, it will just raise warnings. That
+means that if an error happens when mirroring the repository, the deploy will still
+succeed. Users should pay attention to the git hook logs, to avoid losing data
+due to repositories not being mirrored.
+
+To add the `mirror` remote:
+
+    # su -s /bin/bash - blogc
+    $ git remote add --mirror=push mirror $YOUR_GIT_MIRROR_URL
+
+### Caveats of repository mirroring with SSH
+
+The authentication must be done with a password-less SSH key created by the `blogc`
+user.
+
+As the `git push --mirror` call is automated, users must disable SSH strict host
+checking in SSH's `~/.ssh/config` file:
+
+    Host bitbucket.org
+        StrictHostKeyChecking no
+
+The example uses `bitbucket.org` as remote host, that should be changed if needed.
+
+To change this file, users must login with `/bin/bash` or any other "real" shell,
+as `root`:
+
+    # su -s /bin/bash - blogc
+
+## ENVIRONMENT VARIABLES
+
+`blogc-git-receiver` will export an environment variable called `BLOGC_GIT_RECEIVER`
+when calling `gmake` to build websites. This variable can be used to enable building
+of content that should only be built when running in production environment, for
+example.
+
+## BUGS
+
+Please report any issues to: <https://github.com/blogc/blogc>
+
+## AUTHOR
+
+Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
+
+## SEE ALSO
+
+blogc(1), git(7), chsh(1), su(1), make(1)

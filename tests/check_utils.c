@@ -13,38 +13,58 @@
 
 #include <stdlib.h>
 
-#include "../src/utils/utils.h"
+#include "../src/utils.h"
+
+#define SB_STRING_CHUNK_SIZE 128
 
 
 static void
 test_slist_append(void **state)
 {
-    b_slist_t *l = NULL;
-    l = b_slist_append(l, (void*) b_strdup("bola"));
+    sb_slist_t *l = NULL;
+    l = sb_slist_append(l, (void*) sb_strdup("bola"));
     assert_non_null(l);
     assert_string_equal(l->data, "bola");
     assert_null(l->next);
-    l = b_slist_append(l, (void*) b_strdup("guda"));
+    l = sb_slist_append(l, (void*) sb_strdup("guda"));
     assert_non_null(l);
     assert_string_equal(l->data, "bola");
     assert_non_null(l->next);
     assert_string_equal(l->next->data, "guda");
     assert_null(l->next->next);
-    b_slist_free_full(l, free);
+    sb_slist_free_full(l, free);
+}
+
+
+static void
+test_slist_prepend(void **state)
+{
+    sb_slist_t *l = NULL;
+    l = sb_slist_prepend(l, (void*) sb_strdup("bola"));
+    assert_non_null(l);
+    assert_string_equal(l->data, "bola");
+    assert_null(l->next);
+    l = sb_slist_prepend(l, (void*) sb_strdup("guda"));
+    assert_non_null(l);
+    assert_string_equal(l->data, "guda");
+    assert_non_null(l->next);
+    assert_string_equal(l->next->data, "bola");
+    assert_null(l->next->next);
+    sb_slist_free_full(l, free);
 }
 
 
 static void
 test_slist_free(void **state)
 {
-    b_slist_t *l = NULL;
-    char *t1 = b_strdup("bola");
-    char *t2 = b_strdup("guda");
-    char *t3 = b_strdup("chunda");
-    l = b_slist_append(l, (void*) t1);
-    l = b_slist_append(l, (void*) t2);
-    l = b_slist_append(l, (void*) t3);
-    b_slist_free(l);
+    sb_slist_t *l = NULL;
+    char *t1 = sb_strdup("bola");
+    char *t2 = sb_strdup("guda");
+    char *t3 = sb_strdup("chunda");
+    l = sb_slist_append(l, (void*) t1);
+    l = sb_slist_append(l, (void*) t2);
+    l = sb_slist_append(l, (void*) t3);
+    sb_slist_free(l);
     assert_string_equal(t1, "bola");
     assert_string_equal(t2, "guda");
     assert_string_equal(t3, "chunda");
@@ -57,22 +77,23 @@ test_slist_free(void **state)
 static void
 test_slist_length(void **state)
 {
-    b_slist_t *l = NULL;
-    l = b_slist_append(l, (void*) b_strdup("bola"));
-    l = b_slist_append(l, (void*) b_strdup("guda"));
-    l = b_slist_append(l, (void*) b_strdup("chunda"));
-    assert_int_equal(b_slist_length(l), 3);
-    b_slist_free_full(l, free);
+    sb_slist_t *l = NULL;
+    l = sb_slist_append(l, (void*) sb_strdup("bola"));
+    l = sb_slist_append(l, (void*) sb_strdup("guda"));
+    l = sb_slist_append(l, (void*) sb_strdup("chunda"));
+    assert_int_equal(sb_slist_length(l), 3);
+    sb_slist_free_full(l, free);
+    assert_int_equal(sb_slist_length(NULL), 0);
 }
 
 
 static void
 test_strdup(void **state)
 {
-    char *str = b_strdup("bola");
+    char *str = sb_strdup("bola");
     assert_string_equal(str, "bola");
     free(str);
-    str = b_strdup(NULL);
+    str = sb_strdup(NULL);
     assert_null(str);
 }
 
@@ -80,16 +101,16 @@ test_strdup(void **state)
 static void
 test_strndup(void **state)
 {
-    char *str = b_strndup("bolaguda", 4);
+    char *str = sb_strndup("bolaguda", 4);
     assert_string_equal(str, "bola");
     free(str);
-    str = b_strndup("bolaguda", 30);
+    str = sb_strndup("bolaguda", 30);
     assert_string_equal(str, "bolaguda");
     free(str);
-    str = b_strndup("bolaguda", 8);
+    str = sb_strndup("bolaguda", 8);
     assert_string_equal(str, "bolaguda");
     free(str);
-    str = b_strdup(NULL);
+    str = sb_strdup(NULL);
     assert_null(str);
 }
 
@@ -97,10 +118,10 @@ test_strndup(void **state)
 static void
 test_strdup_printf(void **state)
 {
-    char *str = b_strdup_printf("bola");
+    char *str = sb_strdup_printf("bola");
     assert_string_equal(str, "bola");
     free(str);
-    str = b_strdup_printf("bola, %s", "guda");
+    str = sb_strdup_printf("bola, %s", "guda");
     assert_string_equal(str, "bola, guda");
     free(str);
 }
@@ -109,140 +130,146 @@ test_strdup_printf(void **state)
 static void
 test_str_starts_with(void **state)
 {
-    assert_true(b_str_starts_with("bolaguda", "bola"));
-    assert_true(b_str_starts_with("bola", "bola"));
-    assert_false(b_str_starts_with("gudabola", "bola"));
-    assert_false(b_str_starts_with("guda", "bola"));
-    assert_false(b_str_starts_with("bola", "bolaguda"));
+    assert_true(sb_str_starts_with("bolaguda", "bola"));
+    assert_true(sb_str_starts_with("bola", "bola"));
+    assert_false(sb_str_starts_with("gudabola", "bola"));
+    assert_false(sb_str_starts_with("guda", "bola"));
+    assert_false(sb_str_starts_with("bola", "bolaguda"));
 }
 
 
 static void
 test_str_ends_with(void **state)
 {
-    assert_true(b_str_ends_with("bolaguda", "guda"));
-    assert_true(b_str_ends_with("bola", "bola"));
-    assert_false(b_str_ends_with("gudabola", "guda"));
-    assert_false(b_str_ends_with("guda", "bola"));
-    assert_false(b_str_ends_with("bola", "gudabola"));
+    assert_true(sb_str_ends_with("bolaguda", "guda"));
+    assert_true(sb_str_ends_with("bola", "bola"));
+    assert_false(sb_str_ends_with("gudabola", "guda"));
+    assert_false(sb_str_ends_with("guda", "bola"));
+    assert_false(sb_str_ends_with("bola", "gudabola"));
 }
 
 
 static void
 test_str_lstrip(void **state)
 {
-    char *str = b_strdup("  \tbola\n  \t");
-    assert_string_equal(b_str_lstrip(str), "bola\n  \t");
+    char *str = sb_strdup("  \tbola\n  \t");
+    assert_string_equal(sb_str_lstrip(str), "bola\n  \t");
     free(str);
-    str = b_strdup("guda");
-    assert_string_equal(b_str_lstrip(str), "guda");
+    str = sb_strdup("guda");
+    assert_string_equal(sb_str_lstrip(str), "guda");
     free(str);
-    str = b_strdup("\n");
-    assert_string_equal(b_str_lstrip(str), "");
+    str = sb_strdup("\n");
+    assert_string_equal(sb_str_lstrip(str), "");
     free(str);
-    str = b_strdup("\t \n");
-    assert_string_equal(b_str_lstrip(str), "");
+    str = sb_strdup("\t \n");
+    assert_string_equal(sb_str_lstrip(str), "");
     free(str);
-    str = b_strdup("");
-    assert_string_equal(b_str_lstrip(str), "");
+    str = sb_strdup("");
+    assert_string_equal(sb_str_lstrip(str), "");
     free(str);
-    assert_null(b_str_lstrip(NULL));
+    assert_null(sb_str_lstrip(NULL));
 }
 
 
 static void
 test_str_rstrip(void **state)
 {
-    char *str = b_strdup("  \tbola\n  \t");
-    assert_string_equal(b_str_rstrip(str), "  \tbola");
+    char *str = sb_strdup("  \tbola\n  \t");
+    assert_string_equal(sb_str_rstrip(str), "  \tbola");
     free(str);
-    str = b_strdup("guda");
-    assert_string_equal(b_str_rstrip(str), "guda");
+    str = sb_strdup("guda");
+    assert_string_equal(sb_str_rstrip(str), "guda");
     free(str);
-    str = b_strdup("\n");
-    assert_string_equal(b_str_rstrip(str), "");
+    str = sb_strdup("\n");
+    assert_string_equal(sb_str_rstrip(str), "");
     free(str);
-    str = b_strdup("\t \n");
-    assert_string_equal(b_str_rstrip(str), "");
+    str = sb_strdup("\t \n");
+    assert_string_equal(sb_str_rstrip(str), "");
     free(str);
-    str = b_strdup("");
-    assert_string_equal(b_str_rstrip(str), "");
+    str = sb_strdup("");
+    assert_string_equal(sb_str_rstrip(str), "");
     free(str);
-    assert_null(b_str_rstrip(NULL));
+    assert_null(sb_str_rstrip(NULL));
 }
 
 
 static void
 test_str_strip(void **state)
 {
-    char *str = b_strdup("  \tbola\n  \t");
-    assert_string_equal(b_str_strip(str), "bola");
+    char *str = sb_strdup("  \tbola\n  \t");
+    assert_string_equal(sb_str_strip(str), "bola");
     free(str);
-    str = b_strdup("guda");
-    assert_string_equal(b_str_strip(str), "guda");
+    str = sb_strdup("guda");
+    assert_string_equal(sb_str_strip(str), "guda");
     free(str);
-    str = b_strdup("\n");
-    assert_string_equal(b_str_strip(str), "");
+    str = sb_strdup("\n");
+    assert_string_equal(sb_str_strip(str), "");
     free(str);
-    str = b_strdup("\t \n");
-    assert_string_equal(b_str_strip(str), "");
+    str = sb_strdup("\t \n");
+    assert_string_equal(sb_str_strip(str), "");
     free(str);
-    str = b_strdup("");
-    assert_string_equal(b_str_strip(str), "");
+    str = sb_strdup("");
+    assert_string_equal(sb_str_strip(str), "");
     free(str);
-    assert_null(b_str_strip(NULL));
+    assert_null(sb_str_strip(NULL));
 }
 
 
 static void
 test_str_split(void **state)
 {
-    char **strv = b_str_split("bola:guda:chunda", ':', 0);
+    char **strv = sb_str_split("bola:guda:chunda", ':', 0);
     assert_string_equal(strv[0], "bola");
     assert_string_equal(strv[1], "guda");
     assert_string_equal(strv[2], "chunda");
     assert_null(strv[3]);
-    b_strv_free(strv);
-    strv = b_str_split("bola:guda:chunda", ':', 2);
+    sb_strv_free(strv);
+    strv = sb_str_split("bola:guda:chunda", ':', 2);
     assert_string_equal(strv[0], "bola");
     assert_string_equal(strv[1], "guda:chunda");
     assert_null(strv[2]);
-    b_strv_free(strv);
-    strv = b_str_split("bola:guda:chunda", ':', 1);
+    sb_strv_free(strv);
+    strv = sb_str_split("bola:guda:chunda", ':', 1);
     assert_string_equal(strv[0], "bola:guda:chunda");
     assert_null(strv[1]);
-    b_strv_free(strv);
-    strv = b_str_split("", ':', 1);
+    sb_strv_free(strv);
+    strv = sb_str_split("", ':', 1);
     assert_null(strv[0]);
-    b_strv_free(strv);
-    assert_null(b_str_split(NULL, ':', 0));
+    sb_strv_free(strv);
+    assert_null(sb_str_split(NULL, ':', 0));
 }
 
 
 static void
 test_str_replace(void **state)
 {
-    char *str = b_str_replace("bolao", 'o', "zaz");
+    char *str = sb_str_replace("bolao", 'o', "zaz");
     assert_string_equal(str, "bzazlazaz");
     free(str);
-    str = b_str_replace("bolao", 'b', "zaz");
+    str = sb_str_replace("bolao", 'b', "zaz");
     assert_string_equal(str, "zazolao");
     free(str);
+    str = sb_str_replace("bolao", 'b', NULL);
+    assert_string_equal(str, "bolao");
+    free(str);
+    assert_null(sb_str_replace(NULL, 'b', "zaz"));
 }
 
 
 static void
 test_strv_join(void **state)
 {
-    const char *pieces[] = {"guda","bola", "chunda", NULL};
-    char *str = b_strv_join(pieces, ":");
+    char *pieces[] = {"guda","bola", "chunda", NULL};
+    char *str = sb_strv_join(pieces, ":");
     assert_string_equal(str, "guda:bola:chunda");
     free(str);
-    const char *pieces2[] = {NULL};
-    str = b_strv_join(pieces2, ":");
+    char *pieces2[] = {NULL};
+    str = sb_strv_join(pieces2, ":");
     assert_string_equal(str, "");
     free(str);
-    assert_null(b_strv_join(NULL, ":"));
+    assert_null(sb_strv_join(pieces, NULL));
+    assert_null(sb_strv_join(NULL, ":"));
+    assert_null(sb_strv_join(NULL, NULL));
 }
 
 
@@ -250,68 +277,88 @@ static void
 test_strv_length(void **state)
 {
     char *pieces[] = {"guda","bola", "chunda", NULL};
-    assert_int_equal(b_strv_length(pieces), 3);
+    assert_int_equal(sb_strv_length(pieces), 3);
     char *pieces2[] = {NULL};
-    assert_int_equal(b_strv_length(pieces2), 0);
-    assert_int_equal(b_strv_length(NULL), 0);
+    assert_int_equal(sb_strv_length(pieces2), 0);
+    assert_int_equal(sb_strv_length(NULL), 0);
 }
 
 
 static void
 test_string_new(void **state)
 {
-    b_string_t *str = b_string_new();
+    sb_string_t *str = sb_string_new();
     assert_non_null(str);
     assert_string_equal(str->str, "");
     assert_int_equal(str->len, 0);
-    assert_int_equal(str->allocated_len, B_STRING_CHUNK_SIZE);
-    assert_null(b_string_free(str, true));
+    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_null(sb_string_free(str, true));
 }
 
 
 static void
 test_string_free(void **state)
 {
-    b_string_t *str = b_string_new();
+    sb_string_t *str = sb_string_new();
     free(str->str);
-    str->str = b_strdup("bola");
+    str->str = sb_strdup("bola");
     str->len = 4;
-    str->allocated_len = B_STRING_CHUNK_SIZE;
-    char *tmp = b_string_free(str, false);
+    str->allocated_len = SB_STRING_CHUNK_SIZE;
+    char *tmp = sb_string_free(str, false);
     assert_string_equal(tmp, "bola");
     free(tmp);
+    assert_null(sb_string_free(NULL, false));
+}
+
+
+static void
+test_string_dup(void **state)
+{
+    sb_string_t *str = sb_string_new();
+    free(str->str);
+    str->str = sb_strdup("bola");
+    str->len = 4;
+    str->allocated_len = SB_STRING_CHUNK_SIZE;
+    sb_string_t *new = sb_string_dup(str);
+    assert_non_null(new);
+    assert_string_equal(new->str, "bola");
+    assert_int_equal(new->len, 4);
+    assert_int_equal(new->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_null(sb_string_free(new, true));
+    assert_null(sb_string_free(str, true));
+    assert_null(sb_string_dup(NULL));
 }
 
 
 static void
 test_string_append_len(void **state)
 {
-    b_string_t *str = b_string_new();
-    str = b_string_append_len(str, "guda", 4);
+    sb_string_t *str = sb_string_new();
+    str = sb_string_append_len(str, "guda", 4);
     assert_non_null(str);
     assert_string_equal(str->str, "guda");
     assert_int_equal(str->len, 4);
-    assert_int_equal(str->allocated_len, B_STRING_CHUNK_SIZE);
-    assert_null(b_string_free(str, true));
-    str = b_string_new();
-    str = b_string_append_len(str, "guda", 4);
-    str = b_string_append_len(str, "bola", 4);
+    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_null(sb_string_free(str, true));
+    str = sb_string_new();
+    str = sb_string_append_len(str, "guda", 4);
+    str = sb_string_append_len(str, "bola", 4);
     assert_non_null(str);
     assert_string_equal(str->str, "gudabola");
     assert_int_equal(str->len, 8);
-    assert_int_equal(str->allocated_len, B_STRING_CHUNK_SIZE);
-    assert_null(b_string_free(str, true));
-    str = b_string_new();
-    str = b_string_append_len(str, "guda", 3);
-    str = b_string_append_len(str, "bola", 4);
+    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_null(sb_string_free(str, true));
+    str = sb_string_new();
+    str = sb_string_append_len(str, "guda", 3);
+    str = sb_string_append_len(str, "bola", 4);
     assert_non_null(str);
     assert_string_equal(str->str, "gudbola");
     assert_int_equal(str->len, 7);
-    assert_int_equal(str->allocated_len, B_STRING_CHUNK_SIZE);
-    assert_null(b_string_free(str, true));
-    str = b_string_new();
-    str = b_string_append_len(str, "guda", 4);
-    str = b_string_append_len(str,
+    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_null(sb_string_free(str, true));
+    str = sb_string_new();
+    str = sb_string_append_len(str, "guda", 4);
+    str = sb_string_append_len(str,
         "cwlwmwxxmvjnwtidmjehzdeexbxjnjowruxjrqpgpfhmvwgqeacdjissntmbtsjidzkcw"
         "nnqhxhneolbwqlctcxmrsutolrjikpavxombpfpjyaqltgvzrjidotalcuwrwxtaxjiwa"
         "xfhfyzymtffusoqywaruxpybwggukltspqqmghzpqstvcvlqbkhquihzndnrvkaqvevaz"
@@ -321,8 +368,8 @@ test_string_append_len(void **state)
         "dxntikgoqlidfnmdhxzevqzlzubvyleeksdirmmttqthhkvfjggznpmarcamacpvwsrnr"
         "ftzfeyasjpxoevyptpdnqokswiondusnuymqwaryrmdgscbnuilxtypuynckancsfnwtg"
         "okxhegoifakimxbbafkeannglvsxprqzfekdinssqymtfexf", 600);
-    str = b_string_append_len(str, NULL, 0);
-    str = b_string_append_len(str,
+    str = sb_string_append_len(str, NULL, 0);
+    str = sb_string_append_len(str,
         "cwlwmwxxmvjnwtidmjehzdeexbxjnjowruxjrqpgpfhmvwgqeacdjissntmbtsjidzkcw"
         "nnqhxhneolbwqlctcxmrsutolrjikpavxombpfpjyaqltgvzrjidotalcuwrwxtaxjiwa"
         "xfhfyzymtffusoqywaruxpybwggukltspqqmghzpqstvcvlqbkhquihzndnrvkaqvevaz"
@@ -353,32 +400,40 @@ test_string_append_len(void **state)
         "pdnqokswiondusnuymqwaryrmdgscbnuilxtypuynckancsfnwtgokxhegoifakimxbba"
         "fkeannglvsxprqzfekdinssqymtfexf");
     assert_int_equal(str->len, 1204);
-    assert_int_equal(str->allocated_len, B_STRING_CHUNK_SIZE * 10);
-    assert_null(b_string_free(str, true));
+    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE * 10);
+    assert_null(sb_string_free(str, true));
+    str = sb_string_new();
+    str = sb_string_append_len(str, NULL, 0);
+    assert_non_null(str);
+    assert_string_equal(str->str, "");
+    assert_int_equal(str->len, 0);
+    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_null(sb_string_free(str, true));
+    assert_null(sb_string_append_len(NULL, "foo", 3));
 }
 
 
 static void
 test_string_append(void **state)
 {
-    b_string_t *str = b_string_new();
-    str = b_string_append(str, "guda");
+    sb_string_t *str = sb_string_new();
+    str = sb_string_append(str, "guda");
     assert_non_null(str);
     assert_string_equal(str->str, "guda");
     assert_int_equal(str->len, 4);
-    assert_int_equal(str->allocated_len, B_STRING_CHUNK_SIZE);
-    assert_null(b_string_free(str, true));
-    str = b_string_new();
-    str = b_string_append(str, "guda");
-    str = b_string_append(str, "bola");
+    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_null(sb_string_free(str, true));
+    str = sb_string_new();
+    str = sb_string_append(str, "guda");
+    str = sb_string_append(str, "bola");
     assert_non_null(str);
     assert_string_equal(str->str, "gudabola");
     assert_int_equal(str->len, 8);
-    assert_int_equal(str->allocated_len, B_STRING_CHUNK_SIZE);
-    assert_null(b_string_free(str, true));
-    str = b_string_new();
-    str = b_string_append(str, "guda");
-    str = b_string_append(str,
+    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_null(sb_string_free(str, true));
+    str = sb_string_new();
+    str = sb_string_append(str, "guda");
+    str = sb_string_append(str,
         "cwlwmwxxmvjnwtidmjehzdeexbxjnjowruxjrqpgpfhmvwgqeacdjissntmbtsjidzkcw"
         "nnqhxhneolbwqlctcxmrsutolrjikpavxombpfpjyaqltgvzrjidotalcuwrwxtaxjiwa"
         "xfhfyzymtffusoqywaruxpybwggukltspqqmghzpqstvcvlqbkhquihzndnrvkaqvevaz"
@@ -388,8 +443,8 @@ test_string_append(void **state)
         "dxntikgoqlidfnmdhxzevqzlzubvyleeksdirmmttqthhkvfjggznpmarcamacpvwsrnr"
         "ftzfeyasjpxoevyptpdnqokswiondusnuymqwaryrmdgscbnuilxtypuynckancsfnwtg"
         "okxhegoifakimxbbafkeannglvsxprqzfekdinssqymtfexf");
-    str = b_string_append(str, NULL);
-    str = b_string_append(str,
+    str = sb_string_append(str, NULL);
+    str = sb_string_append(str,
         "cwlwmwxxmvjnwtidmjehzdeexbxjnjowruxjrqpgpfhmvwgqeacdjissntmbtsjidzkcw"
         "nnqhxhneolbwqlctcxmrsutolrjikpavxombpfpjyaqltgvzrjidotalcuwrwxtaxjiwa"
         "xfhfyzymtffusoqywaruxpybwggukltspqqmghzpqstvcvlqbkhquihzndnrvkaqvevaz"
@@ -420,18 +475,27 @@ test_string_append(void **state)
         "pdnqokswiondusnuymqwaryrmdgscbnuilxtypuynckancsfnwtgokxhegoifakimxbba"
         "fkeannglvsxprqzfekdinssqymtfexf");
     assert_int_equal(str->len, 1204);
-    assert_int_equal(str->allocated_len, B_STRING_CHUNK_SIZE * 10);
-    assert_null(b_string_free(str, true));
+    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE * 10);
+    assert_null(sb_string_free(str, true));
+    str = sb_string_new();
+    str = sb_string_append(str, NULL);
+    assert_non_null(str);
+    assert_string_equal(str->str, "");
+    assert_int_equal(str->len, 0);
+    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_null(sb_string_free(str, true));
+    assert_null(sb_string_append(NULL, "asd"));
+    assert_null(sb_string_append(NULL, NULL));
 }
 
 
 static void
 test_string_append_c(void **state)
 {
-    b_string_t *str = b_string_new();
-    str = b_string_append_len(str, "guda", 4);
+    sb_string_t *str = sb_string_new();
+    str = sb_string_append_len(str, "guda", 4);
     for (int i = 0; i < 600; i++)
-        str = b_string_append_c(str, 'c');
+        str = sb_string_append_c(str, 'c');
     assert_non_null(str);
     assert_string_equal(str->str,
         "gudaccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
@@ -444,41 +508,43 @@ test_string_append_c(void **state)
         "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
         "cccccccccccccccccccccccccccccccccccccccccccccccccccc");
     assert_int_equal(str->len, 604);
-    assert_int_equal(str->allocated_len, B_STRING_CHUNK_SIZE * 5);
-    assert_null(b_string_free(str, true));
+    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE * 5);
+    assert_null(sb_string_free(str, true));
+    assert_null(sb_string_append_c(NULL, 0));
 }
 
 
 static void
 test_string_append_printf(void **state)
 {
-    b_string_t *str = b_string_new();
-    str = b_string_append_printf(str, "guda: %s %d", "bola", 1);
+    sb_string_t *str = sb_string_new();
+    str = sb_string_append_printf(str, "guda: %s %d", "bola", 1);
     assert_non_null(str);
     assert_string_equal(str->str, "guda: bola 1");
     assert_int_equal(str->len, 12);
-    assert_int_equal(str->allocated_len, B_STRING_CHUNK_SIZE);
-    assert_null(b_string_free(str, true));
+    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_null(sb_string_free(str, true));
+    assert_null(sb_string_append_printf(NULL, "asd"));
 }
 
 
 static void
 test_trie_new(void **state)
 {
-    b_trie_t *trie = b_trie_new(free);
+    sb_trie_t *trie = sb_trie_new(free);
     assert_non_null(trie);
     assert_null(trie->root);
     assert_true(trie->free_func == free);
-    b_trie_free(trie);
+    sb_trie_free(trie);
 }
 
 
 static void
 test_trie_insert(void **state)
 {
-    b_trie_t *trie = b_trie_new(free);
+    sb_trie_t *trie = sb_trie_new(free);
 
-    b_trie_insert(trie, "bola", b_strdup("guda"));
+    sb_trie_insert(trie, "bola", sb_strdup("guda"));
     assert_true(trie->root->key == 'b');
     assert_null(trie->root->data);
     assert_true(trie->root->child->key == 'o');
@@ -491,7 +557,7 @@ test_trie_insert(void **state)
     assert_string_equal(trie->root->child->child->child->child->data, "guda");
 
 
-    b_trie_insert(trie, "chu", b_strdup("nda"));
+    sb_trie_insert(trie, "chu", sb_strdup("nda"));
     assert_true(trie->root->key == 'b');
     assert_null(trie->root->data);
     assert_true(trie->root->child->key == 'o');
@@ -513,7 +579,7 @@ test_trie_insert(void **state)
     assert_string_equal(trie->root->next->child->child->child->data, "nda");
 
 
-    b_trie_insert(trie, "bote", b_strdup("aba"));
+    sb_trie_insert(trie, "bote", sb_strdup("aba"));
     assert_true(trie->root->key == 'b');
     assert_null(trie->root->data);
     assert_true(trie->root->child->key == 'o');
@@ -542,7 +608,7 @@ test_trie_insert(void **state)
     assert_string_equal(trie->root->child->child->next->child->child->data, "aba");
 
 
-    b_trie_insert(trie, "bo", b_strdup("haha"));
+    sb_trie_insert(trie, "bo", sb_strdup("haha"));
     assert_true(trie->root->key == 'b');
     assert_null(trie->root->data);
     assert_true(trie->root->child->key == 'o');
@@ -573,12 +639,12 @@ test_trie_insert(void **state)
     assert_true(trie->root->child->child->next->next->key == '\0');
     assert_string_equal(trie->root->child->child->next->next->data, "haha");
 
-    b_trie_free(trie);
+    sb_trie_free(trie);
 
 
-    trie = b_trie_new(free);
+    trie = sb_trie_new(free);
 
-    b_trie_insert(trie, "chu", b_strdup("nda"));
+    sb_trie_insert(trie, "chu", sb_strdup("nda"));
     assert_true(trie->root->key == 'c');
     assert_null(trie->root->data);
     assert_true(trie->root->child->key == 'h');
@@ -589,7 +655,7 @@ test_trie_insert(void **state)
     assert_string_equal(trie->root->child->child->child->data, "nda");
 
 
-    b_trie_insert(trie, "bola", b_strdup("guda"));
+    sb_trie_insert(trie, "bola", sb_strdup("guda"));
     assert_true(trie->root->key == 'c');
     assert_null(trie->root->data);
     assert_true(trie->root->child->key == 'h');
@@ -611,7 +677,7 @@ test_trie_insert(void **state)
     assert_string_equal(trie->root->next->child->child->child->child->data, "guda");
 
 
-    b_trie_insert(trie, "bote", b_strdup("aba"));
+    sb_trie_insert(trie, "bote", sb_strdup("aba"));
     assert_true(trie->root->key == 'c');
     assert_null(trie->root->data);
     assert_true(trie->root->child->key == 'h');
@@ -640,7 +706,7 @@ test_trie_insert(void **state)
     assert_string_equal(trie->root->next->child->child->next->child->child->data, "aba");
 
 
-    b_trie_insert(trie, "bo", b_strdup("haha"));
+    sb_trie_insert(trie, "bo", sb_strdup("haha"));
     assert_true(trie->root->key == 'c');
     assert_null(trie->root->data);
     assert_true(trie->root->child->key == 'h');
@@ -671,16 +737,16 @@ test_trie_insert(void **state)
     assert_true(trie->root->next->child->child->next->next->key == '\0');
     assert_string_equal(trie->root->next->child->child->next->next->data, "haha");
 
-    b_trie_free(trie);
+    sb_trie_free(trie);
 }
 
 
 static void
 test_trie_insert_duplicated(void **state)
 {
-    b_trie_t *trie = b_trie_new(free);
+    sb_trie_t *trie = sb_trie_new(free);
 
-    b_trie_insert(trie, "bola", b_strdup("guda"));
+    sb_trie_insert(trie, "bola", sb_strdup("guda"));
     assert_true(trie->root->key == 'b');
     assert_null(trie->root->data);
     assert_true(trie->root->child->key == 'o');
@@ -692,7 +758,7 @@ test_trie_insert_duplicated(void **state)
     assert_true(trie->root->child->child->child->child->key == '\0');
     assert_string_equal(trie->root->child->child->child->child->data, "guda");
 
-    b_trie_insert(trie, "bola", b_strdup("asdf"));
+    sb_trie_insert(trie, "bola", sb_strdup("asdf"));
     assert_true(trie->root->key == 'b');
     assert_null(trie->root->data);
     assert_true(trie->root->child->key == 'o');
@@ -704,26 +770,30 @@ test_trie_insert_duplicated(void **state)
     assert_true(trie->root->child->child->child->child->key == '\0');
     assert_string_equal(trie->root->child->child->child->child->data, "asdf");
 
-    b_trie_free(trie);
+    sb_trie_free(trie);
+
+    trie = NULL;
+    sb_trie_insert(trie, "bola", NULL);
+    assert_null(trie);
 }
 
 
 static void
 test_trie_keep_data(void **state)
 {
-    b_trie_t *trie = b_trie_new(NULL);
+    sb_trie_t *trie = sb_trie_new(NULL);
 
     char *t1 = "guda";
     char *t2 = "nda";
     char *t3 = "aba";
     char *t4 = "haha";
 
-    b_trie_insert(trie, "bola", t1);
-    b_trie_insert(trie, "chu", t2);
-    b_trie_insert(trie, "bote", t3);
-    b_trie_insert(trie, "bo", t4);
+    sb_trie_insert(trie, "bola", t1);
+    sb_trie_insert(trie, "chu", t2);
+    sb_trie_insert(trie, "bote", t3);
+    sb_trie_insert(trie, "bo", t4);
 
-    b_trie_free(trie);
+    sb_trie_free(trie);
 
     assert_string_equal(t1, "guda");
     assert_string_equal(t2, "nda");
@@ -735,72 +805,74 @@ test_trie_keep_data(void **state)
 static void
 test_trie_lookup(void **state)
 {
-    b_trie_t *trie = b_trie_new(free);
+    sb_trie_t *trie = sb_trie_new(free);
 
-    b_trie_insert(trie, "bola", b_strdup("guda"));
-    b_trie_insert(trie, "chu", b_strdup("nda"));
-    b_trie_insert(trie, "bote", b_strdup("aba"));
-    b_trie_insert(trie, "bo", b_strdup("haha"));
+    sb_trie_insert(trie, "bola", sb_strdup("guda"));
+    sb_trie_insert(trie, "chu", sb_strdup("nda"));
+    sb_trie_insert(trie, "bote", sb_strdup("aba"));
+    sb_trie_insert(trie, "bo", sb_strdup("haha"));
 
-    assert_string_equal(b_trie_lookup(trie, "bola"), "guda");
-    assert_string_equal(b_trie_lookup(trie, "chu"), "nda");
-    assert_string_equal(b_trie_lookup(trie, "bote"), "aba");
-    assert_string_equal(b_trie_lookup(trie, "bo"), "haha");
+    assert_string_equal(sb_trie_lookup(trie, "bola"), "guda");
+    assert_string_equal(sb_trie_lookup(trie, "chu"), "nda");
+    assert_string_equal(sb_trie_lookup(trie, "bote"), "aba");
+    assert_string_equal(sb_trie_lookup(trie, "bo"), "haha");
 
-    assert_null(b_trie_lookup(trie, "arcoiro"));
+    assert_null(sb_trie_lookup(trie, "arcoiro"));
 
-    b_trie_free(trie);
+    sb_trie_free(trie);
 
-    trie = b_trie_new(free);
+    trie = sb_trie_new(free);
 
-    b_trie_insert(trie, "chu", b_strdup("nda"));
-    b_trie_insert(trie, "bola", b_strdup("guda"));
-    b_trie_insert(trie, "bote", b_strdup("aba"));
-    b_trie_insert(trie, "bo", b_strdup("haha"));
-    b_trie_insert(trie, "copa", b_strdup("bu"));
-    b_trie_insert(trie, "b", b_strdup("c"));
-    b_trie_insert(trie, "test", b_strdup("asd"));
+    sb_trie_insert(trie, "chu", sb_strdup("nda"));
+    sb_trie_insert(trie, "bola", sb_strdup("guda"));
+    sb_trie_insert(trie, "bote", sb_strdup("aba"));
+    sb_trie_insert(trie, "bo", sb_strdup("haha"));
+    sb_trie_insert(trie, "copa", sb_strdup("bu"));
+    sb_trie_insert(trie, "b", sb_strdup("c"));
+    sb_trie_insert(trie, "test", sb_strdup("asd"));
 
-    assert_string_equal(b_trie_lookup(trie, "bola"), "guda");
-    assert_string_equal(b_trie_lookup(trie, "chu"), "nda");
-    assert_string_equal(b_trie_lookup(trie, "bote"), "aba");
-    assert_string_equal(b_trie_lookup(trie, "bo"), "haha");
+    assert_string_equal(sb_trie_lookup(trie, "bola"), "guda");
+    assert_string_equal(sb_trie_lookup(trie, "chu"), "nda");
+    assert_string_equal(sb_trie_lookup(trie, "bote"), "aba");
+    assert_string_equal(sb_trie_lookup(trie, "bo"), "haha");
 
-    assert_null(b_trie_lookup(trie, "arcoiro"));
+    assert_null(sb_trie_lookup(trie, "arcoiro"));
 
-    b_trie_free(trie);
+    sb_trie_free(trie);
+
+    assert_null(sb_trie_lookup(NULL, "bola"));
 }
 
 
 static void
 test_trie_size(void **state)
 {
-    b_trie_t *trie = b_trie_new(free);
+    sb_trie_t *trie = sb_trie_new(free);
 
-    b_trie_insert(trie, "bola", b_strdup("guda"));
-    b_trie_insert(trie, "chu", b_strdup("nda"));
-    b_trie_insert(trie, "bote", b_strdup("aba"));
-    b_trie_insert(trie, "bo", b_strdup("haha"));
+    sb_trie_insert(trie, "bola", sb_strdup("guda"));
+    sb_trie_insert(trie, "chu", sb_strdup("nda"));
+    sb_trie_insert(trie, "bote", sb_strdup("aba"));
+    sb_trie_insert(trie, "bo", sb_strdup("haha"));
 
-    assert_int_equal(b_trie_size(trie), 4);
-    assert_int_equal(b_trie_size(NULL), 0);
+    assert_int_equal(sb_trie_size(trie), 4);
+    assert_int_equal(sb_trie_size(NULL), 0);
 
-    b_trie_free(trie);
+    sb_trie_free(trie);
 
-    trie = b_trie_new(free);
+    trie = sb_trie_new(free);
 
-    b_trie_insert(trie, "chu", b_strdup("nda"));
-    b_trie_insert(trie, "bola", b_strdup("guda"));
-    b_trie_insert(trie, "bote", b_strdup("aba"));
-    b_trie_insert(trie, "bo", b_strdup("haha"));
-    b_trie_insert(trie, "copa", b_strdup("bu"));
-    b_trie_insert(trie, "b", b_strdup("c"));
-    b_trie_insert(trie, "test", b_strdup("asd"));
+    sb_trie_insert(trie, "chu", sb_strdup("nda"));
+    sb_trie_insert(trie, "bola", sb_strdup("guda"));
+    sb_trie_insert(trie, "bote", sb_strdup("aba"));
+    sb_trie_insert(trie, "bo", sb_strdup("haha"));
+    sb_trie_insert(trie, "copa", sb_strdup("bu"));
+    sb_trie_insert(trie, "b", sb_strdup("c"));
+    sb_trie_insert(trie, "test", sb_strdup("asd"));
 
-    assert_int_equal(b_trie_size(trie), 7);
-    assert_int_equal(b_trie_size(NULL), 0);
+    assert_int_equal(sb_trie_size(trie), 7);
+    assert_int_equal(sb_trie_size(NULL), 0);
 
-    b_trie_free(trie);
+    sb_trie_free(trie);
 }
 
 
@@ -809,8 +881,9 @@ static char *expected_keys[] = {"chu", "copa", "bola", "bote", "bo", "b", "test"
 static char *expected_datas[] = {"nda", "bu", "guda", "aba", "haha", "c", "asd"};
 
 static void
-mock_foreach(const char *key, void *data)
+mock_foreach(const char *key, void *data, void *user_data)
 {
+    assert_string_equal(user_data, "foo");
     assert_string_equal(key, expected_keys[counter]);
     assert_string_equal((char*) data, expected_datas[counter++]);
 }
@@ -819,20 +892,23 @@ mock_foreach(const char *key, void *data)
 static void
 test_trie_foreach(void **state)
 {
-    b_trie_t *trie = b_trie_new(free);
+    sb_trie_t *trie = sb_trie_new(free);
 
-    b_trie_insert(trie, "chu", b_strdup("nda"));
-    b_trie_insert(trie, "bola", b_strdup("guda"));
-    b_trie_insert(trie, "bote", b_strdup("aba"));
-    b_trie_insert(trie, "bo", b_strdup("haha"));
-    b_trie_insert(trie, "copa", b_strdup("bu"));
-    b_trie_insert(trie, "b", b_strdup("c"));
-    b_trie_insert(trie, "test", b_strdup("asd"));
+    sb_trie_insert(trie, "chu", sb_strdup("nda"));
+    sb_trie_insert(trie, "bola", sb_strdup("guda"));
+    sb_trie_insert(trie, "bote", sb_strdup("aba"));
+    sb_trie_insert(trie, "bo", sb_strdup("haha"));
+    sb_trie_insert(trie, "copa", sb_strdup("bu"));
+    sb_trie_insert(trie, "b", sb_strdup("c"));
+    sb_trie_insert(trie, "test", sb_strdup("asd"));
 
     counter = 0;
-    b_trie_foreach(trie, mock_foreach);
+    sb_trie_foreach(trie, mock_foreach, "foo");
+    sb_trie_foreach(NULL, mock_foreach, "foo");
+    sb_trie_foreach(trie, NULL, "foo");
+    sb_trie_foreach(NULL, NULL, "foo");
 
-    b_trie_free(trie);
+    sb_trie_free(trie);
 }
 
 
@@ -843,10 +919,11 @@ main(void)
 
         // slist
         unit_test(test_slist_append),
+        unit_test(test_slist_prepend),
         unit_test(test_slist_free),
         unit_test(test_slist_length),
 
-        // strings
+        // strfuncs
         unit_test(test_strdup),
         unit_test(test_strndup),
         unit_test(test_strdup_printf),
@@ -859,8 +936,11 @@ main(void)
         unit_test(test_str_replace),
         unit_test(test_strv_join),
         unit_test(test_strv_length),
+
+        // string
         unit_test(test_string_new),
         unit_test(test_string_free),
+        unit_test(test_string_dup),
         unit_test(test_string_append_len),
         unit_test(test_string_append),
         unit_test(test_string_append_c),

@@ -4,15 +4,16 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-tests \
-	--enable-ronn \
+	--disable-ronn \
 	--disable-valgrind \
+	--enable-git-receiver \
+	--enable-runserver \
 	$(NULL)
 
 
 ## File listings
 
 EXTRA_DIST = \
-	build-aux/build-windows.sh \
 	build-aux/git-version-gen \
 	$(top_srcdir)/.version \
 	autogen.sh \
@@ -40,11 +41,12 @@ noinst_HEADERS = \
 	src/renderer.h \
 	src/source-parser.h \
 	src/template-parser.h \
-	src/utils/utils.h \
+	src/utils.h \
 	$(NULL)
 
 noinst_LTLIBRARIES = \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 noinst_PROGRAMS = \
@@ -53,6 +55,18 @@ noinst_PROGRAMS = \
 bin_PROGRAMS = \
 	blogc \
 	$(NULL)
+
+if BUILD_GIT_RECEIVER
+bin_PROGRAMS += \
+	blogc-git-receiver \
+	$(NULL)
+endif
+
+if BUILD_RUNSERVER
+bin_PROGRAMS += \
+	blogc-runserver \
+	$(NULL)
+endif
 
 check_PROGRAMS = \
 	$(NULL)
@@ -68,10 +82,6 @@ libblogc_la_SOURCES = \
 	src/renderer.c \
 	src/source-parser.c \
 	src/template-parser.c \
-	src/utils/mem.c \
-	src/utils/slist.c \
-	src/utils/strings.c \
-	src/utils/trie.c \
 	$(NULL)
 
 libblogc_la_CFLAGS = \
@@ -84,8 +94,18 @@ libblogc_la_LIBADD = \
 	$(NULL)
 
 
+libblogc_utils_la_SOURCES = \
+	src/utils.c \
+	$(NULL)
+
+libblogc_utils_la_CFLAGS = \
+	$(AM_CFLAGS) \
+	-I$(top_srcdir)/src \
+	$(NULL)
+
+
 blogc_SOURCES = \
-	src/main.c \
+	src/blogc.c \
 	$(NULL)
 
 blogc_CFLAGS = \
@@ -95,23 +115,78 @@ blogc_CFLAGS = \
 
 blogc_LDADD = \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
+
+
+if BUILD_GIT_RECEIVER
+blogc_git_receiver_SOURCES = \
+	src/blogc-git-receiver.c \
+	$(NULL)
+
+blogc_git_receiver_CFLAGS = \
+	$(AM_CFLAGS) \
+	-I$(top_srcdir)/src \
+	$(NULL)
+
+blogc_git_receiver_LDADD = \
+	libblogc_utils.la \
+	$(NULL)
+endif
+
+
+if BUILD_RUNSERVER
+blogc_runserver_SOURCES = \
+	src/blogc-runserver.c \
+	$(NULL)
+
+blogc_runserver_CFLAGS = \
+	$(AM_CFLAGS) \
+	-I$(top_srcdir)/src \
+	$(LIBEVENT_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
+	$(NULL)
+
+blogc_runserver_LDADD = \
+	$(LIBEVENT_LIBS) \
+	$(MAGIC_LIBS) \
+	libblogc_utils.la \
+	$(NULL)
+endif
 
 
 ## Build rules: man pages
 
 EXTRA_DIST += \
 	man/blogc.1.ronn \
+	man/blogc-git-receiver.1.ronn \
+	man/blogc-runserver.1.ronn \
 	man/blogc-source.7.ronn \
 	man/blogc-template.7.ronn \
+	man/blogc-pagination.7.ronn \
 	man/index.txt \
+	blogc-git-receiver.1 \
+	blogc-runserver.1 \
 	$(NULL)
 
 dist_man_MANS = \
 	blogc.1 \
 	blogc-source.7 \
 	blogc-template.7 \
+	blogc-pagination.7 \
 	$(NULL)
+
+if BUILD_GIT_RECEIVER
+dist_man_MANS += \
+	blogc-git-receiver.1 \
+	$(NULL)
+endif
+
+if BUILD_RUNSERVER
+dist_man_MANS += \
+	blogc-runserver.1 \
+	$(NULL)
+endif
 
 MAINTAINERCLEANFILES += \
 	$(dist_man_MANS) \
@@ -125,7 +200,23 @@ blogc.1: man/blogc.1.ronn
 		--pipe \
 		--organization "Rafael G. Martins" \
 		--manual "$(PACKAGE_NAME) Manual" \
-		$< > $@
+		$(top_srcdir)/man/blogc.1.ronn > blogc.1
+
+blogc-git-receiver.1: man/blogc-git-receiver.1.ronn
+	$(AM_V_GEN)$(RONN) \
+		--roff \
+		--pipe \
+		--organization "Rafael G. Martins" \
+		--manual "$(PACKAGE_NAME) Manual" \
+		$(top_srcdir)/man/blogc-git-receiver.1.ronn > blogc-git-receiver.1
+
+blogc-runserver.1: man/blogc-runserver.1.ronn
+	$(AM_V_GEN)$(RONN) \
+		--roff \
+		--pipe \
+		--organization "Rafael G. Martins" \
+		--manual "$(PACKAGE_NAME) Manual" \
+		$(top_srcdir)/man/blogc-runserver.1.ronn > blogc-runserver.1
 
 blogc-source.7: man/blogc-source.7.ronn
 	$(AM_V_GEN)$(RONN) \
@@ -133,7 +224,7 @@ blogc-source.7: man/blogc-source.7.ronn
 		--pipe \
 		--organization "Rafael G. Martins" \
 		--manual "$(PACKAGE_NAME) Manual" \
-		$< > $@
+		$(top_srcdir)/man/blogc-source.7.ronn > blogc-source.7
 
 blogc-template.7: man/blogc-template.7.ronn
 	$(AM_V_GEN)$(RONN) \
@@ -141,17 +232,34 @@ blogc-template.7: man/blogc-template.7.ronn
 		--pipe \
 		--organization "Rafael G. Martins" \
 		--manual "$(PACKAGE_NAME) Manual" \
-		$< > $@
+		$(top_srcdir)/man/blogc-template.7.ronn > blogc-template.7
+
+blogc-pagination.7: man/blogc-pagination.7.ronn
+	$(AM_V_GEN)$(RONN) \
+		--roff \
+		--pipe \
+		--organization "Rafael G. Martins" \
+		--manual "$(PACKAGE_NAME) Manual" \
+		$(top_srcdir)/man/blogc-pagination.7.ronn > blogc-pagination.7
 
 else
 
 blogc.1:
 	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
 
+blogc-git-receiver.1:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
+blogc-runserver.1:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
 blogc-source.7:
 	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
 
 blogc-template.7:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
+blogc-pagination.7:
 	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
 
 endif
@@ -187,6 +295,7 @@ tests_check_error_LDFLAGS = \
 tests_check_error_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 tests_check_loader_SOURCES = \
@@ -206,6 +315,7 @@ tests_check_loader_LDFLAGS = \
 tests_check_loader_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 tests_check_content_parser_SOURCES = \
@@ -224,6 +334,7 @@ tests_check_content_parser_LDFLAGS = \
 tests_check_content_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 tests_check_datetime_parser_SOURCES = \
@@ -241,6 +352,7 @@ tests_check_datetime_parser_LDFLAGS = \
 tests_check_datetime_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 tests_check_renderer_SOURCES = \
@@ -258,6 +370,7 @@ tests_check_renderer_LDFLAGS = \
 tests_check_renderer_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 tests_check_source_parser_SOURCES = \
@@ -275,6 +388,7 @@ tests_check_source_parser_LDFLAGS = \
 tests_check_source_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 tests_check_template_parser_SOURCES = \
@@ -292,6 +406,7 @@ tests_check_template_parser_LDFLAGS = \
 tests_check_template_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 tests_check_utils_SOURCES = \
@@ -308,13 +423,24 @@ tests_check_utils_LDFLAGS = \
 
 tests_check_utils_LDADD = \
 	$(CMOCKA_LIBS) \
-	libblogc.la \
+	libblogc_utils.la \
 	$(NULL)
 
 endif
 
 TESTS = \
 	$(check_PROGRAMS)
+
+
+## Helpers: dist-srpm
+
+if USE_RPMBUILD
+dist-srpm: blogc.spec dist-xz
+	$(RPMBUILD) \
+		--define "_srcrpmdir $(top_builddir)" \
+		--define "_sourcedir $(top_builddir)" \
+		-bs blogc.spec
+endif
 
 
 ## Helpers: git-version-gen

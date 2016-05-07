@@ -13,9 +13,9 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "utils/utils.h"
 #include "template-parser.h"
 #include "error.h"
+#include "utils.h"
 
 
 typedef enum {
@@ -52,7 +52,7 @@ typedef enum {
 } blogc_template_parser_block_state_t;
 
 
-b_slist_t*
+sb_slist_t*
 blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
 {
     if (err == NULL || *err != NULL)
@@ -71,7 +71,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     unsigned int if_count = 0;
     bool foreach_open = false;
 
-    b_slist_t *stmts = NULL;
+    sb_slist_t *stmts = NULL;
     blogc_template_stmt_t *stmt = NULL;
 
     /*
@@ -100,21 +100,21 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
 
             case TEMPLATE_START:
                 if (last) {
-                    stmt = b_malloc(sizeof(blogc_template_stmt_t));
+                    stmt = sb_malloc(sizeof(blogc_template_stmt_t));
                     stmt->type = type;
                     if (lstrip_next) {
-                        tmp = b_strndup(src + start, src_len - start);
-                        stmt->value = b_strdup(b_str_lstrip(tmp));
+                        tmp = sb_strndup(src + start, src_len - start);
+                        stmt->value = sb_strdup(sb_str_lstrip(tmp));
                         free(tmp);
                         tmp = NULL;
                         lstrip_next = false;
                     }
                     else {
-                        stmt->value = b_strndup(src + start, src_len - start);
+                        stmt->value = sb_strndup(src + start, src_len - start);
                     }
                     stmt->op = 0;
                     stmt->value2 = NULL;
-                    stmts = b_slist_append(stmts, stmt);
+                    stmts = sb_slist_append(stmts, stmt);
                     previous = stmt;
                     stmt = NULL;
                 }
@@ -131,21 +131,21 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     else
                         state = TEMPLATE_VARIABLE_START;
                     if (end > start) {
-                        stmt = b_malloc(sizeof(blogc_template_stmt_t));
+                        stmt = sb_malloc(sizeof(blogc_template_stmt_t));
                         stmt->type = type;
                         if (lstrip_next) {
-                            tmp = b_strndup(src + start, end - start);
-                            stmt->value = b_strdup(b_str_lstrip(tmp));
+                            tmp = sb_strndup(src + start, end - start);
+                            stmt->value = sb_strdup(sb_str_lstrip(tmp));
                             free(tmp);
                             tmp = NULL;
                             lstrip_next = false;
                         }
                         else {
-                            stmt->value = b_strndup(src + start, end - start);
+                            stmt->value = sb_strndup(src + start, end - start);
                         }
                         stmt->op = 0;
                         stmt->value2 = NULL;
-                        stmts = b_slist_append(stmts, stmt);
+                        stmts = sb_slist_append(stmts, stmt);
                         previous = stmt;
                         stmt = NULL;
                     }
@@ -159,7 +159,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     if ((previous != NULL) &&
                         (previous->type == BLOGC_TEMPLATE_CONTENT_STMT))
                     {
-                        previous->value = b_str_rstrip(previous->value);  // does not need copy
+                        previous->value = sb_str_rstrip(previous->value);  // does not need copy
                     }
                     state = TEMPLATE_BLOCK_START;
                     break;
@@ -559,19 +559,19 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         op_start = 0;
                         op_end = 0;
                     }
-                    stmt = b_malloc(sizeof(blogc_template_stmt_t));
+                    stmt = sb_malloc(sizeof(blogc_template_stmt_t));
                     stmt->type = type;
                     stmt->value = NULL;
                     stmt->op = tmp_op;
                     stmt->value2 = NULL;
                     if (end > start)
-                        stmt->value = b_strndup(src + start, end - start);
+                        stmt->value = sb_strndup(src + start, end - start);
                     if (end2 > start2) {
-                        stmt->value2 = b_strndup(src + start2, end2 - start2);
+                        stmt->value2 = sb_strndup(src + start2, end2 - start2);
                         start2 = 0;
                         end2 = 0;
                     }
-                    stmts = b_slist_append(stmts, stmt);
+                    stmts = sb_slist_append(stmts, stmt);
                     previous = stmt;
                     stmt = NULL;
                     state = TEMPLATE_START;
@@ -622,9 +622,9 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
 
 
 void
-blogc_template_free_stmts(b_slist_t *stmts)
+blogc_template_free_stmts(sb_slist_t *stmts)
 {
-    for (b_slist_t *tmp = stmts; tmp != NULL; tmp = tmp->next) {
+    for (sb_slist_t *tmp = stmts; tmp != NULL; tmp = tmp->next) {
         blogc_template_stmt_t *data = tmp->data;
         if (data == NULL)
             continue;
@@ -632,5 +632,5 @@ blogc_template_free_stmts(b_slist_t *stmts)
         free(data->value2);
         free(data);
     }
-    b_slist_free(stmts);
+    sb_slist_free(stmts);
 }

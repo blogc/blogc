@@ -13,69 +13,69 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include "utils/utils.h"
 #include "datetime-parser.h"
 #include "error.h"
 #include "loader.h"
 #include "source-parser.h"
 #include "template-parser.h"
 #include "renderer.h"
+#include "utils.h"
 
 
 const char*
-blogc_get_variable(const char *name, b_trie_t *global, b_trie_t *local)
+blogc_get_variable(const char *name, sb_trie_t *global, sb_trie_t *local)
 {
     const char *rv = NULL;
     if (local != NULL) {
-        rv = b_trie_lookup(local, name);
+        rv = sb_trie_lookup(local, name);
         if (rv != NULL)
             return rv;
     }
     if (global != NULL)
-        rv = b_trie_lookup(global, name);
+        rv = sb_trie_lookup(global, name);
     return rv;
 }
 
 
 char*
-blogc_format_date(const char *date, b_trie_t *global, b_trie_t *local)
+blogc_format_date(const char *date, sb_trie_t *global, sb_trie_t *local)
 {
     const char *date_format = blogc_get_variable("DATE_FORMAT", global, local);
     if (date == NULL)
         return NULL;
     if (date_format == NULL)
-        return b_strdup(date);
+        return sb_strdup(date);
 
     blogc_error_t *err = NULL;
     char *rv = blogc_convert_datetime(date, date_format, &err);
     if (err != NULL) {
         blogc_error_print(err);
         blogc_error_free(err);
-        return b_strdup(date);
+        return sb_strdup(date);
     }
     return rv;
 }
 
 
 char*
-blogc_format_variable(const char *name, b_trie_t *global, b_trie_t *local,
-    b_slist_t *foreach_var)
+blogc_format_variable(const char *name, sb_trie_t *global, sb_trie_t *local,
+    sb_slist_t *foreach_var)
 {
     if (0 == strcmp(name, "FOREACH_ITEM")) {
         if (foreach_var != NULL && foreach_var->data != NULL) {
-            return b_strdup(foreach_var->data);
+            return sb_strdup(foreach_var->data);
         }
         return NULL;
     }
 
     char *var = NULL;
     bool must_format = false;
-    if (b_str_ends_with(name, "_FORMATTED")) {
-        var = b_strndup(name, strlen(name) - 10);
+    if (sb_str_ends_with(name, "_FORMATTED")) {
+        var = sb_strndup(name, strlen(name) - 10);
         must_format = true;
     }
     if (var == NULL)
-        var = b_strdup(name);
+        var = sb_strdup(name);
 
     const char *value = blogc_get_variable(var, global, local);
     free(var);
@@ -85,30 +85,30 @@ blogc_format_variable(const char *name, b_trie_t *global, b_trie_t *local,
 
     char *rv = NULL;
     if (must_format) {
-        if (b_str_starts_with(name, "DATE_")) {
+        if (sb_str_starts_with(name, "DATE_")) {
             rv = blogc_format_date(value, global, local);
         }
     }
 
     if (rv == NULL)
-        return b_strdup(value);
+        return sb_strdup(value);
     return rv;
 }
 
 
-b_slist_t*
-blogc_split_list_variable(const char *name, b_trie_t *global, b_trie_t *local)
+sb_slist_t*
+blogc_split_list_variable(const char *name, sb_trie_t *global, sb_trie_t *local)
 {
     const char *value = blogc_get_variable(name, global, local);
     if (value == NULL)
         return NULL;
 
-    b_slist_t *rv = NULL;
+    sb_slist_t *rv = NULL;
 
-    char **tmp = b_str_split(value, ' ', 0);
+    char **tmp = sb_str_split(value, ' ', 0);
     for (unsigned int i = 0; tmp[i] != NULL; i++) {
         if (tmp[i][0] != '\0')  // ignore empty strings
-            rv = b_slist_append(rv, tmp[i]);
+            rv = sb_slist_append(rv, tmp[i]);
         else
             free(tmp[i]);
     }
@@ -119,25 +119,25 @@ blogc_split_list_variable(const char *name, b_trie_t *global, b_trie_t *local)
 
 
 char*
-blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing)
+blogc_render(sb_slist_t *tmpl, sb_slist_t *sources, sb_trie_t *config, bool listing)
 {
     if (tmpl == NULL)
         return NULL;
 
-    b_slist_t *current_source = NULL;
-    b_slist_t *listing_start = NULL;
+    sb_slist_t *current_source = NULL;
+    sb_slist_t *listing_start = NULL;
 
-    b_string_t *str = b_string_new();
+    sb_string_t *str = sb_string_new();
 
-    b_trie_t *tmp_source = NULL;
+    sb_trie_t *tmp_source = NULL;
     char *config_value = NULL;
     char *defined = NULL;
 
     unsigned int if_count = 0;
 
-    b_slist_t *foreach_var = NULL;
-    b_slist_t *foreach_var_start = NULL;
-    b_slist_t *foreach_start = NULL;
+    sb_slist_t *foreach_var = NULL;
+    sb_slist_t *foreach_var_start = NULL;
+    sb_slist_t *foreach_start = NULL;
 
     bool if_not = false;
     bool inside_block = false;
@@ -145,7 +145,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
 
     int cmp = 0;
 
-    b_slist_t *tmp = tmpl;
+    sb_slist_t *tmp = tmpl;
     while (tmp != NULL) {
         blogc_template_stmt_t *stmt = tmp->data;
 
@@ -153,7 +153,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
 
             case BLOGC_TEMPLATE_CONTENT_STMT:
                 if (stmt->value != NULL)
-                    b_string_append(str, stmt->value);
+                    sb_string_append(str, stmt->value);
                 break;
 
             case BLOGC_TEMPLATE_BLOCK_STMT:
@@ -210,7 +210,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                     config_value = blogc_format_variable(stmt->value,
                         config, inside_block ? tmp_source : NULL, foreach_var);
                     if (config_value != NULL) {
-                        b_string_append(str, config_value);
+                        sb_string_append(str, config_value);
                         free(config_value);
                         config_value = NULL;
                         break;
@@ -252,7 +252,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                             (stmt->value2[0] == '"') &&
                             (stmt->value2[strlen(stmt->value2) - 1] == '"'))
                         {
-                            defined2 = b_strndup(stmt->value2 + 1,
+                            defined2 = sb_strndup(stmt->value2 + 1,
                                 strlen(stmt->value2) - 2);
                         }
                         else {
@@ -354,7 +354,7 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
                     }
                 }
                 foreach_start = NULL;
-                b_slist_free_full(foreach_var_start, free);
+                sb_slist_free_full(foreach_var_start, free);
                 foreach_var_start = NULL;
                 break;
         }
@@ -364,5 +364,5 @@ blogc_render(b_slist_t *tmpl, b_slist_t *sources, b_trie_t *config, bool listing
     // no need to free temporary variables here. the template parser makes sure
     // that templates are sane and statements are closed.
 
-    return b_string_free(str, false);
+    return sb_string_free(str, false);
 }

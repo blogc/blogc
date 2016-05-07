@@ -22,6 +22,30 @@ AS_IF([test "x$ac_cv_prog_cc_c99" = "xno"], [
 
 PKG_PROG_PKG_CONFIG
 
+AC_PROG_SED
+
+RPM_VERSION=`echo ${PACKAGE_VERSION} | sed "s/-/./g"`
+AC_SUBST(RPM_VERSION)
+
+AC_ARG_ENABLE([rpmbuild], AS_HELP_STRING([--disable-rpmbuild],
+              [ignore presence of rpmbuild and disable srpm generation]))
+AS_IF([test "x$enable_rpmbuild" != "xno"], [
+  AC_PATH_PROG([rpmbuild], [rpmbuild])
+  AS_IF([test "x$ac_cv_path_rpmbuild" = "x"], [
+    have_rpmbuild=no
+  ], [
+    have_rpmbuild=yes
+  ])
+])
+AS_IF([test "x$have_rpmbuild" = "xyes"], , [
+  AS_IF([test "x$enable_rpmbuild" = "xyes"], [
+    AC_MSG_ERROR([rpmbuild requested but not found])
+  ])
+])
+AM_CONDITIONAL([USE_RPMBUILD], [test "x$ac_cv_path_rpmbuild" != "x"])
+RPMBUILD="$ac_cv_path_rpmbuild"
+AC_SUBST(RPMBUILD)
+
 AC_ARG_ENABLE([ronn], AS_HELP_STRING([--disable-ronn],
               [ignore presence of ronn and disable man pages generation]))
 AS_IF([test "x$enable_ronn" != "xno"], [
@@ -95,29 +119,67 @@ AS_IF([test "x$have_cmocka" = "xyes"], , [
 ])
 AM_CONDITIONAL([USE_CMOCKA], [test "x$have_cmocka" = "xyes"])
 
+GIT_RECEIVER="disabled"
+AC_ARG_ENABLE([git-receiver], AS_HELP_STRING([--enable-git-receiver],
+              [build blogc-git-receiver tool]))
+AS_IF([test "x$enable_git_receiver" = "xyes"], [
+  AC_CHECK_HEADERS([sys/types.h sys/stat.h time.h libgen.h unistd.h errno.h dirent.h], [
+    GIT_RECEIVER="enabled"
+    have_git_receiver=yes
+  ], [
+    AC_MSG_ERROR([blogc-git-receiver tool requested but required headers not found])
+  ])
+])
+AM_CONDITIONAL([BUILD_GIT_RECEIVER], [test "x$have_git_receiver" = "xyes"])
+
+RUNSERVER="disabled"
+AC_ARG_ENABLE([runserver], AS_HELP_STRING([--enable-runserver],
+              [build blogc-runserver tool]))
+AS_IF([test "x$enable_runserver" = "xyes"], [
+  AC_CHECK_HEADERS([signal.h stdarg.h fcntl.h unistd.h sys/stat.h sys/types.h],, [
+    AC_MSG_ERROR([blogc-runserver tool requested but required headers not found])
+  ])
+  AC_CHECK_HEADERS([magic.h],, [
+    AC_MSG_ERROR([blogc-runserver tool requested but libmagic headers not found])
+  ])
+  AC_CHECK_LIB(magic, [magic_open], [MAGIC_LIBS="-lmagic"], [
+    AC_MSG_ERROR([blogc-runserver tool requested but libmagic library not found])
+  ])
+  AC_SUBST(MAGIC_LIBS)
+  PKG_CHECK_MODULES([LIBEVENT], [libevent >= 2.0])
+  RUNSERVER="enabled"
+  have_runserver=yes
+])
+AM_CONDITIONAL([BUILD_RUNSERVER], [test "x$have_runserver" = "xyes"])
+
 AC_CHECK_HEADERS([sys/types.h sys/stat.h time.h])
 
 LT_LIB_M
 
 AC_CONFIG_FILES([
-    Makefile
-    blogc.spec
+  Makefile
+  blogc.spec
 ])
+
 AC_OUTPUT
 
 AS_ECHO("
-        ==== ${PACKAGE_STRING} ====
+        ====== ${PACKAGE_STRING} ======
 
-        prefix:       ${prefix}
-        exec_prefix:  ${exec_prefix}
-        bindir:       ${bindir}
+        prefix:              ${prefix}
+        exec_prefix:         ${exec_prefix}
+        bindir:              ${bindir}
 
-        compiler:     ${CC}
-        cflags:       ${CFLAGS}
-        ldflags:      ${LDFLAGS}
+        compiler:            ${CC}
+        cflags:              ${CFLAGS}
+        ldflags:             ${LDFLAGS}
 
-        tests:        ${TESTS}
+        blogc-git-receiver:  ${GIT_RECEIVER}
+        blogc-runserver:     ${RUNSERVER}
 
-        ronn:         ${RONN}
-        valgrind:     ${VALGRIND}
+        tests:               ${TESTS}
+
+        ronn:                ${RONN}
+        valgrind:            ${VALGRIND}
+        rpmbuild:            ${RPMBUILD}
 ")

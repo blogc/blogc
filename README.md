@@ -1,6 +1,6 @@
 # blogc
 
-[![Build Status](https://semaphoreci.com/api/v1/projects/bd67545c-8593-4a37-ba94-ef1187a6d58d/402577/badge.svg)](https://semaphoreci.com/blogc/blogc)
+[![Build Status](https://travis-ci.org/blogc/blogc.svg?branch=master)](https://travis-ci.org/blogc/blogc)
 
 A blog compiler.
 
@@ -12,9 +12,11 @@ Clone the [Git repository](https://github.com/blogc/blogc) or grab the [latest r
 Inside the source directory, run the following commands:
 
     $ ./autogen.sh  # if installing from git
-    $ ./configure
+    $ ./configure [--enable-git-receiver] [--enable-runserver]
     $ make
     # make install
+
+The `./configure` options listed above will enable building of helper tools. To learn more about these tools, please read the man pages.
 
 To create your first blog, please clone our example repository and adapt it to your needs:
 
@@ -24,7 +26,7 @@ To create your first blog, please clone our example repository and adapt it to y
     $ git init
     $ git commit -am 'initial commit'
 
-At this point you'll have an empty blog, that can be customized to suit your needs. You'll want to look at the 'post/' directory and edit your first post. Each new post, template or asset must be added to the Makefile. Please read it carefully.
+At this point you'll have an empty blog, that can be customized to suit your needs. You'll want to look at the `content/post/` directory and edit your first post. Each new post, template or asset must be added to the `Makefile`. Please read it carefully.
 
 If some unexpected error happened, please [file an issue](https://github.com/blogc/blogc/issues/new).
 

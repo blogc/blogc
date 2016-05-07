@@ -17,8 +17,8 @@
 #include <string.h>
 
 #include "error.h"
-#include "utils/utils.h"
 #include "datetime-parser.h"
+#include "utils.h"
 
 
 typedef enum {
@@ -380,7 +380,7 @@ blogc_convert_datetime(const char *orig, const char *format,
         return NULL;
     }
 
-    return b_strdup(buf);
+    return sb_strdup(buf);
 
 #endif
 }

@@ -32,8 +32,9 @@ Makefile.in
 /stamp-h1
 .dirstamp
 /build-aux/*
-!/build-aux/build-windows.sh
 !/build-aux/git-version-gen
+!/build-aux/travis-build.sh
+!/build-aux/travis-deploy.sh
 
 # installed .m4 files
 /m4/*.m4
@@ -43,8 +44,10 @@ Makefile.in
 /blogc*.[17]
 blogc*.html
 
-# blogc
+# binaries
 /blogc
+/blogc-git-receiver
+/blogc-runserver
 
 # tests
 /tests/check_content_parser
@@ -66,3 +69,5 @@ blogc-*.rpm
 
 # git-version-gen
 /.version
+
+/build/

@@ -9,13 +9,13 @@
 #ifndef _DIRECTIVES_H
 #define _DIRECTIVES_H
 
-#include "utils/utils.h"
+#include "utils.h"
 #include "error.h"
 
 typedef struct {
     const char *name;
     const char *argument;
-    b_trie_t *params;
+    sb_trie_t *params;
     const char *eol;
 } blogc_directive_ctx_t;
 

@@ -1,43 +1,85 @@
-Name:		@PACKAGE_NAME@
-Version:	@PACKAGE_VERSION@
-Release:	1%{?dist}
-License:	BSD
-Group:		Applications/Text
-Summary:	A blog compiler
-URL:		@PACKAGE_URL@
-Source0:	https://github.com/blogc/blogc/releases/download/v%{version}/blogc-%{version}.tar.xz
-
-#BuildRequires:
-#Requires:
+Name: @PACKAGE_NAME@
+Version: @RPM_VERSION@
+Release: 1%{?dist}
+License: BSD
+Group: Applications/Text
+Summary: A blog compiler
+URL: @PACKAGE_URL@
+Source0: https://github.com/blogc/blogc/releases/download/v@PACKAGE_VERSION@/blogc-@PACKAGE_VERSION@.tar.xz
+BuildRequires: libevent-devel >= 2.0, file-devel
 
 %description
 blogc(1) is a blog compiler. It converts source files and templates into
 blog/website resources.
 
+%package git-receiver
+Summary: A simple login shell/git hook to deploy blogc websites
+Group: System Environment/Shells
+Requires: git, tar, make
+
+%description git-receiver
+blogc-git-receiver is a simple login shell/git hook to deploy blogc websites.
+
+%package runserver
+Summary: A simple HTTP server to test blogc websites
+Group: Development/Tools
+Requires: libevent >= 2.0, file-libs
+
+%description runserver
+blogc-runserver is a simple HTTP server to test blogc websites.
 
 %prep
-%setup -q -n blogc-%{version}
-
+%setup -q -n @PACKAGE_NAME@-@PACKAGE_VERSION@
 
 %build
-%configure
+%configure --enable-git-receiver --enable-runserver
 make %{?_smp_mflags}
-
 
 %install
 rm -rf $RPM_BUILD_ROOT
 %make_install
 
-
 %files
-%{_mandir}/man*/blogc*
+%{_mandir}/man*/blogc.*
+%{_mandir}/man*/blogc-source.*
+%{_mandir}/man*/blogc-template.*
+%{_mandir}/man*/blogc-pagination.*
 %{_bindir}/blogc
-
 %doc README.md
 %license LICENSE
 
+%files git-receiver
+%{_mandir}/man*/blogc-git-receiver.*
+%{_bindir}/blogc-git-receiver
+%license LICENSE
+
+%files runserver
+%{_mandir}/man*/blogc-runserver.*
+%{_bindir}/blogc-runserver
+%license LICENSE
 
 %changelog
+* Sat Apr 30 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.9.0-1
+- New release. Merged blogc-git-receiver and blogc-runserver.
+
+* Sun Apr 17 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.8.1-1
+- New release.
+
+* Wed Apr 6 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.8.0-1
+- New release.
+
+* Mon Feb 29 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.7.6-1
+- New release. Added new dependency.
+
+* Sun Feb 21 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.7.5-1
+- New release.
+
+* Sun Feb 21 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.7.4-1
+- New release.
+
+* Sat Feb 20 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.7.3-1
+- New release.
+
 * Mon Jan 25 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.7.2-1
 - New release.
 

@@ -14,16 +14,16 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include "utils/utils.h"
 #include "error.h"
+#include "utils.h"
 
 
 blogc_error_t*
 blogc_error_new(blogc_error_type_t type, const char *msg)
 {
-    blogc_error_t *err = b_malloc(sizeof(blogc_error_t));
+    blogc_error_t *err = sb_malloc(sizeof(blogc_error_t));
     err->type = type;
-    err->msg = b_strdup(msg);
+    err->msg = sb_strdup(msg);
     return err;
 }
 
@@ -33,7 +33,7 @@ blogc_error_new_printf(blogc_error_type_t type, const char *format, ...)
 {
     va_list ap;
     va_start(ap, format);
-    char *tmp = b_strdup_vprintf(format, ap);
+    char *tmp = sb_strdup_vprintf(format, ap);
     va_end(ap);
     blogc_error_t *rv = blogc_error_new(type, tmp);
     free(tmp);
@@ -47,7 +47,7 @@ blogc_error_parser(blogc_error_type_t type, const char *src, size_t src_len,
 {
     va_list ap;
     va_start(ap, format);
-    char *msg = b_strdup_vprintf(format, ap);
+    char *msg = sb_strdup_vprintf(format, ap);
     va_end(ap);
 
     size_t lineno = 1;
@@ -88,7 +88,7 @@ blogc_error_parser(blogc_error_type_t type, const char *src, size_t src_len,
     if (lineend <= linestart && src_len >= linestart)
         lineend = src_len;
 
-    char *line = b_strndup(src + linestart, lineend - linestart);
+    char *line = sb_strndup(src + linestart, lineend - linestart);
 
     blogc_error_t *rv = NULL;
 

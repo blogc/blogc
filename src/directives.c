@@ -12,9 +12,9 @@
 
 #include <string.h>
 
-#include "utils/utils.h"
 #include "directives.h"
 #include "error.h"
+#include "utils.h"
 
 
 const static blogc_directive_t registry[] = {
@@ -48,11 +48,11 @@ blogc_directive_youtube(blogc_directive_ctx_t *ctx, blogc_error_t **err)
         return NULL;
     }
 
-    char *width = b_trie_lookup(ctx->params, "width");
-    char *height = b_trie_lookup(ctx->params, "height");
+    char *width = sb_trie_lookup(ctx->params, "width");
+    char *height = sb_trie_lookup(ctx->params, "height");
 
     // using default 16:9 sizes provided by youtube as of 2015-11-04
-    return b_strdup_printf(
+    return sb_strdup_printf(
         "<iframe width=\"%s\" height=\"%s\" "
         "src=\"https://www.youtube.com/embed/%s\" frameborder=\"0\" "
         "allowfullscreen></iframe>%s",
