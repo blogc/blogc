@@ -39,7 +39,7 @@ blogc_directive_loader(blogc_directive_ctx_t *ctx, blogc_error_t **err)
 }
 
 
-char*
+static char*
 blogc_directive_youtube(blogc_directive_ctx_t *ctx, blogc_error_t **err)
 {
     if (ctx->argument == NULL) {

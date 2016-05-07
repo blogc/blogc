@@ -31,6 +31,6 @@ char* blogc_directive_loader(blogc_directive_ctx_t *ctx, blogc_error_t **err);
 
 
 // built-in directives (that are everything we support right now
-char* blogc_directive_youtube(blogc_directive_ctx_t *ctx, blogc_error_t **err);
+static char* blogc_directive_youtube(blogc_directive_ctx_t *ctx, blogc_error_t **err);
 
 #endif /* _DIRECTIVES_H */
