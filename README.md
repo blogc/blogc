@@ -9,6 +9,8 @@ A blog compiler.
 
 Clone the [Git repository](https://github.com/blogc/blogc) or grab the [latest release](https://github.com/blogc/blogc/releases) and extract it.
 
+If installing from Git repository, [ronn](https://github.com/rtomayko/ronn) and [GNU Autotools](http://www.gnu.org/software/automake/manual/html_node/Autotools-Introduction.html) must be installed in the machine. Release tarballs does not have these dependencies and are the recommended way to install.
+
 Inside the source directory, run the following commands:
 
     $ ./autogen.sh  # if installing from git
@@ -16,7 +18,7 @@ Inside the source directory, run the following commands:
     $ make
     # make install
 
-The `./configure` options listed above will enable building of helper tools. To learn more about these tools, please read the man pages.
+The `./configure` options listed above will enable building of helper tools. To learn more about these tools, please read the man pages. Be aware that [`blogc-runserver(1)`](https://blogc.rgm.io/man/blogc-runserver.1.html) depends on [libmagic](https://github.com/file/file) and [libevent](http://libevent.org/), but this tool can be replaced by any HTTP server you want to use.
 
 To create your first blog, please clone our example repository and adapt it to your needs:
 
