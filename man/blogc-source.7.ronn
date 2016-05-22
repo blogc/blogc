@@ -52,7 +52,8 @@ explicit definition in source file.
 
 Another variable, `DESCRIPTION`, will be automatically created by the source
 parser. Its content is the first line of the first paragraph of the content.
-This variable can be overriden by an explicit definition in source file.
+Paragraphs inside blockquotes are ignored. This variable can be overriden by
+an explicit definition in source file.
 
 ## SOURCE CONTENT - BLOCK ELEMENTS
 

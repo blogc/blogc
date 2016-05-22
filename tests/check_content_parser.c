@@ -1153,7 +1153,7 @@ test_content_parse_description(void **state)
         "</blockquote>\n"
         "<p>bar</p>\n");
     assert_non_null(d);
-    assert_string_equal(d, "qwe");
+    assert_string_equal(d, "bar");
     free(html);
     free(d);
     d = NULL;
@@ -1172,7 +1172,7 @@ test_content_parse_description(void **state)
         "</blockquote>\n"
         "<p>bar</p>\n");
     assert_non_null(d);
-    assert_string_equal(d, "qwe");
+    assert_string_equal(d, "bar");
     free(html);
     free(d);
 }
@@ -1236,7 +1236,7 @@ test_content_parse_description_crlf(void **state)
         "</blockquote>\r\n"
         "<p>bar</p>\r\n");
     assert_non_null(d);
-    assert_string_equal(d, "qwe");
+    assert_string_equal(d, "bar");
     free(html);
     free(d);
     d = NULL;
@@ -1255,7 +1255,7 @@ test_content_parse_description_crlf(void **state)
         "</blockquote>\r\n"
         "<p>bar</p>\r\n");
     assert_non_null(d);
-    assert_string_equal(d, "qwe");
+    assert_string_equal(d, "bar");
     free(html);
     free(d);
 }

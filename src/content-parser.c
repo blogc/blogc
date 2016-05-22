@@ -701,7 +701,10 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
                     for (sb_slist_t *l = lines; l != NULL; l = l->next)
                         sb_string_append_printf(tmp_str, "%s%s", l->data,
                             line_ending);
-                    tmp = blogc_content_parse(tmp_str->str, NULL, description);
+                    // do not propagate description to blockquote parsing,
+                    // because we just want paragraphs from first level of
+                    // content.
+                    tmp = blogc_content_parse(tmp_str->str, NULL, NULL);
                     sb_string_append_printf(rv, "<blockquote>%s</blockquote>%s",
                         tmp, line_ending);
                     free(tmp);
