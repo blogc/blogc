@@ -51,9 +51,10 @@ for building permalinks in templates. This variable can't be overriden by an
 explicit definition in source file.
 
 Another variable, `DESCRIPTION`, will be automatically created by the source
-parser. Its content is the first line of the first paragraph of the content.
-Paragraphs inside blockquotes are ignored. This variable can be overriden by
-an explicit definition in source file.
+parser. It contains the unparsed content of the first paragraph found in the
+source file. Paragraphs inside blockquotes are ignored. This variable can be
+overriden by an explicit definition in source file. This is useful to add
+"description" meta-tags to HTML templates.
 
 ## SOURCE CONTENT - BLOCK ELEMENTS
 

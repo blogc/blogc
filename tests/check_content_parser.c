@@ -60,6 +60,50 @@ test_htmlentities(void **state)
 
 
 static void
+test_fix_description(void **state)
+{
+    assert_null(blogc_fix_description(NULL));
+    char *s = blogc_fix_description("bola");
+    assert_string_equal(s, "bola");
+    free(s);
+    s = blogc_fix_description("bola\n");
+    assert_string_equal(s, "bola");
+    free(s);
+    s = blogc_fix_description("bola\r\n");
+    assert_string_equal(s, "bola");
+    free(s);
+    s = blogc_fix_description("bola\nguda");
+    assert_string_equal(s, "bola guda");
+    free(s);
+    s = blogc_fix_description("bola\nguda\n");
+    assert_string_equal(s, "bola guda");
+    free(s);
+    s = blogc_fix_description("bola\r\nguda\r\n");
+    assert_string_equal(s, "bola guda");
+    free(s);
+
+    s = blogc_fix_description("bola\n   guda   lol\n asd");
+    assert_string_equal(s, "bola guda   lol asd");
+    free(s);
+    s = blogc_fix_description("bola\n   guda   lol\n asd\n");
+    assert_string_equal(s, "bola guda   lol asd");
+    free(s);
+    s = blogc_fix_description("bola\r\n   guda   lol\r\n asd\r\n");
+    assert_string_equal(s, "bola guda   lol asd");
+    free(s);
+    s = blogc_fix_description("  bola\n   guda   lol\n asd");
+    assert_string_equal(s, "bola guda   lol asd");
+    free(s);
+    s = blogc_fix_description("  bola\n   guda   lol\n asd\n");
+    assert_string_equal(s, "bola guda   lol asd");
+    free(s);
+    s = blogc_fix_description("  bola\r\n   guda   lol\r\n asd\r\n");
+    assert_string_equal(s, "bola guda   lol asd");
+    free(s);
+}
+
+
+static void
 test_is_ordered_list_item(void **state)
 {
     assert_true(blogc_is_ordered_list_item("1.bola", 2));
@@ -127,7 +171,7 @@ test_content_parse(void **state)
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_non_null(d);
-    assert_string_equal(d, "bola");
+    assert_string_equal(d, "bola chunda");
     assert_string_equal(html,
         "<h1 id=\"um\">um</h1>\n"
         "<h2 id=\"dois\">dois</h2>\n"
@@ -219,7 +263,7 @@ test_content_parse_crlf(void **state)
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_non_null(d);
-    assert_string_equal(d, "bola");
+    assert_string_equal(d, "bola chunda");
     assert_string_equal(html,
         "<h1 id=\"um\">um</h1>\r\n"
         "<h2 id=\"dois\">dois</h2>\r\n"
@@ -1136,7 +1180,7 @@ test_content_parse_description(void **state)
         "<p>qwe\n"
         "bar</p>\n");
     assert_non_null(d);
-    assert_string_equal(d, "qwe");
+    assert_string_equal(d, "qwe bar");
     free(html);
     free(d);
     d = NULL;
@@ -1219,7 +1263,7 @@ test_content_parse_description_crlf(void **state)
         "<p>qwe\r\n"
         "bar</p>\r\n");
     assert_non_null(d);
-    assert_string_equal(d, "qwe");
+    assert_string_equal(d, "qwe bar");
     free(html);
     free(d);
     d = NULL;
@@ -1277,7 +1321,7 @@ test_content_parse_invalid_excerpt(void **state)
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_non_null(d);
-    assert_string_equal(d, "chunda");
+    assert_string_equal(d, "chunda ..");
     assert_string_equal(html,
         "<h1 id=\"test\">test</h1>\n"
         "<p>chunda\n"
@@ -2019,6 +2063,7 @@ main(void)
     const UnitTest tests[] = {
         unit_test(test_slugify),
         unit_test(test_htmlentities),
+        unit_test(test_fix_description),
         unit_test(test_is_ordered_list_item),
         unit_test(test_content_parse),
         unit_test(test_content_parse_crlf),

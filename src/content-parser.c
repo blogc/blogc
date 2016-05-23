@@ -75,6 +75,47 @@ blogc_htmlentities(const char *str)
 }
 
 
+char*
+blogc_fix_description(const char *paragraph)
+{
+    if (paragraph == NULL)
+        return NULL;
+    sb_string_t *rv = sb_string_new();
+    bool last = false;
+    bool newline = false;
+    char *tmp = NULL;
+    size_t start = 0;
+    size_t current = 0;
+    while (true) {
+        switch (paragraph[current]) {
+            case '\0':
+                last = true;
+            case '\r':
+            case '\n':
+                if (newline)
+                    break;
+                tmp = sb_strndup(paragraph + start, current - start);
+                sb_string_append(rv, sb_str_strip(tmp));
+                free(tmp);
+                tmp = NULL;
+                if (!last)
+                    sb_string_append_c(rv, ' ');
+                start = current + 1;
+                newline = true;
+                break;
+            default:
+                newline = false;
+        }
+        if (last)
+            break;
+        current++;
+    }
+    tmp = sb_strdup(sb_str_strip(rv->str));
+    sb_string_free(rv, true);
+    return tmp;
+}
+
+
 typedef enum {
     CONTENT_START_LINE = 1,
     CONTENT_EXCERPT,
@@ -1018,8 +1059,6 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
                     state = CONTENT_PARAGRAPH_END;
                     end = is_last && c != '\n' && c != '\r' ? src_len :
                         (real_end != 0 ? real_end : current);
-                    if (description != NULL && *description == NULL)
-                        *description = sb_strndup(src + start, end - start);
                 }
                 if (!is_last)
                     break;
@@ -1027,6 +1066,8 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
             case CONTENT_PARAGRAPH_END:
                 if (c == '\n' || c == '\r' || is_last) {
                     tmp = sb_strndup(src + start, end - start);
+                    if (description != NULL && *description == NULL)
+                        *description = blogc_fix_description(tmp);
                     parsed = blogc_content_parse_inline(tmp);
                     sb_string_append_printf(rv, "<p>%s</p>%s", parsed,
                         line_ending);
