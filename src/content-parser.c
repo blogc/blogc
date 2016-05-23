@@ -110,7 +110,7 @@ blogc_fix_description(const char *paragraph)
             break;
         current++;
     }
-    tmp = sb_strdup(sb_str_strip(rv->str));
+    tmp = blogc_htmlentities(sb_str_strip(rv->str));
     sb_string_free(rv, true);
     return tmp;
 }

@@ -52,9 +52,10 @@ explicit definition in source file.
 
 Another variable, `DESCRIPTION`, will be automatically created by the source
 parser. It contains the unparsed content of the first paragraph found in the
-source file. Paragraphs inside blockquotes are ignored. This variable can be
-overriden by an explicit definition in source file. This is useful to add
-"description" meta-tags to HTML templates.
+source file. The content is not parsed but HTML entities are encoded. Paragraphs
+inside blockquotes are ignored. This variable can be overriden by an explicit
+definition in source file, that must have the HTML entities escaped manually.
+This is useful to add "description" meta-tags to HTML templates.
 
 ## SOURCE CONTENT - BLOCK ELEMENTS
 

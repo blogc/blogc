@@ -100,6 +100,9 @@ test_fix_description(void **state)
     s = blogc_fix_description("  bola\r\n   guda   lol\r\n asd\r\n");
     assert_string_equal(s, "bola guda   lol asd");
     free(s);
+    s = blogc_fix_description("b'o\"l<>a");
+    assert_string_equal(s, "b&#x27;o&quot;l&lt;&gt;a");
+    free(s);
 }
 
 
