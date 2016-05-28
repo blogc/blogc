@@ -229,14 +229,14 @@ main(int argc, char **argv)
         else {
             printf("%s\n", val);
         }
-        goto cleanup3;
+        goto cleanup2;
     }
 
     if (template == NULL) {
         blogc_print_usage();
         fprintf(stderr, "blogc: error: argument -t is required when rendering content\n");
         rv = 2;
-        goto cleanup3;
+        goto cleanup2;
     }
 
     sb_slist_t* l = blogc_template_parse_from_file(template, &err);
