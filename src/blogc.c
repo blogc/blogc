@@ -219,13 +219,6 @@ main(int argc, char **argv)
         goto cleanup2;
     }
 
-    sb_slist_t* l = blogc_template_parse_from_file(template, &err);
-    if (err != NULL) {
-        blogc_error_print(err);
-        rv = 2;
-        goto cleanup3;
-    }
-
     if (print != NULL) {
         const char *val = sb_trie_lookup(config, print);
         if (val == NULL) {
@@ -242,6 +235,13 @@ main(int argc, char **argv)
     if (template == NULL) {
         blogc_print_usage();
         fprintf(stderr, "blogc: error: argument -t is required when rendering content\n");
+        rv = 2;
+        goto cleanup3;
+    }
+
+    sb_slist_t* l = blogc_template_parse_from_file(template, &err);
+    if (err != NULL) {
+        blogc_error_print(err);
         rv = 2;
         goto cleanup3;
     }
