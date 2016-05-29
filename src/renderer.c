@@ -10,6 +10,7 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -61,6 +62,12 @@ char*
 blogc_format_variable(const char *name, sb_trie_t *global, sb_trie_t *local,
     sb_slist_t *foreach_var)
 {
+    // if used asked for a variable that exists, just return it right away
+    const char *value = blogc_get_variable(name, global, local);
+    if (value != NULL)
+        return sb_strdup(value);
+
+    // do the same for special variable 'FOREACH_ITEM'
     if (0 == strcmp(name, "FOREACH_ITEM")) {
         if (foreach_var != NULL && foreach_var->data != NULL) {
             return sb_strdup(foreach_var->data);
@@ -68,30 +75,69 @@ blogc_format_variable(const char *name, sb_trie_t *global, sb_trie_t *local,
         return NULL;
     }
 
-    char *var = NULL;
+    char *var = sb_strdup(name);
+
+    size_t i;
+    size_t last = strlen(var);
+
+    long int len = -1;
+
+    // just walk till the last '_'
+    for (i = last - 1; i > 0 && var[i] >= '0' && var[i] <= '9'; i--);
+
+    if (var[i] == '_' && (i + 1) < last) {  // var ends with '_[0-9]+'
+        // passing NULL to endptr because our string was previously validated
+        len = strtol(var + i + 1, NULL, 10);
+        if (errno != 0) {
+            fprintf(stderr, "warning: invalid variable size for '%s' (%s), "
+                "ignoring.\n", var, strerror(errno));
+            len = -1;
+        }
+        else {
+            var[i] = '\0';
+        }
+    }
+
     bool must_format = false;
-    if (sb_str_ends_with(name, "_FORMATTED")) {
-        var = sb_strndup(name, strlen(name) - 10);
+
+    if (sb_str_ends_with(var, "_FORMATTED")) {
+        var[strlen(var) - 10] = '\0';
         must_format = true;
     }
-    if (var == NULL)
-        var = sb_strdup(name);
 
-    const char *value = blogc_get_variable(var, global, local);
+    if ((0 == strcmp(var, "FOREACH_ITEM")) &&
+        (foreach_var != NULL && foreach_var->data != NULL))
+        value = foreach_var->data;
+    else
+        value = blogc_get_variable(var, global, local);
+
     free(var);
 
     if (value == NULL)
         return NULL;
 
     char *rv = NULL;
+
     if (must_format) {
         if (sb_str_starts_with(name, "DATE_")) {
             rv = blogc_format_date(value, global, local);
         }
+        else {
+            fprintf(stderr, "warning: no formatter found for '%s', "
+                "ignoring.\n", var);
+            rv = sb_strdup(value);
+        }
+    }
+    else {
+        rv = sb_strdup(value);
     }
 
-    if (rv == NULL)
-        return sb_strdup(value);
+    if (len > 0) {
+        char *tmp = sb_strndup(rv, len);
+        free(rv);
+        rv = tmp;
+    }
+
     return rv;
 }
 

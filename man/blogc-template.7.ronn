@@ -105,6 +105,36 @@ won't raise any error in this case.
 Variables are always strings, even if the value of the variable is a number,
 it is handled as a string by blogc(1).
 
+### Variable formatters
+
+blogc(1) can apply a formatter to a variable, depending on how it is called
+in the template. If user append `_FORMATTED` to the end of the variable name,
+a formatter will be applied, if available for the variable name:
+
+- Date formatter: if variable name starts with `DATE_`, it is formatted with
+  a strptime(3) format, provided by `DATE_FORMAT` variable. The `DATE_FORMATTED`
+  "meta-variable" will return the formatted version of the `DATE` variable.
+  If `DATE_FORMAT` is not provided, the original value will be returned.
+
+An existing variable is not overrided by formatter. That means that if
+`FOO_FORMATTED` variable exists, it won't be handled as a formatter
+"meta-variable", and `FOO_FORMATTED` variable value will be returned normally.
+
+### Truncated variables
+
+blogc(1) can truncate the value of a variable to a maximum length, if it is
+called with the maximum length appended to the end of the variable, like:
+`FOO_5` will return the 5 first characters of the `FOO` variable, if bigger
+than 5 characters.
+
+This is applicable to the "meta-variables", like `DATE_FORMATTED`. It can
+be truncated like: `DATE_FORMATTED_5`, that will return the 5 first
+characters of the `DATE_FORMATTED` "meta-variable".
+
+An existing variable is not overrided by the truncate syntax. That means
+that if `FOO_5` variable exists, it won't be handled as a truncate
+"meta-variable", and `FOO_5` variable value will be returned normally.
+
 ## TEMPLATE CONDITIONALS
 
 Template conditionals are used to include content to the output, or not,
@@ -198,6 +228,12 @@ iteration.
 
 If the value of the `TAGS` variable is "item1 item2 item3", this template is
 rendered 3 times, one for each item value.
+
+The `FOREACH_ITEM` variable can be truncated, like:
+
+    {% foreach TAGS %}
+    <a href="/tag/{{ FOREACH_ITEM }}/">{{ FOREACH_ITEM_5 }}</a>
+    {% endforeach %}
 
 ## WHITESPACE CONTROL
 

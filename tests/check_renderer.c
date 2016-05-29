@@ -820,18 +820,30 @@ test_format_date_without_date(void **state)
 static void
 test_format_variable(void **state)
 {
+    // FIXME: test warnings
     sb_trie_t *g = sb_trie_new(free);
     sb_trie_insert(g, "NAME", sb_strdup("bola"));
     sb_trie_insert(g, "TITLE", sb_strdup("bola2"));
     sb_trie_t *l = sb_trie_new(free);
     sb_trie_insert(l, "NAME", sb_strdup("chunda"));
     sb_trie_insert(l, "TITLE", sb_strdup("chunda2"));
+    sb_trie_insert(l, "SIZE", sb_strdup("1234567890987654321"));
     char *tmp = blogc_format_variable("NAME", g, l, NULL);
     assert_string_equal(tmp, "chunda");
     free(tmp);
     tmp = blogc_format_variable("TITLE", g, l, NULL);
     assert_string_equal(tmp, "chunda2");
     free(tmp);
+    tmp = blogc_format_variable("TITLE_2", g, l, NULL);
+    assert_string_equal(tmp, "ch");
+    free(tmp);
+    tmp = blogc_format_variable("SIZE_12", g, l, NULL);
+    assert_string_equal(tmp, "123456789098");
+    free(tmp);
+    tmp = blogc_format_variable("SIZE_200", g, l, NULL);
+    assert_string_equal(tmp, "1234567890987654321");
+    free(tmp);
+    assert_null(blogc_format_variable("SIZE_", g, l, NULL));
     assert_null(blogc_format_variable("BOLA", g, l, NULL));
     sb_trie_free(g);
     sb_trie_free(l);
@@ -849,6 +861,12 @@ test_format_variable_with_date(void **state)
     char *tmp = blogc_format_variable("DATE_FORMATTED", g, l, NULL);
     assert_string_equal(tmp, "14:15");
     free(tmp);
+    tmp = blogc_format_variable("DATE_FORMATTED_3", g, l, NULL);
+    assert_string_equal(tmp, "14:");
+    free(tmp);
+    tmp = blogc_format_variable("DATE_FORMATTED_10", g, l, NULL);
+    assert_string_equal(tmp, "14:15");
+    free(tmp);
     sb_trie_free(g);
     sb_trie_free(l);
 }
@@ -860,8 +878,17 @@ test_format_variable_foreach(void **state)
     sb_slist_t *l = NULL;
     l = sb_slist_append(l, sb_strdup("asd"));
     l = sb_slist_append(l, sb_strdup("qwe"));
+    l = sb_slist_append(l, sb_strdup("zxcvbn"));
     char *tmp = blogc_format_variable("FOREACH_ITEM", NULL, NULL, l->next);
     assert_string_equal(tmp, "qwe");
+    free(tmp);
+    tmp = blogc_format_variable("FOREACH_ITEM_4", NULL, NULL,
+        l->next->next);
+    assert_string_equal(tmp, "zxcv");
+    free(tmp);
+    tmp = blogc_format_variable("FOREACH_ITEM_10", NULL, NULL,
+        l->next->next);
+    assert_string_equal(tmp, "zxcvbn");
     free(tmp);
     sb_slist_free_full(l, free);
 }
@@ -871,6 +898,7 @@ static void
 test_format_variable_foreach_empty(void **state)
 {
     assert_null(blogc_format_variable("FOREACH_ITEM", NULL, NULL, NULL));
+    assert_null(blogc_format_variable("FOREACH_ITEM_4", NULL, NULL, NULL));
 }
 
 

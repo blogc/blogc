@@ -55,7 +55,9 @@ parser. It contains the unparsed content of the first paragraph found in the
 source file. The content is not parsed but HTML entities are encoded. Paragraphs
 inside blockquotes are ignored. This variable can be overriden by an explicit
 definition in source file, that must have the HTML entities escaped manually.
-This is useful to add "description" meta-tags to HTML templates.
+This is useful to add "description" meta-tags to HTML templates. It may be
+needed to truncate the variable size to an maximum length, take a look at
+blogc-template(7).
 
 ## SOURCE CONTENT - BLOCK ELEMENTS
 
