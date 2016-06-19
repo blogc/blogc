@@ -282,8 +282,12 @@ cleanup:
 static int
 git_post_receive_hook(int argc, char *argv[])
 {
-    if (0 != system("git remote get-url --push mirror &> /dev/null"))
-        return 0;
+    if (0 != system("git config remote.mirror.pushurl &> /dev/null")) {
+        if (0 != system("git config remote.mirror.url &> /dev/null")) {
+            fprintf(stderr, "warning: repository mirroring disabled\n");
+            return 0;
+        }
+    }
 
     // at this point we know that we have a remote called mirror, we can just
     // push to it.
