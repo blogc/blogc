@@ -86,6 +86,9 @@ due to repositories not being mirrored.
 To add the `mirror` remote:
 
     # su -s /bin/bash - blogc
+    $ cd repos
+    $ git init --bare myblog.git  # if not created yet
+    $ cd myblog.git
     $ git remote add --mirror=push mirror $YOUR_GIT_MIRROR_URL
 
 ### Caveats of repository mirroring with SSH
