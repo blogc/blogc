@@ -282,8 +282,8 @@ cleanup:
 static int
 git_post_receive_hook(int argc, char *argv[])
 {
-    if (0 != system("git config remote.mirror.pushurl &> /dev/null")) {
-        if (0 != system("git config remote.mirror.url &> /dev/null")) {
+    if (0 != system("git config --local remote.mirror.pushurl &> /dev/null")) {
+        if (0 != system("git config --local remote.mirror.url &> /dev/null")) {
             fprintf(stderr, "warning: repository mirroring disabled\n");
             return 0;
         }
