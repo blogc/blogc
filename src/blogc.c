@@ -41,7 +41,7 @@ blogc_print_help(void)
 {
     printf(
         "usage:\n"
-        "    blogc [-h] [-v] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
+        "    blogc [-h] [-v] [-d] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
         "          [-o OUTPUT] [SOURCE ...] - A blog compiler.\n"
         "\n"
         "positional arguments:\n"
@@ -50,6 +50,7 @@ blogc_print_help(void)
         "optional arguments:\n"
         "    -h            show this help message and exit\n"
         "    -v            show version and exit\n"
+        "    -d            enable debug\n"
         "    -l            build listing page, from multiple source files\n"
         "    -D KEY=VALUE  set global configuration parameter\n"
         "    -p KEY        show the value of a global configuration parameter\n"
@@ -63,7 +64,7 @@ static void
 blogc_print_usage(void)
 {
     printf(
-        "usage: blogc [-h] [-v] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
+        "usage: blogc [-h] [-v] [-d] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
         "             [-o OUTPUT] [SOURCE ...]\n");
 }
 
@@ -110,6 +111,7 @@ main(int argc, char **argv)
 
     int rv = 0;
 
+    bool debug = false;
     bool listing = false;
     char *template = NULL;
     char *output = NULL;
@@ -131,6 +133,9 @@ main(int argc, char **argv)
                 case 'v':
                     printf("%s\n", PACKAGE_STRING);
                     goto cleanup;
+                case 'd':
+                    debug = true;
+                    break;
                 case 'l':
                     listing = true;
                     break;
@@ -245,6 +250,9 @@ main(int argc, char **argv)
         rv = 2;
         goto cleanup3;
     }
+
+    if (debug)
+        blogc_template_debug(l);
 
     char *out = blogc_render(l, s, config, listing);
 

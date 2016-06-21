@@ -3,9 +3,9 @@ blogc(1) -- a blog compiler
 
 ## SYNOPSIS
 
-`blogc` [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] <SOURCE><br>
-`blogc` `-l` [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] [<SOURCE> ...]<br>
-`blogc` `-l` `-p` <KEY> [`-D` <KEY>=<VALUE> ...] [<SOURCE> ...]<br>
+`blogc` `-d` [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] <SOURCE><br>
+`blogc` `-d` `-l` [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] [<SOURCE> ...]<br>
+`blogc` `-d` `-l` `-p` <KEY> [`-D` <KEY>=<VALUE> ...] [<SOURCE> ...]<br>
 `blogc` [`-h`|`-v`]
 
 ## DESCRIPTION
@@ -29,6 +29,9 @@ designed to be used with make(1).
     pages, like indexes and feeds.
 
 ## OPTIONS
+
+  * `-d`:
+    Activates debug.
 
   * `-l`:
     Activates listing mode, allowing user to provide multiple source files. See
