@@ -46,10 +46,9 @@ typedef struct _blogc_content_node_t {
         blogc_content_block_type_t block_type;
         blogc_content_inline_type_t inline_type;
     } type;
-    union {
-        struct _blogc_content_node_t *block;
-        char *content;
-    } child;
+    char *content;
+    struct _blogc_content_node_t *child;
+    struct _blogc_content_node_t *next;
     sb_trie_t *parameters;
 } blogc_content_node_t;
 
