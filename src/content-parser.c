@@ -7,6 +7,7 @@
  */
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -673,8 +674,36 @@ blogc_is_ordered_list_item(const char *str, size_t prefix_len)
 }
 
 
-char*
-blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
+static blogc_content_node_t*
+block_node_new(blogc_content_block_type_t type, char *content, sb_trie_t *parameters)
+{
+    blogc_content_node_t *rv = sb_malloc(sizeof(blogc_content_node_t));
+    rv->node_type = BLOGC_CONTENT_BLOCK;
+    rv->type.block_type = type;
+    rv->content = content;
+    rv->parameters = parameters;
+    rv->child = NULL;
+    rv->next = NULL;
+    return rv;
+}
+
+
+static blogc_content_node_t*
+inline_node_new(blogc_content_inline_type_t type, char *content, sb_trie_t *parameters)
+{
+    blogc_content_node_t *rv = sb_malloc(sizeof(blogc_content_node_t));
+    rv->node_type = BLOGC_CONTENT_INLINE;
+    rv->type.inline_type = type;
+    rv->content = content;
+    rv->parameters = parameters;
+    rv->child = NULL;
+    rv->next = NULL;
+    return rv;
+}
+
+
+blogc_content_node_t*
+blogc_content_parse_ast(const char *src, char **nl)
 {
     // src is always nul-terminated.
     size_t src_len = strlen(src);
@@ -683,7 +712,6 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
     size_t start = 0;
     size_t start2 = 0;
     size_t end = 0;
-    size_t eend = 0;
     size_t real_end = 0;
 
     unsigned int header_level = 0;
@@ -692,7 +720,6 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
     char *tmp = NULL;
     char *tmp2 = NULL;
     char *parsed = NULL;
-    char *slug = NULL;
 
     // this isn't empty because we need some reasonable default value in the
     // unlikely case that we need to print some line ending before evaluating
@@ -705,8 +732,10 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
     sb_slist_t *lines = NULL;
     sb_slist_t *lines2 = NULL;
 
-    sb_string_t *rv = sb_string_new();
     sb_string_t *tmp_str = NULL;
+
+    blogc_content_node_t *ast = NULL;
+    blogc_content_node_t *last = NULL;
 
     blogc_content_parser_state_t state = CONTENT_START_LINE;
 
@@ -744,11 +773,8 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
                     break;
                 start = current;
                 if (c == '.') {
-                    if (end_excerpt != NULL) {
-                        eend = rv->len;  // fuck it
-                        state = CONTENT_EXCERPT;
-                        break;
-                    }
+                    state = CONTENT_EXCERPT;
+                    break;
                 }
                 if (c == '#') {
                     header_level = 1;
@@ -784,27 +810,28 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
                 break;
 
             case CONTENT_EXCERPT:
-                if (end_excerpt != NULL) {
-                    if (c == '.')
-                        break;
-                    if (c == '\n' || c == '\r') {
-                        state = CONTENT_EXCERPT_END;
-                        break;
-                    }
+                if (c == '.')
+                    break;
+                if (c == '\n' || c == '\r') {
+                    state = CONTENT_EXCERPT_END;
+                    break;
                 }
-                eend = 0;
                 state = CONTENT_PARAGRAPH;
                 break;
 
             case CONTENT_EXCERPT_END:
-                if (end_excerpt != NULL) {
-                    if (c == '\n' || c == '\r') {
-                        *end_excerpt = eend;
-                        state = CONTENT_START_LINE;
-                        break;
+                if (c == '\n' || c == '\r') {
+                    if (ast == NULL) {
+                        ast = block_node_new(BLOGC_CONTENT_BLOCK_EXCERPT, NULL, NULL);
+                        last = ast;
                     }
+                    else {
+                        last->next = block_node_new(BLOGC_CONTENT_BLOCK_EXCERPT, NULL, NULL);
+                        last = last->next;
+                    }
+                    state = CONTENT_START_LINE;
+                    break;
                 }
-                eend = 0;
                 state = CONTENT_PARAGRAPH_END;
                 break;
 
@@ -834,18 +861,16 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
                     end = is_last && c != '\n' && c != '\r' ? src_len :
                         (real_end != 0 ? real_end : current);
                     tmp = sb_strndup(src + start, end - start);
-                    parsed = blogc_content_parse_inline(tmp);
-                    slug = blogc_slugify(tmp);
-                    if (slug == NULL)
-                        sb_string_append_printf(rv, "<h%d>%s</h%d>%s",
-                            header_level, parsed, header_level, line_ending);
-                    else
-                        sb_string_append_printf(rv, "<h%d id=\"%s\">%s</h%d>%s",
-                            header_level, slug, parsed, header_level,
-                            line_ending);
-                    free(slug);
-                    free(parsed);
-                    parsed = NULL;
+                    sb_trie_t *t = sb_trie_new(free);
+                    sb_trie_insert(t, "level", sb_strdup_printf("%d", header_level));
+                    if (ast == NULL) {
+                        ast = block_node_new(BLOGC_CONTENT_BLOCK_HEADER, blogc_content_parse_inline(tmp), t);
+                        last = ast;
+                    }
+                    else {
+                        last->next = block_node_new(BLOGC_CONTENT_BLOCK_HEADER, blogc_content_parse_inline(tmp), t);  // TODO: inline-me
+                        last = last->next;
+                    }
                     free(tmp);
                     tmp = NULL;
                     state = CONTENT_START_LINE;
@@ -864,10 +889,16 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
 
             case CONTENT_HTML_END:
                 if (c == '\n' || c == '\r' || is_last) {
-                    tmp = sb_strndup(src + start, end - start);
-                    sb_string_append_printf(rv, "%s%s", tmp, line_ending);
-                    free(tmp);
-                    tmp = NULL;
+                    if (ast == NULL) {
+                        ast = block_node_new(BLOGC_CONTENT_BLOCK_RAW,
+                            sb_strndup(src + start, end - start), NULL);
+                        last = ast;
+                    }
+                    else {
+                        last->next = block_node_new(BLOGC_CONTENT_BLOCK_RAW,
+                            sb_strndup(src + start, end - start), NULL);
+                        last = last->next;
+                    }
                     state = CONTENT_START_LINE;
                     start = current;
                 }
@@ -915,14 +946,18 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
                     for (sb_slist_t *l = lines; l != NULL; l = l->next)
                         sb_string_append_printf(tmp_str, "%s%s", l->data,
                             line_ending);
-                    // do not propagate description to blockquote parsing,
-                    // because we just want paragraphs from first level of
-                    // content.
-                    tmp = blogc_content_parse(tmp_str->str, NULL, NULL);
-                    sb_string_append_printf(rv, "<blockquote>%s</blockquote>%s",
-                        tmp, line_ending);
-                    free(tmp);
-                    tmp = NULL;
+                    if (ast == NULL) {
+                        ast = block_node_new(BLOGC_CONTENT_BLOCK_BLOCKQUOTE,
+                            NULL, NULL);
+                        ast->child = blogc_content_parse_ast(tmp_str->str, nl);
+                        last = ast;
+                    }
+                    else {
+                        last->next = block_node_new(BLOGC_CONTENT_BLOCK_BLOCKQUOTE,
+                            NULL, NULL);
+                        last->next->child = blogc_content_parse_ast(tmp_str->str, nl);
+                        last = last->next;
+                    }
                     sb_string_free(tmp_str, true);
                     tmp_str = NULL;
                     sb_slist_free_full(lines, free);
@@ -974,17 +1009,25 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
 
             case CONTENT_CODE_END:
                 if (c == '\n' || c == '\r' || is_last) {
-                    sb_string_append(rv, "<pre><code>");
+                    tmp_str = sb_string_new();
                     for (sb_slist_t *l = lines; l != NULL; l = l->next) {
-                        char *tmp_line = blogc_htmlentities(l->data);
                         if (l->next == NULL)
-                            sb_string_append_printf(rv, "%s", tmp_line);
+                            sb_string_append_printf(tmp_str, "%s", l->data);
                         else
-                            sb_string_append_printf(rv, "%s%s", tmp_line,
+                            sb_string_append_printf(tmp_str, "%s%s", l->data,
                                 line_ending);
-                        free(tmp_line);
                     }
-                    sb_string_append_printf(rv, "</code></pre>%s", line_ending);
+                    if (ast == NULL) {
+                        ast = block_node_new(BLOGC_CONTENT_BLOCK_CODE,
+                            sb_string_free(tmp_str, false), NULL);
+                        last = ast;
+                    }
+                    else {
+                        last->next = block_node_new(BLOGC_CONTENT_BLOCK_CODE,
+                            sb_string_free(tmp_str, false), NULL);
+                        last = last->next;
+                    }
+                    tmp_str = NULL;
                     sb_slist_free_full(lines, free);
                     lines = NULL;
                     free(prefix);
@@ -1016,7 +1059,16 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
                     break;
                 }
                 if (c == '\n' || c == '\r' || is_last) {
-                    sb_string_append_printf(rv, "<hr />%s", line_ending);
+                    if (ast == NULL) {
+                        ast = block_node_new(BLOGC_CONTENT_BLOCK_HORIZONTAL_RULE,
+                            NULL, NULL);
+                        last = ast;
+                    }
+                    else {
+                        last->next = block_node_new(BLOGC_CONTENT_BLOCK_HORIZONTAL_RULE,
+                            NULL, NULL);
+                        last = last->next;
+                    }
                     state = CONTENT_START_LINE;
                     start = current;
                     d = '\0';
@@ -1098,12 +1150,30 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
                         free(parsed);
                         parsed = NULL;
                     }
-                    sb_string_append_printf(rv, "<ul>%s", line_ending);
-                    for (sb_slist_t *l = lines; l != NULL; l = l->next)
-                        sb_string_append_printf(rv, "<li>%s</li>%s", l->data,
-                            line_ending);
-                    sb_string_append_printf(rv, "</ul>%s", line_ending);
-                    sb_slist_free_full(lines, free);
+                    if (ast == NULL) {
+                        ast = block_node_new(BLOGC_CONTENT_BLOCK_UNORDERED_LIST,
+                            NULL, NULL);
+                        last = ast;
+                    }
+                    else {
+                        last->next = block_node_new(BLOGC_CONTENT_BLOCK_UNORDERED_LIST,
+                            NULL, NULL);
+                        last = last->next;
+                    }
+                    blogc_content_node_t *last_list = NULL;
+                    for (sb_slist_t *l = lines; l != NULL; l = l->next) {
+                        if (last_list == NULL) {
+                            last->child = block_node_new(BLOGC_CONTENT_BLOCK_LIST_ITEM,
+                                l->data, NULL);
+                            last_list = last->child;
+                        }
+                        else {
+                            last_list->next = block_node_new(BLOGC_CONTENT_BLOCK_LIST_ITEM,
+                                l->data, NULL);
+                            last_list = last_list->next;
+                        }
+                    }
+                    sb_slist_free(lines);
                     lines = NULL;
                     free(prefix);
                     prefix = NULL;
@@ -1209,12 +1279,30 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
                         free(parsed);
                         parsed = NULL;
                     }
-                    sb_string_append_printf(rv, "<ol>%s", line_ending);
-                    for (sb_slist_t *l = lines; l != NULL; l = l->next)
-                        sb_string_append_printf(rv, "<li>%s</li>%s", l->data,
-                            line_ending);
-                    sb_string_append_printf(rv, "</ol>%s", line_ending);
-                    sb_slist_free_full(lines, free);
+                    if (ast == NULL) {
+                        ast = block_node_new(BLOGC_CONTENT_BLOCK_ORDERED_LIST,
+                            NULL, NULL);
+                        last = ast;
+                    }
+                    else {
+                        last->next = block_node_new(BLOGC_CONTENT_BLOCK_ORDERED_LIST,
+                            NULL, NULL);
+                        last = last->next;
+                    }
+                    blogc_content_node_t *last_list = NULL;
+                    for (sb_slist_t *l = lines; l != NULL; l = l->next) {
+                        if (last_list == NULL) {
+                            last->child = block_node_new(BLOGC_CONTENT_BLOCK_LIST_ITEM,
+                                l->data, NULL);
+                            last_list = last->child;
+                        }
+                        else {
+                            last_list->next = block_node_new(BLOGC_CONTENT_BLOCK_LIST_ITEM,
+                                l->data, NULL);
+                            last_list = last_list->next;
+                        }
+                    }
+                    sb_slist_free(lines);
                     lines = NULL;
                     free(prefix);
                     prefix = NULL;
@@ -1238,16 +1326,19 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
 
             case CONTENT_PARAGRAPH_END:
                 if (c == '\n' || c == '\r' || is_last) {
-                    tmp = sb_strndup(src + start, end - start);
-                    if (description != NULL && *description == NULL)
-                        *description = blogc_fix_description(tmp);
-                    parsed = blogc_content_parse_inline(tmp);
-                    sb_string_append_printf(rv, "<p>%s</p>%s", parsed,
-                        line_ending);
-                    free(parsed);
-                    parsed = NULL;
-                    free(tmp);
-                    tmp = NULL;
+                    char *tmp2 = sb_strndup(src + start, end - start);
+                    sb_trie_t *t = sb_trie_new(free);
+                    sb_trie_insert(t, "parsed", blogc_content_parse_inline(tmp2));
+                    if (ast == NULL) {
+                        ast = block_node_new(BLOGC_CONTENT_BLOCK_PARAGRAPH,
+                            tmp2, t);
+                        last = ast;
+                    }
+                    else {
+                        last->next = block_node_new(BLOGC_CONTENT_BLOCK_PARAGRAPH,
+                            tmp2, t);
+                        last = last->next;
+                    }
                     state = CONTENT_START_LINE;
                     start = current;
                 }
@@ -1260,5 +1351,159 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **description)
         current++;
     }
 
+    if (nl != NULL && *nl == NULL)
+        *nl = sb_strdup(line_ending);
+
+    return ast;
+}
+
+
+void
+blogc_content_free_ast(blogc_content_node_t *ast)
+{
+    if (ast == NULL)
+        return;
+    free(ast->content);
+    sb_trie_free(ast->parameters);
+    blogc_content_free_ast(ast->child);
+    blogc_content_free_ast(ast->next);
+    free(ast);
+}
+
+
+char*
+blogc_content_parse(const char *src, char **excerpt, char **description)
+{
+    char *nl = NULL;
+    blogc_content_node_t *c = blogc_content_parse_ast(src, &nl);
+    char *rv = blogc_content_render_html(c, nl, excerpt, description);
+    free(nl);
+    blogc_content_free_ast(c);
+    return rv;
+}
+
+
+char*
+blogc_content_render_html(blogc_content_node_t *ast, char *nl, char **excerpt,
+    char **description)
+{
+    sb_string_t *rv = sb_string_new();
+    char *tmp = NULL;
+    for (blogc_content_node_t *l = ast; l != NULL; l = l->next) {
+        switch (l->node_type) {
+            case BLOGC_CONTENT_BLOCK:
+                switch (l->type.block_type) {
+                    case BLOGC_CONTENT_BLOCK_RAW:
+                        sb_string_append_printf(rv, "%s%s", l->content, nl);
+                        break;
+                    case BLOGC_CONTENT_BLOCK_HEADER:
+                        tmp = blogc_slugify(l->content);
+                        sb_string_append_printf(rv, "<h%s id=\"%s\">%s</h%s>%s",
+                            sb_trie_lookup(l->parameters, "level"), tmp, l->content,
+                            sb_trie_lookup(l->parameters, "level"), nl);
+                        free(tmp);
+                        tmp = NULL;
+                        break;
+                    case BLOGC_CONTENT_BLOCK_BLOCKQUOTE:
+                        tmp = blogc_content_render_html(l->child, nl, NULL, NULL);
+                        sb_string_append_printf(rv, "<blockquote>%s</blockquote>%s",
+                            tmp, nl);
+                        free(tmp);
+                        tmp = NULL;
+                        break;
+                    case BLOGC_CONTENT_BLOCK_CODE:
+                        tmp = blogc_htmlentities(l->content);
+                        sb_string_append_printf(rv, "<pre><code>%s</code></pre>%s",
+                            tmp, nl);
+                        free(tmp);
+                        tmp = NULL;
+                        break;
+                    case BLOGC_CONTENT_BLOCK_HORIZONTAL_RULE:
+                        sb_string_append_printf(rv, "<hr />%s", nl);
+                        break;
+                    case BLOGC_CONTENT_BLOCK_UNORDERED_LIST:
+                        tmp = blogc_content_render_html(l->child, nl, NULL, NULL);
+                        sb_string_append_printf(rv, "<ul>%s%s</ul>%s", nl,
+                            tmp, nl);
+                        free(tmp);
+                        tmp = NULL;
+                        break;
+                    case BLOGC_CONTENT_BLOCK_ORDERED_LIST:
+                        tmp = blogc_content_render_html(l->child, nl, NULL, NULL);
+                        sb_string_append_printf(rv, "<ol>%s%s</ol>%s", nl,
+                            tmp, nl);
+                        free(tmp);
+                        tmp = NULL;
+                        break;
+                    case BLOGC_CONTENT_BLOCK_LIST_ITEM:
+                        sb_string_append_printf(rv, "<li>%s</li>%s",
+                            l->content, nl);
+                        break;
+                    case BLOGC_CONTENT_BLOCK_PARAGRAPH:
+                        if (description != NULL && *description == NULL)
+                            *description = blogc_fix_description(l->content);
+                        sb_string_append_printf(rv, "<p>%s</p>%s",
+                            sb_trie_lookup(l->parameters, "parsed"), nl);
+                        break;
+                    case BLOGC_CONTENT_BLOCK_EXCERPT:
+                        if (excerpt != NULL && *excerpt == NULL)
+                            *excerpt = sb_strdup(rv->str);
+                        break;
+                }
+                break;
+            case BLOGC_CONTENT_INLINE:
+                break;
+        }
+    }
     return sb_string_free(rv, false);
+}
+
+
+void
+blogc_content_debug(blogc_content_node_t *ast)
+{
+    for (blogc_content_node_t *l = ast; l != NULL; l = l->next) {
+        switch (l->node_type) {
+            case BLOGC_CONTENT_BLOCK:
+                fprintf(stderr, "DEBUG: <CONTENT BLOCK ");
+                switch (l->type.block_type) {
+                    case BLOGC_CONTENT_BLOCK_RAW:
+                        fprintf(stderr, "RAW: `%s`", l->content);
+                        break;
+                    case BLOGC_CONTENT_BLOCK_HEADER:
+                        fprintf(stderr, "HEADER: \"%s\"", l->content);
+                        break;
+                    case BLOGC_CONTENT_BLOCK_BLOCKQUOTE:
+                        fprintf(stderr, "BLOCKQUOTE");
+                        break;
+                    case BLOGC_CONTENT_BLOCK_CODE:
+                        fprintf(stderr, "CODE: `%s`", l->content);
+                        break;
+                    case BLOGC_CONTENT_BLOCK_HORIZONTAL_RULE:
+                        fprintf(stderr, "HORIZONTAL_RULE");
+                        break;
+                    case BLOGC_CONTENT_BLOCK_UNORDERED_LIST:
+                        fprintf(stderr, "UNORDERED_LIST");
+                        break;
+                    case BLOGC_CONTENT_BLOCK_ORDERED_LIST:
+                        fprintf(stderr, "ORDERED_LIST");
+                        break;
+                    case BLOGC_CONTENT_BLOCK_LIST_ITEM:
+                        fprintf(stderr, "LIST_ITEM: `%s`", l->content);
+                        break;
+                    case BLOGC_CONTENT_BLOCK_PARAGRAPH:
+                        fprintf(stderr, "PARAGRAPH: `%s`", l->content);
+                        break;
+                    case BLOGC_CONTENT_BLOCK_EXCERPT:
+                        fprintf(stderr, "EXCERPT");
+                        break;
+                }
+                fprintf(stderr, ">\n");
+                if (l->child != NULL)
+                    blogc_content_debug(l->child);
+                break;
+            case BLOGC_CONTENT_INLINE:
+                break;
+        }
+    }
 }

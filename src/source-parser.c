@@ -34,7 +34,6 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
 
     size_t current = 0;
     size_t start = 0;
-    size_t end_excerpt = 0;
 
     char *key = NULL;
     char *tmp = NULL;
@@ -150,8 +149,9 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                 if (current == (src_len - 1)) {
                     tmp = sb_strndup(src + start, src_len - start);
                     sb_trie_insert(rv, "RAW_CONTENT", tmp);
+                    char *excerpt = NULL;
                     char *description = NULL;
-                    content = blogc_content_parse(tmp, &end_excerpt, &description);
+                    content = blogc_content_parse(tmp, &excerpt, &description);
                     if (description != NULL) {
                         // do not override source-provided description.
                         if (NULL == sb_trie_lookup(rv, "DESCRIPTION")) {
@@ -163,9 +163,9 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                             free(description);
                         }
                     }
+                    sb_trie_insert(rv, "EXCERPT", excerpt == NULL ?
+                        sb_strdup(content) : excerpt);
                     sb_trie_insert(rv, "CONTENT", content);
-                    sb_trie_insert(rv, "EXCERPT", end_excerpt == 0 ?
-                        sb_strdup(content) : sb_strndup(content, end_excerpt));
                 }
                 break;
         }
