@@ -75,7 +75,6 @@ check_PROGRAMS = \
 libblogc_la_SOURCES = \
 	src/content-parser.c \
 	src/datetime-parser.c \
-	src/debug.c \
 	src/error.c \
 	src/file.c \
 	src/loader.c \
@@ -106,6 +105,7 @@ libblogc_utils_la_CFLAGS = \
 
 blogc_SOURCES = \
 	src/blogc.c \
+	src/debug.c \
 	$(NULL)
 
 blogc_CFLAGS = \
