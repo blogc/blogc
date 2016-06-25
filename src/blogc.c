@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
 #include "source-parser.h"
 #include "template-parser.h"
 #include "loader.h"
@@ -252,7 +253,7 @@ main(int argc, char **argv)
     }
 
     if (debug)
-        blogc_template_debug(l);
+        blogc_debug_template(l);
 
     char *out = blogc_render(l, s, config, listing);
 

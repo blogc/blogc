@@ -34,8 +34,9 @@ BUILT_SOURCES = \
 noinst_HEADERS = \
 	src/content-parser.h \
 	src/datetime-parser.h \
-	src/file.h \
+	src/debug.h \
 	src/error.h \
+	src/file.h \
 	src/loader.h \
 	src/renderer.h \
 	src/source-parser.h \
@@ -74,8 +75,9 @@ check_PROGRAMS = \
 libblogc_la_SOURCES = \
 	src/content-parser.c \
 	src/datetime-parser.c \
-	src/file.c \
+	src/debug.c \
 	src/error.c \
+	src/file.c \
 	src/loader.c \
 	src/renderer.c \
 	src/source-parser.c \
