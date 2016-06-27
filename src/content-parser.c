@@ -41,36 +41,46 @@ blogc_slugify(const char *str)
 }
 
 
+static const char*
+htmlentities(char c)
+{
+    switch (c) {
+        case '&':
+            return "&amp;";
+        case '<':
+            return "&lt;";
+        case '>':
+            return "&gt;";
+        case '"':
+            return "&quot;";
+        case '\'':
+            return "&#x27;";
+        case '/':
+            return "&#x2F;";
+    }
+    return NULL;
+}
+
+
+static void
+htmlentities_append(sb_string_t *str, char c)
+{
+    const char *e = htmlentities(c);
+    if (e == NULL)
+        sb_string_append_c(str, c);
+    else
+        sb_string_append(str, e);
+}
+
+
 char*
 blogc_htmlentities(const char *str)
 {
     if (str == NULL)
         return NULL;
     sb_string_t *rv = sb_string_new();
-    for (size_t i = 0; str[i] != '\0'; i++) {
-        switch (str[i]) {
-            case '&':
-                sb_string_append(rv, "&amp;");
-                break;
-            case '<':
-                sb_string_append(rv, "&lt;");
-                break;
-            case '>':
-                sb_string_append(rv, "&gt;");
-                break;
-            case '"':
-                sb_string_append(rv, "&quot;");
-                break;
-            case '\'':
-                sb_string_append(rv, "&#x27;");
-                break;
-            case '/':
-                sb_string_append(rv, "&#x2F;");
-                break;
-            default:
-                sb_string_append_c(rv, str[i]);
-        }
-    }
+    for (size_t i = 0; str[i] != '\0'; i++)
+        htmlentities_append(rv, str[i]);
     return sb_string_free(rv, false);
 }
 
@@ -145,331 +155,497 @@ typedef enum {
 
 
 typedef enum {
-    LINK_CLOSED = 1,
-    LINK_IMAGE,
-    LINK_TEXT,
-    LINK_TEXT_CLOSE,
-    LINK_URL,
-    LINK_AUTO,
-    LINK_AUTO_CLOSE,
-} blogc_content_parser_link_state_t;
+    CONTENT_INLINE_START = 1,
+    CONTENT_INLINE_ASTERISK,
+    CONTENT_INLINE_ASTERISK_DOUBLE,
+    CONTENT_INLINE_UNDERSCORE,
+    CONTENT_INLINE_UNDERSCORE_DOUBLE,
+    CONTENT_INLINE_BACKTICKS,
+    CONTENT_INLINE_BACKTICKS_DOUBLE,
+    CONTENT_INLINE_LINK_START,
+    CONTENT_INLINE_LINK_AUTO,
+    CONTENT_INLINE_LINK_CONTENT,
+    CONTENT_INLINE_LINK_URL_START,
+    CONTENT_INLINE_LINK_URL,
+    CONTENT_INLINE_IMAGE_START,
+    CONTENT_INLINE_IMAGE_ALT,
+    CONTENT_INLINE_IMAGE_URL_START,
+    CONTENT_INLINE_IMAGE_URL,
+    CONTENT_INLINE_ENDASH,
+    CONTENT_INLINE_EMDASH,
+    CONTENT_INLINE_LINE_BREAK_START,
+    CONTENT_INLINE_LINE_BREAK,
+} blogc_content_parser_inline_state_t;
 
 
-char*
-blogc_content_parse_inline(const char *src)
+static char*
+blogc_content_parse_inline_internal(const char *src, size_t src_len)
 {
-    // this function is always called by blogc_content_parse or by itself,
-    // then its safe to assume that src is always nul-terminated.
-    size_t src_len = strlen(src);
-
     size_t current = 0;
     size_t start = 0;
-    size_t start_state = 0;
-    size_t end = 0;
+    size_t count = 0;
+
+    const char *tmp = NULL;
+    char *tmp2 = NULL;
+    char *tmp3 = NULL;
+
+    size_t start_link = 0;
+    char *link1 = NULL;
 
     sb_string_t *rv = sb_string_new();
 
-    bool open_em_ast = false;
-    bool open_strong_ast = false;
-    bool open_em_und = false;
-    bool open_strong_und = false;
-    bool open_code = false;
-    bool open_code_double = false;
-
-    blogc_content_parser_link_state_t state = LINK_CLOSED;
-    bool is_image = false;
-
-    char *tmp = NULL;
-    char *tmp2 = NULL;
-
-    unsigned int open_bracket = 0;
-    unsigned int spaces = 0;
-
-    bool escape = false;
+    blogc_content_parser_inline_state_t state = CONTENT_INLINE_START;
 
     while (current < src_len) {
         char c = src[current];
         bool is_last = current == src_len - 1;
 
-        if (escape) {
-            if (state == LINK_CLOSED)
-                sb_string_append_c(rv, c);
-            current++;
-            escape = false;
-            continue;
-        }
-
-        if (c != ' ' && c != '\n' && c != '\r')
-            spaces = 0;
-
-        if (state == LINK_TEXT_CLOSE && c != ' ' && c != '\n' && c != '\r' &&
-            c != '(')
-        {
-            sb_string_append_c(rv, src[start_state]);
-            tmp = blogc_content_parse_inline(src + start_state + 1);
-            sb_string_append(rv, tmp);
-            // no need to free here, we will exit the loop!
-            break;
-        }
-
-        switch (c) {
-
-            case '\\':
-                if (state == LINK_CLOSED && (open_code || open_code_double)) {
-                    sb_string_append_c(rv, c);
+        switch (state) {
+            case CONTENT_INLINE_START:
+                if (is_last) {
+                    htmlentities_append(rv, c);
                     break;
                 }
-                if (!escape)
-                    escape = true;
+                if (c == '\\') {
+                    htmlentities_append(rv, src[++current]);
+                    break;
+                }
+                if (c == '*') {
+                    state = CONTENT_INLINE_ASTERISK;
+                    break;
+                }
+                if (c == '_') {
+                    state = CONTENT_INLINE_UNDERSCORE;
+                    break;
+                }
+                if (c == '`') {
+                    state = CONTENT_INLINE_BACKTICKS;
+                    break;
+                }
+                if (c == '[') {
+                    state = CONTENT_INLINE_LINK_START;
+                    break;
+                }
+                if (c == '!') {
+                    state = CONTENT_INLINE_IMAGE_START;
+                    break;
+                }
+                if (c == '-') {
+                    state = CONTENT_INLINE_ENDASH;
+                    break;
+                }
+                if (c == ' ') {
+                    state = CONTENT_INLINE_LINE_BREAK_START;
+                    break;
+                }
+                htmlentities_append(rv, c);
                 break;
 
-            case '*':
-            case '_':
-                if (state == LINK_CLOSED && (open_code || open_code_double)) {
-                    sb_string_append_c(rv, c);
+            case CONTENT_INLINE_ASTERISK:
+                if (c == '*') {
+                    state = CONTENT_INLINE_ASTERISK_DOUBLE;
                     break;
                 }
-                if (!is_last && src[current + 1] == c) {
+                tmp = sb_str_find(src + current, '*');
+                if (tmp == NULL || ((tmp - src) >= src_len)) {
+                    sb_string_append_c(rv, '*');
+                    state = CONTENT_INLINE_START;
+                    continue;
+                }
+                tmp2 = blogc_content_parse_inline_internal(
+                    src + current, (tmp - src) - current);
+                sb_string_append_printf(rv, "<em>%s</em>", tmp2);
+                current = tmp - src;
+                tmp = NULL;
+                free(tmp2);
+                tmp2 = NULL;
+                state = CONTENT_INLINE_START;
+                break;
+
+            case CONTENT_INLINE_ASTERISK_DOUBLE:
+                tmp = src + current;
+                do {
+                    tmp = sb_str_find(tmp, '*');
+                    if (((tmp - src) < src_len) && *(tmp + 1) == '*') {
+                        break;
+                    }
+                    tmp++;
+                } while (tmp != NULL && (tmp - src) < src_len);
+                if (tmp == NULL || ((tmp - src) >= src_len)) {
+                    sb_string_append_c(rv, '*');
+                    sb_string_append_c(rv, '*');
+                    state = CONTENT_INLINE_START;
+                    continue;
+                }
+                tmp2 = blogc_content_parse_inline_internal(
+                    src + current, (tmp - src) - current);
+                sb_string_append_printf(rv, "<strong>%s</strong>", tmp2);
+                current = tmp - src + 1;
+                tmp = NULL;
+                free(tmp2);
+                tmp2 = NULL;
+                state = CONTENT_INLINE_START;
+                break;
+
+            case CONTENT_INLINE_UNDERSCORE:
+                if (c == '_') {
+                    state = CONTENT_INLINE_UNDERSCORE_DOUBLE;
+                    break;
+                }
+                tmp = sb_str_find(src + current, '_');
+                if (tmp == NULL || ((tmp - src) >= src_len)) {
+                    sb_string_append_c(rv, '_');
+                    state = CONTENT_INLINE_START;
+                    continue;
+                }
+                tmp2 = blogc_content_parse_inline_internal(
+                    src + current, (tmp - src) - current);
+                sb_string_append_printf(rv, "<em>%s</em>", tmp2);
+                current = tmp - src;
+                tmp = NULL;
+                free(tmp2);
+                tmp2 = NULL;
+                state = CONTENT_INLINE_START;
+                break;
+
+            case CONTENT_INLINE_UNDERSCORE_DOUBLE:
+                tmp = src + current;
+                do {
+                    tmp = sb_str_find(tmp, '_');
+                    if (((tmp - src) < src_len) && *(tmp + 1) == '_') {
+                        break;
+                    }
+                    tmp++;
+                } while (tmp != NULL && (tmp - src) < src_len);
+                if (tmp == NULL || ((tmp - src) >= src_len)) {
+                    sb_string_append_c(rv, '_');
+                    sb_string_append_c(rv, '_');
+                    state = CONTENT_INLINE_START;
+                    continue;
+                }
+                tmp2 = blogc_content_parse_inline_internal(
+                    src + current, (tmp - src) - current);
+                sb_string_append_printf(rv, "<strong>%s</strong>", tmp2);
+                current = tmp - src + 1;
+                tmp = NULL;
+                free(tmp2);
+                tmp2 = NULL;
+                state = CONTENT_INLINE_START;
+                break;
+
+            case CONTENT_INLINE_BACKTICKS:
+                if (c == '`') {
+                    state = CONTENT_INLINE_BACKTICKS_DOUBLE;
+                    break;
+                }
+                tmp = sb_str_find(src + current, '`');
+                if (tmp == NULL || ((tmp - src) >= src_len)) {
+                    sb_string_append_c(rv, '`');
+                    state = CONTENT_INLINE_START;
+                    continue;
+                }
+                tmp3 = sb_strndup(src + current, (tmp - src) - current);
+                tmp2 = blogc_htmlentities(tmp3);
+                free(tmp3);
+                tmp3 = NULL;
+                sb_string_append(rv, "<code>");
+                sb_string_append_escaped(rv, tmp2);
+                sb_string_append(rv, "</code>");
+                current = tmp - src;
+                tmp = NULL;
+                free(tmp2);
+                tmp2 = NULL;
+                state = CONTENT_INLINE_START;
+                break;
+
+            case CONTENT_INLINE_BACKTICKS_DOUBLE:
+                tmp = src + current;
+                do {
+                    tmp = sb_str_find(tmp, '`');
+                    if (((tmp - src) < src_len) && *(tmp + 1) == '`') {
+                        break;
+                    }
+                    tmp++;
+                } while (tmp != NULL && (tmp - src) < src_len);
+                if (tmp == NULL || ((tmp - src) >= src_len)) {
+                    sb_string_append_c(rv, '`');
+                    sb_string_append_c(rv, '`');
+                    state = CONTENT_INLINE_START;
+                    continue;
+                }
+                tmp3 = sb_strndup(src + current, (tmp - src) - current);
+                tmp2 = blogc_htmlentities(tmp3);
+                free(tmp3);
+                tmp3 = NULL;
+                sb_string_append(rv, "<code>");
+                sb_string_append_escaped(rv, tmp2);
+                sb_string_append(rv, "</code>");
+                current = tmp - src + 1;
+                tmp = NULL;
+                free(tmp2);
+                tmp2 = NULL;
+                state = CONTENT_INLINE_START;
+                break;
+
+            case CONTENT_INLINE_LINK_START:
+                if (c == '[') {
+                    state = CONTENT_INLINE_LINK_AUTO;
+                    break;
+                }
+                start_link = current;
+                count = 1;
+                state = CONTENT_INLINE_LINK_CONTENT;
+                break;
+
+            case CONTENT_INLINE_LINK_AUTO:
+                tmp = src + current;
+                do {
+                    tmp = sb_str_find(tmp, ']');
+                    if (((tmp - src) < src_len) && *(tmp + 1) == ']') {
+                        break;
+                    }
+                    tmp++;
+                } while (tmp != NULL && (tmp - src) < src_len);
+                if (tmp == NULL || ((tmp - src) >= src_len)) {
+                    sb_string_append_c(rv, '[');
+                    sb_string_append_c(rv, '[');
+                    state = CONTENT_INLINE_START;
+                    continue;
+                }
+                tmp2 = sb_strndup(src + current, (tmp - src) - current);
+                sb_string_append(rv, "<a href=\"");
+                sb_string_append_escaped(rv, tmp2);
+                sb_string_append(rv, "\">");
+                sb_string_append_escaped(rv, tmp2);
+                sb_string_append(rv, "</a>");
+                current = tmp - src + 1;
+                tmp = NULL;
+                free(tmp2);
+                tmp2 = NULL;
+                state = CONTENT_INLINE_START;
+                break;
+
+            case CONTENT_INLINE_LINK_CONTENT:
+                if (c == '\\') {
                     current++;
-                    if ((c == '*' && open_strong_ast) ||
-                        (c == '_' && open_strong_und))
-                    {
-                        if (state == LINK_CLOSED)
-                            sb_string_append(rv, "</strong>");
-                        if (c == '*')
-                            open_strong_ast = false;
-                        else
-                            open_strong_und = false;
-                        break;
+                    break;
+                }
+                if (c == '[') {  // links can be nested :/
+                    count++;
+                    break;
+                }
+                if (c == ']') {
+                    if (--count == 0) {
+                        link1 = sb_strndup(src + start_link, current - start_link);
+                        state = CONTENT_INLINE_LINK_URL_START;
                     }
-                    if (state == LINK_CLOSED)
-                        sb_string_append(rv, "<strong>");
-                    if (c == '*')
-                        open_strong_ast = true;
-                    else
-                        open_strong_und = true;
-                    break;
                 }
-                if ((c == '*' && open_em_ast) || (c == '_' && open_em_und)) {
-                    if (state == LINK_CLOSED)
-                        sb_string_append(rv, "</em>");
-                    if (c == '*')
-                        open_em_ast = false;
-                    else
-                        open_em_und = false;
-                    break;
-                }
-                if (state == LINK_CLOSED)
-                    sb_string_append(rv, "<em>");
-                if (c == '*')
-                    open_em_ast = true;
-                else
-                    open_em_und = true;
                 break;
 
-            case '`':
-                if (!is_last && src[current + 1] == c) {
+            case CONTENT_INLINE_LINK_URL_START:
+                if (c == ' ' || c == '\t' || c == '\n' || c == '\r')
+                    break;
+                if (c == '(') {
+                    state = CONTENT_INLINE_LINK_URL;
+                    start = current + 1;
+                    break;
+                }
+                sb_string_append_c(rv, '[');
+                state = CONTENT_INLINE_START;
+                current = start_link;
+                start_link = 0;
+                continue;
+
+            case CONTENT_INLINE_LINK_URL:
+                if (c == '\\') {
                     current++;
-                    if (state == LINK_CLOSED)
-                        sb_string_append_printf(rv, "<%scode>",
-                            open_code_double ? "/" : "");
-                    open_code_double = !open_code_double;
                     break;
                 }
-                if (state == LINK_CLOSED)
-                    sb_string_append_printf(rv, "<%scode>", open_code ? "/" : "");
-                open_code = !open_code;
-                break;
-
-            case '!':
-                if (state == LINK_CLOSED) {
-                    if (open_code || open_code_double) {
-                        sb_string_append_c(rv, c);
-                        break;
-                    }
-                    if (!is_last && src[current + 1] != '[') {
-                        sb_string_append_c(rv, c);
-                        break;
-                    }
-                    state = LINK_IMAGE;
-                    is_image = true;
-                    start_state = current;
-                }
-                break;
-
-            case '[':
-                if (state == LINK_CLOSED && (open_code || open_code_double)) {
-                    sb_string_append_c(rv, c);
-                    break;
-                }
-                if (state == LINK_CLOSED || state == LINK_IMAGE) {
-                    if (state == LINK_CLOSED)
-                        start_state = current;
-                    state = LINK_TEXT;
-                    start = current + 1;
-                    open_bracket = 0;
-                    break;
-                }
-                if (state == LINK_TEXT) {
-                    if (current == start) {
-                        start = current + 1;
-                        state = LINK_AUTO;
-                        break;
-                    }
-                    open_bracket++;
-                    break;
-                }
-                break;
-
-            case ']':
-                if (state == LINK_AUTO) {
-                    end = current;
-                    state = LINK_AUTO_CLOSE;
-                    break;
-                }
-                if (state == LINK_AUTO_CLOSE) {
-                    state = LINK_CLOSED;
-                    tmp = sb_strndup(src + start, end - start);
-                    sb_string_append_printf(rv, "<a href=\"%s\">%s</a>", tmp, tmp);
-                    end = 0;
-                    free(tmp);
-                    tmp = NULL;
-                    is_image = false;
-                    break;
-                }
-                if (state == LINK_TEXT) {
-                    if (open_bracket-- == 0) {
-                        state = LINK_TEXT_CLOSE;
-                        tmp = sb_strndup(src + start, current - start);
-                        tmp2 = blogc_content_parse_inline(tmp);
-                        free(tmp);
-                        tmp = NULL;
-                    }
-                    break;
-                }
-                if (state == LINK_CLOSED)
-                    sb_string_append_c(rv, c);
-                break;
-
-            case '(':
-                if (state == LINK_TEXT_CLOSE) {
-                    state = LINK_URL;
-                    start = current + 1;
-                    break;
-                }
-                if (state == LINK_CLOSED)
-                    sb_string_append_c(rv, c);
-                break;
-
-            case ')':
-                if (state == LINK_URL) {
-                    state = LINK_CLOSED;
-                    tmp = sb_strndup(src + start, current - start);
-                    if (is_image)
-                        sb_string_append_printf(rv, "<img src=\"%s\" alt=\"%s\">",
-                            tmp, tmp2);
-                    else
-                        sb_string_append_printf(rv, "<a href=\"%s\">%s</a>",
-                            tmp, tmp2);
-                    free(tmp);
-                    tmp = NULL;
+                if (c == ')') {
+                    tmp2 = sb_strndup(src + start, current - start);
+                    tmp3 = blogc_content_parse_inline(link1);
+                    free(link1);
+                    link1 = NULL;
+                    sb_string_append(rv, "<a href=\"");
+                    sb_string_append_escaped(rv, tmp2);
+                    sb_string_append_printf(rv, "\">%s</a>", tmp3);
                     free(tmp2);
                     tmp2 = NULL;
-                    is_image = false;
+                    free(tmp3);
+                    tmp3 = NULL;
+                    state = CONTENT_INLINE_START;
                     break;
-                }
-                if (state == LINK_CLOSED)
-                    sb_string_append_c(rv, c);
-                break;
-
-            case ' ':
-                if (state == LINK_CLOSED) {
-                    spaces++;
-                    sb_string_append_c(rv, c);
-                }
-                if (!is_last)
-                    break;
-
-            case '\n':
-            case '\r':
-                if (state == LINK_CLOSED) {
-                    if (spaces >= 2) {
-                        sb_string_append(rv, "<br />");
-                        spaces = 0;
-                    }
-                    if (c == '\n' || c == '\r')
-                        sb_string_append_c(rv, c);
                 }
                 break;
 
-            case '-':
-                if (state != LINK_CLOSED)
+            case CONTENT_INLINE_IMAGE_START:
+                // we use the same variables used for links, because why not?
+                if (c == '[') {
+                    state = CONTENT_INLINE_IMAGE_ALT;
+                    start_link = current + 1;
                     break;
-                if ((current < (src_len - 1) && src[current + 1] == '-') &&
-                    !(open_code || open_code_double))
-                {
-                    if (current < (src_len - 2) && src[current + 2] == '-') {
-                        sb_string_append(rv, "&mdash;");
-                        current += 2;
-                    }
-                    else {
+                }
+                sb_string_append_c(rv, '!');
+                state = CONTENT_INLINE_START;
+                continue;
+
+            case CONTENT_INLINE_IMAGE_ALT:
+                if (c == '\\') {
+                    current++;
+                    break;
+                }
+                if (c == ']') {
+                    link1 = sb_strndup(src + start_link, current - start_link);
+                    state = CONTENT_INLINE_IMAGE_URL_START;
+                }
+                break;
+
+            case CONTENT_INLINE_IMAGE_URL_START:
+                if (c == ' ' || c == '\t' || c == '\n' || c == '\r')
+                    break;
+                if (c == '(') {
+                    state = CONTENT_INLINE_IMAGE_URL;
+                    start = current + 1;
+                    break;
+                }
+                sb_string_append_c(rv, '!');
+                sb_string_append_c(rv, '[');
+                state = CONTENT_INLINE_START;
+                current = start_link;
+                start_link = 0;
+                continue;
+
+            case CONTENT_INLINE_IMAGE_URL:
+                if (c == '\\') {
+                    current++;
+                    break;
+                }
+                if (c == ')') {
+                    tmp2 = sb_strndup(src + start, current - start);
+                    sb_string_append(rv, "<img src=\"");
+                    sb_string_append_escaped(rv, tmp2);
+                    sb_string_append(rv, "\" alt=\"");
+                    sb_string_append_escaped(rv, link1);
+                    sb_string_append(rv, "\">");
+                    free(tmp2);
+                    tmp2 = NULL;
+                    free(link1);
+                    link1 = NULL;
+                    state = CONTENT_INLINE_START;
+                    break;
+                }
+                break;
+
+            case CONTENT_INLINE_ENDASH:
+                if (c == '-') {
+                    if (is_last) {
                         sb_string_append(rv, "&ndash;");
-                        current += 1;
+                        state = CONTENT_INLINE_START;  // wat
+                        break;
                     }
+                    state = CONTENT_INLINE_EMDASH;
+                    break;
                 }
-                else {
-                    sb_string_append_c(rv, c);
+                sb_string_append_c(rv, '-');
+                state = CONTENT_INLINE_START;
+                continue;
+
+            case CONTENT_INLINE_EMDASH:
+                if (c == '-') {
+                    sb_string_append(rv, "&mdash;");
+                    state = CONTENT_INLINE_START;
+                    break;
                 }
-                break;
+                sb_string_append(rv, "&ndash;");
+                state = CONTENT_INLINE_START;
+                continue;
 
-            case '&':
-                if (state == LINK_CLOSED)
-                    sb_string_append(rv, "&amp;");
-                break;
+            case CONTENT_INLINE_LINE_BREAK_START:
+                if (c == ' ') {
+                    if (is_last) {
+                        sb_string_append(rv, "<br />");
+                        state = CONTENT_INLINE_START;  // wat
+                        break;
+                    }
+                    count = 2;
+                    state = CONTENT_INLINE_LINE_BREAK;
+                    break;
+                }
+                sb_string_append_c(rv, ' ');
+                state = CONTENT_INLINE_START;
+                continue;
 
-            case '<':
-                if (state == LINK_CLOSED)
-                    sb_string_append(rv, "&lt;");
-                break;
-
-            case '>':
-                if (state == LINK_CLOSED)
-                    sb_string_append(rv, "&gt;");
-                break;
-
-            case '"':
-                if (state == LINK_CLOSED)
-                    sb_string_append(rv, "&quot;");
-                break;
-
-            case '\'':
-                if (state == LINK_CLOSED)
-                    sb_string_append(rv, "&#x27;");
-                break;
-
-            case '/':
-                if (state == LINK_CLOSED)
-                    sb_string_append(rv, "&#x2F;");
-                break;
-
-            default:
-                if (state == LINK_CLOSED)
-                    sb_string_append_c(rv, c);
-        }
-
-        if (is_last && state != LINK_CLOSED) {
-            sb_string_append_c(rv, src[start_state]);
-            tmp = blogc_content_parse_inline(src + start_state + 1);
-            sb_string_append(rv, tmp);
-            // no need to free here, its the last iteration
+            case CONTENT_INLINE_LINE_BREAK:
+                if (c == ' ') {
+                    if (is_last) {
+                        sb_string_append(rv, "<br />");
+                        state = CONTENT_INLINE_START;  // wat
+                        break;
+                    }
+                    count++;
+                    break;
+                }
+                if (c == '\n' || c == '\r') {
+                    sb_string_append_printf(rv, "<br />%c", c);
+                    state = CONTENT_INLINE_START;
+                    break;
+                }
+                for (size_t i = 0; i < count; i++)
+                    sb_string_append_c(rv, ' ');
+                state = CONTENT_INLINE_START;
+                continue;
         }
         current++;
     }
 
-    free(tmp);
+    switch (state) {
+
+        // if after the end of the loop we are on any of the following states,
+        // we must call the parser again, from start_link
+        case CONTENT_INLINE_IMAGE_START:
+        case CONTENT_INLINE_IMAGE_ALT:
+        case CONTENT_INLINE_IMAGE_URL_START:
+        case CONTENT_INLINE_IMAGE_URL:
+            sb_string_append_c(rv, '!');
+
+        case CONTENT_INLINE_LINK_CONTENT:
+        case CONTENT_INLINE_LINK_URL_START:
+        case CONTENT_INLINE_LINK_URL:
+            tmp2 = blogc_content_parse_inline(src + start_link);
+            sb_string_append_c(rv, '[');
+            sb_string_append_escaped(rv, tmp2);  // no need to free, as it wil be done below.
+            break;
+
+        // add all the other states here explicitly, so the compiler helps us
+        // not missing any new state that should be handled.
+        case CONTENT_INLINE_START:
+        case CONTENT_INLINE_ASTERISK:
+        case CONTENT_INLINE_ASTERISK_DOUBLE:
+        case CONTENT_INLINE_UNDERSCORE:
+        case CONTENT_INLINE_UNDERSCORE_DOUBLE:
+        case CONTENT_INLINE_BACKTICKS:
+        case CONTENT_INLINE_BACKTICKS_DOUBLE:
+        case CONTENT_INLINE_LINK_START:
+        case CONTENT_INLINE_LINK_AUTO:
+        case CONTENT_INLINE_ENDASH:
+        case CONTENT_INLINE_EMDASH:
+        case CONTENT_INLINE_LINE_BREAK_START:
+        case CONTENT_INLINE_LINE_BREAK:
+            break;
+    }
+
     free(tmp2);
+    free(tmp3);
+    free(link1);
 
     return sb_string_free(rv, false);
+}
+
+
+char*
+blogc_content_parse_inline(const char *src)
+{
+    return blogc_content_parse_inline_internal(src, strlen(src));
 }
 
 

@@ -257,6 +257,18 @@ test_str_replace(void **state)
 
 
 static void
+test_str_find(void **state)
+{
+    assert_null(sb_str_find(NULL, 'c'));
+    assert_string_equal(sb_str_find("bola", 'l'), "la");
+    assert_string_equal(sb_str_find("bo\\lalala", 'l'), "lala");
+    assert_string_equal(sb_str_find("bola", '\0'), "");
+    assert_null(sb_str_find("bola", 'g'));
+    assert_null(sb_str_find("bo\\la", 'l'));
+}
+
+
+static void
 test_strv_join(void **state)
 {
     char *pieces[] = {"guda","bola", "chunda", NULL};
@@ -525,6 +537,25 @@ test_string_append_printf(void **state)
     assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
     assert_null(sb_string_free(str, true));
     assert_null(sb_string_append_printf(NULL, "asd"));
+}
+
+
+static void
+test_string_append_escaped(void **state)
+{
+    sb_string_t *str = sb_string_new();
+    str = sb_string_append_escaped(str, NULL);
+    assert_non_null(str);
+    assert_string_equal(str->str, "");
+    assert_int_equal(str->len, 0);
+    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    str = sb_string_append_escaped(str, "foo \\a bar \\\\ lol");
+    assert_non_null(str);
+    assert_string_equal(str->str, "foo a bar \\ lol");
+    assert_int_equal(str->len, 15);
+    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_null(sb_string_free(str, true));
+    assert_null(sb_string_append_escaped(NULL, "asd"));
 }
 
 
@@ -934,6 +965,7 @@ main(void)
         unit_test(test_str_strip),
         unit_test(test_str_split),
         unit_test(test_str_replace),
+        unit_test(test_str_find),
         unit_test(test_strv_join),
         unit_test(test_strv_length),
 
@@ -945,6 +977,7 @@ main(void)
         unit_test(test_string_append),
         unit_test(test_string_append_c),
         unit_test(test_string_append_printf),
+        unit_test(test_string_append_escaped),
 
         // trie
         unit_test(test_trie_new),

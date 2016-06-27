@@ -184,7 +184,7 @@ test_content_parse(void **state)
         "<h6 id=\"seis\">seis</h6>\n"
         "<p>bola\n"
         "chunda</p>\n"
-        "<blockquote><p>bola  <br />\n"
+        "<blockquote><p>bola<br />\n"
         "guda\n"
         "buga</p>\n"
         "<pre><code>asd</code></pre>\n"
@@ -276,7 +276,7 @@ test_content_parse_crlf(void **state)
         "<h6 id=\"seis\">seis</h6>\r\n"
         "<p>bola\r\n"
         "chunda</p>\r\n"
-        "<blockquote><p>bola  <br />\r\n"
+        "<blockquote><p>bola<br />\r\n"
         "guda\r\n"
         "buga</p>\r\n"
         "<pre><code>asd</code></pre>\r\n"
@@ -1485,14 +1485,13 @@ test_content_parse_invalid_code(void **state)
 static void
 test_content_parse_invalid_horizontal_rule(void **state)
 {
-    // this generates invalid html, but...
     char *html = blogc_content_parse("** asd", NULL, NULL);
     assert_non_null(html);
-    assert_string_equal(html, "<p><strong> asd</p>\n");
+    assert_string_equal(html, "<p>** asd</p>\n");
     free(html);
     html = blogc_content_parse("** asd\n", NULL, NULL);
     assert_non_null(html);
-    assert_string_equal(html, "<p><strong> asd</p>\n");
+    assert_string_equal(html, "<p>** asd</p>\n");
     free(html);
 }
 
@@ -1500,13 +1499,12 @@ test_content_parse_invalid_horizontal_rule(void **state)
 static void
 test_content_parse_invalid_unordered_list(void **state)
 {
-    // more invalid html
     char *html = blogc_content_parse(
         "*  asd\n"
         "1. qwe", NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
-        "<p><em>  asd\n"
+        "<p>*  asd\n"
         "1. qwe</p>\n");
     free(html);
     html = blogc_content_parse(
@@ -1515,7 +1513,7 @@ test_content_parse_invalid_unordered_list(void **state)
         "\n", NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
-        "<p><em>  asd\n"
+        "<p>*  asd\n"
         "1. qwe</p>\n");
     free(html);
     html = blogc_content_parse(
@@ -1523,7 +1521,7 @@ test_content_parse_invalid_unordered_list(void **state)
         "1. qwe\n", NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
-        "<p><em>  asd\n"
+        "<p>*  asd\n"
         "1. qwe"
         "</p>\n");
     free(html);
@@ -1532,7 +1530,7 @@ test_content_parse_invalid_unordered_list(void **state)
         "1. qwe\n", NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
-        "<p><em> asd\n"
+        "<p>* asd\n"
         "1. qwe"
         "</p>\n");
     free(html);
@@ -1546,7 +1544,7 @@ test_content_parse_invalid_unordered_list(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<p>chunda</p>\n"
-        "<p><em> asd\n"
+        "<p>* asd\n"
         "1. qwe</p>\n"
         "<p>poi</p>\n");
     free(html);
@@ -1556,14 +1554,13 @@ test_content_parse_invalid_unordered_list(void **state)
 static void
 test_content_parse_invalid_ordered_list(void **state)
 {
-    // more invalid html
     char *html = blogc_content_parse(
         "1. asd\n"
         "*  qwe", NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
-        "<em>  qwe</p>\n");
+        "*  qwe</p>\n");
     free(html);
     html = blogc_content_parse(
         "1. asd\n"
@@ -1572,7 +1569,7 @@ test_content_parse_invalid_ordered_list(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
-        "<em>  qwe</p>\n");
+        "*  qwe</p>\n");
     free(html);
     html = blogc_content_parse(
         "1. asd\n"
@@ -1580,7 +1577,7 @@ test_content_parse_invalid_ordered_list(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
-        "<em>  qwe"
+        "*  qwe"
         "</p>\n");
     free(html);
     html = blogc_content_parse(
@@ -1589,7 +1586,7 @@ test_content_parse_invalid_ordered_list(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
-        "<em>  qwe"
+        "*  qwe"
         "</p>\n");
     free(html);
     html = blogc_content_parse(
@@ -1603,7 +1600,7 @@ test_content_parse_invalid_ordered_list(void **state)
     assert_string_equal(html,
         "<p>chunda</p>\n"
         "<p>1. asd\n"
-        "<em>  qwe</p>\n"
+        "*  qwe</p>\n"
         "<p>poi</p>\n");
     free(html);
     html = blogc_content_parse(
@@ -1612,7 +1609,7 @@ test_content_parse_invalid_ordered_list(void **state)
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1 asd\n"
-        "<em> qwe</p>\n");
+        "* qwe</p>\n");
     free(html);
     html = blogc_content_parse(
         "a. asd\n"
@@ -1677,6 +1674,10 @@ test_content_parse_inline_em(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<em>bola</em>\n");
     free(html);
+    html = blogc_content_parse_inline("*bo\\*la*\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<em>bo*la</em>\n");
+    free(html);
     html = blogc_content_parse_inline("_bola_");
     assert_non_null(html);
     assert_string_equal(html, "<em>bola</em>");
@@ -1685,14 +1686,25 @@ test_content_parse_inline_em(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<em>bola</em>\n");
     free(html);
+    html = blogc_content_parse_inline("_bo\\*la_\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<em>bo*la</em>\n");
+    free(html);
     html = blogc_content_parse_inline("_**bola**_\n");
     assert_non_null(html);
     assert_string_equal(html, "<em><strong>bola</strong></em>\n");
     free(html);
-    // this is not really valid
+    html = blogc_content_parse_inline("_**bo\\_\\*la**_\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<em><strong>bo_*la</strong></em>\n");
+    free(html);
     html = blogc_content_parse_inline("_**bola\n");
     assert_non_null(html);
-    assert_string_equal(html, "<em><strong>bola\n");
+    assert_string_equal(html, "_**bola\n");
+    free(html);
+    html = blogc_content_parse_inline("**_bola\\*\n");
+    assert_non_null(html);
+    assert_string_equal(html, "**_bola*\n");
     free(html);
 }
 
@@ -1708,6 +1720,10 @@ test_content_parse_inline_strong(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<strong>bola</strong>\n");
     free(html);
+    html = blogc_content_parse_inline("**bo\*la**\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<strong>bo*la</strong>\n");
+    free(html);
     html = blogc_content_parse_inline("__bola__");
     assert_non_null(html);
     assert_string_equal(html, "<strong>bola</strong>");
@@ -1716,14 +1732,25 @@ test_content_parse_inline_strong(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<strong>bola</strong>\n");
     free(html);
+    html = blogc_content_parse_inline("__bo\*la__\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<strong>bo*la</strong>\n");
+    free(html);
     html = blogc_content_parse_inline("__*bola*__\n");
     assert_non_null(html);
     assert_string_equal(html, "<strong><em>bola</em></strong>\n");
     free(html);
-    // this is not really valid
+    html = blogc_content_parse_inline("__*bo\\_\\*la*__\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<strong><em>bo_*la</em></strong>\n");
+    free(html);
     html = blogc_content_parse_inline("__*bola\n");
     assert_non_null(html);
-    assert_string_equal(html, "<strong><em>bola\n");
+    assert_string_equal(html, "__*bola\n");
+    free(html);
+    html = blogc_content_parse_inline("__*bola\\_\n");
+    assert_non_null(html);
+    assert_string_equal(html, "__*bola_\n");
     free(html);
 }
 
@@ -1751,18 +1778,29 @@ test_content_parse_inline_code(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<code>bo*la</code>\n");
     free(html);
-    // invalid
+    html = blogc_content_parse_inline("``bo<la``\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>bo&lt;la</code>\n");
+    free(html);
+    html = blogc_content_parse_inline("`bo\\`\\`la`\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>bo``la</code>\n");
+    free(html);
+    html = blogc_content_parse_inline("``bo\\`\\`la``\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>bo``la</code>\n");
+    free(html);
     html = blogc_content_parse_inline("``bola\n");
     assert_non_null(html);
-    assert_string_equal(html, "<code>bola\n");
+    assert_string_equal(html, "``bola\n");
     free(html);
     html = blogc_content_parse_inline("`bola\n");
     assert_non_null(html);
-    assert_string_equal(html, "<code>bola\n");
+    assert_string_equal(html, "`bola\n");
     free(html);
     html = blogc_content_parse_inline("``bola`\n");
     assert_non_null(html);
-    assert_string_equal(html, "<code>bola<code>\n");
+    assert_string_equal(html, "``bola`\n");
     free(html);
 }
 
@@ -1802,9 +1840,9 @@ test_content_parse_inline_link(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<a href=\"http://example.org/\"><code>bola</code></a>\n");
     free(html);
-    html = blogc_content_parse_inline("[``bola(2)[3]**!\\``](http://example.org/)\n");
+    html = blogc_content_parse_inline("[``bola(2)[3]**!\\```](http://example.org/)\n");
     assert_non_null(html);
-    assert_string_equal(html, "<a href=\"http://example.org/\"><code>bola(2)[3]**!\\</code></a>\n");
+    assert_string_equal(html, "<a href=\"http://example.org/\"><code>bola(2)[3]**!`</code></a>\n");
     free(html);
     html = blogc_content_parse_inline("test suite!)\n"
         "depends on [cmocka](http://cmocka.org/), though.\n");
@@ -1820,6 +1858,10 @@ test_content_parse_inline_link(void **state)
     html = blogc_content_parse_inline("[bola](\nhttp://example.org/)\n");
     assert_non_null(html);
     assert_string_equal(html, "<a href=\"\nhttp://example.org/\">bola</a>\n");
+    free(html);
+    html = blogc_content_parse_inline("[bo[]\\[\\]()la](http://example.org/?\\(\\))\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"http://example.org/?()\">bo[][]()la</a>\n");
     free(html);
     html = blogc_content_parse_inline("[bola](http://example.org/\n");
     assert_non_null(html);
@@ -1863,13 +1905,21 @@ test_content_parse_inline_link_auto(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<a href=\"guda\">guda</a>\n");
     free(html);
+    html = blogc_content_parse_inline("[[http://example.org/?\\[\\]]]\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"http://example.org/?[]\">http://example.org/?[]</a>\n");
+    free(html);
+    html = blogc_content_parse_inline("[[http://example.org/?\\[\\]a]]\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"http://example.org/?[]a\">http://example.org/?[]a</a>\n");
+    free(html);
     html = blogc_content_parse_inline("[[guda]asd]");
     assert_non_null(html);
-    assert_string_equal(html, "<a href=\"guda\">guda</a>");
+    assert_string_equal(html, "[[guda]asd]");
     free(html);
     html = blogc_content_parse_inline("[[guda]asd]\n");
     assert_non_null(html);
-    assert_string_equal(html, "<a href=\"guda\">guda</a>\n");
+    assert_string_equal(html, "[[guda]asd]\n");
     free(html);
     html = blogc_content_parse_inline("[[guda]asd");
     assert_non_null(html);
@@ -1942,6 +1992,10 @@ test_content_parse_inline_image(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<img src=\"\nhttp://example.org/\" alt=\"bola\">\n");
     free(html);
+    html = blogc_content_parse_inline("![bo\\[\\]()la](http://example.org/?\\(\\))\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<img src=\"http://example.org/?()\" alt=\"bo[]()la\">\n");
+    free(html);
     html = blogc_content_parse_inline("![bola](http://example.org/\n");
     assert_non_null(html);
     assert_string_equal(html, "![bola](http:&#x2F;&#x2F;example.org&#x2F;\n");
@@ -1994,15 +2048,15 @@ test_content_parse_inline_line_break(void **state)
 {
     char *html = blogc_content_parse_inline("asd  \n");
     assert_non_null(html);
-    assert_string_equal(html, "asd  <br />\n");
+    assert_string_equal(html, "asd<br />\n");
     free(html);
     html = blogc_content_parse_inline("asd  ");
     assert_non_null(html);
-    assert_string_equal(html, "asd  <br />");
+    assert_string_equal(html, "asd<br />");
     free(html);
     html = blogc_content_parse_inline("asd   ");
     assert_non_null(html);
-    assert_string_equal(html, "asd   <br />");
+    assert_string_equal(html, "asd<br />");
     free(html);
     // invalid
     html = blogc_content_parse_inline("asd ");
@@ -2021,7 +2075,7 @@ test_content_parse_inline_line_break_crlf(void **state)
 {
     char *html = blogc_content_parse_inline("asd  \r\n");
     assert_non_null(html);
-    assert_string_equal(html, "asd  <br />\r\n");
+    assert_string_equal(html, "asd<br />\r\n");
     free(html);
     html = blogc_content_parse_inline("asd \r\n");
     assert_non_null(html);
@@ -2040,6 +2094,46 @@ test_content_parse_inline_endash_emdash(void **state)
     html = blogc_content_parse_inline("foo --- bar");
     assert_non_null(html);
     assert_string_equal(html, "foo &mdash; bar");
+    free(html);
+    html = blogc_content_parse_inline("foo --");
+    assert_non_null(html);
+    assert_string_equal(html, "foo &ndash;");
+    free(html);
+    html = blogc_content_parse_inline("foo ---");
+    assert_non_null(html);
+    assert_string_equal(html, "foo &mdash;");
+    free(html);
+    html = blogc_content_parse_inline("foo \\-\\-");
+    assert_non_null(html);
+    assert_string_equal(html, "foo --");
+    free(html);
+    html = blogc_content_parse_inline("foo \\-\\-\\-");
+    assert_non_null(html);
+    assert_string_equal(html, "foo ---");
+    free(html);
+    html = blogc_content_parse_inline("foo \\---");
+    assert_non_null(html);
+    assert_string_equal(html, "foo -&ndash;");
+    free(html);
+    html = blogc_content_parse_inline("foo \\----");
+    assert_non_null(html);
+    assert_string_equal(html, "foo -&mdash;");
+    free(html);
+    html = blogc_content_parse_inline("foo \\-\\- bar");
+    assert_non_null(html);
+    assert_string_equal(html, "foo -- bar");
+    free(html);
+    html = blogc_content_parse_inline("foo \\-\\-\\- bar");
+    assert_non_null(html);
+    assert_string_equal(html, "foo --- bar");
+    free(html);
+    html = blogc_content_parse_inline("foo \\--- bar");
+    assert_non_null(html);
+    assert_string_equal(html, "foo -&ndash; bar");
+    free(html);
+    html = blogc_content_parse_inline("foo \\---- bar");
+    assert_non_null(html);
+    assert_string_equal(html, "foo -&mdash; bar");
     free(html);
     html = blogc_content_parse_inline("`foo -- bar`");
     assert_non_null(html);

@@ -287,6 +287,27 @@ sb_str_replace(const char *str, const char search, const char *replace)
 }
 
 
+char*
+sb_str_find(const char *str, char c)
+{
+    // this is somewhat similar to strchr, but respects '\' escaping.
+    if (str == NULL)
+        return NULL;
+    if (c == '\0')
+        return (char*) str + strlen(str);
+    for (size_t i = 0; str[i] != '\0'; i++) {
+        if (str[i] == '\\') {
+            i++;
+            continue;
+        }
+        if (str[i] == c) {
+            return (char*) str + i;
+        }
+    }
+    return NULL;
+}
+
+
 void
 sb_strv_free(char **strv)
 {
@@ -421,6 +442,26 @@ sb_string_append_printf(sb_string_t *str, const char *format, ...)
     va_end(ap);
     str = sb_string_append(str, tmp);
     free(tmp);
+    return str;
+}
+
+
+sb_string_t*
+sb_string_append_escaped(sb_string_t *str, const char *suffix)
+{
+    if (str == NULL)
+        return NULL;
+    if (suffix == NULL)
+        return str;
+    bool escaped = false;
+    for (size_t i = 0; suffix[i] != '\0'; i++) {
+        if (suffix[i] == '\\' && !escaped) {
+            escaped = true;
+            continue;
+        }
+        escaped = false;
+        str = sb_string_append_c(str, suffix[i]);
+    }
     return str;
 }
 

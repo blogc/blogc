@@ -51,6 +51,7 @@ char* sb_str_rstrip(char *str);
 char* sb_str_strip(char *str);
 char** sb_str_split(const char *str, char c, unsigned int max_pieces);
 char* sb_str_replace(const char *str, const char search, const char *replace);
+char* sb_str_find(const char *str, char c);
 void sb_strv_free(char **strv);
 char* sb_strv_join(char **strv, const char *separator);
 size_t sb_strv_length(char **strv);
@@ -71,6 +72,7 @@ sb_string_t* sb_string_append_len(sb_string_t *str, const char *suffix, size_t l
 sb_string_t* sb_string_append(sb_string_t *str, const char *suffix);
 sb_string_t* sb_string_append_c(sb_string_t *str, char c);
 sb_string_t* sb_string_append_printf(sb_string_t *str, const char *format, ...);
+sb_string_t* sb_string_append_escaped(sb_string_t *str, const char *suffix);
 
 
 // trie
