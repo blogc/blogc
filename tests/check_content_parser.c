@@ -1686,9 +1686,9 @@ test_content_parse_inline_em(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<em>bola</em>\n");
     free(html);
-    html = blogc_content_parse_inline("_bo\\*la_\n");
+    html = blogc_content_parse_inline("_bo\\_la_\n");
     assert_non_null(html);
-    assert_string_equal(html, "<em>bo*la</em>\n");
+    assert_string_equal(html, "<em>bo_la</em>\n");
     free(html);
     html = blogc_content_parse_inline("_**bola**_\n");
     assert_non_null(html);
@@ -1720,9 +1720,9 @@ test_content_parse_inline_strong(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<strong>bola</strong>\n");
     free(html);
-    html = blogc_content_parse_inline("**bo\*la**\n");
+    html = blogc_content_parse_inline("**bo\\*\\*la**\n");
     assert_non_null(html);
-    assert_string_equal(html, "<strong>bo*la</strong>\n");
+    assert_string_equal(html, "<strong>bo**la</strong>\n");
     free(html);
     html = blogc_content_parse_inline("__bola__");
     assert_non_null(html);
@@ -1732,9 +1732,9 @@ test_content_parse_inline_strong(void **state)
     assert_non_null(html);
     assert_string_equal(html, "<strong>bola</strong>\n");
     free(html);
-    html = blogc_content_parse_inline("__bo\*la__\n");
+    html = blogc_content_parse_inline("__bo\\_\\_la__\n");
     assert_non_null(html);
-    assert_string_equal(html, "<strong>bo*la</strong>\n");
+    assert_string_equal(html, "<strong>bo__la</strong>\n");
     free(html);
     html = blogc_content_parse_inline("__*bola*__\n");
     assert_non_null(html);
