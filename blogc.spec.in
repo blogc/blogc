@@ -6,7 +6,9 @@ Group: Applications/Text
 Summary: A blog compiler
 URL: @PACKAGE_URL@
 Source0: https://github.com/blogc/blogc/releases/download/v@PACKAGE_VERSION@/blogc-@PACKAGE_VERSION@.tar.xz
+%if ! 0%{?el6}
 BuildRequires: libevent-devel >= 2.0, file-devel
+%endif
 
 %description
 blogc(1) is a blog compiler. It converts source files and templates into
@@ -20,6 +22,7 @@ Requires: git, tar, make
 %description git-receiver
 blogc-git-receiver is a simple login shell/git hook to deploy blogc websites.
 
+%if ! 0%{?el6}
 %package runserver
 Summary: A simple HTTP server to test blogc websites
 Group: Development/Tools
@@ -27,12 +30,17 @@ Requires: libevent >= 2.0, file-libs
 
 %description runserver
 blogc-runserver is a simple HTTP server to test blogc websites.
+%endif
 
 %prep
 %setup -q -n @PACKAGE_NAME@-@PACKAGE_VERSION@
 
 %build
+%if 0%{?el6}
+%configure --enable-git-receiver --disable-runserver
+%else
 %configure --enable-git-receiver --enable-runserver
+%endif
 make %{?_smp_mflags}
 
 %install
@@ -53,10 +61,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/blogc-git-receiver
 %license LICENSE
 
+%if ! 0%{?el6}
 %files runserver
 %{_mandir}/man*/blogc-runserver.*
 %{_bindir}/blogc-runserver
 %license LICENSE
+%endif
 
 %changelog
 * Sun Jun 19 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.10.1-1
