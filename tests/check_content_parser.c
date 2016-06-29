@@ -2067,6 +2067,14 @@ test_content_parse_inline_line_break(void **state)
     assert_non_null(html);
     assert_string_equal(html, "asd \n");
     free(html);
+    html = blogc_content_parse_inline("asd  a\n");
+    assert_non_null(html);
+    assert_string_equal(html, "asd  a\n");
+    free(html);
+    html = blogc_content_parse_inline("asd    a\n");
+    assert_non_null(html);
+    assert_string_equal(html, "asd    a\n");
+    free(html);
 }
 
 
