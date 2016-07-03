@@ -96,8 +96,8 @@ blogc_error_parser(blogc_error_type_t type, const char *src, size_t src_len,
         rv = blogc_error_new(type, msg);
     else
         rv = blogc_error_new_printf(type,
-            "%s\nError occurred near line %d, position %d:\n%s\n%*s", msg,
-            lineno, pos, line, pos, "^");
+            "%s\nError occurred near line %d, position %d: %s", msg, lineno,
+            pos, line);
 
     free(msg);
     free(line);

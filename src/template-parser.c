@@ -622,7 +622,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     if (*err == NULL) {
         if (state == TEMPLATE_BLOCK_IF_STRING_OPERAND)
             *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src, src_len,
-                start2, "Found an open double-quoted string.");
+                start2 - 1, "Found an open double-quoted string.");
         else if (if_count != 0)
             *err = blogc_error_new_printf(BLOGC_ERROR_TEMPLATE_PARSER,
                 "%d open 'ifdef' and/or 'ifndef' statements were not closed!",
