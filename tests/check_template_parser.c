@@ -62,7 +62,7 @@ test_template_parse(void **state)
         "{% block listing %}{{ BOLA }}{% endblock %}\n"
         "{% block listing_once %}asd{% endblock %}\n"
         "{%- foreach BOLA %}hahaha{% endforeach %}\n"
-        "{% if BOLA == \"1\\\"0\" %}aee{% endif %}";
+        "{% if BOLA == \"1\\\"0\" %}aee{% else %}fffuuuuuuu{% endif %}";
     blogc_error_t *err = NULL;
     sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_null(err);
@@ -119,8 +119,12 @@ test_template_parse(void **state)
     blogc_assert_template_stmt(tmp->next->next->next->next->next, "aee",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next, NULL,
-        BLOGC_TEMPLATE_ENDIF_STMT);
-    assert_null(tmp->next->next->next->next->next->next->next);
+        BLOGC_TEMPLATE_ELSE_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next,
+        "fffuuuuuuu", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next->next,
+        NULL, BLOGC_TEMPLATE_ENDIF_STMT);
+    assert_null(tmp->next->next->next->next->next->next->next->next->next);
     blogc_template_free_stmts(stmts);
 }
 
@@ -142,7 +146,7 @@ test_template_parse_crlf(void **state)
         "{% block listing %}{{ BOLA }}{% endblock %}\r\n"
         "{% block listing_once %}asd{% endblock %}\r\n"
         "{%- foreach BOLA %}hahaha{% endforeach %}\r\n"
-        "{% if BOLA == \"1\\\"0\" %}aee{% endif %}";
+        "{% if BOLA == \"1\\\"0\" %}aee{% else %}fffuuuuuuu{% endif %}";
     blogc_error_t *err = NULL;
     sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_null(err);
@@ -199,8 +203,12 @@ test_template_parse_crlf(void **state)
     blogc_assert_template_stmt(tmp->next->next->next->next->next, "aee",
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next->next->next->next->next, NULL,
-        BLOGC_TEMPLATE_ENDIF_STMT);
-    assert_null(tmp->next->next->next->next->next->next->next);
+        BLOGC_TEMPLATE_ELSE_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next,
+        "fffuuuuuuu", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next->next,
+        NULL, BLOGC_TEMPLATE_ENDIF_STMT);
+    assert_null(tmp->next->next->next->next->next->next->next->next->next);
     blogc_template_free_stmts(stmts);
 }
 
@@ -369,6 +377,74 @@ test_template_parse_ifdef_and_var_outside_block(void **state)
 
 
 static void
+test_template_parse_nested_else(void **state)
+{
+    const char *a =
+        "{% ifdef GUDA %}\n"
+        "{% ifdef BOLA %}\n"
+        "asd\n"
+        "{% else %}\n"
+        "{% ifdef CHUNDA %}\n"
+        "qwe\n"
+        "{% else %}\n"
+        "rty\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% ifdef LOL %}\n"
+        "zxc\n"
+        "{% else %}\n"
+        "bnm\n"
+        "{% endif %}\n"
+        "{% endif %}\n";
+    blogc_error_t *err = NULL;
+    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(stmts);
+    blogc_assert_template_stmt(stmts, "GUDA", BLOGC_TEMPLATE_IFDEF_STMT);
+    blogc_assert_template_stmt(stmts->next, "\n", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(stmts->next->next, "BOLA", BLOGC_TEMPLATE_IFDEF_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next, "\nasd\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next->next, NULL,
+        BLOGC_TEMPLATE_ELSE_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next->next->next, "\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next->next->next->next,
+        "CHUNDA", BLOGC_TEMPLATE_IFDEF_STMT);
+    blogc_assert_template_stmt(stmts->next->next->next->next->next->next->next,
+        "\nqwe\n", BLOGC_TEMPLATE_CONTENT_STMT);
+    sb_slist_t *tmp = stmts->next->next->next->next->next->next->next->next;
+    blogc_assert_template_stmt(tmp, NULL, BLOGC_TEMPLATE_ELSE_STMT);
+    blogc_assert_template_stmt(tmp->next, "\nrty\n", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next, NULL,
+        BLOGC_TEMPLATE_ENDIF_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next, "\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next, NULL,
+        BLOGC_TEMPLATE_ENDIF_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next, "\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next->next,
+        "LOL", BLOGC_TEMPLATE_IFDEF_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next->next->next,
+        "\nzxc\n", BLOGC_TEMPLATE_CONTENT_STMT);
+    tmp = tmp->next->next->next->next->next->next->next->next;
+    blogc_assert_template_stmt(tmp, NULL, BLOGC_TEMPLATE_ELSE_STMT);
+    blogc_assert_template_stmt(tmp->next, "\nbnm\n", BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next, NULL,
+        BLOGC_TEMPLATE_ENDIF_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next, "\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next, NULL,
+        BLOGC_TEMPLATE_ENDIF_STMT);
+    blogc_assert_template_stmt(tmp->next->next->next->next->next, "\n",
+        BLOGC_TEMPLATE_CONTENT_STMT);
+    assert_null(tmp->next->next->next->next->next->next);
+    blogc_template_free_stmts(stmts);
+}
+
+
+static void
 test_template_parse_invalid_block_start(void **state)
 {
     const char *a = "{% ASD %}\n";
@@ -466,7 +542,7 @@ test_template_parse_invalid_endif_not_open(void **state)
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
-        "'endif' statement without an open 'ifdef' or 'ifndef' statement.\n"
+        "'endif' statement without an open 'if', 'ifdef' or 'ifndef' statement.\n"
         "Error occurred near line 1, position 28: "
         "{% block listing %}{% endif %}{% endblock %}");
     blogc_error_free(err);
@@ -709,6 +785,62 @@ test_template_parse_invalid_if_operand3(void **state)
 
 
 static void
+test_template_parse_invalid_else1(void **state)
+{
+    const char *a = "{% else %}\n";
+    blogc_error_t *err = NULL;
+    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "'else' statement without an open 'if', 'ifdef' or 'ifndef' statement.\n"
+        "Error occurred near line 1, position 8: {% else %}");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_else2(void **state)
+{
+    const char *a = "{% if BOLA == \"123\" %}{% if GUDA == \"1\" %}{% else %}{% else %}\n";
+    blogc_error_t *err = NULL;
+    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "More than one 'else' statement for an open 'if', 'ifdef' or 'ifndef' "
+        "statement.\nError occurred near line 1, position 60: {% if BOLA == \"123\" "
+        "%}{% if GUDA == \"1\" %}{% else %}{% else %}");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_else3(void **state)
+{
+    const char *a =
+        "{% if BOLA == \"123\" %}\n"
+        "{% if GUDA == \"1\" %}\n"
+        "{% else %}\n"
+        "asd\n"
+        "{% endif %}\n"
+        "{% else %}\n"
+        "{% else %}\n";
+    blogc_error_t *err = NULL;
+    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "More than one 'else' statement for an open 'if', 'ifdef' or 'ifndef' "
+        "statement.\nError occurred near line 7, position 8: {% else %}");
+    blogc_error_free(err);
+}
+
+
+static void
 test_template_parse_invalid_block_end(void **state)
 {
     const char *a = "{% block entry }}\n";
@@ -876,6 +1008,7 @@ main(void)
         unit_test(test_template_parse_crlf),
         unit_test(test_template_parse_html),
         unit_test(test_template_parse_ifdef_and_var_outside_block),
+        unit_test(test_template_parse_nested_else),
         unit_test(test_template_parse_invalid_block_start),
         unit_test(test_template_parse_invalid_block_nested),
         unit_test(test_template_parse_invalid_foreach_nested),
@@ -895,6 +1028,9 @@ main(void)
         unit_test(test_template_parse_invalid_if_operand),
         unit_test(test_template_parse_invalid_if_operand2),
         unit_test(test_template_parse_invalid_if_operand3),
+        unit_test(test_template_parse_invalid_else1),
+        unit_test(test_template_parse_invalid_else2),
+        unit_test(test_template_parse_invalid_else3),
         unit_test(test_template_parse_invalid_block_end),
         unit_test(test_template_parse_invalid_variable_name),
         unit_test(test_template_parse_invalid_variable_name2),

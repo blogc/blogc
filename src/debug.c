@@ -55,6 +55,9 @@ blogc_debug_template(sb_slist_t *stmts)
                 fprintf(stderr, "IF: %s %s %s", data->value,
                     get_operator(data->op), data->value2);
                 break;
+            case BLOGC_TEMPLATE_ELSE_STMT:
+                fprintf(stderr, "ELSE");
+                break;
             case BLOGC_TEMPLATE_ENDIF_STMT:
                 fprintf(stderr, "ENDIF");
                 break;

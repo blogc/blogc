@@ -74,7 +74,7 @@ test_render_entry(void **state)
         "{% if GUDA == \"zxc\" %}LOL{% endif %}\n"
         "{% if GUDA != \"bola\" %}HEHE{% endif %}\n"
         "{% if GUDA < \"zxd\" %}LOL2{% endif %}\n"
-        "{% if GUDA > \"zxd\" %}LOL3{% endif %}\n"
+        "{% if GUDA > \"zxd\" %}LOL3{% else %}ELSE{% endif %}\n"
         "{% if GUDA <= \"zxc\" %}LOL4{% endif %}\n"
         "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
         "{% foreach TAGS_ASD %}yay{% endforeach %}\n";
@@ -99,7 +99,7 @@ test_render_entry(void **state)
         "LOL\n"
         "HEHE\n"
         "LOL2\n"
-        "\n"
+        "ELSE\n"
         "LOL4\n"
         "lol foo haha lol bar haha lol baz haha \n"
         "\n");
@@ -282,6 +282,146 @@ test_render_ifdef3(void **state)
 
 
 static void
+test_render_ifdef4(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% ifdef GUDA %}guda\n"
+        "{% ifdef BOLA %}bola\n"
+        "{% ifdef CHUNDA %}chunda\n"
+        "{% else %}else\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% else %}lol\n"
+        "{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    sb_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, NULL, false);
+    assert_string_equal(out,
+        "\n"
+        "guda\n"
+        "bola\n"
+        "else\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n");
+    blogc_template_free_stmts(l);
+    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_ifdef5(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% ifdef GUDA %}guda\n"
+        "{% ifdef CHUNDA %}chunda\n"
+        "{% ifdef BOLA %}bola\n"
+        "{% endif %}\n"
+        "{% else %}else\n"
+        "{% endif %}\n"
+        "{% else %}lol\n"
+        "{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    sb_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, NULL, false);
+    assert_string_equal(out,
+        "\n"
+        "guda\n"
+        "else\n"
+        "\n"
+        "\n"
+        "\n");
+    blogc_template_free_stmts(l);
+    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_ifdef6(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% ifdef CHUNDA %}chunda\n"
+        "{% ifdef GUDA %}guda\n"
+        "{% ifdef BOLA %}bola\n"
+        "{% endif %}\n"
+        "{% else %}else\n"
+        "{% endif %}\n"
+        "{% else %}lol\n"
+        "{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    sb_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, NULL, false);
+    assert_string_equal(out,
+        "\n"
+        "lol\n"
+        "\n"
+        "\n");
+    blogc_template_free_stmts(l);
+    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_ifdef7(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% ifdef GUDA %}guda\n"
+        "{% ifdef BOLA %}bola\n"
+        "{% ifdef CHUNDA %}chunda\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% ifdef CHUNDA %}ch\n"
+        "{% else %}else\n"
+        "{% endif %}\n"
+        "{% endif %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    sb_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, NULL, false);
+    assert_string_equal(out,
+        "\n"
+        "guda\n"
+        "bola\n"
+        "\n"
+        "\n"
+        "else\n"
+        "\n"
+        "\n"
+        "\n");
+    blogc_template_free_stmts(l);
+    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    free(out);
+}
+
+
+static void
 test_render_ifndef(void **state)
 {
     const char *str =
@@ -289,6 +429,7 @@ test_render_ifndef(void **state)
         "{% ifndef CHUNDA %}chunda\n"
         "{% ifdef GUDA %}guda\n"
         "{% ifndef BOLA %}bola\n"
+        "{% else %}else\n"
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endif %}\n"
@@ -304,6 +445,7 @@ test_render_ifndef(void **state)
         "\n"
         "chunda\n"
         "guda\n"
+        "else\n"
         "\n"
         "\n"
         "\n"
@@ -323,6 +465,7 @@ test_render_if_eq(void **state)
         "{% if GUDA == \"zxc\" %}guda\n"
         "{% ifdef BOLA %}bola\n"
         "{% if GUDA > \"zxc\" %}asd\n"
+        "{% else %}else\n"
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endif %}\n"
@@ -339,6 +482,7 @@ test_render_if_eq(void **state)
         "gudabola\n"
         "guda\n"
         "bola\n"
+        "else\n"
         "\n"
         "\n"
         "\n"
@@ -358,6 +502,7 @@ test_render_if_neq(void **state)
         "{% if GUDA != \"zxa\" %}guda\n"
         "{% ifdef BOLA %}bola\n"
         "{% if GUDA > \"zxc\" %}asd\n"
+        "{% else %}else\n"
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endif %}\n"
@@ -374,6 +519,7 @@ test_render_if_neq(void **state)
         "gudabola\n"
         "guda\n"
         "bola\n"
+        "else\n"
         "\n"
         "\n"
         "\n"
@@ -393,6 +539,7 @@ test_render_if_lt(void **state)
         "{% if GUDA < \"zxe\" %}guda\n"
         "{% ifdef BOLA %}bola\n"
         "{% if GUDA > \"zxc\" %}asd\n"
+        "{% else %}else\n"
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endif %}\n"
@@ -409,6 +556,7 @@ test_render_if_lt(void **state)
         "gudabola\n"
         "guda\n"
         "bola\n"
+        "else\n"
         "\n"
         "\n"
         "\n"
@@ -428,6 +576,7 @@ test_render_if_gt(void **state)
         "{% if GUDA > \"zxa\" %}guda\n"
         "{% ifdef BOLA %}bola\n"
         "{% if GUDA > \"zxc\" %}asd\n"
+        "{% else %}else\n"
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endif %}\n"
@@ -444,6 +593,7 @@ test_render_if_gt(void **state)
         "gudabola\n"
         "guda\n"
         "bola\n"
+        "else\n"
         "\n"
         "\n"
         "\n"
@@ -464,6 +614,7 @@ test_render_if_lt_eq(void **state)
         "{% if GUDA <= \"zxe\" %}guda2\n"
         "{% ifdef BOLA %}bola\n"
         "{% if GUDA > \"zxc\" %}asd\n"
+        "{% else %}else\n"
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endif %}\n"
@@ -482,6 +633,7 @@ test_render_if_lt_eq(void **state)
         "guda\n"
         "guda2\n"
         "bola\n"
+        "else\n"
         "\n"
         "\n"
         "\n"
@@ -503,6 +655,7 @@ test_render_if_gt_eq(void **state)
         "{% if GUDA >= \"zxa\" %}guda2\n"
         "{% ifdef BOLA %}bola\n"
         "{% if GUDA > \"zxc\" %}asd\n"
+        "{% else %}else\n"
         "{% endif %}\n"
         "{% endif %}\n"
         "{% endif %}\n"
@@ -521,6 +674,7 @@ test_render_if_gt_eq(void **state)
         "guda\n"
         "guda2\n"
         "bola\n"
+        "else\n"
         "\n"
         "\n"
         "\n"
@@ -574,6 +728,32 @@ test_render_foreach_if(void **state)
     assert_string_equal(out,
         "\n"
         "   bar   \n"
+        "\n");
+    blogc_template_free_stmts(l);
+    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_foreach_if_else(void **state)
+{
+    const char *str =
+        "{% block entry %}\n"
+        "{% foreach TAGS %}{% if FOREACH_ITEM == \"bar\" %}yay"
+        "{% else %}{{ FOREACH_ITEM }}"
+        "{% endif %} {% endforeach %}\n"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    sb_slist_t *s = create_sources(1);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, NULL, false);
+    assert_string_equal(out,
+        "\n"
+        "foo yay baz \n"
         "\n");
     blogc_template_free_stmts(l);
     sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
@@ -943,6 +1123,10 @@ main(void)
         unit_test(test_render_ifdef),
         unit_test(test_render_ifdef2),
         unit_test(test_render_ifdef3),
+        unit_test(test_render_ifdef4),
+        unit_test(test_render_ifdef5),
+        unit_test(test_render_ifdef6),
+        unit_test(test_render_ifdef7),
         unit_test(test_render_ifndef),
         unit_test(test_render_if_eq),
         unit_test(test_render_if_neq),
@@ -952,6 +1136,7 @@ main(void)
         unit_test(test_render_if_gt_eq),
         unit_test(test_render_foreach),
         unit_test(test_render_foreach_if),
+        unit_test(test_render_foreach_if_else),
         unit_test(test_render_null),
         unit_test(test_render_outside_block),
         unit_test(test_render_prefer_local_variable),

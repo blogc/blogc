@@ -188,6 +188,7 @@ blogc_render(sb_slist_t *tmpl, sb_slist_t *sources, sb_trie_t *config, bool list
     bool if_not = false;
     bool inside_block = false;
     bool evaluate = false;
+    bool valid_else = false;
 
     int cmp = 0;
 
@@ -343,13 +344,23 @@ blogc_render(sb_slist_t *tmpl, sb_slist_t *sources, sb_trie_t *config, bool list
                             if_count++;
                             continue;
                         }
+                        if ((stmt->type == BLOGC_TEMPLATE_ELSE_STMT) &&
+                            (if_count == 0))
+                        {
+                            // this is somewhat complex. only an else statement
+                            // right after a non evaluated block should be considered
+                            // valid, because all the inner conditionals were just
+                            // skipped, and all the outter conditionals evaluated
+                            // to true.
+                            valid_else = true;
+                            break;
+                        }
                         if (stmt->type == BLOGC_TEMPLATE_ENDIF_STMT) {
                             if (if_count > 0) {
                                 if_count--;
                                 continue;
                             }
-                            if (if_count == 0)
-                                break;
+                            break;
                         }
                     }
                 }
@@ -358,7 +369,41 @@ blogc_render(sb_slist_t *tmpl, sb_slist_t *sources, sb_trie_t *config, bool list
                 if_not = false;
                 break;
 
+            case BLOGC_TEMPLATE_ELSE_STMT:
+                if_count = 0;
+                if (!valid_else) {
+
+                    // at this point we can just skip anything, counting the
+                    // number of 'if's, to know how many 'endif's we need to
+                    // skip as well.
+                    while (1) {
+                        tmp = tmp->next;
+                        stmt = tmp->data;
+                        if ((stmt->type == BLOGC_TEMPLATE_IF_STMT) ||
+                            (stmt->type == BLOGC_TEMPLATE_IFDEF_STMT) ||
+                            (stmt->type == BLOGC_TEMPLATE_IFNDEF_STMT))
+                        {
+                            if_count++;
+                            continue;
+                        }
+                        // no need to handle else statements here, because every
+                        // if should have an endif.
+                        if (stmt->type == BLOGC_TEMPLATE_ENDIF_STMT) {
+                            if (if_count > 0) {
+                                if_count--;
+                                continue;
+                            }
+                            break;
+                        }
+                    }
+                }
+                valid_else = false;
+                break;
+
             case BLOGC_TEMPLATE_ENDIF_STMT:
+                // any endif statement should invalidate valid_else, to avoid
+                // propagation to outter conditionals.
+                valid_else = false;
                 if (if_count > 0)
                     if_count--;
                 break;

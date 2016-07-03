@@ -69,6 +69,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     blogc_template_stmt_operator_t tmp_op = 0;
 
     unsigned int if_count = 0;
+    bool else_open = false;
     bool foreach_open = false;
 
     sb_slist_t *stmts = NULL;
@@ -224,6 +225,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         type = BLOGC_TEMPLATE_IFDEF_STMT;
                         start = current;
                         if_count++;
+                        else_open = false;
                         break;
                     }
                     else if ((current - start == 6) &&
@@ -233,6 +235,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         type = BLOGC_TEMPLATE_IFNDEF_STMT;
                         start = current;
                         if_count++;
+                        else_open = false;
                         break;
                     }
                     else if ((current - start == 2) &&
@@ -242,6 +245,29 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         type = BLOGC_TEMPLATE_IF_STMT;
                         start = current;
                         if_count++;
+                        else_open = false;
+                        break;
+                    }
+                    else if ((current - start == 4) &&
+                        (0 == strncmp("else", src + start, 4)))
+                    {
+                        if (if_count > 0) {
+                            if (!else_open) {
+                                state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
+                                type = BLOGC_TEMPLATE_ELSE_STMT;
+                                else_open = true;
+                                break;
+                            }
+                            *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
+                                src, src_len, current,
+                                "More than one 'else' statement for an open 'if', "
+                                "'ifdef' or 'ifndef' statement.");
+                            break;
+                        }
+                        *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
+                            src, src_len, current,
+                            "'else' statement without an open 'if', 'ifdef' or "
+                            "'ifndef' statement.");
                         break;
                     }
                     else if ((current - start == 5) &&
@@ -251,12 +277,13 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                             state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                             type = BLOGC_TEMPLATE_ENDIF_STMT;
                             if_count--;
+                            else_open = false;
                             break;
                         }
                         *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
                             src, src_len, current,
-                            "'endif' statement without an open 'ifdef' or 'ifndef' "
-                            "statement.");
+                            "'endif' statement without an open 'if', 'ifdef' or "
+                            "'ifndef' statement.");
                         break;
                     }
                     else if ((current - start == 7) &&
