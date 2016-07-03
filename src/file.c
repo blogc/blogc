@@ -41,11 +41,23 @@ blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err)
 
     sb_string_t *str = sb_string_new();
     char buffer[BLOGC_FILE_CHUNK_SIZE];
+    char *tmp;
 
     while (!feof(fp)) {
         size_t read_len = fread(buffer, sizeof(char), BLOGC_FILE_CHUNK_SIZE, fp);
+
+        tmp = buffer;
+
+        if (str->len == 0 && read_len > 0) {
+            // skipping BOM before validation, for performance. should be safe
+            // enough
+            size_t skip = blogc_utf8_skip_bom((uint8_t*) buffer, read_len);
+            read_len -= skip;
+            tmp += skip;
+        }
+
         *len += read_len;
-        sb_string_append_len(str, buffer, read_len);
+        sb_string_append_len(str, tmp, read_len);
     }
     fclose(fp);
 

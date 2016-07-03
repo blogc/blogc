@@ -15,5 +15,6 @@
 
 bool blogc_utf8_validate(const uint8_t *str, size_t len);
 bool blogc_utf8_validate_str(sb_string_t *str);
+size_t blogc_utf8_skip_bom(const uint8_t *str, size_t len);
 
 #endif /* _UTF_8_H */

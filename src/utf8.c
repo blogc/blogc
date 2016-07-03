@@ -86,3 +86,16 @@ blogc_utf8_validate_str(sb_string_t *str)
 {
     return blogc_utf8_validate((uint8_t*) str->str, str->len);
 }
+
+
+size_t
+blogc_utf8_skip_bom(const uint8_t *str, size_t len)
+{
+    if (len < 3)
+        return 0;
+
+    if (str[0] == 0xef && str[1] == 0xbb && str[2] == 0xbf)
+        return 3;
+
+    return 0;
+}
