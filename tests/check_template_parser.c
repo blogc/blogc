@@ -761,7 +761,7 @@ test_template_parse_invalid_if_operand2(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Found an open double-quoted string.\n"
-        "Error occurred near line 1, position 31: "
+        "Error occurred near line 1, position 32: "
         "{% block entry %}{% if BOLA == \"asd %}");
     blogc_error_free(err);
 }
