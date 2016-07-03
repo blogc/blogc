@@ -576,7 +576,7 @@ test_template_parse_invalid_block_name(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
         "Invalid statement type: Allowed types are: 'block', 'endblock', 'ifdef', "
-        "'ifndef', 'endif', 'foreach' and 'endforeach'.\n"
+        "'ifndef', 'else', 'endif', 'foreach' and 'endforeach'.\n"
         "Error occurred near line 1, position 10: {% chunda %}");
     blogc_error_free(err);
 }
