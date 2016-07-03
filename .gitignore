@@ -57,6 +57,7 @@ blogc*.html
 /tests/check_renderer
 /tests/check_source_parser
 /tests/check_template_parser
+/tests/check_utf8
 /tests/check_utils
 
 # tarballs

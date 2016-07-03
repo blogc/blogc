@@ -16,6 +16,7 @@
 #include <string.h>
 #include "file.h"
 #include "error.h"
+#include "utf8.h"
 #include "utils.h"
 
 // this would belong to loader.c, but we need it in a separated file to be
@@ -47,6 +48,14 @@ blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err)
         sb_string_append_len(str, buffer, read_len);
     }
     fclose(fp);
+
+    if (!blogc_utf8_validate_str(str)) {
+        *err = blogc_error_new_printf(BLOGC_ERROR_LOADER,
+            "File content is not valid UTF-8: %s", path);
+        sb_string_free(str, true);
+        return NULL;
+    }
+
     return sb_string_free(str, false);
 }
 

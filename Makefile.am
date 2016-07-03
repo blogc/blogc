@@ -41,6 +41,7 @@ noinst_HEADERS = \
 	src/renderer.h \
 	src/source-parser.h \
 	src/template-parser.h \
+	src/utf8.h \
 	src/utils.h \
 	$(NULL)
 
@@ -94,6 +95,7 @@ libblogc_la_LIBADD = \
 
 
 libblogc_utils_la_SOURCES = \
+	src/utf8.c \
 	src/utils.c \
 	$(NULL)
 
@@ -277,6 +279,7 @@ check_PROGRAMS += \
 	tests/check_renderer \
 	tests/check_source_parser \
 	tests/check_template_parser \
+	tests/check_utf8 \
 	tests/check_utils \
 	$(NULL)
 
@@ -405,6 +408,23 @@ tests_check_template_parser_LDFLAGS = \
 tests_check_template_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_utils.la \
+	$(NULL)
+
+tests_check_utf8_SOURCES = \
+	tests/check_utf8.c \
+	$(NULL)
+
+tests_check_utf8_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_check_utf8_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_check_utf8_LDADD = \
+	$(CMOCKA_LIBS) \
 	libblogc_utils.la \
 	$(NULL)
 
