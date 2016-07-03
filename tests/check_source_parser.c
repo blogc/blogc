@@ -220,7 +220,9 @@ test_source_parse_config_invalid_key(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
     assert_string_equal(err->msg,
         "Can't find a configuration key or the content separator.\n"
-        "Error occurred near line 1, position 1: bola: guda");
+        "Error occurred near line 1, position 1:\n"
+        "bola: guda\n"
+        "^");
     blogc_error_free(err);
     sb_trie_free(source);
 }
@@ -236,7 +238,9 @@ test_source_parse_config_no_key(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
     assert_string_equal(err->msg,
         "Invalid configuration key.\n"
-        "Error occurred near line 1, position 4: BOLa");
+        "Error occurred near line 1, position 4:\n"
+        "BOLa\n"
+        "   ^");
     blogc_error_free(err);
     sb_trie_free(source);
 }
@@ -252,7 +256,9 @@ test_source_parse_config_no_key2(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
     assert_string_equal(err->msg,
         "Your last configuration key is missing ':' and the value\n"
-        "Error occurred near line 1, position 5: BOLA");
+        "Error occurred near line 1, position 5:\n"
+        "BOLA\n"
+        "    ^");
     blogc_error_free(err);
     sb_trie_free(source);
 }
@@ -269,7 +275,9 @@ test_source_parse_config_no_value(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
     assert_string_equal(err->msg,
         "Configuration value not provided for 'BOLA'.\n"
-        "Error occurred near line 1, position 6: BOLA:");
+        "Error occurred near line 1, position 6:\n"
+        "BOLA:\n"
+        "     ^");
     blogc_error_free(err);
     sb_trie_free(source);
 }
@@ -286,7 +294,9 @@ test_source_parse_config_no_value2(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
     assert_string_equal(err->msg,
         "Configuration value not provided for 'BOLA'.\n"
-        "Error occurred near line 1, position 6: BOLA:");
+        "Error occurred near line 1, position 6:\n"
+        "BOLA:\n"
+        "     ^");
     blogc_error_free(err);
     sb_trie_free(source);
 }
@@ -490,7 +500,9 @@ test_source_parse_config_value_no_line_ending(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
     assert_string_equal(err->msg,
         "No line ending after the configuration value for 'BOLA'.\n"
-        "Error occurred near line 1, position 10: BOLA: asd");
+        "Error occurred near line 1, position 10:\n"
+        "BOLA: asd\n"
+        "         ^");
     blogc_error_free(err);
     sb_trie_free(source);
 }
@@ -507,7 +519,9 @@ test_source_parse_invalid_separator(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
     assert_string_equal(err->msg,
         "Invalid content separator. Must be more than one '-' characters.\n"
-        "Error occurred near line 2, position 4: ---#");
+        "Error occurred near line 2, position 4:\n"
+        "---#\n"
+        "   ^");
     blogc_error_free(err);
     sb_trie_free(source);
 }
