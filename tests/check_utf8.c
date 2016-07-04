@@ -77,14 +77,14 @@ test_utf8_invalid_str(void **state)
 static void
 test_utf8_skip_bom(void **state)
 {
-    const char c[4] = {0xef, 0xbb, 0xbf, 0};
+    const uint8_t c[4] = {0xef, 0xbb, 0xbf, 0};
     assert_int_equal(blogc_utf8_skip_bom(c, 2), 0);
     assert_int_equal(blogc_utf8_skip_bom(c, 3), 3);
     assert_string_equal(c + 3, "");
-    const char d[8] = {0xef, 0xbb, 0xbf, 'b', 'o', 'l', 'a', 0};
+    const uint8_t d[8] = {0xef, 0xbb, 0xbf, 'b', 'o', 'l', 'a', 0};
     assert_int_equal(blogc_utf8_skip_bom(d, 8), 3);
     assert_string_equal(d + 3, "bola");
-    const char e[5] = "bola";
+    const uint8_t e[5] = "bola";
     assert_int_equal(blogc_utf8_skip_bom(e, 4), 0);
 }
 
