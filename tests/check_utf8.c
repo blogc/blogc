@@ -82,7 +82,7 @@ test_utf8_skip_bom(void **state)
     assert_int_equal(blogc_utf8_skip_bom(c, 3), 3);
     assert_string_equal(c + 3, "");
     const uint8_t d[8] = {0xef, 0xbb, 0xbf, 'b', 'o', 'l', 'a', 0};
-    assert_int_equal(blogc_utf8_skip_bom(d, 8), 3);
+    assert_int_equal(blogc_utf8_skip_bom(d, 7), 3);
     assert_string_equal(d + 3, "bola");
     const uint8_t e[5] = "bola";
     assert_int_equal(blogc_utf8_skip_bom(e, 4), 0);
