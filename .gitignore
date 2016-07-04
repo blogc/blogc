@@ -71,4 +71,7 @@ blogc-*.rpm
 # git-version-gen
 /.version
 
+# scan-build reports
+*.plist
+
 /build/

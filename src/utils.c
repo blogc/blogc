@@ -622,22 +622,19 @@ sb_trie_foreach_node(sb_trie_node_t *node, sb_string_t *str,
         return;
 
     if (node->key == '\0') {
-        char *tmp = sb_string_free(str, false);
-        func(tmp, node->data, user_data);
-        free(tmp);
+        func(str->str, node->data, user_data);
+        return;
     }
 
     if (node->child != NULL) {
         sb_string_t *child = sb_string_dup(str);
         child = sb_string_append_c(child, node->key);
         sb_trie_foreach_node(node->child, child, func, user_data);
+        sb_string_free(child, true);
     }
 
     if (node->next != NULL)
         sb_trie_foreach_node(node->next, str, func, user_data);
-
-    if (node->child != NULL && node->next == NULL)
-        sb_string_free(str, true);
 }
 
 
@@ -650,4 +647,5 @@ sb_trie_foreach(sb_trie_t *trie, sb_trie_foreach_func_t func,
 
     sb_string_t *str = sb_string_new();
     sb_trie_foreach_node(trie->root, str, func, user_data);
+    sb_string_free(str, true);
 }

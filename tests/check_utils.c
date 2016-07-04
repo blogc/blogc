@@ -938,6 +938,7 @@ test_trie_foreach(void **state)
     sb_trie_foreach(NULL, mock_foreach, "foo");
     sb_trie_foreach(trie, NULL, "foo");
     sb_trie_foreach(NULL, NULL, "foo");
+    assert_int_equal(counter, 7);
 
     sb_trie_free(trie);
 }

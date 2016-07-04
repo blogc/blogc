@@ -111,10 +111,10 @@ blogc_format_variable(const char *name, sb_trie_t *global, sb_trie_t *local,
     else
         value = blogc_get_variable(var, global, local);
 
-    free(var);
-
-    if (value == NULL)
+    if (value == NULL) {
+        free(var);
         return NULL;
+    }
 
     char *rv = NULL;
 
@@ -131,6 +131,8 @@ blogc_format_variable(const char *name, sb_trie_t *global, sb_trie_t *local,
     else {
         rv = sb_strdup(value);
     }
+
+    free(var);
 
     if (len > 0) {
         char *tmp = sb_strndup(rv, len);
