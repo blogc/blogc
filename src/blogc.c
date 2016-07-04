@@ -126,11 +126,6 @@ main(int argc, char **argv)
     sb_trie_insert(config, "BLOGC_VERSION", sb_strdup(PACKAGE_VERSION));
 
     for (unsigned int i = 1; i < argc; i++) {
-        if (!blogc_utf8_validate((uint8_t*) argv[i], strlen(argv[i]))) {
-            fprintf(stderr, "blogc: error: command-line argument is not utf8-"
-                "encoded: %s\n", argv[i]);
-            goto cleanup;
-        }
         tmp = NULL;
         if (argv[i][0] == '-') {
             switch (argv[i][1]) {
@@ -170,6 +165,11 @@ main(int argc, char **argv)
                     else if (i + 1 < argc)
                         tmp = argv[++i];
                     if (tmp != NULL) {
+                        if (!blogc_utf8_validate((uint8_t*) tmp, strlen(tmp))) {
+                            fprintf(stderr, "blogc: error: invalid value for "
+                                "-D (must be valid UTF-8 string): %s\n", tmp);
+                            goto cleanup;
+                        }
                         pieces = sb_str_split(tmp, '=', 2);
                         if (sb_strv_length(pieces) != 2) {
                             fprintf(stderr, "blogc: error: invalid value for "
