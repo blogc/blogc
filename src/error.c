@@ -122,6 +122,9 @@ blogc_error_print(blogc_error_t *err)
         case BLOGC_ERROR_LOADER:
             fprintf(stderr, "blogc: error: loader: %s\n", err->msg);
             break;
+        case BLOGC_ERROR_FILE:
+            fprintf(stderr, "blogc: error: file: %s\n", err->msg);
+            break;
         case BLOGC_WARNING_DATETIME_PARSER:
             fprintf(stderr, "blogc: warning: datetime: %s\n", err->msg);
             break;
