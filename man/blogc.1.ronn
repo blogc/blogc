@@ -66,7 +66,8 @@ designed to be used with make(1).
 ## FILES
 
 The `blogc` command expects a template file blogc-template(7), one (or more)
-source files blogc-source(7) and an output file, if wanted.
+source files blogc-source(7) and an output file, if wanted. Templates and source
+files must have valid UTF-8 content.
 
 ## ENVIRONMENT
 

@@ -15,6 +15,8 @@ Content is written in a markup language that is similar to John Gruber's
 Markdown, but that is NOT Markdown. This language is very simple, while
 powerful enough to write big posts.
 
+Content must be valid UTF-8.
+
 ## SOURCE VARIABLES
 
 Variables are key-value lines. The variable name must be upper-case, starting
