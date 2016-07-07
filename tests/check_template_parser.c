@@ -550,6 +550,40 @@ test_template_parse_invalid_endif_not_open(void **state)
 
 
 static void
+test_template_parse_invalid_endif_not_open_inside_block(void **state)
+{
+    const char *a = "{% ifdef BOLA %}{% block listing %}{% endif %}{% endblock %}";
+    blogc_error_t *err = NULL;
+    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "'endif' statement without an open 'if', 'ifdef' or 'ifndef' statement.\n"
+        "Error occurred near line 1, position 44: {% ifdef BOLA %}{% block "
+        "listing %}{% endif %}{% endblock %}");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_else_not_open_inside_block(void **state)
+{
+    const char *a = "{% ifdef BOLA %}{% block listing %}{% else %}{% endif %}{% endblock %}";
+    blogc_error_t *err = NULL;
+    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "'else' statement without an open 'if', 'ifdef' or 'ifndef' statement.\n"
+        "Error occurred near line 1, position 43: {% ifdef BOLA %}"
+        "{% block listing %}{% else %}{% endif %}{% endblock %}");
+    blogc_error_free(err);
+}
+
+
+static void
 test_template_parse_invalid_endforeach_not_open(void **state)
 {
     const char *a = "{% endforeach %}\n";
@@ -566,6 +600,74 @@ test_template_parse_invalid_endforeach_not_open(void **state)
 
 
 static void
+test_template_parse_invalid_endforeach_not_open_inside_block(void **state)
+{
+    const char *a = "{% foreach TAGS %}{% block entry %}{% endforeach %}"
+        "{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "'endforeach' statement without an open 'foreach' statement.\n"
+        "Error occurred near line 1, position 49: {% foreach TAGS %}"
+        "{% block entry %}{% endforeach %}{% endblock %}");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_endforeach_not_open_inside_block2(void **state)
+{
+    const char *a = "{% block entry %}{% foreach TAGS %}"
+        "{% endforeach %}{% endforeach %}{% endblock %}\n";
+    blogc_error_t *err = NULL;
+    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "'endforeach' statement without an open 'foreach' statement.\n"
+        "Error occurred near line 1, position 65: {% block entry %}"
+        "{% foreach TAGS %}{% endforeach %}{% endforeach %}{% endblock %}");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_endforeach_not_closed_inside_block(void **state)
+{
+    const char *a = "{% block entry %}{% foreach TAGS %}{% endblock %}"
+        "{% endforeach %}\n";
+    blogc_error_t *err = NULL;
+    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "An open 'foreach' statement was not closed inside a 'entry' block!");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_endforeach_not_closed_inside_block2(void **state)
+{
+    const char *a = "{% block entry %}{% foreach TAGS %}{% endforeach %}"
+        "{% foreach TAGS %}{% endblock %}{% endforeach %}\n";
+    blogc_error_t *err = NULL;
+    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "An open 'foreach' statement was not closed inside a 'entry' block!");
+    blogc_error_free(err);
+}
+
+
+static void
 test_template_parse_invalid_block_name(void **state)
 {
     const char *a = "{% chunda %}\n";
@@ -575,8 +677,8 @@ test_template_parse_invalid_block_name(void **state)
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
-        "Invalid statement type: Allowed types are: 'block', 'endblock', 'ifdef', "
-        "'ifndef', 'else', 'endif', 'foreach' and 'endforeach'.\n"
+        "Invalid statement type: Allowed types are: 'block', 'endblock', 'if', "
+        "'ifdef', 'ifndef', 'else', 'endif', 'foreach' and 'endforeach'.\n"
         "Error occurred near line 1, position 10: {% chunda %}");
     blogc_error_free(err);
 }
@@ -958,16 +1060,48 @@ test_template_parse_invalid_close2(void **state)
 
 
 static void
-test_template_parse_invalid_if_not_closed(void **state)
+test_template_parse_invalid_endif_not_closed(void **state)
 {
-    const char *a = "{% block entry %}{% ifdef BOLA %}{% endblock %}\n";
+    const char *a = "{% block entry %}{% endblock %}{% ifdef BOLA %}\n";
     blogc_error_t *err = NULL;
     sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
-    assert_string_equal(err->msg, "1 open 'ifdef' and/or 'ifndef' statements "
+    assert_string_equal(err->msg, "1 open 'if', 'ifdef' and/or 'ifndef' statements "
         "were not closed!");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_endif_not_closed_inside_block(void **state)
+{
+    const char *a = "{% block listing %}{% ifdef BOLA %}{% endblock %}{% endif %}";
+    blogc_error_t *err = NULL;
+    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "1 open 'if', 'ifdef' and/or 'ifndef' statements were not closed inside "
+        "a 'listing' block!");
+    blogc_error_free(err);
+}
+
+
+static void
+test_template_parse_invalid_else_not_closed_inside_block(void **state)
+{
+    const char *a = "{% block listing %}{% ifdef BOLA %}{% else %}{% endblock %}{% endif %}";
+    blogc_error_t *err = NULL;
+    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(stmts);
+    assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
+    assert_string_equal(err->msg,
+        "1 open 'if', 'ifdef' and/or 'ifndef' statements were not closed inside "
+        "a 'listing' block!");
     blogc_error_free(err);
 }
 
@@ -1014,7 +1148,13 @@ main(void)
         unit_test(test_template_parse_invalid_foreach_nested),
         unit_test(test_template_parse_invalid_block_not_open),
         unit_test(test_template_parse_invalid_endif_not_open),
+        unit_test(test_template_parse_invalid_endif_not_open_inside_block),
+        unit_test(test_template_parse_invalid_else_not_open_inside_block),
         unit_test(test_template_parse_invalid_endforeach_not_open),
+        unit_test(test_template_parse_invalid_endforeach_not_open_inside_block),
+        unit_test(test_template_parse_invalid_endforeach_not_open_inside_block2),
+        unit_test(test_template_parse_invalid_endforeach_not_closed_inside_block),
+        unit_test(test_template_parse_invalid_endforeach_not_closed_inside_block2),
         unit_test(test_template_parse_invalid_block_name),
         unit_test(test_template_parse_invalid_block_type_start),
         unit_test(test_template_parse_invalid_block_type),
@@ -1038,7 +1178,9 @@ main(void)
         unit_test(test_template_parse_invalid_variable_end),
         unit_test(test_template_parse_invalid_close),
         unit_test(test_template_parse_invalid_close2),
-        unit_test(test_template_parse_invalid_if_not_closed),
+        unit_test(test_template_parse_invalid_endif_not_closed),
+        unit_test(test_template_parse_invalid_endif_not_closed_inside_block),
+        unit_test(test_template_parse_invalid_else_not_closed_inside_block),
         unit_test(test_template_parse_invalid_block_not_closed),
         unit_test(test_template_parse_invalid_foreach_not_closed),
     };

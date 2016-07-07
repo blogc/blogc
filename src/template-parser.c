@@ -44,14 +44,6 @@ typedef enum {
 } blogc_template_parser_state_t;
 
 
-typedef enum {
-    BLOCK_CLOSED = 1,
-    BLOCK_ENTRY,
-    BLOCK_LISTING,
-    BLOCK_LISTING_ONCE,
-} blogc_template_parser_block_state_t;
-
-
 sb_slist_t*
 blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
 {
@@ -69,8 +61,10 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
     blogc_template_stmt_operator_t tmp_op = 0;
 
     unsigned int if_count = 0;
+    unsigned int block_if_count = 0;
     bool else_open = false;
     bool foreach_open = false;
+    bool block_foreach_open = false;
 
     sb_slist_t *stmts = NULL;
     blogc_template_stmt_t *stmt = NULL;
@@ -88,10 +82,12 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
 
     bool lstrip_next = false;
     char *tmp = NULL;
+    char *block_type = NULL;
 
     blogc_template_parser_state_t state = TEMPLATE_START;
-    blogc_template_parser_block_state_t block_state = BLOCK_CLOSED;
     blogc_template_stmt_type_t type = BLOGC_TEMPLATE_CONTENT_STMT;
+
+    bool block_open = false;
 
     while (current < src_len) {
         char c = src[current];
@@ -194,10 +190,12 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     if ((current - start == 5) &&
                         (0 == strncmp("block", src + start, 5)))
                     {
-                        if (block_state == BLOCK_CLOSED) {
+                        if (!block_open) {
                             state = TEMPLATE_BLOCK_BLOCK_TYPE_START;
                             type = BLOGC_TEMPLATE_BLOCK_STMT;
                             start = current;
+                            block_if_count = if_count;
+                            block_foreach_open = foreach_open;
                             break;
                         }
                         *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
@@ -207,10 +205,23 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     else if ((current - start == 8) &&
                         (0 == strncmp("endblock", src + start, 8)))
                     {
-                        if (block_state != BLOCK_CLOSED) {
+                        if (block_open) {
+                            if (if_count != block_if_count) {
+                                *err = blogc_error_new_printf(BLOGC_ERROR_TEMPLATE_PARSER,
+                                    "%d open 'if', 'ifdef' and/or 'ifndef' statements "
+                                    "were not closed inside a '%s' block!",
+                                    if_count - block_if_count, block_type);
+                                break;
+                            }
+                            if (!block_foreach_open && foreach_open) {
+                                *err = blogc_error_new_printf(BLOGC_ERROR_TEMPLATE_PARSER,
+                                    "An open 'foreach' statement was not closed "
+                                    "inside a '%s' block!", block_type);
+                                break;
+                            }
                             state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                             type = BLOGC_TEMPLATE_ENDBLOCK_STMT;
-                            block_state = BLOCK_CLOSED;
+                            block_open = false;
                             break;
                         }
                         *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
@@ -251,7 +262,9 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     else if ((current - start == 4) &&
                         (0 == strncmp("else", src + start, 4)))
                     {
-                        if (if_count > 0) {
+                        if ((block_open && if_count > block_if_count) ||
+                            (!block_open && if_count > 0))
+                        {
                             if (!else_open) {
                                 state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                                 type = BLOGC_TEMPLATE_ELSE_STMT;
@@ -273,7 +286,9 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     else if ((current - start == 5) &&
                         (0 == strncmp("endif", src + start, 5)))
                     {
-                        if (if_count > 0) {
+                        if ((block_open && if_count > block_if_count) ||
+                            (!block_open && if_count > 0))
+                        {
                             state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                             type = BLOGC_TEMPLATE_ENDIF_STMT;
                             if_count--;
@@ -304,7 +319,9 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     else if ((current - start == 10) &&
                         (0 == strncmp("endforeach", src + start, 10)))
                     {
-                        if (foreach_open) {
+                        if ((block_open && !block_foreach_open && foreach_open) ||
+                            (!block_open && foreach_open))
+                        {
                             state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                             type = BLOGC_TEMPLATE_ENDFOREACH_STMT;
                             foreach_open = false;
@@ -320,8 +337,8 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 *err = blogc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
                     src_len, current,
                     "Invalid statement type: Allowed types are: 'block', "
-                    "'endblock', 'ifdef', 'ifndef', 'else', 'endif', 'foreach' "
-                    "and 'endforeach'.");
+                    "'endblock', 'if', 'ifdef', 'ifndef', 'else', 'endif', "
+                    "'foreach' and 'endforeach'.");
                 break;
 
             case TEMPLATE_BLOCK_BLOCK_TYPE_START:
@@ -344,7 +361,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     if ((current - start == 5) &&
                         (0 == strncmp("entry", src + start, 5)))
                     {
-                        block_state = BLOCK_ENTRY;
+                        block_open = true;
                         end = current;
                         state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                         break;
@@ -352,7 +369,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     else if ((current - start == 7) &&
                         (0 == strncmp("listing", src + start, 7)))
                     {
-                        block_state = BLOCK_LISTING;
+                        block_open = true;
                         end = current;
                         state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                         break;
@@ -360,7 +377,7 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                     else if ((current - start == 12) &&
                         (0 == strncmp("listing_once", src + start, 12)))
                     {
-                        block_state = BLOCK_LISTING_ONCE;
+                        block_open = true;
                         end = current;
                         state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                         break;
@@ -598,6 +615,8 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                         start2 = 0;
                         end2 = 0;
                     }
+                    if (type == BLOGC_TEMPLATE_BLOCK_STMT)
+                        block_type = stmt->value;
                     stmts = sb_slist_append(stmts, stmt);
                     previous = stmt;
                     stmt = NULL;
@@ -625,9 +644,9 @@ blogc_template_parse(const char *src, size_t src_len, blogc_error_t **err)
                 start2, "Found an open double-quoted string.");
         else if (if_count != 0)
             *err = blogc_error_new_printf(BLOGC_ERROR_TEMPLATE_PARSER,
-                "%d open 'ifdef' and/or 'ifndef' statements were not closed!",
+                "%d open 'if', 'ifdef' and/or 'ifndef' statements were not closed!",
                 if_count);
-        else if (block_state != BLOCK_CLOSED)
+        else if (block_open)
             *err = blogc_error_new(BLOGC_ERROR_TEMPLATE_PARSER,
                 "An open block was not closed!");
         else if (foreach_open)
