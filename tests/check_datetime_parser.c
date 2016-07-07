@@ -6,16 +6,11 @@
  * See the file LICENSE.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
-
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
-#include <string.h>
-#include <stdio.h>
+#include <stdlib.h>
 #include <locale.h>
 #include "../src/error.h"
 #include "../src/datetime-parser.h"

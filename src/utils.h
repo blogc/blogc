@@ -12,8 +12,6 @@
 #include <stddef.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <stdarg.h>
-#include <stdlib.h>
 
 
 // memory

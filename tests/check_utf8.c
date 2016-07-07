@@ -6,14 +6,12 @@
  * See the file LICENSE.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
-
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 #include "../src/utf8.h"
 #include "../src/utils.h"

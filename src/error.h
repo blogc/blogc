@@ -9,8 +9,7 @@
 #ifndef _ERROR_H
 #define _ERROR_H
 
-#include <stdlib.h>
-#include <stdarg.h>
+#include <stddef.h>
 
 typedef enum {
     BLOGC_ERROR_SOURCE_PARSER = 1,

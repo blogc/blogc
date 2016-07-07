@@ -9,7 +9,7 @@
 #ifndef _SOURCE_PARSER_H
 #define _SOURCE_PARSER_H
 
-#include <stdlib.h>
+#include <stddef.h>
 #include "error.h"
 #include "utils.h"
 

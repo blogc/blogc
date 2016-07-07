@@ -9,8 +9,8 @@
 #ifndef _FILE_H
 #define _FILE_H
 
+#include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include "error.h"
 
 #define BLOGC_FILE_CHUNK_SIZE 1024

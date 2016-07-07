@@ -152,7 +152,7 @@ AS_IF([test "x$enable_runserver" = "xyes"], [
 ])
 AM_CONDITIONAL([BUILD_RUNSERVER], [test "x$have_runserver" = "xyes"])
 
-AC_CHECK_HEADERS([sys/types.h sys/stat.h time.h])
+AC_CHECK_HEADERS([sys/stat.h time.h])
 
 LT_LIB_M
 

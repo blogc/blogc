@@ -13,20 +13,20 @@
 #include <event2/event.h>
 #include <event2/http.h>
 #include <event2/buffer.h>
-#include <event2/keyvalq_struct.h>
 #include <magic.h>
 #include <signal.h>
-#include <stdarg.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 
 #include "utils.h"
+
+struct evhttp_request;
 
 
 /**

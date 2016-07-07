@@ -9,7 +9,7 @@
 #ifndef _CONTENT_PARSER_H
 #define _CONTENT_PARSER_H
 
-#include <stdlib.h>
+#include <stddef.h>
 #include <stdbool.h>
 
 char* blogc_slugify(const char *str);

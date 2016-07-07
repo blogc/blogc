@@ -6,18 +6,14 @@
  * See the file LICENSE.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
-
 #include <errno.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "datetime-parser.h"
 #include "error.h"
-#include "loader.h"
-#include "source-parser.h"
 #include "template-parser.h"
 #include "renderer.h"
 #include "utils.h"

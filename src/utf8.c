@@ -26,7 +26,8 @@
 // See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
 
 #include <stdbool.h>
-#include <inttypes.h>
+#include <stddef.h>
+#include <stdint.h>
 #include "utils.h"
 
 #define UTF8_ACCEPT 0

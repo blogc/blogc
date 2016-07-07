@@ -9,8 +9,9 @@
 #ifndef _UTF_8_H
 #define _UTF_8_H
 
-#include <inttypes.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include "utils.h"
 
 bool blogc_utf8_validate(const uint8_t *str, size_t len);

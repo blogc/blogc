@@ -6,17 +6,11 @@
  * See the file LICENSE.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
-
 #define SB_STRING_CHUNK_SIZE 128
 
-#include <ctype.h>
 #include <string.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdio.h>
 

@@ -10,9 +10,8 @@
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
-
+#include <stdbool.h>
 #include <stdlib.h>
-
 #include "../src/utils.h"
 
 #define SB_STRING_CHUNK_SIZE 128

@@ -14,18 +14,15 @@
 #include <sys/stat.h>
 #endif /* HAVE_SYS_STAT_H */
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif /* HAVE_SYS_TYPES_H */
-
 #include <errno.h>
 #include <locale.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "debug.h"
-#include "source-parser.h"
 #include "template-parser.h"
 #include "loader.h"
 #include "renderer.h"
@@ -78,7 +75,7 @@ blogc_mkdir_recursive(const char *filename)
     for (char *tmp = fname; *tmp != '\0'; tmp++) {
         if (*tmp != '/' && *tmp != '\\')
             continue;
-#if defined(HAVE_SYS_STAT_H) && defined(HAVE_SYS_TYPES_H)
+#ifdef HAVE_SYS_STAT_H
         char bkp = *tmp;
         *tmp = '\0';
         if ((strlen(fname) > 0) &&

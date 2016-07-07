@@ -6,15 +6,10 @@
  * See the file LICENSE.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
-
 #include <stdio.h>
 
 #include "template-parser.h"
 #include "utils.h"
-
 #include "debug.h"
 
 

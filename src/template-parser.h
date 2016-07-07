@@ -9,6 +9,7 @@
 #ifndef _TEMPLATE_PARSER_H
 #define _TEMPLATE_PARSER_H
 
+#include <stddef.h>
 #include "error.h"
 #include "utils.h"
 
