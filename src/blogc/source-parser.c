@@ -26,7 +26,7 @@ typedef enum {
 } blogc_source_parser_state_t;
 
 
-sb_trie_t*
+bc_trie_t*
 blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
 {
     if (err == NULL || *err != NULL)
@@ -39,7 +39,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
     char *key = NULL;
     char *tmp = NULL;
     char *content = NULL;
-    sb_trie_t *rv = sb_trie_new(free);
+    bc_trie_t *rv = bc_trie_new(free);
 
     blogc_source_parser_state_t state = SOURCE_START;
 
@@ -69,7 +69,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                 if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
                     break;
                 if (c == ':') {
-                    key = sb_strndup(src + start, current - start);
+                    key = bc_strndup(src + start, current - start);
                     if (((current - start == 8) &&
                          (0 == strncmp("FILENAME", src + start, 8))) ||
                         ((current - start == 7) &&
@@ -118,8 +118,8 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
 
             case SOURCE_CONFIG_VALUE:
                 if (c == '\n' || c == '\r') {
-                    tmp = sb_strndup(src + start, current - start);
-                    sb_trie_insert(rv, key, sb_strdup(sb_str_strip(tmp)));
+                    tmp = bc_strndup(src + start, current - start);
+                    bc_trie_insert(rv, key, bc_strdup(bc_str_strip(tmp)));
                     free(tmp);
                     free(key);
                     key = NULL;
@@ -148,24 +148,24 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
 
             case SOURCE_CONTENT:
                 if (current == (src_len - 1)) {
-                    tmp = sb_strndup(src + start, src_len - start);
-                    sb_trie_insert(rv, "RAW_CONTENT", tmp);
+                    tmp = bc_strndup(src + start, src_len - start);
+                    bc_trie_insert(rv, "RAW_CONTENT", tmp);
                     char *description = NULL;
                     content = blogc_content_parse(tmp, &end_excerpt, &description);
                     if (description != NULL) {
                         // do not override source-provided description.
-                        if (NULL == sb_trie_lookup(rv, "DESCRIPTION")) {
+                        if (NULL == bc_trie_lookup(rv, "DESCRIPTION")) {
                             // no need to free, because we are transfering memory
                             // ownership to the trie.
-                            sb_trie_insert(rv, "DESCRIPTION", description);
+                            bc_trie_insert(rv, "DESCRIPTION", description);
                         }
                         else {
                             free(description);
                         }
                     }
-                    sb_trie_insert(rv, "CONTENT", content);
-                    sb_trie_insert(rv, "EXCERPT", end_excerpt == 0 ?
-                        sb_strdup(content) : sb_strndup(content, end_excerpt));
+                    bc_trie_insert(rv, "CONTENT", content);
+                    bc_trie_insert(rv, "EXCERPT", end_excerpt == 0 ?
+                        bc_strdup(content) : bc_strndup(content, end_excerpt));
                 }
                 break;
         }
@@ -176,7 +176,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
         current++;
     }
 
-    if (*err == NULL && sb_trie_size(rv) == 0) {
+    if (*err == NULL && bc_trie_size(rv) == 0) {
 
         // ok, nothing found in the config trie, but no error set either.
         // let's try to be nice with the users and provide some reasonable
@@ -210,7 +210,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
 
     if (*err != NULL) {
         free(key);
-        sb_trie_free(rv);
+        bc_trie_free(rv);
         return NULL;
     }
 

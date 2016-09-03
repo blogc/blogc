@@ -34,9 +34,9 @@ get_operator(blogc_template_stmt_operator_t op)
 
 
 void
-blogc_debug_template(sb_slist_t *stmts)
+blogc_debug_template(bc_slist_t *stmts)
 {
-    for (sb_slist_t *tmp = stmts; tmp != NULL; tmp = tmp->next) {
+    for (bc_slist_t *tmp = stmts; tmp != NULL; tmp = tmp->next) {
         blogc_template_stmt_t *data = tmp->data;
         fprintf(stderr, "DEBUG: <TEMPLATE ");
         switch (data->type) {

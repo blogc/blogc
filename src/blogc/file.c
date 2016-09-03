@@ -37,7 +37,7 @@ blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err)
         return NULL;
     }
 
-    sb_string_t *str = sb_string_new();
+    bc_string_t *str = bc_string_new();
     char buffer[BLOGC_FILE_CHUNK_SIZE];
     char *tmp;
 
@@ -55,18 +55,18 @@ blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err)
         }
 
         *len += read_len;
-        sb_string_append_len(str, tmp, read_len);
+        bc_string_append_len(str, tmp, read_len);
     }
     fclose(fp);
 
     if (!blogc_utf8_validate_str(str)) {
         *err = blogc_error_new_printf(BLOGC_ERROR_FILE,
             "File content is not valid UTF-8: %s", path);
-        sb_string_free(str, true);
+        bc_string_free(str, true);
         return NULL;
     }
 
-    return sb_string_free(str, false);
+    return bc_string_free(str, false);
 }
 
 

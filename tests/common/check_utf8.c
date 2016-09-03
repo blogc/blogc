@@ -45,30 +45,30 @@ test_utf8_invalid(void **state)
 static void
 test_utf8_valid_str(void **state)
 {
-    sb_string_t *s = sb_string_new();
-    sb_string_append(s,
+    bc_string_t *s = bc_string_new();
+    bc_string_append(s,
         "<a href=\"{{ BASE_URL }}/page/{{ PREVIOUS_PAGE }}/\">\xc2\xab Newer "
         "posts</a>");
     assert_true(blogc_utf8_validate_str(s));
-    sb_string_free(s, true);
-    s = sb_string_new();
-    sb_string_append(s, "\xe2\x82\xac");
+    bc_string_free(s, true);
+    s = bc_string_new();
+    bc_string_append(s, "\xe2\x82\xac");
     assert_true(blogc_utf8_validate_str(s));
-    sb_string_free(s, true);
+    bc_string_free(s, true);
 }
 
 
 static void
 test_utf8_invalid_str(void **state)
 {
-    sb_string_t *s = sb_string_new();
-    sb_string_append(s, "\xff\xfe\xac\x20");  // utf-16
+    bc_string_t *s = bc_string_new();
+    bc_string_append(s, "\xff\xfe\xac\x20");  // utf-16
     assert_false(blogc_utf8_validate_str(s));
-    sb_string_free(s, true);
-    s = sb_string_new();
-    sb_string_append(s, "\xff\xfe\x00\x00\xac\x20\x00\x00");  // utf-32
+    bc_string_free(s, true);
+    s = bc_string_new();
+    bc_string_append(s, "\xff\xfe\x00\x00\xac\x20\x00\x00");  // utf-32
     assert_false(blogc_utf8_validate_str(s));
-    sb_string_free(s, true);
+    bc_string_free(s, true);
 }
 
 

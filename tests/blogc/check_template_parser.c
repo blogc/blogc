@@ -17,7 +17,7 @@
 
 
 static void
-blogc_assert_template_stmt(sb_slist_t *l, const char *value,
+blogc_assert_template_stmt(bc_slist_t *l, const char *value,
     const blogc_template_stmt_type_t type)
 {
     blogc_template_stmt_t *stmt = l->data;
@@ -30,7 +30,7 @@ blogc_assert_template_stmt(sb_slist_t *l, const char *value,
 
 
 static void
-blogc_assert_template_if_stmt(sb_slist_t *l, const char *variable,
+blogc_assert_template_if_stmt(bc_slist_t *l, const char *variable,
     blogc_template_stmt_operator_t operator, const char *operand)
 {
     blogc_template_stmt_t *stmt = l->data;
@@ -60,7 +60,7 @@ test_template_parse(void **state)
         "{%- foreach BOLA %}hahaha{% endforeach %}\n"
         "{% if BOLA == \"1\\\"0\" %}aee{% else %}fffuuuuuuu{% endif %}";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(stmts);
     blogc_assert_template_stmt(stmts, "Test",
@@ -77,7 +77,7 @@ test_template_parse(void **state)
         BLOGC_TEMPLATE_ENDIF_STMT);
     blogc_assert_template_stmt(stmts->next->next->next->next->next->next, "\n",
         BLOGC_TEMPLATE_CONTENT_STMT);
-    sb_slist_t *tmp = stmts->next->next->next->next->next->next->next;
+    bc_slist_t *tmp = stmts->next->next->next->next->next->next->next;
     blogc_assert_template_stmt(tmp, "BOLA", BLOGC_TEMPLATE_IFNDEF_STMT);
     blogc_assert_template_stmt(tmp->next, "\nbolao", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next, NULL, BLOGC_TEMPLATE_ENDIF_STMT);
@@ -144,7 +144,7 @@ test_template_parse_crlf(void **state)
         "{%- foreach BOLA %}hahaha{% endforeach %}\r\n"
         "{% if BOLA == \"1\\\"0\" %}aee{% else %}fffuuuuuuu{% endif %}";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(stmts);
     blogc_assert_template_stmt(stmts, "Test",
@@ -161,7 +161,7 @@ test_template_parse_crlf(void **state)
         BLOGC_TEMPLATE_ENDIF_STMT);
     blogc_assert_template_stmt(stmts->next->next->next->next->next->next, "\r\n",
         BLOGC_TEMPLATE_CONTENT_STMT);
-    sb_slist_t *tmp = stmts->next->next->next->next->next->next->next;
+    bc_slist_t *tmp = stmts->next->next->next->next->next->next->next;
     blogc_assert_template_stmt(tmp, "BOLA", BLOGC_TEMPLATE_IFNDEF_STMT);
     blogc_assert_template_stmt(tmp->next, "\r\nbolao", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next, NULL, BLOGC_TEMPLATE_ENDIF_STMT);
@@ -236,7 +236,7 @@ test_template_parse_html(void **state)
         "    </body>\n"
         "</html>\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(stmts);
     blogc_assert_template_stmt(stmts, "<html>\n    <head>\n        ",
@@ -255,7 +255,7 @@ test_template_parse_html(void **state)
         "\n        ", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(stmts->next->next->next->next->next->next->next,
         "listing_once", BLOGC_TEMPLATE_BLOCK_STMT);
-    sb_slist_t *tmp = stmts->next->next->next->next->next->next->next->next;
+    bc_slist_t *tmp = stmts->next->next->next->next->next->next->next->next;
     blogc_assert_template_stmt(tmp,
         "\n        <title>My cool blog - Main page</title>\n        ",
         BLOGC_TEMPLATE_CONTENT_STMT);
@@ -346,7 +346,7 @@ test_template_parse_ifdef_and_var_outside_block(void **state)
         "{{ BOLA }}\n"
         "{% ifndef CHUNDA %}{{ CHUNDA }}{% endif %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(stmts);
     blogc_assert_template_stmt(stmts, "GUDA", BLOGC_TEMPLATE_IFDEF_STMT);
@@ -362,7 +362,7 @@ test_template_parse_ifdef_and_var_outside_block(void **state)
         BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(stmts->next->next->next->next->next->next,
         "CHUNDA", BLOGC_TEMPLATE_IFNDEF_STMT);
-    sb_slist_t *tmp = stmts->next->next->next->next->next->next->next;
+    bc_slist_t *tmp = stmts->next->next->next->next->next->next->next;
     blogc_assert_template_stmt(tmp, "CHUNDA", BLOGC_TEMPLATE_VARIABLE_STMT);
     blogc_assert_template_stmt(tmp->next, NULL, BLOGC_TEMPLATE_ENDIF_STMT);
     blogc_assert_template_stmt(tmp->next->next, "\n",
@@ -393,7 +393,7 @@ test_template_parse_nested_else(void **state)
         "{% endif %}\n"
         "{% endif %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(stmts);
     blogc_assert_template_stmt(stmts, "GUDA", BLOGC_TEMPLATE_IFDEF_STMT);
@@ -409,7 +409,7 @@ test_template_parse_nested_else(void **state)
         "CHUNDA", BLOGC_TEMPLATE_IFDEF_STMT);
     blogc_assert_template_stmt(stmts->next->next->next->next->next->next->next,
         "\nqwe\n", BLOGC_TEMPLATE_CONTENT_STMT);
-    sb_slist_t *tmp = stmts->next->next->next->next->next->next->next->next;
+    bc_slist_t *tmp = stmts->next->next->next->next->next->next->next->next;
     blogc_assert_template_stmt(tmp, NULL, BLOGC_TEMPLATE_ELSE_STMT);
     blogc_assert_template_stmt(tmp->next, "\nrty\n", BLOGC_TEMPLATE_CONTENT_STMT);
     blogc_assert_template_stmt(tmp->next->next, NULL,
@@ -445,7 +445,7 @@ test_template_parse_invalid_block_start(void **state)
 {
     const char *a = "{% ASD %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -483,7 +483,7 @@ test_template_parse_invalid_block_nested(void **state)
         "{% block entry %}\n"
         "{% block listing %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -501,7 +501,7 @@ test_template_parse_invalid_foreach_nested(void **state)
         "{% foreach A %}\n"
         "{% foreach B %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -517,7 +517,7 @@ test_template_parse_invalid_block_not_open(void **state)
 {
     const char *a = "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -533,7 +533,7 @@ test_template_parse_invalid_endif_not_open(void **state)
 {
     const char *a = "{% block listing %}{% endif %}{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -550,7 +550,7 @@ test_template_parse_invalid_endif_not_open_inside_block(void **state)
 {
     const char *a = "{% ifdef BOLA %}{% block listing %}{% endif %}{% endblock %}";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -567,7 +567,7 @@ test_template_parse_invalid_else_not_open_inside_block(void **state)
 {
     const char *a = "{% ifdef BOLA %}{% block listing %}{% else %}{% endif %}{% endblock %}";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -584,7 +584,7 @@ test_template_parse_invalid_endforeach_not_open(void **state)
 {
     const char *a = "{% endforeach %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -601,7 +601,7 @@ test_template_parse_invalid_endforeach_not_open_inside_block(void **state)
     const char *a = "{% foreach TAGS %}{% block entry %}{% endforeach %}"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -619,7 +619,7 @@ test_template_parse_invalid_endforeach_not_open_inside_block2(void **state)
     const char *a = "{% block entry %}{% foreach TAGS %}"
         "{% endforeach %}{% endforeach %}{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -637,7 +637,7 @@ test_template_parse_invalid_endforeach_not_closed_inside_block(void **state)
     const char *a = "{% block entry %}{% foreach TAGS %}{% endblock %}"
         "{% endforeach %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -653,7 +653,7 @@ test_template_parse_invalid_endforeach_not_closed_inside_block2(void **state)
     const char *a = "{% block entry %}{% foreach TAGS %}{% endforeach %}"
         "{% foreach TAGS %}{% endblock %}{% endforeach %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -668,7 +668,7 @@ test_template_parse_invalid_block_name(void **state)
 {
     const char *a = "{% chunda %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -685,7 +685,7 @@ test_template_parse_invalid_block_type_start(void **state)
 {
     const char *a = "{% block ENTRY %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -701,7 +701,7 @@ test_template_parse_invalid_block_type(void **state)
 {
     const char *a = "{% block chunda %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -717,7 +717,7 @@ test_template_parse_invalid_ifdef_start(void **state)
 {
     const char *a = "{% block entry %}{% ifdef guda %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -734,7 +734,7 @@ test_template_parse_invalid_foreach_start(void **state)
 {
     const char *a = "{% block entry %}{% foreach guda %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -751,7 +751,7 @@ test_template_parse_invalid_ifdef_variable(void **state)
 {
     const char *a = "{% block entry %}{% ifdef BoLA %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -768,7 +768,7 @@ test_template_parse_invalid_ifdef_variable2(void **state)
 {
     const char *a = "{% block entry %}{% ifdef 0123 %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -785,7 +785,7 @@ test_template_parse_invalid_foreach_variable(void **state)
 {
     const char *a = "{% block entry %}{% foreach BoLA %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -802,7 +802,7 @@ test_template_parse_invalid_foreach_variable2(void **state)
 {
     const char *a = "{% block entry %}{% foreach 0123 %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -819,7 +819,7 @@ test_template_parse_invalid_if_operator(void **state)
 {
     const char *a = "{% block entry %}{% if BOLA = \"asd\" %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -836,7 +836,7 @@ test_template_parse_invalid_if_operand(void **state)
 {
     const char *a = "{% block entry %}{% if BOLA == asd %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -853,7 +853,7 @@ test_template_parse_invalid_if_operand2(void **state)
 {
     const char *a = "{% block entry %}{% if BOLA == \"asd %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -870,7 +870,7 @@ test_template_parse_invalid_if_operand3(void **state)
 {
     const char *a = "{% block entry %}{% if BOLA == 0123 %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -887,7 +887,7 @@ test_template_parse_invalid_else1(void **state)
 {
     const char *a = "{% else %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -903,7 +903,7 @@ test_template_parse_invalid_else2(void **state)
 {
     const char *a = "{% if BOLA == \"123\" %}{% if GUDA == \"1\" %}{% else %}{% else %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -927,7 +927,7 @@ test_template_parse_invalid_else3(void **state)
         "{% else %}\n"
         "{% else %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -943,7 +943,7 @@ test_template_parse_invalid_block_end(void **state)
 {
     const char *a = "{% block entry }}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -959,7 +959,7 @@ test_template_parse_invalid_variable_name(void **state)
 {
     const char *a = "{% block entry %}{{ bola }}{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -976,7 +976,7 @@ test_template_parse_invalid_variable_name2(void **state)
 {
     const char *a = "{% block entry %}{{ Bola }}{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -993,7 +993,7 @@ test_template_parse_invalid_variable_name3(void **state)
 {
     const char *a = "{% block entry %}{{ 0123 }}{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -1010,7 +1010,7 @@ test_template_parse_invalid_variable_end(void **state)
 {
     const char *a = "{% block entry %}{{ BOLA %}{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -1027,7 +1027,7 @@ test_template_parse_invalid_close(void **state)
 {
     const char *a = "{% block entry %%\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -1043,7 +1043,7 @@ test_template_parse_invalid_close2(void **state)
 {
     const char *a = "{% block entry %}{{ BOLA }%{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -1060,7 +1060,7 @@ test_template_parse_invalid_endif_not_closed(void **state)
 {
     const char *a = "{% block entry %}{% endblock %}{% ifdef BOLA %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -1075,7 +1075,7 @@ test_template_parse_invalid_endif_not_closed_inside_block(void **state)
 {
     const char *a = "{% block listing %}{% ifdef BOLA %}{% endblock %}{% endif %}";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -1091,7 +1091,7 @@ test_template_parse_invalid_else_not_closed_inside_block(void **state)
 {
     const char *a = "{% block listing %}{% ifdef BOLA %}{% else %}{% endblock %}{% endif %}";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -1107,7 +1107,7 @@ test_template_parse_invalid_block_not_closed(void **state)
 {
     const char *a = "{% block entry %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
@@ -1121,7 +1121,7 @@ test_template_parse_invalid_foreach_not_closed(void **state)
 {
     const char *a = "{% foreach ASD %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
+    bc_slist_t *stmts = blogc_template_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(stmts);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);

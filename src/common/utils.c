@@ -18,7 +18,7 @@
 
 
 void*
-sb_malloc(size_t size)
+bc_malloc(size_t size)
 {
     // simple things simple!
     void *rv = malloc(size);
@@ -31,7 +31,7 @@ sb_malloc(size_t size)
 
 
 void*
-sb_realloc(void *ptr, size_t size)
+bc_realloc(void *ptr, size_t size)
 {
     // simple things even simpler :P
     void *rv = realloc(ptr, size);
@@ -44,17 +44,17 @@ sb_realloc(void *ptr, size_t size)
 }
 
 
-sb_slist_t*
-sb_slist_append(sb_slist_t *l, void *data)
+bc_slist_t*
+bc_slist_append(bc_slist_t *l, void *data)
 {
-    sb_slist_t *node = sb_malloc(sizeof(sb_slist_t));
+    bc_slist_t *node = bc_malloc(sizeof(bc_slist_t));
     node->data = data;
     node->next = NULL;
     if (l == NULL) {
         l = node;
     }
     else {
-        sb_slist_t *tmp;
+        bc_slist_t *tmp;
         for (tmp = l; tmp->next != NULL; tmp = tmp->next);
         tmp->next = node;
     }
@@ -62,10 +62,10 @@ sb_slist_append(sb_slist_t *l, void *data)
 }
 
 
-sb_slist_t*
-sb_slist_prepend(sb_slist_t *l, void *data)
+bc_slist_t*
+bc_slist_prepend(bc_slist_t *l, void *data)
 {
-    sb_slist_t *node = sb_malloc(sizeof(sb_slist_t));
+    bc_slist_t *node = bc_malloc(sizeof(bc_slist_t));
     node->data = data;
     node->next = l;
     l = node;
@@ -74,10 +74,10 @@ sb_slist_prepend(sb_slist_t *l, void *data)
 
 
 void
-sb_slist_free_full(sb_slist_t *l, sb_free_func_t free_func)
+bc_slist_free_full(bc_slist_t *l, bc_free_func_t free_func)
 {
     while (l != NULL) {
-        sb_slist_t *tmp = l->next;
+        bc_slist_t *tmp = l->next;
         if ((free_func != NULL) && (l->data != NULL))
             free_func(l->data);
         free(l);
@@ -87,26 +87,26 @@ sb_slist_free_full(sb_slist_t *l, sb_free_func_t free_func)
 
 
 void
-sb_slist_free(sb_slist_t *l)
+bc_slist_free(bc_slist_t *l)
 {
-    sb_slist_free_full(l, NULL);
+    bc_slist_free_full(l, NULL);
 }
 
 
 size_t
-sb_slist_length(sb_slist_t *l)
+bc_slist_length(bc_slist_t *l)
 {
     if (l == NULL)
         return 0;
     size_t i;
-    sb_slist_t *tmp;
+    bc_slist_t *tmp;
     for (tmp = l, i = 0; tmp != NULL; tmp = tmp->next, i++);
     return i;
 }
 
 
 char*
-sb_strdup(const char *s)
+bc_strdup(const char *s)
 {
     if (s == NULL)
         return NULL;
@@ -120,7 +120,7 @@ sb_strdup(const char *s)
 
 
 char*
-sb_strndup(const char *s, size_t n)
+bc_strndup(const char *s, size_t n)
 {
     if (s == NULL)
         return NULL;
@@ -135,7 +135,7 @@ sb_strndup(const char *s, size_t n)
 
 
 char*
-sb_strdup_vprintf(const char *format, va_list ap)
+bc_strdup_vprintf(const char *format, va_list ap)
 {
     va_list ap2;
     va_copy(ap2, ap);
@@ -156,18 +156,18 @@ sb_strdup_vprintf(const char *format, va_list ap)
 
 
 char*
-sb_strdup_printf(const char *format, ...)
+bc_strdup_printf(const char *format, ...)
 {
     va_list ap;
     va_start(ap, format);
-    char *tmp = sb_strdup_vprintf(format, ap);
+    char *tmp = bc_strdup_vprintf(format, ap);
     va_end(ap);
     return tmp;
 }
 
 
 bool
-sb_str_starts_with(const char *str, const char *prefix)
+bc_str_starts_with(const char *str, const char *prefix)
 {
     int str_l = strlen(str);
     int str_lp = strlen(prefix);
@@ -178,7 +178,7 @@ sb_str_starts_with(const char *str, const char *prefix)
 
 
 bool
-sb_str_ends_with(const char *str, const char *suffix)
+bc_str_ends_with(const char *str, const char *suffix)
 {
     int str_l = strlen(str);
     int str_ls = strlen(suffix);
@@ -189,7 +189,7 @@ sb_str_ends_with(const char *str, const char *suffix)
 
 
 char*
-sb_str_lstrip(char *str)
+bc_str_lstrip(char *str)
 {
     if (str == NULL)
         return NULL;
@@ -213,7 +213,7 @@ sb_str_lstrip(char *str)
 
 
 char*
-sb_str_rstrip(char *str)
+bc_str_rstrip(char *str)
 {
     if (str == NULL)
         return NULL;
@@ -237,52 +237,52 @@ sb_str_rstrip(char *str)
 
 
 char*
-sb_str_strip(char *str)
+bc_str_strip(char *str)
 {
-    return sb_str_lstrip(sb_str_rstrip(str));
+    return bc_str_lstrip(bc_str_rstrip(str));
 }
 
 
 char**
-sb_str_split(const char *str, char c, unsigned int max_pieces)
+bc_str_split(const char *str, char c, unsigned int max_pieces)
 {
     if (str == NULL)
         return NULL;
-    char **rv = sb_malloc(sizeof(char*));
+    char **rv = bc_malloc(sizeof(char*));
     unsigned int i, start = 0, count = 0;
     for (i = 0; i < strlen(str) + 1; i++) {
         if (str[0] == '\0')
             break;
         if ((str[i] == c && (!max_pieces || count + 1 < max_pieces)) || str[i] == '\0') {
-            rv = sb_realloc(rv, (count + 1) * sizeof(char*));
-            rv[count] = sb_malloc(i - start + 1);
+            rv = bc_realloc(rv, (count + 1) * sizeof(char*));
+            rv[count] = bc_malloc(i - start + 1);
             memcpy(rv[count], str + start, i - start);
             rv[count++][i - start] = '\0';
             start = i + 1;
         }
     }
-    rv = sb_realloc(rv, (count + 1) * sizeof(char*));
+    rv = bc_realloc(rv, (count + 1) * sizeof(char*));
     rv[count] = NULL;
     return rv;
 }
 
 
 char*
-sb_str_replace(const char *str, const char search, const char *replace)
+bc_str_replace(const char *str, const char search, const char *replace)
 {
-    char **pieces = sb_str_split(str, search, 0);
+    char **pieces = bc_str_split(str, search, 0);
     if (pieces == NULL)
         return NULL;
-    char* rv = sb_strv_join(pieces, replace);
-    sb_strv_free(pieces);
+    char* rv = bc_strv_join(pieces, replace);
+    bc_strv_free(pieces);
     if (rv == NULL)
-        return sb_strdup(str);
+        return bc_strdup(str);
     return rv;
 }
 
 
 char*
-sb_str_find(const char *str, char c)
+bc_str_find(const char *str, char c)
 {
     // this is somewhat similar to strchr, but respects '\' escaping.
     if (str == NULL)
@@ -303,7 +303,7 @@ sb_str_find(const char *str, char c)
 
 
 void
-sb_strv_free(char **strv)
+bc_strv_free(char **strv)
 {
     if (strv == NULL)
         return;
@@ -314,22 +314,22 @@ sb_strv_free(char **strv)
 
 
 char*
-sb_strv_join(char **strv, const char *separator)
+bc_strv_join(char **strv, const char *separator)
 {
     if (strv == NULL || separator == NULL)
         return NULL;
-    sb_string_t *str = sb_string_new();
+    bc_string_t *str = bc_string_new();
     for (size_t i = 0; strv[i] != NULL; i++) {
-        str = sb_string_append(str, strv[i]);
+        str = bc_string_append(str, strv[i]);
         if (strv[i + 1] != NULL)
-            str = sb_string_append(str, separator);
+            str = bc_string_append(str, separator);
     }
-    return sb_string_free(str, false);
+    return bc_string_free(str, false);
 }
 
 
 size_t
-sb_strv_length(char **strv)
+bc_strv_length(char **strv)
 {
     if (strv == NULL)
         return 0;
@@ -339,23 +339,23 @@ sb_strv_length(char **strv)
 }
 
 
-sb_string_t*
-sb_string_new(void)
+bc_string_t*
+bc_string_new(void)
 {
-    sb_string_t* rv = sb_malloc(sizeof(sb_string_t));
+    bc_string_t* rv = bc_malloc(sizeof(bc_string_t));
     rv->str = NULL;
     rv->len = 0;
     rv->allocated_len = 0;
 
     // initialize with empty string
-    rv = sb_string_append(rv, "");
+    rv = bc_string_append(rv, "");
 
     return rv;
 }
 
 
 char*
-sb_string_free(sb_string_t *str, bool free_str)
+bc_string_free(bc_string_t *str, bool free_str)
 {
     if (str == NULL)
         return NULL;
@@ -369,18 +369,18 @@ sb_string_free(sb_string_t *str, bool free_str)
 }
 
 
-sb_string_t*
-sb_string_dup(sb_string_t *str)
+bc_string_t*
+bc_string_dup(bc_string_t *str)
 {
     if (str == NULL)
         return NULL;
-    sb_string_t* new = sb_string_new();
-    return sb_string_append_len(new, str->str, str->len);
+    bc_string_t* new = bc_string_new();
+    return bc_string_append_len(new, str->str, str->len);
 }
 
 
-sb_string_t*
-sb_string_append_len(sb_string_t *str, const char *suffix, size_t len)
+bc_string_t*
+bc_string_append_len(bc_string_t *str, const char *suffix, size_t len)
 {
     if (str == NULL)
         return NULL;
@@ -390,7 +390,7 @@ sb_string_append_len(sb_string_t *str, const char *suffix, size_t len)
     str->len += len;
     if (str->len + 1 > str->allocated_len) {
         str->allocated_len = (((str->len + 1) / SB_STRING_CHUNK_SIZE) + 1) * SB_STRING_CHUNK_SIZE;
-        str->str = sb_realloc(str->str, str->allocated_len);
+        str->str = bc_realloc(str->str, str->allocated_len);
     }
     memcpy(str->str + old_len, suffix, len);
     str->str[str->len] = '\0';
@@ -398,18 +398,18 @@ sb_string_append_len(sb_string_t *str, const char *suffix, size_t len)
 }
 
 
-sb_string_t*
-sb_string_append(sb_string_t *str, const char *suffix)
+bc_string_t*
+bc_string_append(bc_string_t *str, const char *suffix)
 {
     if (str == NULL)
         return NULL;
     const char *my_suffix = suffix == NULL ? "" : suffix;
-    return sb_string_append_len(str, my_suffix, strlen(my_suffix));
+    return bc_string_append_len(str, my_suffix, strlen(my_suffix));
 }
 
 
-sb_string_t*
-sb_string_append_c(sb_string_t *str, char c)
+bc_string_t*
+bc_string_append_c(bc_string_t *str, char c)
 {
     if (str == NULL)
         return NULL;
@@ -417,7 +417,7 @@ sb_string_append_c(sb_string_t *str, char c)
     str->len += 1;
     if (str->len + 1 > str->allocated_len) {
         str->allocated_len = (((str->len + 1) / SB_STRING_CHUNK_SIZE) + 1) * SB_STRING_CHUNK_SIZE;
-        str->str = sb_realloc(str->str, str->allocated_len);
+        str->str = bc_realloc(str->str, str->allocated_len);
     }
     str->str[old_len] = c;
     str->str[str->len] = '\0';
@@ -425,23 +425,23 @@ sb_string_append_c(sb_string_t *str, char c)
 }
 
 
-sb_string_t*
-sb_string_append_printf(sb_string_t *str, const char *format, ...)
+bc_string_t*
+bc_string_append_printf(bc_string_t *str, const char *format, ...)
 {
     if (str == NULL)
         return NULL;
     va_list ap;
     va_start(ap, format);
-    char *tmp = sb_strdup_vprintf(format, ap);
+    char *tmp = bc_strdup_vprintf(format, ap);
     va_end(ap);
-    str = sb_string_append(str, tmp);
+    str = bc_string_append(str, tmp);
     free(tmp);
     return str;
 }
 
 
-sb_string_t*
-sb_string_append_escaped(sb_string_t *str, const char *suffix)
+bc_string_t*
+bc_string_append_escaped(bc_string_t *str, const char *suffix)
 {
     if (str == NULL)
         return NULL;
@@ -454,16 +454,16 @@ sb_string_append_escaped(sb_string_t *str, const char *suffix)
             continue;
         }
         escaped = false;
-        str = sb_string_append_c(str, suffix[i]);
+        str = bc_string_append_c(str, suffix[i]);
     }
     return str;
 }
 
 
-sb_trie_t*
-sb_trie_new(sb_free_func_t free_func)
+bc_trie_t*
+bc_trie_new(bc_free_func_t free_func)
 {
-    sb_trie_t *trie = sb_malloc(sizeof(sb_trie_t));
+    bc_trie_t *trie = bc_malloc(sizeof(bc_trie_t));
     trie->root = NULL;
     trie->free_func = free_func;
     return trie;
@@ -471,43 +471,43 @@ sb_trie_new(sb_free_func_t free_func)
 
 
 static void
-sb_trie_free_node(sb_trie_t *trie, sb_trie_node_t *node)
+bc_trie_free_node(bc_trie_t *trie, bc_trie_node_t *node)
 {
     if (trie == NULL || node == NULL)
         return;
     if (node->data != NULL && trie->free_func != NULL)
         trie->free_func(node->data);
-    sb_trie_free_node(trie, node->next);
-    sb_trie_free_node(trie, node->child);
+    bc_trie_free_node(trie, node->next);
+    bc_trie_free_node(trie, node->child);
     free(node);
 }
 
 
 void
-sb_trie_free(sb_trie_t *trie)
+bc_trie_free(bc_trie_t *trie)
 {
     if (trie == NULL)
         return;
-    sb_trie_free_node(trie, trie->root);
+    bc_trie_free_node(trie, trie->root);
     free(trie);
 }
 
 
 void
-sb_trie_insert(sb_trie_t *trie, const char *key, void *data)
+bc_trie_insert(bc_trie_t *trie, const char *key, void *data)
 {
     if (trie == NULL || key == NULL || data == NULL)
         return;
 
-    sb_trie_node_t *parent = NULL;
-    sb_trie_node_t *previous;
-    sb_trie_node_t *current;
-    sb_trie_node_t *tmp;
+    bc_trie_node_t *parent = NULL;
+    bc_trie_node_t *previous;
+    bc_trie_node_t *current;
+    bc_trie_node_t *tmp;
 
     while (1) {
 
         if (trie->root == NULL || (parent != NULL && parent->child == NULL)) {
-            current = sb_malloc(sizeof(sb_trie_node_t));
+            current = bc_malloc(sizeof(bc_trie_node_t));
             current->key = *key;
             current->data = NULL;
             current->next = NULL;
@@ -533,7 +533,7 @@ sb_trie_insert(sb_trie_t *trie, const char *key, void *data)
         if (previous == NULL || parent != NULL)
             goto clean;
 
-        current = sb_malloc(sizeof(sb_trie_node_t));
+        current = bc_malloc(sizeof(bc_trie_node_t));
         current->key = *key;
         current->data = NULL;
         current->next = NULL;
@@ -554,13 +554,13 @@ clean:
 
 
 void*
-sb_trie_lookup(sb_trie_t *trie, const char *key)
+bc_trie_lookup(bc_trie_t *trie, const char *key)
 {
     if (trie == NULL || trie->root == NULL || key == NULL)
         return NULL;
 
-    sb_trie_node_t *parent = trie->root;
-    sb_trie_node_t *tmp;
+    bc_trie_node_t *parent = trie->root;
+    bc_trie_node_t *tmp;
     while (1) {
         for (tmp = parent; tmp != NULL; tmp = tmp->next) {
 
@@ -583,7 +583,7 @@ sb_trie_lookup(sb_trie_t *trie, const char *key)
 
 
 static void
-sb_trie_size_node(sb_trie_node_t *node, size_t *count)
+bc_trie_size_node(bc_trie_node_t *node, size_t *count)
 {
     if (node == NULL || count == NULL)
         return;
@@ -591,26 +591,26 @@ sb_trie_size_node(sb_trie_node_t *node, size_t *count)
     if (node->key == '\0')
         (*count)++;
 
-    sb_trie_size_node(node->next, count);
-    sb_trie_size_node(node->child, count);
+    bc_trie_size_node(node->next, count);
+    bc_trie_size_node(node->child, count);
 }
 
 
 size_t
-sb_trie_size(sb_trie_t *trie)
+bc_trie_size(bc_trie_t *trie)
 {
     if (trie == NULL)
         return 0;
 
     size_t count = 0;
-    sb_trie_size_node(trie->root, &count);
+    bc_trie_size_node(trie->root, &count);
     return count;
 }
 
 
 static void
-sb_trie_foreach_node(sb_trie_node_t *node, sb_string_t *str,
-    sb_trie_foreach_func_t func, void *user_data)
+bc_trie_foreach_node(bc_trie_node_t *node, bc_string_t *str,
+    bc_trie_foreach_func_t func, void *user_data)
 {
     if (node == NULL || str == NULL || func == NULL)
         return;
@@ -621,25 +621,25 @@ sb_trie_foreach_node(sb_trie_node_t *node, sb_string_t *str,
     }
 
     if (node->child != NULL) {
-        sb_string_t *child = sb_string_dup(str);
-        child = sb_string_append_c(child, node->key);
-        sb_trie_foreach_node(node->child, child, func, user_data);
-        sb_string_free(child, true);
+        bc_string_t *child = bc_string_dup(str);
+        child = bc_string_append_c(child, node->key);
+        bc_trie_foreach_node(node->child, child, func, user_data);
+        bc_string_free(child, true);
     }
 
     if (node->next != NULL)
-        sb_trie_foreach_node(node->next, str, func, user_data);
+        bc_trie_foreach_node(node->next, str, func, user_data);
 }
 
 
 void
-sb_trie_foreach(sb_trie_t *trie, sb_trie_foreach_func_t func,
+bc_trie_foreach(bc_trie_t *trie, bc_trie_foreach_func_t func,
     void *user_data)
 {
     if (trie == NULL || trie->root == NULL || func == NULL)
         return;
 
-    sb_string_t *str = sb_string_new();
-    sb_trie_foreach_node(trie->root, str, func, user_data);
-    sb_string_free(str, true);
+    bc_string_t *str = bc_string_new();
+    bc_trie_foreach_node(trie->root, str, func, user_data);
+    bc_string_free(str, true);
 }

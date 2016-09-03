@@ -60,7 +60,7 @@ rmdir_recursive(const char *dir)
     while (NULL != (e = readdir(d))) {
         if ((0 == strcmp(e->d_name, ".")) || (0 == strcmp(e->d_name, "..")))
             continue;
-        char *f = sb_strdup_printf("%s/%s", dir, e->d_name);
+        char *f = bc_strdup_printf("%s/%s", dir, e->d_name);
         if (0 != stat(f, &buf)) {
             fprintf(stderr, "error: failed to stat directory entry (%s): %s\n",
                 e->d_name, strerror(errno));
@@ -131,7 +131,7 @@ git_shell(int argc, char *argv[])
     }
 
     // get git repository
-    command_orig = sb_strdup(argv[2]);
+    command_orig = bc_strdup(argv[2]);
     char *p, *r;
     for (p = command_orig; *p != ' ' && *p != '\0'; p++);
     if (*p == ' ')
@@ -146,7 +146,7 @@ git_shell(int argc, char *argv[])
     if (*--p == '/')
         *p = '\0';
 
-    repo = sb_strdup_printf("repos/%s", r);
+    repo = bc_strdup_printf("repos/%s", r);
 
     // check if repository is sane
     if (0 == strlen(repo)) {
@@ -166,7 +166,7 @@ git_shell(int argc, char *argv[])
     }
 
     if (0 != access(repo, F_OK)) {
-        char *git_init_cmd = sb_strdup_printf(
+        char *git_init_cmd = bc_strdup_printf(
             "git init --bare \"%s\" > /dev/null", repo);
         if (0 != system(git_init_cmd)) {
             fprintf(stderr, "error: failed to create git repository: %s\n",
@@ -243,7 +243,7 @@ git_shell(int argc, char *argv[])
     }
 
 git_exec:
-    command_name = sb_strdup(argv[2]);
+    command_name = bc_strdup(argv[2]);
     for (p = command_name; *p != ' ' && *p != '\0'; p++);
     if (*p == ' ')
         *p = '\0';
@@ -386,7 +386,7 @@ git_pre_receive_hook(int argc, char *argv[])
         goto cleanup;
     }
 
-    repo_dir = sb_strdup(buffer);
+    repo_dir = bc_strdup(buffer);
 
     char dir[] = "/tmp/blogc_XXXXXX";
     if (NULL == mkdtemp(dir)) {
@@ -394,7 +394,7 @@ git_pre_receive_hook(int argc, char *argv[])
         goto cleanup;
     }
 
-    char *git_archive_cmd = sb_strdup_printf(
+    char *git_archive_cmd = bc_strdup_printf(
         "git archive \"%s\" | tar -x -C \"%s\" -f -", master, dir);
     if (0 != system(git_archive_cmd)) {
         fprintf(stderr, "error: failed to extract git content to temporary "
@@ -425,8 +425,8 @@ git_pre_receive_hook(int argc, char *argv[])
     }
 
     unsigned long epoch = time(NULL);
-    output_dir = sb_strdup_printf("%s/builds/%s-%lu", home, master, epoch);
-    char *gmake_cmd = sb_strdup_printf(
+    output_dir = bc_strdup_printf("%s/builds/%s-%lu", home, master, epoch);
+    char *gmake_cmd = bc_strdup_printf(
         "gmake -j%d OUTPUT_DIR=\"%s\" BLOGC_GIT_RECEIVER=1",
         cpu_count(), output_dir);
     fprintf(stdout, "running command: %s\n\n", gmake_cmd);

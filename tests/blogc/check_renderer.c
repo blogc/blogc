@@ -20,7 +20,7 @@
 #include "../../src/common/utils.h"
 
 
-static sb_slist_t*
+static bc_slist_t*
 create_sources(unsigned int count)
 {
     const char *s[] = {
@@ -45,12 +45,12 @@ create_sources(unsigned int count)
     };
     assert_false(count > 3);
     blogc_error_t *err = NULL;
-    sb_slist_t *l = NULL;
+    bc_slist_t *l = NULL;
     for (unsigned int i = 0; i < count; i++) {
-        l = sb_slist_append(l, blogc_source_parse(s[i], strlen(s[i]), &err));
+        l = bc_slist_append(l, blogc_source_parse(s[i], strlen(s[i]), &err));
         assert_null(err);
     }
-    assert_int_equal(sb_slist_length(l), count);
+    assert_int_equal(bc_slist_length(l), count);
     return l;
 }
 
@@ -77,10 +77,10 @@ test_render_entry(void **state)
         "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
         "{% foreach TAGS_ASD %}yay{% endforeach %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -102,7 +102,7 @@ test_render_entry(void **state)
         "lol foo haha lol bar haha lol baz haha \n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -124,10 +124,10 @@ test_render_listing(void **state)
         "{% foreach TAGS_ASD %}yay{% endforeach %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(3);
+    bc_slist_t *s = create_sources(3);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, true);
     assert_string_equal(out,
@@ -151,7 +151,7 @@ test_render_listing(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -172,7 +172,7 @@ test_render_listing_empty(void **state)
         "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
     char *out = blogc_render(l, NULL, NULL, true);
@@ -199,10 +199,10 @@ test_render_ifdef(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -210,7 +210,7 @@ test_render_ifdef(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -228,10 +228,10 @@ test_render_ifdef2(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -241,7 +241,7 @@ test_render_ifdef2(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -259,10 +259,10 @@ test_render_ifdef3(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -274,7 +274,7 @@ test_render_ifdef3(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -294,10 +294,10 @@ test_render_ifdef4(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -310,7 +310,7 @@ test_render_ifdef4(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -330,10 +330,10 @@ test_render_ifdef5(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -344,7 +344,7 @@ test_render_ifdef5(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -364,10 +364,10 @@ test_render_ifdef6(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -376,7 +376,7 @@ test_render_ifdef6(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -397,10 +397,10 @@ test_render_ifdef7(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -414,7 +414,7 @@ test_render_ifdef7(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -433,10 +433,10 @@ test_render_ifndef(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -449,7 +449,7 @@ test_render_ifndef(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -469,10 +469,10 @@ test_render_if_eq(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -486,7 +486,7 @@ test_render_if_eq(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -506,10 +506,10 @@ test_render_if_neq(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -523,7 +523,7 @@ test_render_if_neq(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -543,10 +543,10 @@ test_render_if_lt(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -560,7 +560,7 @@ test_render_if_lt(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -580,10 +580,10 @@ test_render_if_gt(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -597,7 +597,7 @@ test_render_if_gt(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -619,10 +619,10 @@ test_render_if_lt_eq(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -638,7 +638,7 @@ test_render_if_lt_eq(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -660,10 +660,10 @@ test_render_if_gt_eq(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -679,7 +679,7 @@ test_render_if_gt_eq(void **state)
         "\n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -692,10 +692,10 @@ test_render_foreach(void **state)
         "{% foreach TAGS %} {{ FOREACH_ITEM }} {% endforeach %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -703,7 +703,7 @@ test_render_foreach(void **state)
         " foo  bar  baz \n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -717,10 +717,10 @@ test_render_foreach_if(void **state)
         "{% endif %} {% endforeach %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -728,7 +728,7 @@ test_render_foreach_if(void **state)
         "   bar   \n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -743,10 +743,10 @@ test_render_foreach_if_else(void **state)
         "{% endif %} {% endforeach %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     char *out = blogc_render(l, s, NULL, false);
     assert_string_equal(out,
@@ -754,7 +754,7 @@ test_render_foreach_if_else(void **state)
         "foo yay baz \n"
         "\n");
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -774,21 +774,21 @@ test_render_outside_block(void **state)
         "{{ BOLA }}\n"
         "{% ifndef CHUNDA %}lol{% endif %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    sb_trie_t *c = sb_trie_new(free);
-    sb_trie_insert(c, "GUDA", sb_strdup("asd"));
+    bc_trie_t *c = bc_trie_new(free);
+    bc_trie_insert(c, "GUDA", bc_strdup("asd"));
     char *out = blogc_render(l, s, c, false);
     assert_string_equal(out,
         "bola\n"
         "\n"
         "lol\n");
-    sb_trie_free(c);
+    bc_trie_free(c);
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -807,14 +807,14 @@ test_render_prefer_local_variable(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    sb_trie_t *c = sb_trie_new(free);
-    sb_trie_insert(c, "GUDA", sb_strdup("hehe"));
-    sb_trie_insert(c, "LOL", sb_strdup("hmm"));
+    bc_trie_t *c = bc_trie_new(free);
+    bc_trie_insert(c, "GUDA", bc_strdup("hehe"));
+    bc_trie_insert(c, "LOL", bc_strdup("hmm"));
     char *out = blogc_render(l, s, c, false);
     assert_string_equal(out,
         "\n"
@@ -825,9 +825,9 @@ test_render_prefer_local_variable(void **state)
         "\n"
         "\n"
         "\n");
-    sb_trie_free(c);
+    bc_trie_free(c);
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -843,12 +843,12 @@ test_render_respect_variable_scope(void **state)
         "{% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = create_sources(1);
+    bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    sb_trie_t *c = sb_trie_new(free);
+    bc_trie_t *c = bc_trie_new(free);
     char *out = blogc_render(l, s, c, false);
     assert_string_equal(out,
         "\n"
@@ -857,9 +857,9 @@ test_render_respect_variable_scope(void **state)
         "\n"
         "asd\n"
         "\n");
-    sb_trie_free(c);
+    bc_trie_free(c);
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -875,22 +875,22 @@ test_render_ifcount_bug(void **state)
         "{% endif %}\n"
         "{% endblock %}\n";
     blogc_error_t *err = NULL;
-    sb_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    sb_slist_t *s = NULL;
-    s = sb_slist_append(s, sb_trie_new(free));
-    sb_trie_insert(s->data, "TITLE", sb_strdup("bola"));
-    sb_trie_t *c = sb_trie_new(free);
+    bc_slist_t *s = NULL;
+    s = bc_slist_append(s, bc_trie_new(free));
+    bc_trie_insert(s->data, "TITLE", bc_strdup("bola"));
+    bc_trie_t *c = bc_trie_new(free);
     char *out = blogc_render(l, s, c, false);
     assert_string_equal(out,
         "\n"
         "<h3>bola</h3>\n"
         "\n"
         "\n");
-    sb_trie_free(c);
+    bc_trie_free(c);
     blogc_template_free_stmts(l);
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
 
@@ -898,100 +898,100 @@ test_render_ifcount_bug(void **state)
 static void
 test_get_variable(void **state)
 {
-    sb_trie_t *g = sb_trie_new(free);
-    sb_trie_insert(g, "NAME", sb_strdup("bola"));
-    sb_trie_insert(g, "TITLE", sb_strdup("bola2"));
-    sb_trie_t *l = sb_trie_new(free);
-    sb_trie_insert(l, "NAME", sb_strdup("chunda"));
-    sb_trie_insert(l, "TITLE", sb_strdup("chunda2"));
+    bc_trie_t *g = bc_trie_new(free);
+    bc_trie_insert(g, "NAME", bc_strdup("bola"));
+    bc_trie_insert(g, "TITLE", bc_strdup("bola2"));
+    bc_trie_t *l = bc_trie_new(free);
+    bc_trie_insert(l, "NAME", bc_strdup("chunda"));
+    bc_trie_insert(l, "TITLE", bc_strdup("chunda2"));
     assert_string_equal(blogc_get_variable("NAME", g, l), "chunda");
     assert_string_equal(blogc_get_variable("TITLE", g, l), "chunda2");
     assert_null(blogc_get_variable("BOLA", g, l));
-    sb_trie_free(g);
-    sb_trie_free(l);
+    bc_trie_free(g);
+    bc_trie_free(l);
 }
 
 
 static void
 test_get_variable_only_local(void **state)
 {
-    sb_trie_t *g = NULL;
-    sb_trie_t *l = sb_trie_new(free);
-    sb_trie_insert(l, "NAME", sb_strdup("chunda"));
-    sb_trie_insert(l, "TITLE", sb_strdup("chunda2"));
+    bc_trie_t *g = NULL;
+    bc_trie_t *l = bc_trie_new(free);
+    bc_trie_insert(l, "NAME", bc_strdup("chunda"));
+    bc_trie_insert(l, "TITLE", bc_strdup("chunda2"));
     assert_string_equal(blogc_get_variable("NAME", g, l), "chunda");
     assert_string_equal(blogc_get_variable("TITLE", g, l), "chunda2");
     assert_null(blogc_get_variable("BOLA", g, l));
-    sb_trie_free(l);
+    bc_trie_free(l);
 }
 
 
 static void
 test_get_variable_only_global(void **state)
 {
-    sb_trie_t *g = sb_trie_new(free);
-    sb_trie_insert(g, "NAME", sb_strdup("bola"));
-    sb_trie_insert(g, "TITLE", sb_strdup("bola2"));
-    sb_trie_t *l = NULL;
+    bc_trie_t *g = bc_trie_new(free);
+    bc_trie_insert(g, "NAME", bc_strdup("bola"));
+    bc_trie_insert(g, "TITLE", bc_strdup("bola2"));
+    bc_trie_t *l = NULL;
     assert_string_equal(blogc_get_variable("NAME", g, l), "bola");
     assert_string_equal(blogc_get_variable("TITLE", g, l), "bola2");
     assert_null(blogc_get_variable("BOLA", g, l));
-    sb_trie_free(g);
+    bc_trie_free(g);
 }
 
 
 static void
 test_format_date(void **state)
 {
-    sb_trie_t *g = sb_trie_new(free);
-    sb_trie_insert(g, "DATE_FORMAT", sb_strdup("%H -- %M"));
-    sb_trie_t *l = sb_trie_new(free);
-    sb_trie_insert(l, "DATE_FORMAT", sb_strdup("%R"));
+    bc_trie_t *g = bc_trie_new(free);
+    bc_trie_insert(g, "DATE_FORMAT", bc_strdup("%H -- %M"));
+    bc_trie_t *l = bc_trie_new(free);
+    bc_trie_insert(l, "DATE_FORMAT", bc_strdup("%R"));
     char *date = blogc_format_date("2015-01-02 03:04:05", g, l);
     assert_string_equal(date, "03:04");
     free(date);
-    sb_trie_free(g);
-    sb_trie_free(l);
+    bc_trie_free(g);
+    bc_trie_free(l);
 }
 
 
 static void
 test_format_date_with_global_format(void **state)
 {
-    sb_trie_t *g = sb_trie_new(free);
-    sb_trie_insert(g, "DATE_FORMAT", sb_strdup("%H -- %M"));
-    sb_trie_t *l = sb_trie_new(free);
+    bc_trie_t *g = bc_trie_new(free);
+    bc_trie_insert(g, "DATE_FORMAT", bc_strdup("%H -- %M"));
+    bc_trie_t *l = bc_trie_new(free);
     char *date = blogc_format_date("2015-01-02 03:04:05", g, l);
     assert_string_equal(date, "03 -- 04");
     free(date);
-    sb_trie_free(g);
-    sb_trie_free(l);
+    bc_trie_free(g);
+    bc_trie_free(l);
 }
 
 
 static void
 test_format_date_without_format(void **state)
 {
-    sb_trie_t *g = sb_trie_new(free);
-    sb_trie_t *l = sb_trie_new(free);
+    bc_trie_t *g = bc_trie_new(free);
+    bc_trie_t *l = bc_trie_new(free);
     char *date = blogc_format_date("2015-01-02 03:04:05", g, l);
     assert_string_equal(date, "2015-01-02 03:04:05");
     free(date);
-    sb_trie_free(g);
-    sb_trie_free(l);
+    bc_trie_free(g);
+    bc_trie_free(l);
 }
 
 
 static void
 test_format_date_without_date(void **state)
 {
-    sb_trie_t *g = sb_trie_new(free);
-    sb_trie_t *l = sb_trie_new(free);
+    bc_trie_t *g = bc_trie_new(free);
+    bc_trie_t *l = bc_trie_new(free);
     char *date = blogc_format_date(NULL, g, l);
     assert_null(date);
     free(date);
-    sb_trie_free(g);
-    sb_trie_free(l);
+    bc_trie_free(g);
+    bc_trie_free(l);
 }
 
 
@@ -999,13 +999,13 @@ static void
 test_format_variable(void **state)
 {
     // FIXME: test warnings
-    sb_trie_t *g = sb_trie_new(free);
-    sb_trie_insert(g, "NAME", sb_strdup("bola"));
-    sb_trie_insert(g, "TITLE", sb_strdup("bola2"));
-    sb_trie_t *l = sb_trie_new(free);
-    sb_trie_insert(l, "NAME", sb_strdup("chunda"));
-    sb_trie_insert(l, "TITLE", sb_strdup("chunda2"));
-    sb_trie_insert(l, "SIZE", sb_strdup("1234567890987654321"));
+    bc_trie_t *g = bc_trie_new(free);
+    bc_trie_insert(g, "NAME", bc_strdup("bola"));
+    bc_trie_insert(g, "TITLE", bc_strdup("bola2"));
+    bc_trie_t *l = bc_trie_new(free);
+    bc_trie_insert(l, "NAME", bc_strdup("chunda"));
+    bc_trie_insert(l, "TITLE", bc_strdup("chunda2"));
+    bc_trie_insert(l, "SIZE", bc_strdup("1234567890987654321"));
     char *tmp = blogc_format_variable("NAME", g, l, NULL);
     assert_string_equal(tmp, "chunda");
     free(tmp);
@@ -1023,19 +1023,19 @@ test_format_variable(void **state)
     free(tmp);
     assert_null(blogc_format_variable("SIZE_", g, l, NULL));
     assert_null(blogc_format_variable("BOLA", g, l, NULL));
-    sb_trie_free(g);
-    sb_trie_free(l);
+    bc_trie_free(g);
+    bc_trie_free(l);
 }
 
 
 static void
 test_format_variable_with_date(void **state)
 {
-    sb_trie_t *g = sb_trie_new(free);
-    sb_trie_insert(g, "DATE", sb_strdup("2010-11-12 13:14:15"));
-    sb_trie_insert(g, "DATE_FORMAT", sb_strdup("%R"));
-    sb_trie_t *l = sb_trie_new(free);
-    sb_trie_insert(l, "DATE", sb_strdup("2011-12-13 14:15:16"));
+    bc_trie_t *g = bc_trie_new(free);
+    bc_trie_insert(g, "DATE", bc_strdup("2010-11-12 13:14:15"));
+    bc_trie_insert(g, "DATE_FORMAT", bc_strdup("%R"));
+    bc_trie_t *l = bc_trie_new(free);
+    bc_trie_insert(l, "DATE", bc_strdup("2011-12-13 14:15:16"));
     char *tmp = blogc_format_variable("DATE_FORMATTED", g, l, NULL);
     assert_string_equal(tmp, "14:15");
     free(tmp);
@@ -1045,18 +1045,18 @@ test_format_variable_with_date(void **state)
     tmp = blogc_format_variable("DATE_FORMATTED_10", g, l, NULL);
     assert_string_equal(tmp, "14:15");
     free(tmp);
-    sb_trie_free(g);
-    sb_trie_free(l);
+    bc_trie_free(g);
+    bc_trie_free(l);
 }
 
 
 static void
 test_format_variable_foreach(void **state)
 {
-    sb_slist_t *l = NULL;
-    l = sb_slist_append(l, sb_strdup("asd"));
-    l = sb_slist_append(l, sb_strdup("qwe"));
-    l = sb_slist_append(l, sb_strdup("zxcvbn"));
+    bc_slist_t *l = NULL;
+    l = bc_slist_append(l, bc_strdup("asd"));
+    l = bc_slist_append(l, bc_strdup("qwe"));
+    l = bc_slist_append(l, bc_strdup("zxcvbn"));
     char *tmp = blogc_format_variable("FOREACH_ITEM", NULL, NULL, l->next);
     assert_string_equal(tmp, "qwe");
     free(tmp);
@@ -1068,7 +1068,7 @@ test_format_variable_foreach(void **state)
         l->next->next);
     assert_string_equal(tmp, "zxcvbn");
     free(tmp);
-    sb_slist_free_full(l, free);
+    bc_slist_free_full(l, free);
 }
 
 
@@ -1083,31 +1083,31 @@ test_format_variable_foreach_empty(void **state)
 static void
 test_split_list_variable(void **state)
 {
-    sb_trie_t *g = sb_trie_new(free);
-    sb_trie_insert(g, "TAGS", sb_strdup("asd  lol hehe"));
-    sb_trie_t *l = sb_trie_new(free);
-    sb_trie_insert(l, "TAGS", sb_strdup("asd  lol XD"));
-    sb_slist_t *tmp = blogc_split_list_variable("TAGS", g, l);
+    bc_trie_t *g = bc_trie_new(free);
+    bc_trie_insert(g, "TAGS", bc_strdup("asd  lol hehe"));
+    bc_trie_t *l = bc_trie_new(free);
+    bc_trie_insert(l, "TAGS", bc_strdup("asd  lol XD"));
+    bc_slist_t *tmp = blogc_split_list_variable("TAGS", g, l);
     assert_string_equal(tmp->data, "asd");
     assert_string_equal(tmp->next->data, "lol");
     assert_string_equal(tmp->next->next->data, "XD");
-    sb_slist_free_full(tmp, free);
-    sb_trie_free(g);
-    sb_trie_free(l);
+    bc_slist_free_full(tmp, free);
+    bc_trie_free(g);
+    bc_trie_free(l);
 }
 
 
 static void
 test_split_list_variable_not_found(void **state)
 {
-    sb_trie_t *g = sb_trie_new(free);
-    sb_trie_insert(g, "TAGS", sb_strdup("asd  lol hehe"));
-    sb_trie_t *l = sb_trie_new(free);
-    sb_trie_insert(l, "TAGS", sb_strdup("asd  lol XD"));
-    sb_slist_t *tmp = blogc_split_list_variable("TAG", g, l);
+    bc_trie_t *g = bc_trie_new(free);
+    bc_trie_insert(g, "TAGS", bc_strdup("asd  lol hehe"));
+    bc_trie_t *l = bc_trie_new(free);
+    bc_trie_insert(l, "TAGS", bc_strdup("asd  lol XD"));
+    bc_slist_t *tmp = blogc_split_list_variable("TAG", g, l);
     assert_null(tmp);
-    sb_trie_free(g);
-    sb_trie_free(l);
+    bc_trie_free(g);
+    bc_trie_free(l);
 }
 
 

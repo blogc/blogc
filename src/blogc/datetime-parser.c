@@ -380,7 +380,7 @@ blogc_convert_datetime(const char *orig, const char *format,
         return NULL;
     }
 
-    return sb_strdup(buf);
+    return bc_strdup(buf);
 
 #endif
 }

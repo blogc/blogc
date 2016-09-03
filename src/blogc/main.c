@@ -71,7 +71,7 @@ blogc_print_usage(void)
 static void
 blogc_mkdir_recursive(const char *filename)
 {
-    char *fname = sb_strdup(filename);
+    char *fname = bc_strdup(filename);
     for (char *tmp = fname; *tmp != '\0'; tmp++) {
         if (*tmp != '/' && *tmp != '\\')
             continue;
@@ -118,9 +118,9 @@ main(int argc, char **argv)
     char *tmp = NULL;
     char **pieces = NULL;
 
-    sb_slist_t *sources = NULL;
-    sb_trie_t *config = sb_trie_new(free);
-    sb_trie_insert(config, "BLOGC_VERSION", sb_strdup(PACKAGE_VERSION));
+    bc_slist_t *sources = NULL;
+    bc_trie_t *config = bc_trie_new(free);
+    bc_trie_insert(config, "BLOGC_VERSION", bc_strdup(PACKAGE_VERSION));
 
     for (unsigned int i = 1; i < argc; i++) {
         tmp = NULL;
@@ -140,21 +140,21 @@ main(int argc, char **argv)
                     break;
                 case 't':
                     if (argv[i][2] != '\0')
-                        template = sb_strdup(argv[i] + 2);
+                        template = bc_strdup(argv[i] + 2);
                     else if (i + 1 < argc)
-                        template = sb_strdup(argv[++i]);
+                        template = bc_strdup(argv[++i]);
                     break;
                 case 'o':
                     if (argv[i][2] != '\0')
-                        output = sb_strdup(argv[i] + 2);
+                        output = bc_strdup(argv[i] + 2);
                     else if (i + 1 < argc)
-                        output = sb_strdup(argv[++i]);
+                        output = bc_strdup(argv[++i]);
                     break;
                 case 'p':
                     if (argv[i][2] != '\0')
-                        print = sb_strdup(argv[i] + 2);
+                        print = bc_strdup(argv[i] + 2);
                     else if (i + 1 < argc)
-                        print = sb_strdup(argv[++i]);
+                        print = bc_strdup(argv[++i]);
                     break;
                 case 'D':
                     if (argv[i][2] != '\0')
@@ -167,11 +167,11 @@ main(int argc, char **argv)
                                 "-D (must be valid UTF-8 string): %s\n", tmp);
                             goto cleanup;
                         }
-                        pieces = sb_str_split(tmp, '=', 2);
-                        if (sb_strv_length(pieces) != 2) {
+                        pieces = bc_str_split(tmp, '=', 2);
+                        if (bc_strv_length(pieces) != 2) {
                             fprintf(stderr, "blogc: error: invalid value for "
                                 "-D (must have an '='): %s\n", tmp);
-                            sb_strv_free(pieces);
+                            bc_strv_free(pieces);
                             rv = 2;
                             goto cleanup;
                         }
@@ -182,13 +182,13 @@ main(int argc, char **argv)
                                 fprintf(stderr, "blogc: error: invalid value "
                                     "for -D (configuration key must be uppercase "
                                     "with '_'): %s\n", pieces[0]);
-                                sb_strv_free(pieces);
+                                bc_strv_free(pieces);
                                 rv = 2;
                                 goto cleanup;
                             }
                         }
-                        sb_trie_insert(config, pieces[0], sb_strdup(pieces[1]));
-                        sb_strv_free(pieces);
+                        bc_trie_insert(config, pieces[0], bc_strdup(pieces[1]));
+                        bc_strv_free(pieces);
                         pieces = NULL;
                     }
                     break;
@@ -201,17 +201,17 @@ main(int argc, char **argv)
             }
         }
         else
-            sources = sb_slist_append(sources, sb_strdup(argv[i]));
+            sources = bc_slist_append(sources, bc_strdup(argv[i]));
     }
 
-    if (!listing && sb_slist_length(sources) == 0) {
+    if (!listing && bc_slist_length(sources) == 0) {
         blogc_print_usage();
         fprintf(stderr, "blogc: error: one source file is required\n");
         rv = 2;
         goto cleanup;
     }
 
-    if (!listing && sb_slist_length(sources) > 1) {
+    if (!listing && bc_slist_length(sources) > 1) {
         blogc_print_usage();
         fprintf(stderr, "blogc: error: only one source file should be provided, "
             "if running without '-l'\n");
@@ -221,7 +221,7 @@ main(int argc, char **argv)
 
     blogc_error_t *err = NULL;
 
-    sb_slist_t *s = blogc_source_parse_from_files(config, sources, &err);
+    bc_slist_t *s = blogc_source_parse_from_files(config, sources, &err);
     if (err != NULL) {
         blogc_error_print(err);
         rv = 2;
@@ -229,7 +229,7 @@ main(int argc, char **argv)
     }
 
     if (print != NULL) {
-        const char *val = sb_trie_lookup(config, print);
+        const char *val = bc_trie_lookup(config, print);
         if (val == NULL) {
             fprintf(stderr, "blogc: error: configuration variable not found: %s\n",
                 print);
@@ -248,7 +248,7 @@ main(int argc, char **argv)
         goto cleanup2;
     }
 
-    sb_slist_t* l = blogc_template_parse_from_file(template, &err);
+    bc_slist_t* l = blogc_template_parse_from_file(template, &err);
     if (err != NULL) {
         blogc_error_print(err);
         rv = 2;
@@ -285,13 +285,13 @@ cleanup4:
 cleanup3:
     blogc_template_free_stmts(l);
 cleanup2:
-    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     blogc_error_free(err);
 cleanup:
-    sb_trie_free(config);
+    bc_trie_free(config);
     free(template);
     free(output);
     free(print);
-    sb_slist_free_full(sources, free);
+    bc_slist_free_full(sources, free);
     return rv;
 }

@@ -83,7 +83,7 @@ blogc_utf8_validate(const uint8_t *str, size_t len)
 
 
 bool
-blogc_utf8_validate_str(sb_string_t *str)
+blogc_utf8_validate_str(bc_string_t *str)
 {
     return blogc_utf8_validate((uint8_t*) str->str, str->len);
 }

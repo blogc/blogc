@@ -16,9 +16,9 @@
 blogc_error_t*
 blogc_error_new(blogc_error_type_t type, const char *msg)
 {
-    blogc_error_t *err = sb_malloc(sizeof(blogc_error_t));
+    blogc_error_t *err = bc_malloc(sizeof(blogc_error_t));
     err->type = type;
-    err->msg = sb_strdup(msg);
+    err->msg = bc_strdup(msg);
     return err;
 }
 
@@ -28,7 +28,7 @@ blogc_error_new_printf(blogc_error_type_t type, const char *format, ...)
 {
     va_list ap;
     va_start(ap, format);
-    char *tmp = sb_strdup_vprintf(format, ap);
+    char *tmp = bc_strdup_vprintf(format, ap);
     va_end(ap);
     blogc_error_t *rv = blogc_error_new(type, tmp);
     free(tmp);
@@ -42,7 +42,7 @@ blogc_error_parser(blogc_error_type_t type, const char *src, size_t src_len,
 {
     va_list ap;
     va_start(ap, format);
-    char *msg = sb_strdup_vprintf(format, ap);
+    char *msg = bc_strdup_vprintf(format, ap);
     va_end(ap);
 
     size_t lineno = 1;
@@ -83,7 +83,7 @@ blogc_error_parser(blogc_error_type_t type, const char *src, size_t src_len,
     if (lineend <= linestart && src_len >= linestart)
         lineend = src_len;
 
-    char *line = sb_strndup(src + linestart, lineend - linestart);
+    char *line = bc_strndup(src + linestart, lineend - linestart);
 
     blogc_error_t *rv = NULL;
 
