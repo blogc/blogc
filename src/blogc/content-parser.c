@@ -11,7 +11,7 @@
 #include <string.h>
 
 #include "content-parser.h"
-#include "utils.h"
+#include "../common/utils.h"
 
 // this is a half ass implementation of a markdown-like syntax. bugs are
 // expected. feel free to improve the parser and add new features.

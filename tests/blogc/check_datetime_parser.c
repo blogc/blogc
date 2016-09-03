@@ -12,8 +12,8 @@
 #include <cmocka.h>
 #include <stdlib.h>
 #include <locale.h>
-#include "../src/error.h"
-#include "../src/datetime-parser.h"
+#include "../../src/blogc/error.h"
+#include "../../src/blogc/datetime-parser.h"
 
 
 static void

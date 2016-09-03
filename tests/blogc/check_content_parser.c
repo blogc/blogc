@@ -11,7 +11,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
-#include "../src/content-parser.h"
+#include "../../src/blogc/content-parser.h"
 
 
 static void

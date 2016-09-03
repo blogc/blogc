@@ -12,7 +12,7 @@
 #include <cmocka.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include "../src/utils.h"
+#include "../../src/common/utils.h"
 
 #define SB_STRING_CHUNK_SIZE 128
 

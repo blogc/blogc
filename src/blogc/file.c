@@ -14,8 +14,8 @@
 #include <string.h>
 #include "file.h"
 #include "error.h"
-#include "utf8.h"
-#include "utils.h"
+#include "../common/utf8.h"
+#include "../common/utils.h"
 
 // this would belong to loader.c, but we need it in a separated file to be
 // able to mock it when unit testing the loader functions.

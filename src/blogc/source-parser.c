@@ -12,7 +12,7 @@
 #include "content-parser.h"
 #include "source-parser.h"
 #include "error.h"
-#include "utils.h"
+#include "../common/utils.h"
 
 
 typedef enum {

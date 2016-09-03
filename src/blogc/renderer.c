@@ -16,7 +16,7 @@
 #include "error.h"
 #include "template-parser.h"
 #include "renderer.h"
-#include "utils.h"
+#include "../common/utils.h"
 
 
 const char*

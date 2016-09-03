@@ -13,11 +13,11 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../src/error.h"
-#include "../src/renderer.h"
-#include "../src/source-parser.h"
-#include "../src/template-parser.h"
-#include "../src/utils.h"
+#include "../../src/blogc/error.h"
+#include "../../src/blogc/renderer.h"
+#include "../../src/blogc/source-parser.h"
+#include "../../src/blogc/template-parser.h"
+#include "../../src/common/utils.h"
 
 
 static sb_slist_t*

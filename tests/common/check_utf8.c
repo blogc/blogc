@@ -13,8 +13,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include "../src/utf8.h"
-#include "../src/utils.h"
+#include "../../src/common/utf8.h"
+#include "../../src/common/utils.h"
 
 // this file MUST be ASCII
 

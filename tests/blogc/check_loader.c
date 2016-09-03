@@ -13,10 +13,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "../src/error.h"
-#include "../src/template-parser.h"
-#include "../src/loader.h"
-#include "../src/utils.h"
+#include "../../src/blogc/error.h"
+#include "../../src/blogc/template-parser.h"
+#include "../../src/blogc/loader.h"
+#include "../../src/common/utils.h"
 
 
 static void

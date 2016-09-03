@@ -11,7 +11,7 @@
 
 #include <stddef.h>
 #include "error.h"
-#include "utils.h"
+#include "../common/utils.h"
 
 /*
  * note: whitespace cleaners are NOT added to ast. we fix strings right during

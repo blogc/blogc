@@ -27,8 +27,8 @@
 #include "loader.h"
 #include "renderer.h"
 #include "error.h"
-#include "utf8.h"
-#include "utils.h"
+#include "../common/utf8.h"
+#include "../common/utils.h"
 
 #ifndef PACKAGE_VERSION
 #define PACKAGE_VERSION "Unknown"

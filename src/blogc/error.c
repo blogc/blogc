@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include "error.h"
-#include "utils.h"
+#include "../common/utils.h"
 
 
 blogc_error_t*

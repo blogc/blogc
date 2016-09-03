@@ -9,7 +9,7 @@
 #include <stdio.h>
 
 #include "template-parser.h"
-#include "utils.h"
+#include "../common/utils.h"
 #include "debug.h"
 
 

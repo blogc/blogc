@@ -11,7 +11,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <string.h>
-#include "../src/error.h"
+#include "../../src/blogc/error.h"
 
 
 static void

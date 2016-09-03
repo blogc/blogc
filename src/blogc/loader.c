@@ -17,7 +17,7 @@
 #include "template-parser.h"
 #include "loader.h"
 #include "error.h"
-#include "utils.h"
+#include "../common/utils.h"
 
 
 char*

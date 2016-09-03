@@ -9,7 +9,7 @@
 #ifndef ___DEBUG_H
 #define ___DEBUG_H
 
-#include "utils.h"
+#include "../common/utils.h"
 
 void blogc_debug_template(sb_slist_t *stmts);
 

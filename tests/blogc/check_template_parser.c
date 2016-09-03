@@ -11,9 +11,9 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <string.h>
-#include "../src/template-parser.h"
-#include "../src/error.h"
-#include "../src/utils.h"
+#include "../../src/blogc/template-parser.h"
+#include "../../src/blogc/error.h"
+#include "../../src/common/utils.h"
 
 
 static void
