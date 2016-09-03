@@ -16,7 +16,8 @@
 #include "source-parser.h"
 #include "template-parser.h"
 #include "loader.h"
-#include "error.h"
+#include "errors.h"
+#include "../common/error.h"
 #include "../common/utils.h"
 
 
@@ -58,7 +59,7 @@ blogc_get_filename(const char *f)
 
 
 bc_slist_t*
-blogc_template_parse_from_file(const char *f, blogc_error_t **err)
+blogc_template_parse_from_file(const char *f, bc_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -73,7 +74,7 @@ blogc_template_parse_from_file(const char *f, blogc_error_t **err)
 
 
 bc_trie_t*
-blogc_source_parse_from_file(const char *f, blogc_error_t **err)
+blogc_source_parse_from_file(const char *f, bc_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -96,9 +97,9 @@ blogc_source_parse_from_file(const char *f, blogc_error_t **err)
 
 
 bc_slist_t*
-blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, blogc_error_t **err)
+blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
 {
-    blogc_error_t *tmp_err = NULL;
+    bc_error_t *tmp_err = NULL;
     bc_slist_t *rv = NULL;
     unsigned int with_date = 0;
 
@@ -123,10 +124,10 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, blogc_error_t **er
         char *f = tmp->data;
         bc_trie_t *s = blogc_source_parse_from_file(f, &tmp_err);
         if (s == NULL) {
-            *err = blogc_error_new_printf(BLOGC_ERROR_LOADER,
+            *err = bc_error_new_printf(BLOGC_ERROR_LOADER,
                 "An error occurred while parsing source file: %s\n\n%s",
                 f, tmp_err->msg);
-            blogc_error_free(tmp_err);
+            bc_error_free(tmp_err);
             tmp_err = NULL;
             bc_slist_free_full(rv, (bc_free_func_t) bc_trie_free);
             rv = NULL;

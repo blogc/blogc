@@ -13,7 +13,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "file.h"
-#include "error.h"
+#include "errors.h"
+#include "../common/error.h"
 #include "../common/utf8.h"
 #include "../common/utils.h"
 
@@ -22,7 +23,7 @@
 
 
 char*
-blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err)
+blogc_file_get_contents(const char *path, size_t *len, bc_error_t **err)
 {
     if (path == NULL || err == NULL || *err != NULL)
         return NULL;
@@ -32,7 +33,7 @@ blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err)
 
     if (fp == NULL) {
         int tmp_errno = errno;
-        *err = blogc_error_new_printf(BLOGC_ERROR_FILE,
+        *err = bc_error_new_printf(BLOGC_ERROR_FILE,
             "Failed to open file (%s): %s", path, strerror(tmp_errno));
         return NULL;
     }
@@ -60,7 +61,7 @@ blogc_file_get_contents(const char *path, size_t *len, blogc_error_t **err)
     fclose(fp);
 
     if (!blogc_utf8_validate_str(str)) {
-        *err = blogc_error_new_printf(BLOGC_ERROR_FILE,
+        *err = bc_error_new_printf(BLOGC_ERROR_FILE,
             "File content is not valid UTF-8: %s", path);
         bc_string_free(str, true);
         return NULL;

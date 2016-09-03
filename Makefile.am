@@ -35,12 +35,13 @@ noinst_HEADERS = \
 	src/blogc/content-parser.h \
 	src/blogc/datetime-parser.h \
 	src/blogc/debug.h \
-	src/blogc/error.h \
+	src/blogc/errors.h \
 	src/blogc/file.h \
 	src/blogc/loader.h \
 	src/blogc/renderer.h \
 	src/blogc/source-parser.h \
 	src/blogc/template-parser.h \
+	src/common/error.h \
 	src/common/utf8.h \
 	src/common/utils.h \
 	$(NULL)
@@ -76,7 +77,7 @@ check_PROGRAMS = \
 libblogc_la_SOURCES = \
 	src/blogc/content-parser.c \
 	src/blogc/datetime-parser.c \
-	src/blogc/error.c \
+	src/blogc/errors.c \
 	src/blogc/file.c \
 	src/blogc/loader.c \
 	src/blogc/renderer.c \
@@ -94,6 +95,7 @@ libblogc_la_LIBADD = \
 
 
 libblogc_common_la_SOURCES = \
+	src/common/error.c \
 	src/common/utf8.c \
 	src/common/utils.c \
 	$(NULL)
@@ -269,31 +271,13 @@ if USE_CMOCKA
 check_PROGRAMS += \
 	tests/blogc/check_content_parser \
 	tests/blogc/check_datetime_parser \
-	tests/blogc/check_error \
 	tests/blogc/check_loader \
 	tests/blogc/check_renderer \
 	tests/blogc/check_source_parser \
 	tests/blogc/check_template_parser \
+	tests/common/check_error \
 	tests/common/check_utf8 \
 	tests/common/check_utils \
-	$(NULL)
-
-tests_blogc_check_error_SOURCES = \
-	tests/blogc/check_error.c \
-	$(NULL)
-
-tests_blogc_check_error_CFLAGS = \
-	$(CMOCKA_CFLAGS) \
-	$(NULL)
-
-tests_blogc_check_error_LDFLAGS = \
-	-no-install \
-	$(NULL)
-
-tests_blogc_check_error_LDADD = \
-	$(CMOCKA_LIBS) \
-	libblogc.la \
-	libblogc_common.la \
 	$(NULL)
 
 tests_blogc_check_loader_SOURCES = \
@@ -403,6 +387,23 @@ tests_blogc_check_template_parser_LDFLAGS = \
 tests_blogc_check_template_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_common.la \
+	$(NULL)
+
+tests_common_check_error_SOURCES = \
+	tests/common/check_error.c \
+	$(NULL)
+
+tests_common_check_error_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_common_check_error_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_common_check_error_LDADD = \
+	$(CMOCKA_LIBS) \
 	libblogc_common.la \
 	$(NULL)
 

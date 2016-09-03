@@ -10,10 +10,11 @@
 #define _SOURCE_PARSER_H
 
 #include <stddef.h>
-#include "error.h"
+#include "errors.h"
+#include "../common/error.h"
 #include "../common/utils.h"
 
 bc_trie_t* blogc_source_parse(const char *src, size_t src_len,
-    blogc_error_t **err);
+    bc_error_t **err);
 
 #endif /* _SOURCE_PARSER_H */

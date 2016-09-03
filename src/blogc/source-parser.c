@@ -11,7 +11,8 @@
 
 #include "content-parser.h"
 #include "source-parser.h"
-#include "error.h"
+#include "errors.h"
+#include "../common/error.h"
 #include "../common/utils.h"
 
 
@@ -27,7 +28,7 @@ typedef enum {
 
 
 bc_trie_t*
-blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
+blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -60,7 +61,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                     state = SOURCE_SEPARATOR;
                     break;
                 }
-                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current,
                     "Can't find a configuration key or the content separator.");
                 break;
@@ -93,7 +94,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                         ((current - start == 13) &&
                          (0 == strncmp("BLOGC_VERSION", src + start, 13))))
                     {
-                        *err = blogc_error_new_printf(BLOGC_ERROR_SOURCE_PARSER,
+                        *err = bc_error_new_printf(BLOGC_ERROR_SOURCE_PARSER,
                             "'%s' variable is forbidden in source files. It will "
                             "be set for you by the compiler.", key);
                         break;
@@ -101,7 +102,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                     state = SOURCE_CONFIG_VALUE_START;
                     break;
                 }
-                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current, "Invalid configuration key.");
                 break;
 
@@ -111,7 +112,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                     start = current;
                     break;
                 }
-                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current, "Configuration value not provided for '%s'.",
                     key);
                 break;
@@ -134,7 +135,7 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
                     state = SOURCE_CONTENT_START;
                     break;
                 }
-                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current,
                     "Invalid content separator. Must be more than one '-' characters.");
                 break;
@@ -183,21 +184,21 @@ blogc_source_parse(const char *src, size_t src_len, blogc_error_t **err)
         // output. :)
         switch (state) {
             case SOURCE_START:
-                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current, "Your source file is empty.");
                 break;
             case SOURCE_CONFIG_KEY:
-                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current, "Your last configuration key is missing ':' and "
                     "the value");
                 break;
             case SOURCE_CONFIG_VALUE_START:
-                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current, "Configuration value not provided for '%s'.",
                     key);
                 break;
             case SOURCE_CONFIG_VALUE:
-                *err = blogc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current, "No line ending after the configuration value for "
                     "'%s'.", key);
                 break;

@@ -52,11 +52,11 @@ blogc*.html
 # tests
 /tests/blogc/check_content_parser
 /tests/blogc/check_datetime_parser
-/tests/blogc/check_error
 /tests/blogc/check_loader
 /tests/blogc/check_renderer
 /tests/blogc/check_source_parser
 /tests/blogc/check_template_parser
+/tests/common/check_error
 /tests/common/check_utf8
 /tests/common/check_utils
 

@@ -10,34 +10,34 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include "error.h"
-#include "../common/utils.h"
+#include "utils.h"
 
 
-blogc_error_t*
-blogc_error_new(blogc_error_type_t type, const char *msg)
+bc_error_t*
+bc_error_new(int type, const char *msg)
 {
-    blogc_error_t *err = bc_malloc(sizeof(blogc_error_t));
+    bc_error_t *err = bc_malloc(sizeof(bc_error_t));
     err->type = type;
     err->msg = bc_strdup(msg);
     return err;
 }
 
 
-blogc_error_t*
-blogc_error_new_printf(blogc_error_type_t type, const char *format, ...)
+bc_error_t*
+bc_error_new_printf(int type, const char *format, ...)
 {
     va_list ap;
     va_start(ap, format);
     char *tmp = bc_strdup_vprintf(format, ap);
     va_end(ap);
-    blogc_error_t *rv = blogc_error_new(type, tmp);
+    bc_error_t *rv = bc_error_new(type, tmp);
     free(tmp);
     return rv;
 }
 
 
-blogc_error_t*
-blogc_error_parser(blogc_error_type_t type, const char *src, size_t src_len,
+bc_error_t*
+bc_error_parser(int type, const char *src, size_t src_len,
     size_t current, const char *format, ...)
 {
     va_list ap;
@@ -85,12 +85,12 @@ blogc_error_parser(blogc_error_type_t type, const char *src, size_t src_len,
 
     char *line = bc_strndup(src + linestart, lineend - linestart);
 
-    blogc_error_t *rv = NULL;
+    bc_error_t *rv = NULL;
 
     if (line[0] == '\0')  // "near" message isn't useful if line is empty
-        rv = blogc_error_new(type, msg);
+        rv = bc_error_new(type, msg);
     else
-        rv = blogc_error_new_printf(type,
+        rv = bc_error_new_printf(type,
             "%s\nError occurred near line %d, position %d: %s", msg, lineno,
             pos, line);
 
@@ -102,35 +102,7 @@ blogc_error_parser(blogc_error_type_t type, const char *src, size_t src_len,
 
 
 void
-blogc_error_print(blogc_error_t *err)
-{
-    if (err == NULL)
-        return;
-
-    switch(err->type) {
-        case BLOGC_ERROR_SOURCE_PARSER:
-            fprintf(stderr, "blogc: error: source: %s\n", err->msg);
-            break;
-        case BLOGC_ERROR_TEMPLATE_PARSER:
-            fprintf(stderr, "blogc: error: template: %s\n", err->msg);
-            break;
-        case BLOGC_ERROR_LOADER:
-            fprintf(stderr, "blogc: error: loader: %s\n", err->msg);
-            break;
-        case BLOGC_ERROR_FILE:
-            fprintf(stderr, "blogc: error: file: %s\n", err->msg);
-            break;
-        case BLOGC_WARNING_DATETIME_PARSER:
-            fprintf(stderr, "blogc: warning: datetime: %s\n", err->msg);
-            break;
-        default:
-            fprintf(stderr, "blogc: error: %s\n", err->msg);
-    }
-}
-
-
-void
-blogc_error_free(blogc_error_t *err)
+bc_error_free(bc_error_t *err)
 {
     if (err == NULL)
         return;

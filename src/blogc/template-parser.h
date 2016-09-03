@@ -10,7 +10,8 @@
 #define _TEMPLATE_PARSER_H
 
 #include <stddef.h>
-#include "error.h"
+#include "errors.h"
+#include "../common/error.h"
 #include "../common/utils.h"
 
 /*
@@ -47,7 +48,7 @@ typedef struct {
 } blogc_template_stmt_t;
 
 bc_slist_t* blogc_template_parse(const char *src, size_t src_len,
-    blogc_error_t **err);
+    bc_error_t **err);
 void blogc_template_free_stmts(bc_slist_t *stmts);
 
 #endif /* _TEMPLATE_PARSER_H */

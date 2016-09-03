@@ -26,7 +26,8 @@
 #include "template-parser.h"
 #include "loader.h"
 #include "renderer.h"
-#include "error.h"
+#include "errors.h"
+#include "../common/error.h"
 #include "../common/utf8.h"
 #include "../common/utils.h"
 
@@ -219,7 +220,7 @@ main(int argc, char **argv)
         goto cleanup;
     }
 
-    blogc_error_t *err = NULL;
+    bc_error_t *err = NULL;
 
     bc_slist_t *s = blogc_source_parse_from_files(config, sources, &err);
     if (err != NULL) {
@@ -286,7 +287,7 @@ cleanup3:
     blogc_template_free_stmts(l);
 cleanup2:
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
-    blogc_error_free(err);
+    bc_error_free(err);
 cleanup:
     bc_trie_free(config);
     free(template);
