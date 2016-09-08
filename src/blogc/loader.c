@@ -16,7 +16,6 @@
 #include "source-parser.h"
 #include "template-parser.h"
 #include "loader.h"
-#include "errors.h"
 #include "../common/error.h"
 #include "../common/utils.h"
 

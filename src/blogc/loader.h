@@ -9,7 +9,6 @@
 #ifndef _LOADER_H
 #define _LOADER_H
 
-#include "errors.h"
 #include "../common/error.h"
 #include "../common/utils.h"
 

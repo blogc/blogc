@@ -26,7 +26,6 @@
 #include "template-parser.h"
 #include "loader.h"
 #include "renderer.h"
-#include "errors.h"
 #include "../common/error.h"
 #include "../common/utf8.h"
 #include "../common/utils.h"
@@ -224,7 +223,7 @@ main(int argc, char **argv)
 
     bc_slist_t *s = blogc_source_parse_from_files(config, sources, &err);
     if (err != NULL) {
-        blogc_error_print(err);
+        bc_error_print(err);
         rv = 2;
         goto cleanup2;
     }
@@ -251,7 +250,7 @@ main(int argc, char **argv)
 
     bc_slist_t* l = blogc_template_parse_from_file(template, &err);
     if (err != NULL) {
-        blogc_error_print(err);
+        bc_error_print(err);
         rv = 2;
         goto cleanup3;
     }

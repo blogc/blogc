@@ -35,7 +35,6 @@ noinst_HEADERS = \
 	src/blogc/content-parser.h \
 	src/blogc/datetime-parser.h \
 	src/blogc/debug.h \
-	src/blogc/errors.h \
 	src/blogc/file.h \
 	src/blogc/loader.h \
 	src/blogc/renderer.h \
@@ -77,7 +76,6 @@ check_PROGRAMS = \
 libblogc_la_SOURCES = \
 	src/blogc/content-parser.c \
 	src/blogc/datetime-parser.c \
-	src/blogc/errors.c \
 	src/blogc/file.c \
 	src/blogc/loader.c \
 	src/blogc/renderer.c \

@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "file.h"
-#include "errors.h"
 #include "../common/error.h"
 #include "../common/utf8.h"
 #include "../common/utils.h"

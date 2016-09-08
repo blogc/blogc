@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include "../../src/common/error.h"
 #include "../../src/common/utils.h"
-#include "../../src/blogc/errors.h"
 #include "../../src/blogc/template-parser.h"
 #include "../../src/blogc/loader.h"
 

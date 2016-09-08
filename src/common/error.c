@@ -101,6 +101,35 @@ bc_error_parser(int type, const char *src, size_t src_len,
 }
 
 
+// error handling is centralized here for the sake of simplicity :/
+void
+bc_error_print(bc_error_t *err)
+{
+    if (err == NULL)
+        return;
+
+    switch(err->type) {
+        case BLOGC_ERROR_SOURCE_PARSER:
+            fprintf(stderr, "blogc: error: source: %s\n", err->msg);
+            break;
+        case BLOGC_ERROR_TEMPLATE_PARSER:
+            fprintf(stderr, "blogc: error: template: %s\n", err->msg);
+            break;
+        case BLOGC_ERROR_LOADER:
+            fprintf(stderr, "blogc: error: loader: %s\n", err->msg);
+            break;
+        case BLOGC_ERROR_FILE:
+            fprintf(stderr, "blogc: error: file: %s\n", err->msg);
+            break;
+        case BLOGC_WARNING_DATETIME_PARSER:
+            fprintf(stderr, "blogc: warning: datetime: %s\n", err->msg);
+            break;
+        default:
+            fprintf(stderr, "blogc: error: %s\n", err->msg);
+    }
+}
+
+
 void
 bc_error_free(bc_error_t *err)
 {

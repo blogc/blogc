@@ -9,7 +9,6 @@
 #ifndef _DATETIME_H
 #define _DATETIME_H
 
-#include "errors.h"
 #include "../common/error.h"
 
 char* blogc_convert_datetime(const char *orig, const char *format,

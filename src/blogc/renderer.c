@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "datetime-parser.h"
-#include "errors.h"
 #include "template-parser.h"
 #include "renderer.h"
 #include "../common/error.h"
@@ -47,7 +46,7 @@ blogc_format_date(const char *date, bc_trie_t *global, bc_trie_t *local)
     bc_error_t *err = NULL;
     char *rv = blogc_convert_datetime(date, date_format, &err);
     if (err != NULL) {
-        blogc_error_print(err);
+        bc_error_print(err);
         bc_error_free(err);
         return bc_strdup(date);
     }

@@ -10,7 +10,6 @@
 #define _SOURCE_PARSER_H
 
 #include <stddef.h>
-#include "errors.h"
 #include "../common/error.h"
 #include "../common/utils.h"
 

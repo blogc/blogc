@@ -11,9 +11,20 @@
 
 #include <stddef.h>
 
+// error handling is centralized here for the sake of simplicity :/
+typedef enum {
+
+    // errors for src/blogc
+    BLOGC_ERROR_SOURCE_PARSER = 100,
+    BLOGC_ERROR_TEMPLATE_PARSER,
+    BLOGC_ERROR_LOADER,
+    BLOGC_ERROR_FILE,
+    BLOGC_WARNING_DATETIME_PARSER,
+} bc_error_type_t;
+
 typedef struct {
     char *msg;
-    int type;
+    bc_error_type_t type;
 } bc_error_t;
 
 bc_error_t* bc_error_new(int type, const char *msg);
