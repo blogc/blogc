@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include "../../src/common/utils.h"
 
-#define SB_STRING_CHUNK_SIZE 128
+#define BC_STRING_CHUNK_SIZE 128
 
 
 static void
@@ -302,7 +302,7 @@ test_string_new(void **state)
     assert_non_null(str);
     assert_string_equal(str->str, "");
     assert_int_equal(str->len, 0);
-    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_int_equal(str->allocated_len, BC_STRING_CHUNK_SIZE);
     assert_null(bc_string_free(str, true));
 }
 
@@ -314,7 +314,7 @@ test_string_free(void **state)
     free(str->str);
     str->str = bc_strdup("bola");
     str->len = 4;
-    str->allocated_len = SB_STRING_CHUNK_SIZE;
+    str->allocated_len = BC_STRING_CHUNK_SIZE;
     char *tmp = bc_string_free(str, false);
     assert_string_equal(tmp, "bola");
     free(tmp);
@@ -329,12 +329,12 @@ test_string_dup(void **state)
     free(str->str);
     str->str = bc_strdup("bola");
     str->len = 4;
-    str->allocated_len = SB_STRING_CHUNK_SIZE;
+    str->allocated_len = BC_STRING_CHUNK_SIZE;
     bc_string_t *new = bc_string_dup(str);
     assert_non_null(new);
     assert_string_equal(new->str, "bola");
     assert_int_equal(new->len, 4);
-    assert_int_equal(new->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_int_equal(new->allocated_len, BC_STRING_CHUNK_SIZE);
     assert_null(bc_string_free(new, true));
     assert_null(bc_string_free(str, true));
     assert_null(bc_string_dup(NULL));
@@ -349,7 +349,7 @@ test_string_append_len(void **state)
     assert_non_null(str);
     assert_string_equal(str->str, "guda");
     assert_int_equal(str->len, 4);
-    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_int_equal(str->allocated_len, BC_STRING_CHUNK_SIZE);
     assert_null(bc_string_free(str, true));
     str = bc_string_new();
     str = bc_string_append_len(str, "guda", 4);
@@ -357,7 +357,7 @@ test_string_append_len(void **state)
     assert_non_null(str);
     assert_string_equal(str->str, "gudabola");
     assert_int_equal(str->len, 8);
-    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_int_equal(str->allocated_len, BC_STRING_CHUNK_SIZE);
     assert_null(bc_string_free(str, true));
     str = bc_string_new();
     str = bc_string_append_len(str, "guda", 3);
@@ -365,7 +365,7 @@ test_string_append_len(void **state)
     assert_non_null(str);
     assert_string_equal(str->str, "gudbola");
     assert_int_equal(str->len, 7);
-    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_int_equal(str->allocated_len, BC_STRING_CHUNK_SIZE);
     assert_null(bc_string_free(str, true));
     str = bc_string_new();
     str = bc_string_append_len(str, "guda", 4);
@@ -411,14 +411,14 @@ test_string_append_len(void **state)
         "pdnqokswiondusnuymqwaryrmdgscbnuilxtypuynckancsfnwtgokxhegoifakimxbba"
         "fkeannglvsxprqzfekdinssqymtfexf");
     assert_int_equal(str->len, 1204);
-    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE * 10);
+    assert_int_equal(str->allocated_len, BC_STRING_CHUNK_SIZE * 10);
     assert_null(bc_string_free(str, true));
     str = bc_string_new();
     str = bc_string_append_len(str, NULL, 0);
     assert_non_null(str);
     assert_string_equal(str->str, "");
     assert_int_equal(str->len, 0);
-    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_int_equal(str->allocated_len, BC_STRING_CHUNK_SIZE);
     assert_null(bc_string_free(str, true));
     assert_null(bc_string_append_len(NULL, "foo", 3));
 }
@@ -432,7 +432,7 @@ test_string_append(void **state)
     assert_non_null(str);
     assert_string_equal(str->str, "guda");
     assert_int_equal(str->len, 4);
-    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_int_equal(str->allocated_len, BC_STRING_CHUNK_SIZE);
     assert_null(bc_string_free(str, true));
     str = bc_string_new();
     str = bc_string_append(str, "guda");
@@ -440,7 +440,7 @@ test_string_append(void **state)
     assert_non_null(str);
     assert_string_equal(str->str, "gudabola");
     assert_int_equal(str->len, 8);
-    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_int_equal(str->allocated_len, BC_STRING_CHUNK_SIZE);
     assert_null(bc_string_free(str, true));
     str = bc_string_new();
     str = bc_string_append(str, "guda");
@@ -486,14 +486,14 @@ test_string_append(void **state)
         "pdnqokswiondusnuymqwaryrmdgscbnuilxtypuynckancsfnwtgokxhegoifakimxbba"
         "fkeannglvsxprqzfekdinssqymtfexf");
     assert_int_equal(str->len, 1204);
-    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE * 10);
+    assert_int_equal(str->allocated_len, BC_STRING_CHUNK_SIZE * 10);
     assert_null(bc_string_free(str, true));
     str = bc_string_new();
     str = bc_string_append(str, NULL);
     assert_non_null(str);
     assert_string_equal(str->str, "");
     assert_int_equal(str->len, 0);
-    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_int_equal(str->allocated_len, BC_STRING_CHUNK_SIZE);
     assert_null(bc_string_free(str, true));
     assert_null(bc_string_append(NULL, "asd"));
     assert_null(bc_string_append(NULL, NULL));
@@ -519,7 +519,7 @@ test_string_append_c(void **state)
         "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
         "cccccccccccccccccccccccccccccccccccccccccccccccccccc");
     assert_int_equal(str->len, 604);
-    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE * 5);
+    assert_int_equal(str->allocated_len, BC_STRING_CHUNK_SIZE * 5);
     assert_null(bc_string_free(str, true));
     assert_null(bc_string_append_c(NULL, 0));
 }
@@ -533,7 +533,7 @@ test_string_append_printf(void **state)
     assert_non_null(str);
     assert_string_equal(str->str, "guda: bola 1");
     assert_int_equal(str->len, 12);
-    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_int_equal(str->allocated_len, BC_STRING_CHUNK_SIZE);
     assert_null(bc_string_free(str, true));
     assert_null(bc_string_append_printf(NULL, "asd"));
 }
@@ -547,12 +547,12 @@ test_string_append_escaped(void **state)
     assert_non_null(str);
     assert_string_equal(str->str, "");
     assert_int_equal(str->len, 0);
-    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_int_equal(str->allocated_len, BC_STRING_CHUNK_SIZE);
     str = bc_string_append_escaped(str, "foo \\a bar \\\\ lol");
     assert_non_null(str);
     assert_string_equal(str->str, "foo a bar \\ lol");
     assert_int_equal(str->len, 15);
-    assert_int_equal(str->allocated_len, SB_STRING_CHUNK_SIZE);
+    assert_int_equal(str->allocated_len, BC_STRING_CHUNK_SIZE);
     assert_null(bc_string_free(str, true));
     assert_null(bc_string_append_escaped(NULL, "asd"));
 }

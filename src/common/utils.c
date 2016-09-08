@@ -6,7 +6,7 @@
  * See the file LICENSE.
  */
 
-#define SB_STRING_CHUNK_SIZE 128
+#define BC_STRING_CHUNK_SIZE 128
 
 #include <string.h>
 #include <stdarg.h>
@@ -389,7 +389,7 @@ bc_string_append_len(bc_string_t *str, const char *suffix, size_t len)
     size_t old_len = str->len;
     str->len += len;
     if (str->len + 1 > str->allocated_len) {
-        str->allocated_len = (((str->len + 1) / SB_STRING_CHUNK_SIZE) + 1) * SB_STRING_CHUNK_SIZE;
+        str->allocated_len = (((str->len + 1) / BC_STRING_CHUNK_SIZE) + 1) * BC_STRING_CHUNK_SIZE;
         str->str = bc_realloc(str->str, str->allocated_len);
     }
     memcpy(str->str + old_len, suffix, len);
@@ -416,7 +416,7 @@ bc_string_append_c(bc_string_t *str, char c)
     size_t old_len = str->len;
     str->len += 1;
     if (str->len + 1 > str->allocated_len) {
-        str->allocated_len = (((str->len + 1) / SB_STRING_CHUNK_SIZE) + 1) * SB_STRING_CHUNK_SIZE;
+        str->allocated_len = (((str->len + 1) / BC_STRING_CHUNK_SIZE) + 1) * BC_STRING_CHUNK_SIZE;
         str->str = bc_realloc(str->str, str->allocated_len);
     }
     str->str[old_len] = c;
