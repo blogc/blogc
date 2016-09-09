@@ -56,6 +56,7 @@ blogc*.html
 /tests/blogc/check_renderer
 /tests/blogc/check_source_parser
 /tests/blogc/check_template_parser
+/tests/common/check_config_parser
 /tests/common/check_error
 /tests/common/check_utf8
 /tests/common/check_utils

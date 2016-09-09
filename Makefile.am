@@ -40,6 +40,7 @@ noinst_HEADERS = \
 	src/blogc/renderer.h \
 	src/blogc/source-parser.h \
 	src/blogc/template-parser.h \
+	src/common/config-parser.h \
 	src/common/error.h \
 	src/common/utf8.h \
 	src/common/utils.h \
@@ -93,6 +94,7 @@ libblogc_la_LIBADD = \
 
 
 libblogc_common_la_SOURCES = \
+	src/common/config-parser.c \
 	src/common/error.c \
 	src/common/utf8.c \
 	src/common/utils.c \
@@ -273,6 +275,7 @@ check_PROGRAMS += \
 	tests/blogc/check_renderer \
 	tests/blogc/check_source_parser \
 	tests/blogc/check_template_parser \
+	tests/common/check_config_parser \
 	tests/common/check_error \
 	tests/common/check_utf8 \
 	tests/common/check_utils \
@@ -385,6 +388,23 @@ tests_blogc_check_template_parser_LDFLAGS = \
 tests_blogc_check_template_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
+	libblogc_common.la \
+	$(NULL)
+
+tests_common_check_config_parser_SOURCES = \
+	tests/common/check_config_parser.c \
+	$(NULL)
+
+tests_common_check_config_parser_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_common_check_config_parser_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_common_check_config_parser_LDADD = \
+	$(CMOCKA_LIBS) \
 	libblogc_common.la \
 	$(NULL)
 

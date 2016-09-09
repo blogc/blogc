@@ -14,6 +14,9 @@
 // error handling is centralized here for the sake of simplicity :/
 typedef enum {
 
+    // errors for src/common
+    BC_ERROR_CONFIG_PARSER = 1,
+
     // errors for src/blogc
     BLOGC_ERROR_SOURCE_PARSER = 100,
     BLOGC_ERROR_TEMPLATE_PARSER,
