@@ -35,13 +35,13 @@ noinst_HEADERS = \
 	src/blogc/content-parser.h \
 	src/blogc/datetime-parser.h \
 	src/blogc/debug.h \
-	src/blogc/file.h \
 	src/blogc/loader.h \
 	src/blogc/renderer.h \
 	src/blogc/source-parser.h \
 	src/blogc/template-parser.h \
 	src/common/config-parser.h \
 	src/common/error.h \
+	src/common/file.h \
 	src/common/utf8.h \
 	src/common/utils.h \
 	$(NULL)
@@ -77,7 +77,6 @@ check_PROGRAMS = \
 libblogc_la_SOURCES = \
 	src/blogc/content-parser.c \
 	src/blogc/datetime-parser.c \
-	src/blogc/file.c \
 	src/blogc/loader.c \
 	src/blogc/renderer.c \
 	src/blogc/source-parser.c \
@@ -96,6 +95,7 @@ libblogc_la_LIBADD = \
 libblogc_common_la_SOURCES = \
 	src/common/config-parser.c \
 	src/common/error.c \
+	src/common/file.c \
 	src/common/utf8.c \
 	src/common/utils.c \
 	$(NULL)
@@ -291,8 +291,7 @@ tests_blogc_check_loader_CFLAGS = \
 
 tests_blogc_check_loader_LDFLAGS = \
 	-no-install \
-	-Wl,--wrap=blogc_file_get_contents \
-	-Wl,--wrap=blogc_fprintf \
+	-Wl,--wrap=bc_file_get_contents \
 	$(NULL)
 
 tests_blogc_check_loader_LDADD = \

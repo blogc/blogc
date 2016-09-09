@@ -13,16 +13,13 @@
 #include <stdio.h>
 #include <string.h>
 #include "file.h"
-#include "../common/error.h"
-#include "../common/utf8.h"
-#include "../common/utils.h"
-
-// this would belong to loader.c, but we need it in a separated file to be
-// able to mock it when unit testing the loader functions.
+#include "error.h"
+#include "utf8.h"
+#include "utils.h"
 
 
 char*
-blogc_file_get_contents(const char *path, size_t *len, bc_error_t **err)
+bc_file_get_contents(const char *path, size_t *len, bc_error_t **err)
 {
     if (path == NULL || err == NULL || *err != NULL)
         return NULL;
@@ -32,17 +29,17 @@ blogc_file_get_contents(const char *path, size_t *len, bc_error_t **err)
 
     if (fp == NULL) {
         int tmp_errno = errno;
-        *err = bc_error_new_printf(BLOGC_ERROR_FILE,
+        *err = bc_error_new_printf(BC_ERROR_FILE,
             "Failed to open file (%s): %s", path, strerror(tmp_errno));
         return NULL;
     }
 
     bc_string_t *str = bc_string_new();
-    char buffer[BLOGC_FILE_CHUNK_SIZE];
+    char buffer[BC_FILE_CHUNK_SIZE];
     char *tmp;
 
     while (!feof(fp)) {
-        size_t read_len = fread(buffer, sizeof(char), BLOGC_FILE_CHUNK_SIZE, fp);
+        size_t read_len = fread(buffer, sizeof(char), BC_FILE_CHUNK_SIZE, fp);
 
         tmp = buffer;
 
@@ -60,7 +57,7 @@ blogc_file_get_contents(const char *path, size_t *len, bc_error_t **err)
     fclose(fp);
 
     if (!bc_utf8_validate_str(str)) {
-        *err = bc_error_new_printf(BLOGC_ERROR_FILE,
+        *err = bc_error_new_printf(BC_ERROR_FILE,
             "File content is not valid UTF-8: %s", path);
         bc_string_free(str, true);
         return NULL;

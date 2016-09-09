@@ -12,11 +12,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "file.h"
 #include "source-parser.h"
 #include "template-parser.h"
 #include "loader.h"
 #include "../common/error.h"
+#include "../common/file.h"
 #include "../common/utils.h"
 
 
@@ -63,7 +63,7 @@ blogc_template_parse_from_file(const char *f, bc_error_t **err)
     if (err == NULL || *err != NULL)
         return NULL;
     size_t len;
-    char *s = blogc_file_get_contents(f, &len, err);
+    char *s = bc_file_get_contents(f, &len, err);
     if (s == NULL)
         return NULL;
     bc_slist_t *rv = blogc_template_parse(s, len, err);
@@ -78,7 +78,7 @@ blogc_source_parse_from_file(const char *f, bc_error_t **err)
     if (err == NULL || *err != NULL)
         return NULL;
     size_t len;
-    char *s = blogc_file_get_contents(f, &len, err);
+    char *s = bc_file_get_contents(f, &len, err);
     if (s == NULL)
         return NULL;
     bc_trie_t *rv = blogc_source_parse(s, len, err);

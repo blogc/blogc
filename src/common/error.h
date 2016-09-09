@@ -16,12 +16,12 @@ typedef enum {
 
     // errors for src/common
     BC_ERROR_CONFIG_PARSER = 1,
+    BC_ERROR_FILE,
 
     // errors for src/blogc
     BLOGC_ERROR_SOURCE_PARSER = 100,
     BLOGC_ERROR_TEMPLATE_PARSER,
     BLOGC_ERROR_LOADER,
-    BLOGC_ERROR_FILE,
     BLOGC_WARNING_DATETIME_PARSER,
 } bc_error_type_t;
 

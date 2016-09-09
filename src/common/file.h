@@ -10,10 +10,10 @@
 #define _FILE_H
 
 #include <stddef.h>
-#include "../common/error.h"
+#include "error.h"
 
-#define BLOGC_FILE_CHUNK_SIZE 1024
+#define BC_FILE_CHUNK_SIZE 1024
 
-char* blogc_file_get_contents(const char *path, size_t *len, bc_error_t **err);
+char* bc_file_get_contents(const char *path, size_t *len, bc_error_t **err);
 
 #endif /* _FILE_H */

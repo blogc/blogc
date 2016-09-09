@@ -50,7 +50,7 @@ test_get_filename(void **state)
 
 
 char*
-__wrap_blogc_file_get_contents(const char *path, size_t *len, bc_error_t **err)
+__wrap_bc_file_get_contents(const char *path, size_t *len, bc_error_t **err)
 {
     assert_null(*err);
     const char *_path = mock_type(const char*);
@@ -68,8 +68,8 @@ static void
 test_template_parse_from_file(void **state)
 {
     bc_error_t *err = NULL;
-    will_return(__wrap_blogc_file_get_contents, "bola");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup("{{ BOLA }}\n"));
+    will_return(__wrap_bc_file_get_contents, "bola");
+    will_return(__wrap_bc_file_get_contents, bc_strdup("{{ BOLA }}\n"));
     bc_slist_t *l = blogc_template_parse_from_file("bola", &err);
     assert_null(err);
     assert_non_null(l);
@@ -82,8 +82,8 @@ static void
 test_template_parse_from_file_null(void **state)
 {
     bc_error_t *err = NULL;
-    will_return(__wrap_blogc_file_get_contents, "bola");
-    will_return(__wrap_blogc_file_get_contents, NULL);
+    will_return(__wrap_bc_file_get_contents, "bola");
+    will_return(__wrap_bc_file_get_contents, NULL);
     bc_slist_t *l = blogc_template_parse_from_file("bola", &err);
     assert_null(err);
     assert_null(l);
@@ -94,8 +94,8 @@ static void
 test_source_parse_from_file(void **state)
 {
     bc_error_t *err = NULL;
-    will_return(__wrap_blogc_file_get_contents, "bola.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 123\n"
         "--------\n"
         "bola"));
@@ -117,8 +117,8 @@ static void
 test_source_parse_from_file_null(void **state)
 {
     bc_error_t *err = NULL;
-    will_return(__wrap_blogc_file_get_contents, "bola.txt");
-    will_return(__wrap_blogc_file_get_contents, NULL);
+    will_return(__wrap_bc_file_get_contents, "bola.txt");
+    will_return(__wrap_bc_file_get_contents, NULL);
     bc_trie_t *t = blogc_source_parse_from_file("bola.txt", &err);
     assert_null(err);
     assert_null(t);
@@ -128,20 +128,20 @@ test_source_parse_from_file_null(void **state)
 static void
 test_source_parse_from_files(void **state)
 {
-    will_return(__wrap_blogc_file_get_contents, "bola1.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 123\n"
         "DATE: 2001-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola2.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola2.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 456\n"
         "DATE: 2002-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola3.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola3.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 789\n"
         "DATE: 2003-02-03 04:05:06\n"
         "--------\n"
@@ -170,22 +170,22 @@ test_source_parse_from_files(void **state)
 static void
 test_source_parse_from_files_filter_by_tag(void **state)
 {
-    will_return(__wrap_blogc_file_get_contents, "bola1.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 123\n"
         "DATE: 2001-02-03 04:05:06\n"
         "TAGS: chunda\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola2.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola2.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 456\n"
         "DATE: 2002-02-03 04:05:06\n"
         "TAGS: bola, chunda\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola3.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola3.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 789\n"
         "DATE: 2003-02-03 04:05:06\n"
         "--------\n"
@@ -216,44 +216,44 @@ test_source_parse_from_files_filter_by_tag(void **state)
 static void
 test_source_parse_from_files_filter_by_page(void **state)
 {
-    will_return(__wrap_blogc_file_get_contents, "bola1.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 123\n"
         "DATE: 2001-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola2.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola2.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 456\n"
         "DATE: 2002-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola3.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola3.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 789\n"
         "DATE: 2003-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola4.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola4.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7891\n"
         "DATE: 2004-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola5.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola5.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7892\n"
         "DATE: 2005-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola6.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola6.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7893\n"
         "DATE: 2006-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola7.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola7.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7894\n"
         "DATE: 2007-02-03 04:05:06\n"
         "--------\n"
@@ -294,44 +294,44 @@ test_source_parse_from_files_filter_by_page(void **state)
 static void
 test_source_parse_from_files_filter_by_page2(void **state)
 {
-    will_return(__wrap_blogc_file_get_contents, "bola1.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 123\n"
         "DATE: 2001-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola2.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola2.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 456\n"
         "DATE: 2002-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola3.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola3.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 789\n"
         "DATE: 2003-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola4.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola4.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7891\n"
         "DATE: 2004-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola5.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola5.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7892\n"
         "DATE: 2005-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola6.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola6.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7893\n"
         "DATE: 2006-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola7.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola7.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7894\n"
         "DATE: 2007-02-03 04:05:06\n"
         "--------\n"
@@ -373,44 +373,44 @@ test_source_parse_from_files_filter_by_page2(void **state)
 static void
 test_source_parse_from_files_filter_by_page3(void **state)
 {
-    will_return(__wrap_blogc_file_get_contents, "bola1.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 123\n"
         "DATE: 2001-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola2.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola2.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 456\n"
         "DATE: 2002-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola3.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola3.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 789\n"
         "DATE: 2003-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola4.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola4.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7891\n"
         "DATE: 2004-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola5.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola5.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7892\n"
         "DATE: 2005-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola6.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola6.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7893\n"
         "DATE: 2006-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola7.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola7.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7894\n"
         "DATE: 2007-02-03 04:05:06\n"
         "--------\n"
@@ -451,48 +451,48 @@ test_source_parse_from_files_filter_by_page3(void **state)
 static void
 test_source_parse_from_files_filter_by_page_and_tag(void **state)
 {
-    will_return(__wrap_blogc_file_get_contents, "bola1.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 123\n"
         "DATE: 2001-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola2.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola2.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 456\n"
         "DATE: 2002-02-03 04:05:06\n"
         "TAGS: chunda\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola3.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola3.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 789\n"
         "DATE: 2003-02-03 04:05:06\n"
         "TAGS: chunda bola\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola4.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola4.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7891\n"
         "DATE: 2004-02-03 04:05:06\n"
         "TAGS: bola\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola5.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola5.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7892\n"
         "DATE: 2005-02-03 04:05:06\n"
         "TAGS: chunda\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola6.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola6.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7893\n"
         "DATE: 2006-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola7.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola7.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7894\n"
         "DATE: 2007-02-03 04:05:06\n"
         "TAGS: yay chunda\n"
@@ -536,44 +536,44 @@ test_source_parse_from_files_filter_by_page_and_tag(void **state)
 static void
 test_source_parse_from_files_filter_by_page_invalid(void **state)
 {
-    will_return(__wrap_blogc_file_get_contents, "bola1.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 123\n"
         "DATE: 2001-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola2.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola2.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 456\n"
         "DATE: 2002-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola3.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola3.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 789\n"
         "DATE: 2003-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola4.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola4.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7891\n"
         "DATE: 2004-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola5.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola5.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7892\n"
         "DATE: 2005-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola6.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola6.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7893\n"
         "DATE: 2006-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola7.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola7.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7894\n"
         "DATE: 2007-02-03 04:05:06\n"
         "--------\n"
@@ -614,44 +614,44 @@ test_source_parse_from_files_filter_by_page_invalid(void **state)
 static void
 test_source_parse_from_files_filter_by_page_invalid2(void **state)
 {
-    will_return(__wrap_blogc_file_get_contents, "bola1.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 123\n"
         "DATE: 2001-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola2.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola2.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 456\n"
         "DATE: 2002-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola3.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola3.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 789\n"
         "DATE: 2003-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola4.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola4.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7891\n"
         "DATE: 2004-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola5.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola5.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7892\n"
         "DATE: 2005-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola6.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola6.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7893\n"
         "DATE: 2006-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola7.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola7.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 7894\n"
         "DATE: 2007-02-03 04:05:06\n"
         "--------\n"
@@ -679,19 +679,19 @@ test_source_parse_from_files_filter_by_page_invalid2(void **state)
 static void
 test_source_parse_from_files_without_all_dates(void **state)
 {
-    will_return(__wrap_blogc_file_get_contents, "bola1.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 123\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola2.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola2.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 456\n"
         "DATE: 2002-02-03 04:05:06\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_blogc_file_get_contents, "bola3.txt");
-    will_return(__wrap_blogc_file_get_contents, bc_strdup(
+    will_return(__wrap_bc_file_get_contents, "bola3.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 789\n"
         "DATE: 2003-02-03 04:05:06\n"
         "--------\n"

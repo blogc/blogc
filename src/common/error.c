@@ -112,6 +112,9 @@ bc_error_print(bc_error_t *err)
         case BC_ERROR_CONFIG_PARSER:
             fprintf(stderr, "error: config-parser: %s\n", err->msg);
             break;
+        case BC_ERROR_FILE:
+            fprintf(stderr, "error: file: %s\n", err->msg);
+            break;
         case BLOGC_ERROR_SOURCE_PARSER:
             fprintf(stderr, "error: source: %s\n", err->msg);
             break;
@@ -120,9 +123,6 @@ bc_error_print(bc_error_t *err)
             break;
         case BLOGC_ERROR_LOADER:
             fprintf(stderr, "error: loader: %s\n", err->msg);
-            break;
-        case BLOGC_ERROR_FILE:
-            fprintf(stderr, "error: file: %s\n", err->msg);
             break;
         case BLOGC_WARNING_DATETIME_PARSER:
             fprintf(stderr, "warning: datetime: %s\n", err->msg);
