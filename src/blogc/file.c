@@ -49,7 +49,7 @@ blogc_file_get_contents(const char *path, size_t *len, bc_error_t **err)
         if (str->len == 0 && read_len > 0) {
             // skipping BOM before validation, for performance. should be safe
             // enough
-            size_t skip = blogc_utf8_skip_bom((uint8_t*) buffer, read_len);
+            size_t skip = bc_utf8_skip_bom((uint8_t*) buffer, read_len);
             read_len -= skip;
             tmp += skip;
         }
@@ -59,7 +59,7 @@ blogc_file_get_contents(const char *path, size_t *len, bc_error_t **err)
     }
     fclose(fp);
 
-    if (!blogc_utf8_validate_str(str)) {
+    if (!bc_utf8_validate_str(str)) {
         *err = bc_error_new_printf(BLOGC_ERROR_FILE,
             "File content is not valid UTF-8: %s", path);
         bc_string_free(str, true);

@@ -70,7 +70,7 @@ decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
 
 
 bool
-blogc_utf8_validate(const uint8_t *str, size_t len)
+bc_utf8_validate(const uint8_t *str, size_t len)
 {
     uint32_t codepoint;
     uint32_t state = 0;
@@ -83,14 +83,14 @@ blogc_utf8_validate(const uint8_t *str, size_t len)
 
 
 bool
-blogc_utf8_validate_str(bc_string_t *str)
+bc_utf8_validate_str(bc_string_t *str)
 {
-    return blogc_utf8_validate((uint8_t*) str->str, str->len);
+    return bc_utf8_validate((uint8_t*) str->str, str->len);
 }
 
 
 size_t
-blogc_utf8_skip_bom(const uint8_t *str, size_t len)
+bc_utf8_skip_bom(const uint8_t *str, size_t len)
 {
     if (len < 3)
         return 0;

@@ -162,7 +162,7 @@ main(int argc, char **argv)
                     else if (i + 1 < argc)
                         tmp = argv[++i];
                     if (tmp != NULL) {
-                        if (!blogc_utf8_validate((uint8_t*) tmp, strlen(tmp))) {
+                        if (!bc_utf8_validate((uint8_t*) tmp, strlen(tmp))) {
                             fprintf(stderr, "blogc: error: invalid value for "
                                 "-D (must be valid UTF-8 string): %s\n", tmp);
                             goto cleanup;
