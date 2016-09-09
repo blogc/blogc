@@ -64,15 +64,6 @@ __wrap_blogc_file_get_contents(const char *path, size_t *len, bc_error_t **err)
 }
 
 
-int
-__wrap_blogc_fprintf(FILE *stream, const char *format, ...)
-{
-    assert_true(stream == mock_type(FILE*));
-    assert_string_equal(format, mock_type(const char*));
-    return strlen(format);
-}
-
-
 static void
 test_template_parse_from_file(void **state)
 {
@@ -688,11 +679,6 @@ test_source_parse_from_files_filter_by_page_invalid2(void **state)
 static void
 test_source_parse_from_files_without_all_dates(void **state)
 {
-    will_return(__wrap_blogc_fprintf, stderr);
-    will_return(__wrap_blogc_fprintf,
-        "blogc: warning: 'DATE' variable provided for at least one source "
-        "file, but not for all source files. This means that you may get wrong "
-        "values for 'DATE_FIRST' and 'DATE_LAST' variables.\n");
     will_return(__wrap_blogc_file_get_contents, "bola1.txt");
     will_return(__wrap_blogc_file_get_contents, bc_strdup(
         "ASD: 123\n"
@@ -717,16 +703,16 @@ test_source_parse_from_files_without_all_dates(void **state)
     s = bc_slist_append(s, bc_strdup("bola3.txt"));
     bc_trie_t *c = bc_trie_new(free);
     bc_slist_t *t = blogc_source_parse_from_files(c, s, &err);
-    assert_null(err);
-    assert_non_null(t);
-    assert_int_equal(bc_slist_length(t), 3);  // it is enough, no need to look at the items
-    assert_int_equal(bc_trie_size(c), 3);
-    assert_string_equal(bc_trie_lookup(c, "FILENAME_FIRST"), "bola1");
-    assert_string_equal(bc_trie_lookup(c, "FILENAME_LAST"), "bola3");
-    assert_string_equal(bc_trie_lookup(c, "DATE_LAST"), "2003-02-03 04:05:06");
+    assert_null(t);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_LOADER);
+    assert_string_equal(err->msg,
+        "'DATE' variable provided for at least one source file, but not for "
+        "all source files. It must be provided for all files.\n");
+    bc_error_free(err);
+    assert_int_equal(bc_trie_size(c), 0);
     bc_trie_free(c);
     bc_slist_free_full(s, free);
-    bc_slist_free_full(t, (bc_free_func_t) bc_trie_free);
 }
 
 

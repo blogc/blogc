@@ -166,12 +166,13 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
         rv = bc_slist_append(rv, s);
     }
 
-    if (with_date > 0 && with_date < bc_slist_length(rv))
-        // fatal error, maybe?
-        blogc_fprintf(stderr,
-            "blogc: warning: 'DATE' variable provided for at least one source "
-            "file, but not for all source files. This means that you may get "
-            "wrong values for 'DATE_FIRST' and 'DATE_LAST' variables.\n");
+    if (with_date > 0 && with_date < bc_slist_length(rv)) {
+        *err = bc_error_new_printf(BLOGC_ERROR_LOADER,
+            "'DATE' variable provided for at least one source file, but not "
+            "for all source files. It must be provided for all files.\n");
+        bc_slist_free_full(rv, (bc_free_func_t) bc_trie_free);
+        rv = NULL;
+    }
 
     bool first = true;
     for (bc_slist_t *tmp = rv; tmp != NULL; tmp = tmp->next) {
