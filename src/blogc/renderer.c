@@ -46,7 +46,7 @@ blogc_format_date(const char *date, bc_trie_t *global, bc_trie_t *local)
     bc_error_t *err = NULL;
     char *rv = blogc_convert_datetime(date, date_format, &err);
     if (err != NULL) {
-        bc_error_print(err);
+        bc_error_print(err, "blogc");
         bc_error_free(err);
         return bc_strdup(date);
     }

@@ -103,10 +103,13 @@ bc_error_parser(bc_error_type_t type, const char *src, size_t src_len,
 
 // error handling is centralized here for the sake of simplicity :/
 void
-bc_error_print(bc_error_t *err)
+bc_error_print(bc_error_t *err, const char *prefix)
 {
     if (err == NULL)
         return;
+
+    if (prefix != NULL)
+        fprintf(stderr, "%s: ", prefix);
 
     switch(err->type) {
         case BC_ERROR_CONFIG_PARSER:

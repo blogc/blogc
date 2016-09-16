@@ -223,7 +223,7 @@ main(int argc, char **argv)
 
     bc_slist_t *s = blogc_source_parse_from_files(config, sources, &err);
     if (err != NULL) {
-        bc_error_print(err);
+        bc_error_print(err, "blogc");
         rv = 2;
         goto cleanup2;
     }
@@ -250,7 +250,7 @@ main(int argc, char **argv)
 
     bc_slist_t* l = blogc_template_parse_from_file(template, &err);
     if (err != NULL) {
-        bc_error_print(err);
+        bc_error_print(err, "blogc");
         rv = 2;
         goto cleanup3;
     }
