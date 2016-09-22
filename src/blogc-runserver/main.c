@@ -41,7 +41,7 @@ static const struct content_type_map {
     {"text/plain", "txt", "index.txt"},
     {"application/xhtml+xml", "xhtml", "index.xhtml"},
 
-    // withoud index
+    // without index
     {"text/css", "css", NULL},
     {"image/gif", "gif", NULL},
     {"image/jpeg", "jpeg", NULL},
