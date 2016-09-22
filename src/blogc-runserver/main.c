@@ -13,7 +13,6 @@
 #include <event2/event.h>
 #include <event2/http.h>
 #include <event2/buffer.h>
-#include <magic.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -26,29 +25,122 @@
 #include "../common/utils.h"
 
 
-/**
- * this mapping is used to declare "supported" file types, that are forced over
- * whatever detected by libmagic, but we will still use the charset provided by
- * libmagic anyway. it also helps detecting index files when the client asks
- * for a directory.
- */
+// mime types with index should be in the begin of the list. first NULL
+// index aborts the lookup, for optimization
 static const struct content_type_map {
     const char *mimetype;
     const char *extension;
     const char *index;
 } content_types[] = {
+
+    // with index
     {"text/html", "html", "index.html"},
     {"text/html", "htm", "index.htm"},
+    {"text/html", "shtml", "index.shtml"},
     {"text/xml", "xml", "index.xml"},
     {"text/plain", "txt", "index.txt"},
+    {"application/xhtml+xml", "xhtml", "index.xhtml"},
+
+    // withoud index
     {"text/css", "css", NULL},
+    {"image/gif", "gif", NULL},
+    {"image/jpeg", "jpeg", NULL},
+    {"image/jpeg", "jpg", NULL},
     {"application/javascript", "js", NULL},
+    {"application/atom+xml", "atom", NULL},
+    {"application/rss+xml", "rss", NULL},
+    {"text/mathml", "mml", NULL},
+    {"text/vnd.sun.j2me.app-descriptor", "jad", NULL},
+    {"text/vnd.wap.wml", "wml", NULL},
+    {"text/x-component", "htc", NULL},
+    {"image/png", "png", NULL},
+    {"image/tiff", "tif", NULL},
+    {"image/tiff", "tiff", NULL},
+    {"image/vnd.wap.wbmp", "wbmp", NULL},
+    {"image/x-icon", "ico", NULL},
+    {"image/x-jng", "jng", NULL},
+    {"image/x-ms-bmp", "bmp", NULL},
+    {"image/svg+xml", "svg", NULL},
+    {"image/svg+xml", "svgz", NULL},
+    {"image/webp", "webp", NULL},
+    {"application/font-woff", "woff", NULL},
+    {"application/java-archive", "jar", NULL},
+    {"application/java-archive", "war", NULL},
+    {"application/java-archive", "ear", NULL},
+    {"application/json", "json", NULL},
+    {"application/mac-binhex40", "hqx", NULL},
+    {"application/msword", "doc", NULL},
+    {"application/pdf", "pdf", NULL},
+    {"application/postscript", "ps", NULL},
+    {"application/postscript", "eps", NULL},
+    {"application/postscript", "ai", NULL},
+    {"application/rtf", "rtf", NULL},
+    {"application/vnd.apple.mpegurl", "m3u8", NULL},
+    {"application/vnd.ms-excel", "xls", NULL},
+    {"application/vnd.ms-fontobject", "eot", NULL},
+    {"application/vnd.ms-powerpoint", "ppt", NULL},
+    {"application/vnd.wap.wmlc", "wmlc", NULL},
+    {"application/vnd.google-earth.kml+xml", "kml", NULL},
+    {"application/vnd.google-earth.kmz", "kmz", NULL},
+    {"application/x-7z-compressed", "7z", NULL},
+    {"application/x-cocoa", "cco", NULL},
+    {"application/x-java-archive-diff", "jardiff", NULL},
+    {"application/x-java-jnlp-file", "jnlp", NULL},
+    {"application/x-makeself", "run", NULL},
+    {"application/x-perl", "pl", NULL},
+    {"application/x-perl", "pm", NULL},
+    {"application/x-pilot", "prc", NULL},
+    {"application/x-pilot", "pdb", NULL},
+    {"application/x-rar-compressed", "rar", NULL},
+    {"application/x-redhat-package-manager", "rpm", NULL},
+    {"application/x-sea", "sea", NULL},
+    {"application/x-shockwave-flash", "swf", NULL},
+    {"application/x-stuffit", "sit", NULL},
+    {"application/x-tcl", "tcl", NULL},
+    {"application/x-tcl", "tk", NULL},
+    {"application/x-x509-ca-cert", "der", NULL},
+    {"application/x-x509-ca-cert", "pem", NULL},
+    {"application/x-x509-ca-cert", "crt", NULL},
+    {"application/x-xpinstall", "xpi", NULL},
+    {"application/xspf+xml", "xspf", NULL},
+    {"application/zip", "zip", NULL},
+    {"application/octet-stream", "bin", NULL},
+    {"application/octet-stream", "exe", NULL},
+    {"application/octet-stream", "dll", NULL},
+    {"application/octet-stream", "deb", NULL},
+    {"application/octet-stream", "dmg", NULL},
+    {"application/octet-stream", "iso", NULL},
+    {"application/octet-stream", "img", NULL},
+    {"application/octet-stream", "msi", NULL},
+    {"application/octet-stream", "msp", NULL},
+    {"application/octet-stream", "msm", NULL},
+    {"application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx", NULL},
+    {"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx", NULL},
+    {"application/vnd.openxmlformats-officedocument.presentationml.presentation", "pptx", NULL},
+    {"audio/midi", "mid", NULL},
+    {"audio/midi", "midi", NULL},
+    {"audio/midi", "kar", NULL},
+    {"audio/mpeg", "mp3", NULL},
+    {"audio/ogg", "ogg", NULL},
+    {"audio/x-m4a", "m4a", NULL},
+    {"audio/x-realaudio", "ra", NULL},
+    {"video/3gpp", "3gpp", NULL},
+    {"video/3gpp", "3gp", NULL},
+    {"video/mp2t", "ts", NULL},
+    {"video/mp4", "mp4", NULL},
+    {"video/mpeg", "mpeg", NULL},
+    {"video/mpeg", "mpg", NULL},
+    {"video/quicktime", "mov", NULL},
+    {"video/webm", "webm", NULL},
+    {"video/x-flv", "flv", NULL},
+    {"video/x-m4v", "m4v", NULL},
+    {"video/x-mng", "mng", NULL},
+    {"video/x-ms-asf", "asx", NULL},
+    {"video/x-ms-asf", "asf", NULL},
+    {"video/x-ms-wmv", "wmv", NULL},
+    {"video/x-msvideo", "avi", NULL},
     {NULL, NULL, NULL}
 };
-
-
-static magic_t magic_all = NULL;
-static magic_t magic_charset = NULL;
 
 
 static const char*
@@ -68,41 +160,19 @@ get_extension(const char *filename)
 }
 
 
-static char*
-guess_content_type(const char *filename, int fd)
+static const char*
+guess_content_type(const char *filename)
 {
-    int newfd;
-
-    // try "supported" types first, and just use libmagic for charset
     const char *extension = get_extension(filename);
     if (extension == NULL)
-        goto libmagic;
-    const char *supported = NULL;
-    for (unsigned int i = 0; content_types[i].extension != NULL; i++)
-        if (0 == strcmp(content_types[i].extension, extension))
-            supported = content_types[i].mimetype;
-    if (supported != NULL) {
-        newfd = dup(fd);
-        if (-1 != newfd) {
-            const char* charset = magic_descriptor(magic_charset, newfd);
-            close(newfd);
-            if (charset != NULL)
-                return bc_strdup_printf("%s; charset=%s", supported, charset);
+        goto default_type;
+    for (unsigned int i = 0; content_types[i].extension != NULL; i++) {
+        if (0 == strcmp(content_types[i].extension, extension)) {
+            return content_types[i].mimetype;
         }
-        return bc_strdup(supported);
     }
-
-libmagic:
-
-    // fallback to use libmagic for everything
-    newfd = dup(fd);
-    if (-1 != newfd) {
-        const char* content_type = magic_descriptor(magic_all, newfd);
-        close(newfd);
-        if (content_type != NULL)
-            return bc_strdup(content_type);
-    }
-    return bc_strdup("application/octet-stream");
+default_type:
+    return "application/octet-stream";
 }
 
 
@@ -159,13 +229,11 @@ handler(struct evhttp_request *request, void *ptr)
     if (S_ISDIR(st.st_mode)) {
         char *found = NULL;
 
-        for (unsigned int i = 0; content_types[i].mimetype != NULL; i++) {
-            if (content_types[i].index == NULL)
-                continue;
+        for (unsigned int i = 0; content_types[i].index != NULL; i++) {
             char *f = bc_strdup_printf("%s/%s", real_path,
                 content_types[i].index);
             if (0 == access(f, F_OK)) {
-                found = bc_strdup(f);
+                found = f;
                 break;
             }
             free(f);
@@ -190,11 +258,11 @@ handler(struct evhttp_request *request, void *ptr)
         goto point4;
     }
 
-    char *type = guess_content_type(real_path, fd);
+    const char *type = guess_content_type(real_path);
 
     if (fstat(fd, &st) < 0) {
         evhttp_send_error(request, 500, "Internal server error");
-        goto point5;
+        goto point4;
     }
 
     struct evkeyvalq *headers = evhttp_request_get_output_headers(request);
@@ -206,7 +274,7 @@ handler(struct evhttp_request *request, void *ptr)
         // production webservers usually returns 301 in such cases, but 302 is
         // better for development/testing.
         evhttp_send_reply(request, 302, "Found", NULL);
-        goto point5;
+        goto point4;
     }
 
     evhttp_add_header(headers, "Content-Type", type);
@@ -218,8 +286,6 @@ handler(struct evhttp_request *request, void *ptr)
     evbuffer_add_file(evb, fd, 0, st.st_size);
     evhttp_send_reply(request, 200, "OK", evb);
 
-point5:
-    free(type);
 point4:
     free(real_root);
 point3:
@@ -355,28 +421,7 @@ main(int argc, char **argv)
     if (host == NULL)
         host = bc_strdup("127.0.0.1");
 
-    magic_all = magic_open(MAGIC_MIME);
-    magic_charset = magic_open(MAGIC_MIME_ENCODING);
-    if (magic_all == NULL || magic_charset == NULL) {
-        fprintf(stderr, "error: failed to initialize libmagic\n");
-        rv = 1;
-        goto cleanup;
-    }
-
-    if ((0 != magic_load(magic_all, NULL)) ||
-        (0 != magic_load(magic_charset, NULL)))
-    {
-        fprintf(stderr, "error: failed to load libmagic data\n");
-        magic_close(magic_all);
-        magic_close(magic_charset);
-        rv = 1;
-        goto cleanup;
-    }
-
     rv = runserver(host, port, docroot);
-
-    magic_close(magic_all);
-    magic_close(magic_charset);
 
 cleanup:
     free(host);

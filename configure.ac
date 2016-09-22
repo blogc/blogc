@@ -139,13 +139,6 @@ AS_IF([test "x$enable_runserver" = "xyes"], [
   AC_CHECK_HEADERS([signal.h stdarg.h fcntl.h unistd.h sys/stat.h sys/types.h],, [
     AC_MSG_ERROR([blogc-runserver tool requested but required headers not found])
   ])
-  AC_CHECK_HEADERS([magic.h],, [
-    AC_MSG_ERROR([blogc-runserver tool requested but libmagic headers not found])
-  ])
-  AC_CHECK_LIB(magic, [magic_open], [MAGIC_LIBS="-lmagic"], [
-    AC_MSG_ERROR([blogc-runserver tool requested but libmagic library not found])
-  ])
-  AC_SUBST(MAGIC_LIBS)
   PKG_CHECK_MODULES([LIBEVENT], [libevent >= 2.0])
   RUNSERVER="enabled"
   have_runserver=yes

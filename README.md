@@ -18,7 +18,7 @@ Inside the source directory, run the following commands:
     $ make
     # make install
 
-The `./configure` options listed above will enable building of helper tools. To learn more about these tools, please read the man pages. Be aware that [`blogc-runserver(1)`](https://blogc.rgm.io/man/blogc-runserver.1.html) depends on [libmagic](https://github.com/file/file) and [libevent](http://libevent.org/), but this tool can be replaced by any HTTP server you want to use.
+The `./configure` options listed above will enable building of helper tools. To learn more about these tools, please read the man pages. Be aware that [`blogc-runserver(1)`](https://blogc.rgm.io/man/blogc-runserver.1.html) depends on [libevent](http://libevent.org/), but this tool can be replaced by any HTTP server you want to use.
 
 To create your first blog, please clone our example repository and adapt it to your needs:
 

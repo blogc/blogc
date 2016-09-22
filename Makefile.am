@@ -143,12 +143,10 @@ blogc_runserver_SOURCES = \
 blogc_runserver_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(LIBEVENT_CFLAGS) \
-	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 blogc_runserver_LDADD = \
 	$(LIBEVENT_LIBS) \
-	$(MAGIC_LIBS) \
 	libblogc_common.la \
 	$(NULL)
 endif

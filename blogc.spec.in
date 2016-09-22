@@ -7,7 +7,7 @@ Summary: A blog compiler
 URL: @PACKAGE_URL@
 Source0: https://github.com/blogc/blogc/releases/download/v@PACKAGE_VERSION@/blogc-@PACKAGE_VERSION@.tar.xz
 %if ! 0%{?el6}
-BuildRequires: libevent-devel >= 2.0, file-devel
+BuildRequires: libevent-devel >= 2.0
 %endif
 
 %description
@@ -26,7 +26,7 @@ blogc-git-receiver is a simple login shell/git hook to deploy blogc websites.
 %package runserver
 Summary: A simple HTTP server to test blogc websites
 Group: Development/Tools
-Requires: libevent >= 2.0, file-libs
+Requires: libevent >= 2.0
 
 %description runserver
 blogc-runserver is a simple HTTP server to test blogc websites.
