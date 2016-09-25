@@ -41,7 +41,9 @@ error(int socket, int status_code, const char *error)
         "Connection: close\r\n"
         "\r\n"
         "<h1>%s</h1>\n", status_code, error, error);
-    write(socket, str, strlen(str));
+    if (write(socket, str, strlen(str)) == -1) {
+        // do nothing, just avoid warnig
+    }
     free(str);
 }
 
@@ -138,7 +140,9 @@ handle_request(void *arg)
             "Location: %s/\r\n"
             "Connection: close\r\n"
             "\r\n", path);
-        write(client_socket, tmp, strlen(tmp));
+        if (write(client_socket, tmp, strlen(tmp)) == -1) {
+            // do nothing, just avoid warnig
+        }
         free(tmp);
         goto point3;
     }
@@ -158,10 +162,14 @@ handle_request(void *arg)
         "Content-Length: %d\r\n"
         "Connection: close\r\n"
         "\r\n", br_mime_guess_content_type(real_path), len);
-    write(client_socket, out, strlen(out));
+    if (write(client_socket, out, strlen(out)) == -1) {
+        // do nothing, just avoid warnig
+    }
     free(out);
 
-    write(client_socket, contents, len);
+    if (write(client_socket, contents, len) == -1) {
+        // do nothing, just avoid warnig
+    }
 
 point3:
     free(real_root);
