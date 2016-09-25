@@ -6,7 +6,6 @@ addons:
   apt:
     packages:
       - libcmocka-dev
-      - libevent-dev
       - rpm
       - valgrind
 
