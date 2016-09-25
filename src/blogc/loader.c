@@ -63,7 +63,7 @@ blogc_template_parse_from_file(const char *f, bc_error_t **err)
     if (err == NULL || *err != NULL)
         return NULL;
     size_t len;
-    char *s = bc_file_get_contents(f, &len, err);
+    char *s = bc_file_get_contents(f, true, &len, err);
     if (s == NULL)
         return NULL;
     bc_slist_t *rv = blogc_template_parse(s, len, err);
@@ -78,7 +78,7 @@ blogc_source_parse_from_file(const char *f, bc_error_t **err)
     if (err == NULL || *err != NULL)
         return NULL;
     size_t len;
-    char *s = bc_file_get_contents(f, &len, err);
+    char *s = bc_file_get_contents(f, true, &len, err);
     if (s == NULL)
         return NULL;
     bc_trie_t *rv = blogc_source_parse(s, len, err);

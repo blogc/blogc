@@ -19,7 +19,7 @@
 
 
 char*
-bc_file_get_contents(const char *path, size_t *len, bc_error_t **err)
+bc_file_get_contents(const char *path, bool utf8, size_t *len, bc_error_t **err)
 {
     if (path == NULL || err == NULL || *err != NULL)
         return NULL;
@@ -43,7 +43,7 @@ bc_file_get_contents(const char *path, size_t *len, bc_error_t **err)
 
         tmp = buffer;
 
-        if (str->len == 0 && read_len > 0) {
+        if (utf8 && str->len == 0 && read_len > 0) {
             // skipping BOM before validation, for performance. should be safe
             // enough
             size_t skip = bc_utf8_skip_bom((uint8_t*) buffer, read_len);
@@ -56,7 +56,7 @@ bc_file_get_contents(const char *path, size_t *len, bc_error_t **err)
     }
     fclose(fp);
 
-    if (!bc_utf8_validate_str(str)) {
+    if (utf8 && !bc_utf8_validate_str(str)) {
         *err = bc_error_new_printf(BC_ERROR_FILE,
             "File content is not valid UTF-8: %s", path);
         bc_string_free(str, true);

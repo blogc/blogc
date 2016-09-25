@@ -39,6 +39,9 @@ noinst_HEADERS = \
 	src/blogc/renderer.h \
 	src/blogc/source-parser.h \
 	src/blogc/template-parser.h \
+	src/blogc-runserver/httpd.h \
+	src/blogc-runserver/httpd-utils.h \
+	src/blogc-runserver/mime.h \
 	src/common/config-parser.h \
 	src/common/error.h \
 	src/common/file.h \
@@ -67,6 +70,10 @@ endif
 if BUILD_RUNSERVER
 bin_PROGRAMS += \
 	blogc-runserver \
+	$(NULL)
+
+noinst_LTLIBRARIES += \
+	libblogc_runserver.la \
 	$(NULL)
 endif
 
@@ -142,12 +149,28 @@ blogc_runserver_SOURCES = \
 
 blogc_runserver_CFLAGS = \
 	$(AM_CFLAGS) \
-	$(LIBEVENT_CFLAGS) \
+	$(PTHREAD_CFLAGS) \
 	$(NULL)
 
 blogc_runserver_LDADD = \
-	$(LIBEVENT_LIBS) \
+	$(PTHREAD_LIBS) \
+	libblogc_runserver.la \
 	libblogc_common.la \
+	$(NULL)
+
+libblogc_runserver_la_SOURCES = \
+	src/blogc-runserver/httpd.c \
+	src/blogc-runserver/httpd-utils.c \
+	src/blogc-runserver/mime.c \
+	$(NULL)
+
+libblogc_runserver_la_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(PTHREAD_CFLAGS) \
+	$(NULL)
+
+libblogc_runserver_la_LIBADD = \
+	$(PTHREAD_LIBS) \
 	$(NULL)
 endif
 
@@ -455,6 +478,51 @@ tests_common_check_utils_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_common.la \
 	$(NULL)
+
+if BUILD_RUNSERVER
+check_PROGRAMS += \
+	tests/blogc-runserver/check_httpd_utils \
+	tests/blogc-runserver/check_mime \
+	$(NULL)
+
+tests_blogc_runserver_check_httpd_utils_SOURCES = \
+	tests/blogc-runserver/check_httpd_utils.c \
+	$(NULL)
+
+tests_blogc_runserver_check_httpd_utils_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_runserver_check_httpd_utils_LDFLAGS = \
+	-no-install \
+	-Wl,--wrap=read \
+	$(NULL)
+
+tests_blogc_runserver_check_httpd_utils_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_runserver.la \
+	libblogc_common.la \
+	$(NULL)
+
+tests_blogc_runserver_check_mime_SOURCES = \
+	tests/blogc-runserver/check_mime.c \
+	$(NULL)
+
+tests_blogc_runserver_check_mime_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_runserver_check_mime_LDFLAGS = \
+	-no-install \
+	-Wl,--wrap=access \
+	$(NULL)
+
+tests_blogc_runserver_check_mime_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_runserver.la \
+	libblogc_common.la \
+	$(NULL)
+endif
 
 endif
 

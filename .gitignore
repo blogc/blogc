@@ -38,6 +38,7 @@ Makefile.in
 
 # installed .m4 files
 /m4/*.m4
+!/m4/ax_pthread.m4
 !/m4/pkg.m4
 
 # man pages
@@ -56,6 +57,8 @@ blogc*.html
 /tests/blogc/check_renderer
 /tests/blogc/check_source_parser
 /tests/blogc/check_template_parser
+/tests/blogc-runserver/check_httpd_utils
+/tests/blogc-runserver/check_mime
 /tests/common/check_config_parser
 /tests/common/check_error
 /tests/common/check_utf8

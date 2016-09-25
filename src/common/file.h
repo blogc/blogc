@@ -10,10 +10,11 @@
 #define _FILE_H
 
 #include <stddef.h>
+#include <stdbool.h>
 #include "error.h"
 
 #define BC_FILE_CHUNK_SIZE 1024
 
-char* bc_file_get_contents(const char *path, size_t *len, bc_error_t **err);
+char* bc_file_get_contents(const char *path, bool utf8, size_t *len, bc_error_t **err);
 
 #endif /* _FILE_H */

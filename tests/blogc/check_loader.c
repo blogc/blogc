@@ -50,8 +50,9 @@ test_get_filename(void **state)
 
 
 char*
-__wrap_bc_file_get_contents(const char *path, size_t *len, bc_error_t **err)
+__wrap_bc_file_get_contents(const char *path, bool utf8, size_t *len, bc_error_t **err)
 {
+    assert_true(utf8);
     assert_null(*err);
     const char *_path = mock_type(const char*);
     if (_path != NULL)
