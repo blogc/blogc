@@ -9,7 +9,7 @@
 #ifndef _HTTPD_UTILS_H
 #define _HTTPD_UTILS_H
 
-#define READLINE_BUFFER_SIZE 1024
+#define READLINE_BUFFER_SIZE 256
 
 char* br_readline(int socket);
 int br_hextoi(const char c);

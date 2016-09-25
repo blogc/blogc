@@ -31,6 +31,18 @@
 
 #define LISTEN_BACKLOG 100
 
+typedef struct {
+    pthread_t thread;
+    bool initialized;
+} thread_data_t;
+
+typedef struct {
+    size_t thread_id;
+    int socket;
+    char *ip;
+    const char *docroot;
+} request_data_t;
+
 
 static void
 error(int socket, int status_code, const char *error)
@@ -48,28 +60,31 @@ error(int socket, int status_code, const char *error)
 }
 
 
-typedef struct {
-    int socket;
-    const char *docroot;
-} request_data_t;
-
-
 static void*
 handle_request(void *arg)
 {
     request_data_t *req = arg;
+    size_t thread_id = req->thread_id;
     int client_socket = req->socket;
+    char *ip = req->ip;
     const char *docroot = req->docroot;
     free(arg);
 
     char *conn_line = br_readline(client_socket);
+    if (conn_line == NULL || conn_line[0] == '\0')
+        goto point0;
+
+    unsigned short status_code = 200;
+
     char **pieces = bc_str_split(conn_line, ' ', 3);
     if (bc_strv_length(pieces) != 3) {
+        status_code = 400;
         error(client_socket, 400, "Bad Request");
         goto point1;
     }
 
     if (strcmp(pieces[0], "GET") != 0) {
+        status_code = 405;
         error(client_socket, 405, "Method Not Allowed");
         goto point1;
     }
@@ -79,6 +94,7 @@ handle_request(void *arg)
     bc_strv_free(pieces2);
 
     if (path == NULL) {
+        status_code = 400;
         error(client_socket, 400, "Bad Request");
         goto point1;
     }
@@ -88,23 +104,27 @@ handle_request(void *arg)
     free(abs_path);
 
     if (real_path == NULL) {
+        status_code = 404;
         error(client_socket, 404, "Not Found");
         goto point1;
     }
 
     char *real_root = realpath(docroot, NULL);
     if (real_root == NULL) {
+        status_code = 500;
         error(client_socket, 500, "Internal Server Error");
         goto point2;
     }
 
     if (0 != strncmp(real_root, real_path, strlen(real_root))) {
+        status_code = 404;
         error(client_socket, 404, "Not Found");
         goto point3;
     }
 
     struct stat st;
     if (0 > stat(real_path, &st)) {
+        status_code = 404;
         error(client_socket, 404, "Not Found");
         goto point3;
     }
@@ -115,6 +135,7 @@ handle_request(void *arg)
         char *found = br_mime_guess_index(real_path);
 
         if (found == NULL) {
+            status_code = 403;
             error(client_socket, 403, "Forbidden");
             goto point3;
         }
@@ -128,6 +149,7 @@ handle_request(void *arg)
     }
 
     if (0 != access(real_path, F_OK)) {
+        status_code = 500;
         error(client_socket, 500, "Internal Server Error");
         goto point3;
     }
@@ -140,6 +162,7 @@ handle_request(void *arg)
             "Location: %s/\r\n"
             "Connection: close\r\n"
             "\r\n", path);
+        status_code = 302;
         if (write(client_socket, tmp, strlen(tmp)) == -1) {
             // do nothing, just avoid warnig
         }
@@ -151,6 +174,7 @@ handle_request(void *arg)
     bc_error_t *err = NULL;
     char* contents = bc_file_get_contents(real_path, false, &len, &err);
     if (err != NULL) {
+        status_code = 500;
         error(client_socket, 500, "Internal Server Error");
         bc_error_free(err);
         goto point3;
@@ -176,15 +200,24 @@ point3:
 point2:
     free(real_path);
 point1:
+    fprintf(stderr, "[Thread-%zu] %s - - \"%s\" %d\n", thread_id + 1,
+        ip, conn_line, status_code);
     bc_strv_free(pieces);
+point0:
+    free(ip);
     close(client_socket);
     return NULL;
 }
 
 
 int
-br_httpd_run(const char *host, unsigned short port, const char *docroot)
+br_httpd_run(const char *host, unsigned short port, const char *docroot,
+    size_t max_threads)
 {
+    thread_data_t threads[max_threads];
+    for (size_t i = 0; i < max_threads; i++)
+        threads[i].initialized = false;
+
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
         fprintf(stderr, "Failed to open server socket: %s\n", strerror(errno));
@@ -226,12 +259,14 @@ br_httpd_run(const char *host, unsigned short port, const char *docroot)
     }
 
     fprintf(stderr,
-        " * Running on http://%s:%d/\n"
+        " * Running on http://%s:%d/ (max threads: %zu)\n"
         "\n"
         "WARNING!!! This is a development server, DO NOT RUN IT IN PRODUCTION!\n"
-        "\n", host, port);
+        "\n", host, port, max_threads);
 
     socklen_t len = sizeof(struct sockaddr_in);
+
+    size_t current_thread = 0;
 
     while (1) {
         struct sockaddr_in client_addr;
@@ -244,16 +279,29 @@ br_httpd_run(const char *host, unsigned short port, const char *docroot)
         }
 
         request_data_t *arg = malloc(sizeof(request_data_t));
+        arg->thread_id = current_thread;
         arg->socket = client_socket;
+        arg->ip = bc_strdup(inet_ntoa(client_addr.sin_addr));
         arg->docroot = docroot;
 
-        // this isn't really safe. the server can be easily DDoS'ed.
-        pthread_t thread;
-        if (pthread_create(&thread, NULL, handle_request, arg) != 0) {
+        if (threads[current_thread].initialized) {
+            if (pthread_join(threads[current_thread].thread, NULL) != 0) {
+                fprintf(stderr, "Failed to join thread\n");
+                rv = 1;
+                goto cleanup;
+            }
+        }
+
+        if (pthread_create(&(threads[current_thread].thread), NULL, handle_request, arg) != 0) {
             fprintf(stderr, "Failed to create thread\n");
             rv = 1;
             goto cleanup;
         }
+
+        threads[current_thread++].initialized = true;
+
+        if (current_thread >= max_threads)
+            current_thread = 0;
     }
 
 cleanup:

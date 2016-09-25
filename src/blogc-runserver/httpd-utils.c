@@ -24,9 +24,9 @@ br_readline(int socket)
     char buffer[READLINE_BUFFER_SIZE];
     ssize_t len;
 
-    while ((len = read(socket, buffer, READLINE_BUFFER_SIZE)) != -1) {
+    while ((len = read(socket, buffer, READLINE_BUFFER_SIZE)) > 0) {
         for (ssize_t i = 0; i < len; i++) {
-            if (buffer[i] == '\r' || buffer[i] == '\n')
+            if (buffer[i] == '\r' || buffer[i] == '\n' || buffer[i] == '\0')
                 goto end;
             bc_string_append_c(rv, buffer[i]);
         }

@@ -9,6 +9,7 @@
 #ifndef _HTTPD_H
 #define _HTTPD_H
 
-int br_httpd_run(const char *host, unsigned short port, const char *docroot);
+int br_httpd_run(const char *host, unsigned short port, const char *docroot,
+    size_t max_threads);
 
 #endif /* _HTTPD_H */

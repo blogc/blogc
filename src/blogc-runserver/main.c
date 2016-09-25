@@ -23,7 +23,7 @@ print_help(void)
 {
     printf(
         "usage:\n"
-        "    blogc-runserver [-h] [-v] [-t HOST] [-p PORT] DOCROOT\n"
+        "    blogc-runserver [-h] [-v] [-t HOST] [-p PORT] [-m THREADS] DOCROOT\n"
         "                    - A simple HTTP server to test blogc websites.\n"
         "\n"
         "positional arguments:\n"
@@ -33,14 +33,15 @@ print_help(void)
         "    -h            show this help message and exit\n"
         "    -v            show version and exit\n"
         "    -t HOST       set server listen address (default: 127.0.0.1)\n"
-        "    -p PORT       set server listen port (default: 8080)\n");
+        "    -p PORT       set server listen port (default: 8080)\n"
+        "    -m THREADS    set maximum number of threads to spawn (default: 20)\n");
 }
 
 
 static void
 print_usage(void)
 {
-    printf("usage: blogc-runserver [-h] [-v] [-t HOST] [-p PORT] DOCROOT\n");
+    printf("usage: blogc-runserver [-h] [-v] [-t HOST] [-p PORT] [-m THREADS] DOCROOT\n");
 }
 
 
@@ -53,6 +54,7 @@ main(int argc, char **argv)
     char *host = NULL;
     char *docroot = NULL;
     unsigned short port = 8080;
+    size_t max_threads = 20;
 
     unsigned int args = 0;
 
@@ -76,6 +78,12 @@ main(int argc, char **argv)
                         port = strtoul(argv[i] + 2, NULL, 10);
                     else
                         port = strtoul(argv[++i], NULL, 10);
+                    break;
+                case 'm':
+                    if (argv[i][2] != '\0')
+                        max_threads = strtoul(argv[i] + 2, NULL, 10);
+                    else
+                        max_threads = strtoul(argv[++i], NULL, 10);
                     break;
                 default:
                     print_usage();
@@ -106,10 +114,18 @@ main(int argc, char **argv)
         goto cleanup;
     }
 
+    if (max_threads <= 0 || max_threads > 1000) {
+        print_usage();
+        fprintf(stderr, "blogc-runserver: error: invalid value for -m. "
+            "Must be integer > 0 and <= 1000\n");
+        rv = 2;
+        goto cleanup;
+    }
+
     if (host == NULL)
         host = bc_strdup("127.0.0.1");
 
-    rv = br_httpd_run(host, port, docroot);
+    rv = br_httpd_run(host, port, docroot, max_threads);
 
 cleanup:
     free(host);
