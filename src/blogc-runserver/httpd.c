@@ -50,9 +50,10 @@ error(int socket, int status_code, const char *error)
     char *str = bc_strdup_printf(
         "HTTP/1.0 %d %s\r\n"
         "Content-Type: text/html\r\n"
+        "Content-Length: %zu\r\n"
         "Connection: close\r\n"
         "\r\n"
-        "<h1>%s</h1>\n", status_code, error, error);
+        "<h1>%s</h1>\n", status_code, error, strlen(error) + 10, error);
     if (write(socket, str, strlen(str)) == -1) {
         // do nothing, just avoid warnig
     }
@@ -160,6 +161,7 @@ handle_request(void *arg)
         char *tmp = bc_strdup_printf(
             "HTTP/1.0 302 Found\r\n"
             "Location: %s/\r\n"
+            "Content-Length: 0\r\n"
             "Connection: close\r\n"
             "\r\n", path);
         status_code = 302;
@@ -183,7 +185,7 @@ handle_request(void *arg)
     char *out = bc_strdup_printf(
         "HTTP/1.0 200 OK\r\n"
         "Content-Type: %s\r\n"
-        "Content-Length: %d\r\n"
+        "Content-Length: %zu\r\n"
         "Connection: close\r\n"
         "\r\n", br_mime_guess_content_type(real_path), len);
     if (write(client_socket, out, strlen(out)) == -1) {
