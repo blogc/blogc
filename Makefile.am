@@ -39,6 +39,9 @@ noinst_HEADERS = \
 	src/blogc/renderer.h \
 	src/blogc/source-parser.h \
 	src/blogc/template-parser.h \
+	src/blogc-git-receiver/post-receive.h \
+	src/blogc-git-receiver/pre-receive.h \
+	src/blogc-git-receiver/shell.h \
 	src/blogc-runserver/httpd.h \
 	src/blogc-runserver/httpd-utils.h \
 	src/blogc-runserver/mime.h \
@@ -64,6 +67,10 @@ bin_PROGRAMS = \
 if BUILD_GIT_RECEIVER
 bin_PROGRAMS += \
 	blogc-git-receiver \
+	$(NULL)
+
+noinst_LTLIBRARIES += \
+	libblogc_git_receiver.la \
 	$(NULL)
 endif
 
@@ -137,7 +144,21 @@ blogc_git_receiver_CFLAGS = \
 	$(NULL)
 
 blogc_git_receiver_LDADD = \
+	libblogc_git_receiver.la \
 	libblogc_common.la \
+	$(NULL)
+
+libblogc_git_receiver_la_SOURCES = \
+	src/blogc-git-receiver/post-receive.c \
+	src/blogc-git-receiver/pre-receive.c \
+	src/blogc-git-receiver/shell.c \
+	$(NULL)
+
+libblogc_git_receiver_la_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(NULL)
+
+libblogc_git_receiver_la_LIBADD = \
 	$(NULL)
 endif
 
