@@ -17,12 +17,10 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <time.h>
-
 #include "../common/utils.h"
-
-#ifndef BUFFER_SIZE
-#define BUFFER_SIZE 4096
-#endif
+#include "../common/stdin.h"
+#include "pre-receive-parser.h"
+#include "pre-receive.h"
 
 
 static unsigned int
@@ -91,93 +89,26 @@ rmdir_recursive(const char *dir)
 }
 
 
-typedef enum {
-    START_OLD = 1,
-    OLD,
-    START_NEW,
-    NEW,
-    START_REF,
-    REF
-} input_state_t;
-
-
 int
 bgr_pre_receive_hook(int argc, char *argv[])
 {
-    int c;
-    char buffer[BUFFER_SIZE];
-
-    input_state_t state = START_OLD;
-    size_t i = 0;
-    size_t start = 0;
-
     int rv = 0;
-    char *new = NULL;
-    char *master = NULL;
+    char buffer[4096];
 
-    while (EOF != (c = getc(stdin))) {
-
-        buffer[i] = (char) c;
-
-        switch (state) {
-            case START_OLD:
-                start = i;
-                state = OLD;
-                break;
-            case OLD:
-                if (c != ' ')
-                    break;
-                // no need to store old
-                state = START_NEW;
-                break;
-            case START_NEW:
-                start = i;
-                state = NEW;
-                break;
-            case NEW:
-                if (c != ' ')
-                    break;
-                state = START_REF;
-                new = strndup(buffer + start, i - start);
-                break;
-            case START_REF:
-                start = i;
-                state = REF;
-                break;
-            case REF:
-                if (c != '\n')
-                    break;
-                state = START_OLD;
-                // we just care about a ref (refs/heads/master), everything
-                // else is disposable :)
-                if (!((i - start == 17) &&
-                      (0 == strncmp("refs/heads/master", buffer + start, 17))))
-                {
-                    free(new);
-                    new = NULL;
-                    break;
-                }
-                master = new;
-                break;
-        }
-
-        if (++i >= BUFFER_SIZE) {
-            fprintf(stderr, "error: pre-receive hook payload is too big.\n");
-            rv = 1;
-            goto cleanup2;
-        }
-    }
+    char *input = bc_stdin_read();
+    char *master = bgr_pre_receive_parse(input);
+    free(input);
 
     if (master == NULL) {
         fprintf(stderr, "warning: no reference to master branch found. "
             "nothing to deploy.\n");
-        goto cleanup2;
+        return rv;
     }
 
     char *repo_dir = NULL;
     char *output_dir = NULL;
 
-    if (NULL == getcwd(buffer, BUFFER_SIZE)) {
+    if (NULL == getcwd(buffer, sizeof(buffer))) {
         fprintf(stderr, "error: failed to get repository remote path: %s\n",
             strerror(errno));
         rv = 1;
@@ -247,7 +178,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
     }
 
     char *htdocs_sym = NULL;
-    ssize_t htdocs_sym_len = readlink("htdocs", buffer, BUFFER_SIZE);
+    ssize_t htdocs_sym_len = readlink("htdocs", buffer, sizeof(buffer));
     if (0 < htdocs_sym_len) {
         if (0 != unlink("htdocs")) {
             fprintf(stderr, "error: failed to remove symlink (%s/htdocs): %s\n",
@@ -275,7 +206,5 @@ cleanup:
     free(output_dir);
     rmdir_recursive(dir);
     free(repo_dir);
-cleanup2:
-    free(new);
     return rv;
 }

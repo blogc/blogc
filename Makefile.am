@@ -41,6 +41,7 @@ noinst_HEADERS = \
 	src/blogc/template-parser.h \
 	src/blogc-git-receiver/post-receive.h \
 	src/blogc-git-receiver/pre-receive.h \
+	src/blogc-git-receiver/pre-receive-parser.h \
 	src/blogc-git-receiver/shell.h \
 	src/blogc-runserver/httpd.h \
 	src/blogc-runserver/httpd-utils.h \
@@ -48,6 +49,7 @@ noinst_HEADERS = \
 	src/common/config-parser.h \
 	src/common/error.h \
 	src/common/file.h \
+	src/common/stdin.h \
 	src/common/utf8.h \
 	src/common/utils.h \
 	$(NULL)
@@ -110,6 +112,7 @@ libblogc_common_la_SOURCES = \
 	src/common/config-parser.c \
 	src/common/error.c \
 	src/common/file.c \
+	src/common/stdin.c \
 	src/common/utf8.c \
 	src/common/utils.c \
 	$(NULL)
@@ -151,6 +154,7 @@ blogc_git_receiver_LDADD = \
 libblogc_git_receiver_la_SOURCES = \
 	src/blogc-git-receiver/post-receive.c \
 	src/blogc-git-receiver/pre-receive.c \
+	src/blogc-git-receiver/pre-receive-parser.c \
 	src/blogc-git-receiver/shell.c \
 	$(NULL)
 
@@ -319,6 +323,7 @@ check_PROGRAMS += \
 	tests/blogc/check_template_parser \
 	tests/common/check_config_parser \
 	tests/common/check_error \
+	tests/common/check_stdin \
 	tests/common/check_utf8 \
 	tests/common/check_utils \
 	$(NULL)
@@ -466,6 +471,24 @@ tests_common_check_error_LDADD = \
 	libblogc_common.la \
 	$(NULL)
 
+tests_common_check_stdin_SOURCES = \
+	tests/common/check_stdin.c \
+	$(NULL)
+
+tests_common_check_stdin_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_common_check_stdin_LDFLAGS = \
+	-no-install \
+	-Wl,--wrap=fgetc \
+	$(NULL)
+
+tests_common_check_stdin_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_common.la \
+	$(NULL)
+
 tests_common_check_utf8_SOURCES = \
 	tests/common/check_utf8.c \
 	$(NULL)
@@ -541,6 +564,30 @@ tests_blogc_runserver_check_mime_LDFLAGS = \
 tests_blogc_runserver_check_mime_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_runserver.la \
+	libblogc_common.la \
+	$(NULL)
+endif
+
+if BUILD_GIT_RECEIVER
+check_PROGRAMS += \
+	tests/blogc-git-receiver/check_pre_receive_parser \
+	$(NULL)
+
+tests_blogc_git_receiver_check_pre_receive_parser_SOURCES = \
+	tests/blogc-git-receiver/check_pre_receive_parser.c \
+	$(NULL)
+
+tests_blogc_git_receiver_check_pre_receive_parser_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_git_receiver_check_pre_receive_parser_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_blogc_git_receiver_check_pre_receive_parser_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_git_receiver.la \
 	libblogc_common.la \
 	$(NULL)
 endif
