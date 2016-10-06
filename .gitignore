@@ -58,6 +58,7 @@ blogc*.html
 /tests/blogc/check_source_parser
 /tests/blogc/check_template_parser
 /tests/blogc-git-receiver/check_pre_receive_parser
+/tests/blogc-git-receiver/check_shell_command_parser
 /tests/blogc-runserver/check_httpd_utils
 /tests/blogc-runserver/check_mime
 /tests/common/check_config_parser

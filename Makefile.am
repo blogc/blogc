@@ -43,6 +43,7 @@ noinst_HEADERS = \
 	src/blogc-git-receiver/pre-receive.h \
 	src/blogc-git-receiver/pre-receive-parser.h \
 	src/blogc-git-receiver/shell.h \
+	src/blogc-git-receiver/shell-command-parser.h \
 	src/blogc-runserver/httpd.h \
 	src/blogc-runserver/httpd-utils.h \
 	src/blogc-runserver/mime.h \
@@ -156,6 +157,7 @@ libblogc_git_receiver_la_SOURCES = \
 	src/blogc-git-receiver/pre-receive.c \
 	src/blogc-git-receiver/pre-receive-parser.c \
 	src/blogc-git-receiver/shell.c \
+	src/blogc-git-receiver/shell-command-parser.c \
 	$(NULL)
 
 libblogc_git_receiver_la_CFLAGS = \
@@ -571,6 +573,7 @@ endif
 if BUILD_GIT_RECEIVER
 check_PROGRAMS += \
 	tests/blogc-git-receiver/check_pre_receive_parser \
+	tests/blogc-git-receiver/check_shell_command_parser \
 	$(NULL)
 
 tests_blogc_git_receiver_check_pre_receive_parser_SOURCES = \
@@ -586,6 +589,24 @@ tests_blogc_git_receiver_check_pre_receive_parser_LDFLAGS = \
 	$(NULL)
 
 tests_blogc_git_receiver_check_pre_receive_parser_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_git_receiver.la \
+	libblogc_common.la \
+	$(NULL)
+
+tests_blogc_git_receiver_check_shell_command_parser_SOURCES = \
+	tests/blogc-git-receiver/check_shell_command_parser.c \
+	$(NULL)
+
+tests_blogc_git_receiver_check_shell_command_parser_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_git_receiver_check_shell_command_parser_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_blogc_git_receiver_check_shell_command_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_git_receiver.la \
 	libblogc_common.la \

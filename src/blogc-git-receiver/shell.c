@@ -16,11 +16,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "../common/utils.h"
+#include "shell-command-parser.h"
 #include "shell.h"
-
-#ifndef BUFFER_SIZE
-#define BUFFER_SIZE 4096
-#endif
 
 
 int
@@ -29,22 +26,7 @@ bgr_shell(int argc, char *argv[])
     int rv = 0;
 
     char *repo = NULL;
-    char *command_orig = NULL;
-    char *command_name = NULL;
-    char command_new[BUFFER_SIZE];
-
-    bool exec_git = false;
-
-    // validate git command
-    size_t len = strlen(argv[2]);
-    if (!((len > 17 && (0 == strncmp(argv[2], "git-receive-pack ", 17))) ||
-          (len > 16 && (0 == strncmp(argv[2], "git-upload-pack ", 16))) ||
-          (len > 19 && (0 == strncmp(argv[2], "git-upload-archive ", 19)))))
-    {
-        fprintf(stderr, "error: unsupported git command: %s\n", argv[2]);
-        rv = 1;
-        goto cleanup;
-    }
+    char *quoted_repo = NULL;
 
     // get shell path
     char *self = getenv("SHELL");
@@ -62,23 +44,17 @@ bgr_shell(int argc, char *argv[])
         goto cleanup;
     }
 
-    // get git repository
-    command_orig = bc_strdup(argv[2]);
-    char *p, *r;
-    for (p = command_orig; *p != ' ' && *p != '\0'; p++);
-    if (*p == ' ')
-        p++;
-    if (*p == '\'' || *p == '"')
-        p++;
-    if (*p == '/')
-        p++;
-    for (r = p; *p != '\'' && *p != '"' && *p != '\0'; p++);
-    if (*p == '\'' || *p == '"')
-        *p = '\0';
-    if (*--p == '/')
-        *p = '\0';
+    // validate command and extract git repository
+    char *tmp_repo = bgr_shell_command_parse(argv[2]);
+    if (tmp_repo == NULL) {
+        fprintf(stderr, "error: invalid git-shell command: %s\n", argv[2]);
+        rv = 1;
+        goto cleanup;
+    }
 
-    repo = bc_strdup_printf("repos/%s", r);
+    repo = bc_strdup_printf("repos/%s", tmp_repo);
+    quoted_repo = bgr_shell_quote(repo);
+    free(tmp_repo);
 
     // check if repository is sane
     if (0 == strlen(repo)) {
@@ -99,7 +75,7 @@ bgr_shell(int argc, char *argv[])
 
     if (0 != access(repo, F_OK)) {
         char *git_init_cmd = bc_strdup_printf(
-            "git init --bare \"%s\" > /dev/null", repo);
+            "git init --bare %s > /dev/null", quoted_repo);
         if (0 != system(git_init_cmd)) {
             fprintf(stderr, "error: failed to create git repository: %s\n",
                 repo);
@@ -175,32 +151,41 @@ bgr_shell(int argc, char *argv[])
     }
 
 git_exec:
-    command_name = bc_strdup(argv[2]);
-    for (p = command_name; *p != ' ' && *p != '\0'; p++);
-    if (*p == ' ')
-        *p = '\0';
 
-    if (BUFFER_SIZE < (strlen(command_name) + strlen(repo) + 4)) {
-        fprintf(stderr, "error: git-shell command is too big\n");
-        rv = 1;
-        goto cleanup;
-    }
+    {
+        // static allocation instead of bc_strdup_printf to avoid leaks
+        char buffer[4096];
+        char *command = bc_strdup(argv[2]);
+        char *p;
+        for (p = command; *p != ' ' && *p != '\0'; p++);
+        if (*p == ' ')
+            *p = '\0';
 
-    if (snprintf(command_new, BUFFER_SIZE, "%s '%s'", command_name, repo))
-        exec_git = true;
+        if (sizeof(buffer) < (strlen(command) + strlen(quoted_repo) + 2)) {
+            fprintf(stderr, "error: git-shell command is too big\n");
+            rv = 1;
+            goto cleanup;
+        }
 
-cleanup:
-    free(repo);
-    free(command_orig);
-    free(command_name);
+        if (0 > snprintf(buffer, sizeof(buffer), "%s %s", command, quoted_repo)) {
+            fprintf(stderr, "error: failed to generate git-shell command\n");
+            rv = 1;
+            goto cleanup;
+        }
 
-    if (exec_git) {
-        execlp("git-shell", "git-shell", "-c", command_new, NULL);
+        free(command);
+        free(repo);
+        free(quoted_repo);
+
+        execlp("git-shell", "git-shell", "-c", buffer, NULL);
 
         // execlp only returns on error, then something bad happened
         fprintf(stderr, "error: failed to execute git-shell\n");
-        rv = 1;
+        return 1;  // avoid freeing repo again
     }
 
+cleanup:
+    free(repo);
+    free(quoted_repo);
     return rv;
 }
