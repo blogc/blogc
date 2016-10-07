@@ -6,12 +6,9 @@
  * See the file LICENSE.
  */
 
-#include <stdbool.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <libgen.h>
 #include <unistd.h>
 #include <errno.h>
 #include <sys/stat.h>

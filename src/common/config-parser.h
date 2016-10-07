@@ -9,6 +9,7 @@
 #ifndef _CONFIG_PARSER_H
 #define _CONFIG_PARSER_H
 
+#include <stddef.h>
 #include "utils.h"
 #include "error.h"
 

@@ -6,7 +6,6 @@
  * See the file LICENSE.
  */
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +13,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include "../common/utils.h"
 #include "shell-command-parser.h"
 #include "shell.h"

@@ -13,7 +13,6 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "../common/utils.h"
 #include "httpd.h"
 

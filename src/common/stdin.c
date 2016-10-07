@@ -6,6 +6,7 @@
  * See the file LICENSE.
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include "utils.h"
 #include "stdin.h"
