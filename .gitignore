@@ -35,6 +35,7 @@ Makefile.in
 !/build-aux/git-version-gen
 !/build-aux/travis-build.sh
 !/build-aux/travis-deploy.sh
+!/build-aux/valgrind.sh
 
 # installed .m4 files
 /m4/*.m4
@@ -58,6 +59,7 @@ blogc*.html
 /tests/blogc/check_source_parser
 /tests/blogc/check_template_parser
 /tests/blogc-git-receiver/check_pre_receive_parser
+/tests/blogc-git-receiver/check_post_receive
 /tests/blogc-git-receiver/check_shell_command_parser
 /tests/blogc-runserver/check_httpd_utils
 /tests/blogc-runserver/check_mime

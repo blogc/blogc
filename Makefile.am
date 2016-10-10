@@ -15,6 +15,7 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 
 EXTRA_DIST = \
 	build-aux/git-version-gen \
+	build-aux/valgrind.sh \
 	$(top_srcdir)/.version \
 	autogen.sh \
 	LICENSE \
@@ -88,6 +89,9 @@ noinst_LTLIBRARIES += \
 endif
 
 check_PROGRAMS = \
+	$(NULL)
+
+dist_check_SCRIPTS = \
 	$(NULL)
 
 
@@ -313,6 +317,12 @@ endif
 
 
 ## Build rules: tests
+
+if BUILD_GIT_RECEIVER
+dist_check_SCRIPTS += \
+	tests/blogc-git-receiver/check_post_receive.sh \
+	$(NULL)
+endif
 
 if USE_CMOCKA
 
@@ -573,6 +583,7 @@ endif
 if BUILD_GIT_RECEIVER
 check_PROGRAMS += \
 	tests/blogc-git-receiver/check_pre_receive_parser \
+	tests/blogc-git-receiver/check_post_receive \
 	tests/blogc-git-receiver/check_shell_command_parser \
 	$(NULL)
 
@@ -589,6 +600,25 @@ tests_blogc_git_receiver_check_pre_receive_parser_LDFLAGS = \
 	$(NULL)
 
 tests_blogc_git_receiver_check_pre_receive_parser_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_git_receiver.la \
+	libblogc_common.la \
+	$(NULL)
+
+tests_blogc_git_receiver_check_post_receive_SOURCES = \
+	tests/blogc-git-receiver/check_post_receive.c \
+	$(NULL)
+
+tests_blogc_git_receiver_check_post_receive_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_git_receiver_check_post_receive_LDFLAGS = \
+	-no-install \
+	-Wl,--wrap=realpath \
+	$(NULL)
+
+tests_blogc_git_receiver_check_post_receive_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_git_receiver.la \
 	libblogc_common.la \
@@ -616,7 +646,9 @@ endif
 endif
 
 TESTS = \
-	$(check_PROGRAMS)
+	$(check_PROGRAMS) \
+	$(dist_check_SCRIPTS) \
+	$(NULL)
 
 
 ## Helpers: dist-srpm
@@ -644,12 +676,6 @@ dist-hook:
 if USE_VALGRIND
 valgrind: all
 	$(MAKE) check TESTS_ENVIRONMENT=" \
-		$(VALGRIND) \
-			--tool=memcheck \
-			--leak-check=full \
-			--leak-resolution=high \
-			--num-callers=20 \
-			--error-exitcode=1 \
-			--show-possibly-lost=no"
-
+		VALGRIND=$(VALGRIND) \
+		$(top_srcdir)/build-aux/valgrind.sh"
 endif

@@ -63,9 +63,7 @@ After running these commands, the machine is ready to be used.
 ## REPOSITORY MIRRORING
 
 Users can rely on `blogc-git-receiver` to mirror repositories to a remote Git
-repository (e.g. a free Bitbucket private repository). This feature just requires
-adding a remote called `mirror` to the bare repository in the server. If such remote
-exists, `blogc-git-receiver` will `git push --mirror` to it.
+repository (e.g. a free Bitbucket private repository).
 
 Please note that the `blogc` user must be able to push to the remote repository, and
 that any content manually pushed to the remote repository is overwritten by
@@ -83,13 +81,28 @@ means that if an error happens when mirroring the repository, the deploy will st
 succeed. Users should pay attention to the git hook logs, to avoid losing data
 due to repositories not being mirrored.
 
-To add the `mirror` remote:
+This feature just requires adding a remote called `mirror` to the bare repository
+in the server, or creating a configuration file (~/blogc-git-receiver.ini), that is
+a simple INI-style file where each repository is represented by a section and the
+value of the `mirror` variable is the URL that should be used to push.
+
+To create the configuration file (recommended):
+
+    # su -s /bin/bash - blogc
+    # cat > ~/blogc-git-receiver.ini <<EOF
+    [repo:myblog.git]
+    mirror=$YOUR_GIT_MIRROR_URL
+    EOF
+
+Or to add the `mirror` remote:
 
     # su -s /bin/bash - blogc
     $ cd repos
     $ git init --bare myblog.git  # if not created yet
     $ cd myblog.git
     $ git remote add --mirror=push mirror $YOUR_GIT_MIRROR_URL
+
+Both examples assume that your repository is named `myblog.git`.
 
 ### Caveats of repository mirroring with SSH
 
