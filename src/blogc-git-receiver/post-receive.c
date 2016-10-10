@@ -52,8 +52,8 @@ bgr_post_receive_hook(int argc, char *argv[])
     // the 'mirror' remote, just push to it.
     // this will be removed at some point, but will be kept for compatibility
     // with old setups.
-    if ((0 == system("git config --local remote.mirror.pushurl &> /dev/null")) ||
-        (0 == system("git config --local remote.mirror.url &> /dev/null")))
+    if ((0 == system("git config --local remote.mirror.pushurl > /dev/null")) ||
+        (0 == system("git config --local remote.mirror.url > /dev/null")))
     {
         mirror = bc_strdup("mirror");
         goto push;
