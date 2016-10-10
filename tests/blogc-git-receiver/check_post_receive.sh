@@ -44,18 +44,18 @@ git init --bare "${TEMP}/repos/bar.git" &> /dev/null
 HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/post-receive 2>&1 | tee "${TEMP}/output.txt"
 grep "warning: repository mirroring disabled" "${TEMP}/output.txt" &> /dev/null
 
-git config remote.mirror.pushurl "${TEMP}/repos/bar.git"
+git config --local remote.mirror.pushurl "${TEMP}/repos/bar.git"
 HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/post-receive 2>&1 | tee "${TEMP}/output.txt"
 grep "[new branch] *master" "${TEMP}/output.txt" &> /dev/null
 
-git config --unset remote.mirror.pushurl
+git config --local --unset remote.mirror.pushurl
 rm -rf "${TEMP}/repos/bar.git"
 git init --bare "${TEMP}/repos/bar.git" &> /dev/null
-git config remote.mirror.url "${TEMP}/repos/bar.git"
+git config --local remote.mirror.url "${TEMP}/repos/bar.git"
 HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/post-receive 2>&1 | tee "${TEMP}/output.txt"
 grep "[new branch] *master" "${TEMP}/output.txt" &> /dev/null
 
-git config --unset remote.mirror.url
+git config --local --unset remote.mirror.url
 rm -rf "${TEMP}/repos/bar.git"
 cat > "${TEMP}/blogc-git-receiver.ini" <<EOF
 [repo:boo.git]
