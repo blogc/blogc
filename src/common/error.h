@@ -23,9 +23,6 @@ typedef enum {
     BLOGC_ERROR_TEMPLATE_PARSER,
     BLOGC_ERROR_LOADER,
     BLOGC_WARNING_DATETIME_PARSER,
-
-    // errors for src/blogc-git-receiver
-    BLOGC_GR_ERROR_POST_RECEIVE = 200,
 } bc_error_type_t;
 
 typedef struct {

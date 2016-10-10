@@ -2,6 +2,8 @@
 
 set -xe -o pipefail
 
+export LC_ALL=C
+
 TEMP="$(mktemp -d)"
 [[ -n "${TEMP}" ]]
 
