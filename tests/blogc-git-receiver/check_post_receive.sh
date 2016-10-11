@@ -9,7 +9,7 @@ TEMP="$(mktemp -d)"
 
 trap_func() {
     [[ -e "${TEMP}/output.txt" ]] && cat "${TEMP}/output.txt"
-    rm -rf "${TEMP}"
+    [[ -n "${TEMP}" ]] && rm -rf "${TEMP}"
 }
 
 trap trap_func EXIT
@@ -49,40 +49,37 @@ HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/post-receive 2>&1 | tee "${TEMP}/out
 grep "[new branch] *master" "${TEMP}/output.txt" &> /dev/null
 
 git config --local --unset remote.mirror.pushurl
-rm -rf "${TEMP}/repos/bar.git"
-git init --bare "${TEMP}/repos/bar.git" &> /dev/null
-git config --local remote.mirror.url "${TEMP}/repos/bar.git"
+git init --bare "${TEMP}/repos/bar2.git" &> /dev/null
+git config --local remote.mirror.url "${TEMP}/repos/bar2.git"
 HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/post-receive 2>&1 | tee "${TEMP}/output.txt"
 grep "[new branch] *master" "${TEMP}/output.txt" &> /dev/null
 
 git config --local --unset remote.mirror.url
-rm -rf "${TEMP}/repos/bar.git"
 cat > "${TEMP}/blogc-git-receiver.ini" <<EOF
 [repo:boo.git]
 mirror = 123
 
 [repo:foo.git]
-mirror = ${TEMP}/repos/bar.git
+mirror = ${TEMP}/repos/bar3.git
 
 [repo:bar.git]
 mirror = lol
 EOF
-git init --bare "${TEMP}/repos/bar.git" &> /dev/null
+git init --bare "${TEMP}/repos/bar3.git" &> /dev/null
 HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/post-receive 2>&1 | tee "${TEMP}/output.txt"
 grep "[new branch] *master" "${TEMP}/output.txt" &> /dev/null
 
-rm -rf "${TEMP}/repos/bar.git"
 cat > "${TEMP}/blogc-git-receiver.ini" <<EOF
 asd[repo:boo.git]
 mirror = 123
 
 [repo:foo.git]
-mirror = ${TEMP}/repos/bar.git
+mirror = ${TEMP}/repos/bar4.git
 
 [repo:bar.git]
 mirror = lol
 EOF
-git init --bare "${TEMP}/repos/bar.git" &> /dev/null
+git init --bare "${TEMP}/repos/bar4.git" &> /dev/null
 HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/post-receive 2>&1 | tee "${TEMP}/output.txt"
 grep "warning: failed to parse configuration file " "${TEMP}/output.txt" &> /dev/null
 

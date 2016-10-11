@@ -9,7 +9,7 @@ TEMP="$(mktemp -d)"
 
 trap_func() {
     [[ -e "${TEMP}/output.txt" ]] && cat "${TEMP}/output.txt"
-    rm -rf "${TEMP}"
+    [[ -n "${TEMP}" ]] && rm -rf "${TEMP}"
 }
 
 trap trap_func EXIT

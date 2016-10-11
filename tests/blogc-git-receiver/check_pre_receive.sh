@@ -9,7 +9,7 @@ TEMP="$(mktemp -d)"
 
 trap_func() {
     [[ -e "${TEMP}/output.txt" ]] && cat "${TEMP}/output.txt"
-    rm -rf "${TEMP}"
+    [[ -n "${TEMP}" ]] && rm -rf "${TEMP}"
 }
 
 trap trap_func EXIT
@@ -62,9 +62,8 @@ SHELL="${SELF}" HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEM
 grep "warning: no makefile found. skipping ..." "${TEMP}/output.txt" &> /dev/null
 
 cd "${TEMP}"
-rm -rf "${TEMP}/repos/foo.git"
-git init --bare "${TEMP}/repos/foo.git" &> /dev/null
-ln -s "${SELF}" "${TEMP}/repos/foo.git/hooks/pre-receive"
+git init --bare "${TEMP}/repos/foo2.git" &> /dev/null
+ln -s "${SELF}" "${TEMP}/repos/foo2.git/hooks/pre-receive"
 
 cat > "${TEMP}/tmp.txt" <<EOF
 blob
@@ -85,7 +84,7 @@ M 100644 :1 Makefile
 
 EOF
 
-cd "${TEMP}/repos/foo.git"
+cd "${TEMP}/repos/foo2.git"
 git fast-import < "${TEMP}/tmp.txt" &> /dev/null
 
 cat > "${TEMP}/payload.txt" <<EOF
@@ -104,9 +103,8 @@ DEST="$(readlink htdocs)"
 [[ -e "${DEST}" ]]
 
 cd "${TEMP}"
-rm -rf "${TEMP}/repos/foo.git"
-git init --bare "${TEMP}/repos/foo.git" &> /dev/null
-ln -s "${SELF}" "${TEMP}/repos/foo.git/hooks/pre-receive"
+git init --bare "${TEMP}/repos/foo3.git" &> /dev/null
+ln -s "${SELF}" "${TEMP}/repos/foo3.git/hooks/pre-receive"
 
 cat > "${TEMP}/tmp.txt" <<EOF
 blob
@@ -127,7 +125,7 @@ M 100644 :1 Makefile
 
 EOF
 
-cd "${TEMP}/repos/foo.git"
+cd "${TEMP}/repos/foo3.git"
 ln -s "${DEST}" htdocs
 git fast-import < "${TEMP}/tmp.txt" &> /dev/null
 
