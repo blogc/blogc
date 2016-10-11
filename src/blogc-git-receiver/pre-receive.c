@@ -168,7 +168,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
     unsigned long epoch = time(NULL);
     output_dir = bc_strdup_printf("%s/builds/%s-%lu", home, master, epoch);
     char *gmake_cmd = bc_strdup_printf(
-        "gmake -j%d OUTPUT_DIR=\"%s\" BLOGC_GIT_RECEIVER=1",
+        "%s -j%d OUTPUT_DIR=\"%s\" BLOGC_GIT_RECEIVER=1", make_impl,
         cpu_count(), output_dir);
     fprintf(stdout, "running command: %s\n\n", gmake_cmd);
     fflush(stdout);
