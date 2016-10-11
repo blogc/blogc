@@ -200,6 +200,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
         rmdir_recursive(htdocs_sym);
 
 cleanup:
+    free(master);
     free(output_dir);
     rmdir_recursive(dir);
     free(repo_dir);
