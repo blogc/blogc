@@ -243,7 +243,7 @@ MAINTAINERCLEANFILES += \
 	$(dist_man_MANS) \
 	$(NULL)
 
-if USE_RONN
+if BUILD_MANPAGE
 
 blogc.1: man/blogc.1.ronn
 	$(AM_V_GEN)$(RONN) \
@@ -655,7 +655,7 @@ TESTS = \
 
 ## Helpers: dist-srpm
 
-if USE_RPMBUILD
+if BUILD_SRPM
 dist-srpm: blogc.spec dist-xz
 	$(RPMBUILD) \
 		--define "_srcrpmdir $(top_builddir)" \

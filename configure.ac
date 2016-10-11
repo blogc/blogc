@@ -42,7 +42,7 @@ AS_IF([test "x$have_rpmbuild" = "xyes"], , [
     AC_MSG_ERROR([rpmbuild requested but not found])
   ])
 ])
-AM_CONDITIONAL([USE_RPMBUILD], [test "x$ac_cv_path_rpmbuild" != "x"])
+AM_CONDITIONAL([BUILD_SRPM], [test "x$ac_cv_path_rpmbuild" != "x"])
 RPMBUILD="$ac_cv_path_rpmbuild"
 AC_SUBST(RPMBUILD)
 
@@ -61,7 +61,7 @@ AS_IF([test "x$have_ronn" = "xyes"], , [
     AC_MSG_ERROR([ronn requested but not found])
   ])
 ])
-AM_CONDITIONAL([USE_RONN], [test "x$have_ronn" = "xyes"])
+AM_CONDITIONAL([BUILD_MANPAGE], [test "x$have_ronn" = "xyes"])
 RONN="$ac_cv_path_ronn"
 AC_SUBST(RONN)
 
@@ -83,41 +83,6 @@ AS_IF([test "x$have_valgrind" = "xyes"], , [
 AM_CONDITIONAL([USE_VALGRIND], [test "x$have_valgrind" = "xyes"])
 VALGRIND="$ac_cv_path_valgrind"
 AC_SUBST(VALGRIND)
-
-TESTS="disabled"
-AC_ARG_ENABLE([tests], AS_HELP_STRING([--disable-tests],
-              [disable unit tests, ignoring presence of cmocka]))
-AS_IF([test "x$enable_tests" != "xno"], [
-  PKG_CHECK_MODULES([CMOCKA], [cmocka], [
-    AC_MSG_CHECKING([whether the linker supports -wrap])
-    save_LDFLAGS="$LDFLAGS"
-    LDFLAGS="$LDFLAGS -Wl,-wrap,exit"
-    AC_RUN_IFELSE([
-      AC_LANG_PROGRAM([
-        [void __wrap_exit(int s){__real_exit(0);}]
-      ], [
-        [exit(1);]
-      ])
-    ], [
-      TESTS="enabled"
-      have_cmocka=yes
-    ], [
-      have_cmocka=no
-    ], [
-      have_cmocka=no
-    ])
-    AC_MSG_RESULT([$have_cmocka])
-    LDFLAGS="$save_LDFLAGS"
-  ], [
-    have_cmocka=no
-  ])
-])
-AS_IF([test "x$have_cmocka" = "xyes"], , [
-  AS_IF([test "x$enable_tests" = "xyes"], [
-    AC_MSG_ERROR([unit tests requested but cmocka not found])
-  ])
-])
-AM_CONDITIONAL([USE_CMOCKA], [test "x$have_cmocka" = "xyes"])
 
 GIT_RECEIVER="disabled"
 AC_ARG_ENABLE([git-receiver], AS_HELP_STRING([--enable-git-receiver],
@@ -146,6 +111,64 @@ AS_IF([test "x$enable_runserver" = "xyes"], [
   have_runserver=yes
 ])
 AM_CONDITIONAL([BUILD_RUNSERVER], [test "x$have_runserver" = "xyes"])
+
+TESTS="disabled"
+AC_ARG_ENABLE([tests], AS_HELP_STRING([--disable-tests],
+              [disable unit tests, ignoring presence of cmocka]))
+AS_IF([test "x$enable_tests" != "xno"], [
+  TESTS="enabled"
+  have_tests=yes
+  PKG_CHECK_MODULES([CMOCKA], [cmocka], [
+    AC_MSG_CHECKING([whether the linker supports -wrap])
+    save_LDFLAGS="$LDFLAGS"
+    LDFLAGS="$LDFLAGS -Wl,-wrap,exit"
+    AC_RUN_IFELSE([
+      AC_LANG_PROGRAM([
+        [void __wrap_exit(int s){__real_exit(0);}]
+      ], [
+        [exit(1);]
+      ])
+    ], [
+      have_cmocka=yes
+    ], [
+      have_cmocka=no
+    ], [
+      have_cmocka=no
+    ])
+    AC_MSG_RESULT([$have_cmocka])
+    LDFLAGS="$save_LDFLAGS"
+  ], [
+    have_cmocka=no
+  ])
+  AC_PATH_PROG([git], [git])
+  AC_PATH_PROG([tee], [tee])
+  AC_PATH_PROG([tar], [tar])
+  AS_IF([test "x$ac_cv_path_git" = "x" -o "x$ac_cv_path_tee" = "x" -o "x$ac_cv_path_tar" = "x"], [
+    have_bgr_deps=no
+  ], [
+    have_bgr_deps=yes
+  ])
+], [
+  have_tests=no
+])
+
+AS_IF([test "x$have_tests" = "xyes"], [
+  AS_IF([test "x$have_cmocka" = "xyes"], [
+    TESTS="${TESTS} +cmocka"
+  ], [
+    AC_MSG_ERROR([unit tests requested but cmocka not found])
+  ])
+  AS_IF([test "x$have_bgr_deps" = "xyes"], [
+    TESTS="${TESTS} +blogc-git-receiver"
+  ], [
+    AS_IF([test "x$have_git_receiver" = "xyes"], [
+      AC_MSG_ERROR([unit tests requested for blogc-git-receiver but git, tar and tee not found])
+    ])
+  ])
+])
+AM_CONDITIONAL([BUILD_TESTS], [test "x$enable_tests" = "xyes"])
+AM_CONDITIONAL([USE_CMOCKA], [test "x$have_cmocka" = "xyes"])
+AM_CONDITIONAL([USE_BGR_DEPS], [test "x$have_bgr_deps" = "xyes"])
 
 AC_CHECK_HEADERS([sys/stat.h time.h])
 
