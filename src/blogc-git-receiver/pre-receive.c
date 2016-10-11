@@ -150,6 +150,21 @@ bgr_pre_receive_hook(int argc, char *argv[])
         goto cleanup;
     }
 
+    const char *make_impl = NULL;
+
+    if (127 != system("gmake -f /dev/null &> /dev/null")) {
+        make_impl = "gmake";
+    }
+    else if (127 != system("make -f /dev/null &> /dev/null")) {
+        make_impl = "make";
+    }
+
+    if (make_impl == NULL) {
+        fprintf(stderr, "error: no 'make' implementation found\n");
+        rv = 1;
+        goto cleanup;
+    }
+
     unsigned long epoch = time(NULL);
     output_dir = bc_strdup_printf("%s/builds/%s-%lu", home, master, epoch);
     char *gmake_cmd = bc_strdup_printf(
