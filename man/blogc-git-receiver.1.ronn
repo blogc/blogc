@@ -88,7 +88,7 @@ value of the `mirror` variable is the URL that should be used to push.
 
 To create the configuration file (recommended):
 
-    # su -s /bin/bash - blogc
+    # su -s /bin/sh - blogc
     # cat > ~/blogc-git-receiver.ini <<EOF
     [repo:myblog.git]
     mirror=$YOUR_GIT_MIRROR_URL
@@ -96,7 +96,7 @@ To create the configuration file (recommended):
 
 Or to add the `mirror` remote:
 
-    # su -s /bin/bash - blogc
+    # su -s /bin/sh - blogc
     $ cd repos
     $ git init --bare myblog.git  # if not created yet
     $ cd myblog.git
@@ -117,10 +117,10 @@ checking in SSH's `~/.ssh/config` file:
 
 The example uses `bitbucket.org` as remote host, that should be changed if needed.
 
-To change this file, users must login with `/bin/bash` or any other "real" shell,
+To change this file, users must login with `/bin/sh` or any other "real" shell,
 as `root`:
 
-    # su -s /bin/bash - blogc
+    # su -s /bin/sh - blogc
 
 ## ENVIRONMENT VARIABLES
 
