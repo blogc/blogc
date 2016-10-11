@@ -141,28 +141,32 @@ AS_IF([test "x$enable_tests" != "xno"], [
     have_cmocka=no
   ])
   AC_PATH_PROG([git], [git])
-  AC_PATH_PROG([tee], [tee])
   AC_PATH_PROG([tar], [tar])
-  AS_IF([test "x$ac_cv_path_git" = "x" -o "x$ac_cv_path_tee" = "x" -o "x$ac_cv_path_tar" = "x"], [
+  AS_IF([test "x$ac_cv_path_git" = "x" -o "x$ac_cv_path_tar" = "x"], [
     have_bgr_deps=no
   ], [
     have_bgr_deps=yes
+  ])
+  AC_PATH_PROG([tee], [tee])
+  AS_IF([test "x$ac_cv_path_tee" = "x"], [
+    have_tee=no
+  ], [
+    have_tee=yes
   ])
 ], [
   have_tests=no
 ])
 
 AS_IF([test "x$have_tests" = "xyes"], [
-  AS_IF([test "x$have_cmocka" = "xyes"], [
-    TESTS="${TESTS} +cmocka"
-  ], [
-    AC_MSG_ERROR([unit tests requested but cmocka not found])
+  AS_IF([test "x$have_cmocka" = "xyes"],, [
+    AC_MSG_ERROR([tests requested but cmocka not found])
   ])
-  AS_IF([test "x$have_bgr_deps" = "xyes"], [
-    TESTS="${TESTS} +blogc-git-receiver"
-  ], [
+  AS_IF([test "x$have_tee" = "xyes"],, [
+    AC_MSG_ERROR([tests requested but tee not found])
+  ])
+  AS_IF([test "x$have_bgr_deps" = "xyes"], , [
     AS_IF([test "x$have_git_receiver" = "xyes"], [
-      AC_MSG_ERROR([unit tests requested for blogc-git-receiver but git, tar and tee not found])
+      AC_MSG_ERROR([tests requested for blogc-git-receiver but git and/or tar not found])
     ])
   ])
 ])
