@@ -50,26 +50,12 @@ bgr_shell(int argc, char *argv[])
         goto cleanup;
     }
 
-    repo = bc_strdup_printf("repos/%s", tmp_repo);
+    repo = bc_strdup_printf("%s/repos/%s", home, tmp_repo);
     quoted_repo = bgr_shell_quote(repo);
     free(tmp_repo);
 
-    // check if repository is sane
-    if (0 == strlen(repo)) {
-        fprintf(stderr, "error: invalid repository\n");
-        rv = 1;
-        goto cleanup;
-    }
-
     if (0 == strncmp(argv[2], "git-upload-", 11))  // no need to check len here
         goto git_exec;
-
-    if (0 != chdir(home)) {
-        fprintf(stderr, "error: failed to chdir (%s): %s\n", home,
-            strerror(errno));
-        rv = 1;
-        goto cleanup;
-    }
 
     if (0 != access(repo, F_OK)) {
         char *git_init_cmd = bc_strdup_printf(
@@ -85,7 +71,7 @@ bgr_shell(int argc, char *argv[])
     }
 
     if (0 != chdir(repo)) {
-        fprintf(stderr, "error: failed to chdir (%s/%s): %s\n", home, repo,
+        fprintf(stderr, "error: failed to chdir (%s): %s\n", repo,
             strerror(errno));
         rv = 1;
         goto cleanup;
@@ -95,16 +81,16 @@ bgr_shell(int argc, char *argv[])
         // openwrt git package won't install git templates, then the git
         // repositories created with it won't have the hooks/ directory.
         if (0 != mkdir("hooks", 0777)) {  // mkdir honors umask for us.
-            fprintf(stderr, "error: failed to create directory (%s/%s/hooks): "
-                "%s\n", home, repo, strerror(errno));
+            fprintf(stderr, "error: failed to create directory (%s/hooks): "
+                "%s\n", repo, strerror(errno));
             rv = 1;
             goto cleanup;
         }
     }
 
     if (0 != chdir("hooks")) {
-        fprintf(stderr, "error: failed to chdir (%s/%s/hooks): %s\n", home,
-            repo, strerror(errno));
+        fprintf(stderr, "error: failed to chdir (%s/hooks): %s\n", repo,
+            strerror(errno));
         rv = 1;
         goto cleanup;
     }
@@ -112,7 +98,7 @@ bgr_shell(int argc, char *argv[])
     if (0 == access("pre-receive", F_OK)) {
         if (0 != unlink("pre-receive")) {
             fprintf(stderr, "error: failed to remove old symlink "
-                "(%s/%s/hooks/pre-receive): %s\n", home, repo, strerror(errno));
+                "(%s/hooks/pre-receive): %s\n", repo, strerror(errno));
             rv = 1;
             goto cleanup;
         }
@@ -120,7 +106,7 @@ bgr_shell(int argc, char *argv[])
 
     if (0 != symlink(self, "pre-receive")) {
         fprintf(stderr, "error: failed to create symlink "
-            "(%s/%s/hooks/pre-receive): %s\n", home, repo, strerror(errno));
+            "(%s/hooks/pre-receive): %s\n", repo, strerror(errno));
         rv = 1;
         goto cleanup;
     }
@@ -128,7 +114,7 @@ bgr_shell(int argc, char *argv[])
     if (0 == access("post-receive", F_OK)) {
         if (0 != unlink("post-receive")) {
             fprintf(stderr, "error: failed to remove old symlink "
-                "(%s/%s/hooks/post-receive): %s\n", home, repo, strerror(errno));
+                "(%s/hooks/post-receive): %s\n", repo, strerror(errno));
             rv = 1;
             goto cleanup;
         }
@@ -136,10 +122,12 @@ bgr_shell(int argc, char *argv[])
 
     if (0 != symlink(self, "post-receive")) {
         fprintf(stderr, "error: failed to create symlink "
-            "(%s/%s/hooks/post-receive): %s\n", home, repo, strerror(errno));
+            "(%s/hooks/post-receive): %s\n", repo, strerror(errno));
         rv = 1;
         goto cleanup;
     }
+
+git_exec:
 
     if (0 != chdir(home)) {
         fprintf(stderr, "error: failed to chdir (%s): %s\n", home,
@@ -148,39 +136,41 @@ bgr_shell(int argc, char *argv[])
         goto cleanup;
     }
 
-git_exec:
+    // static allocation instead of bc_strdup_printf to avoid leaks
+    char buffer[4096];
+    char *command = bc_strdup(argv[2]);
+    char *p;
+    for (p = command; *p != ' ' && *p != '\0'; p++);
+    if (*p == ' ')
+        *p = '\0';
 
-    {
-        // static allocation instead of bc_strdup_printf to avoid leaks
-        char buffer[4096];
-        char *command = bc_strdup(argv[2]);
-        char *p;
-        for (p = command; *p != ' ' && *p != '\0'; p++);
-        if (*p == ' ')
-            *p = '\0';
+    if (sizeof(buffer) < (strlen(command) + strlen(quoted_repo) + 2)) {
+        fprintf(stderr, "error: git-shell command is too big\n");
+        rv = 1;
+        goto cleanup;
+    }
 
-        if (sizeof(buffer) < (strlen(command) + strlen(quoted_repo) + 2)) {
-            fprintf(stderr, "error: git-shell command is too big\n");
-            rv = 1;
-            goto cleanup;
-        }
+    if (0 > snprintf(buffer, sizeof(buffer), "%s %s", command, quoted_repo)) {
+        fprintf(stderr, "error: failed to generate git-shell command\n");
+        rv = 1;
+        goto cleanup;
+    }
 
-        if (0 > snprintf(buffer, sizeof(buffer), "%s %s", command, quoted_repo)) {
-            fprintf(stderr, "error: failed to generate git-shell command\n");
-            rv = 1;
-            goto cleanup;
-        }
+    free(command);
+    free(repo);
+    free(quoted_repo);
 
-        free(command);
-        free(repo);
-        free(quoted_repo);
-
+    // this is a hack. no memory handling should be done inside this block
+    if (NULL == getenv("__VALGRIND_ENABLED")) {
         execlp("git-shell", "git-shell", "-c", buffer, NULL);
 
         // execlp only returns on error, then something bad happened
         fprintf(stderr, "error: failed to execute git-shell\n");
-        return 1;  // avoid freeing repo again
+        return 1;
     }
+
+    printf("git-shell -c \"%s\"\n", buffer);  // used by tests, ignore
+    return 0;
 
 cleanup:
     free(repo);

@@ -322,6 +322,7 @@ if BUILD_GIT_RECEIVER
 dist_check_SCRIPTS += \
 	tests/blogc-git-receiver/check_post_receive.sh \
 	tests/blogc-git-receiver/check_pre_receive.sh \
+	tests/blogc-git-receiver/check_shell.sh \
 	$(NULL)
 endif
 
