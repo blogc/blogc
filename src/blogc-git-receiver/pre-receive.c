@@ -153,10 +153,10 @@ bgr_pre_receive_hook(int argc, char *argv[])
 
     const char *make_impl = NULL;
 
-    if (127 != WEXITSTATUS(system("gmake -f /dev/null &> /dev/null"))) {
+    if (127 != WEXITSTATUS(system("gmake -f /dev/null 2> /dev/null > /dev/null"))) {
         make_impl = "gmake";
     }
-    else if (127 != WEXITSTATUS(system("make -f /dev/null &> /dev/null"))) {
+    else if (127 != WEXITSTATUS(system("make -f /dev/null 2> /dev/null > /dev/null"))) {
         make_impl = "make";
     }
 
