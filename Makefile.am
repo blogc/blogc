@@ -18,6 +18,7 @@ EXTRA_DIST = \
 	build-aux/valgrind.sh \
 	$(top_srcdir)/.version \
 	autogen.sh \
+	blogc.spec \
 	LICENSE \
 	README.md \
 	$(NULL)
