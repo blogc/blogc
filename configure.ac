@@ -170,7 +170,7 @@ AS_IF([test "x$have_tests" = "xyes"], [
     ])
   ])
 ])
-AM_CONDITIONAL([BUILD_TESTS], [test "x$enable_tests" = "xyes"])
+AM_CONDITIONAL([BUILD_TESTS], [test "x$have_tests" = "xyes"])
 AM_CONDITIONAL([USE_CMOCKA], [test "x$have_cmocka" = "xyes"])
 AM_CONDITIONAL([USE_BGR_DEPS], [test "x$have_bgr_deps" = "xyes"])
 

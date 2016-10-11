@@ -319,6 +319,8 @@ endif
 
 ## Build rules: tests
 
+if BUILD_TESTS
+
 if BUILD_GIT_RECEIVER
 dist_check_SCRIPTS += \
 	tests/blogc-git-receiver/check_post_receive.sh \
@@ -644,6 +646,8 @@ tests_blogc_git_receiver_check_shell_command_parser_LDADD = \
 	libblogc_git_receiver.la \
 	libblogc_common.la \
 	$(NULL)
+endif
+
 endif
 
 endif
