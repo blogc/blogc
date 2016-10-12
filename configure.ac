@@ -156,16 +156,32 @@ AS_IF([test "x$enable_tests" != "xno"], [
   ])
 ])
 
-AS_IF([test "x$enable_tests" = "xyes"], [
-  AS_IF([test "x$have_cmocka" = "xyes"],, [
+AS_IF([test "x$have_cmocka" = "xyes"],, [
+  have_tests=no
+  TESTS="disabled"
+  AS_IF([test "x$enable_tests" = "xyes"], [
     AC_MSG_ERROR([tests requested but cmocka not found])
+  ], [
+    AC_MSG_WARN([cmocka not found, install it to run tests])
   ])
-  AS_IF([test "x$have_blogc_deps" = "xyes"],, [
+])
+AS_IF([test "x$have_blogc_deps" = "xyes"],, [
+  have_tests=no
+  TESTS="disabled"
+  AS_IF([test "x$enable_tests" = "xyes"], [
     AC_MSG_ERROR([tests requested but bash and/or tee not found])
+  ], [
+    AC_MSG_WARN([bash and/or tee not found, install it to run tests])
   ])
-  AS_IF([test "x$have_bgr_deps" = "xyes"], , [
-    AS_IF([test "x$have_git_receiver" = "xyes"], [
+])
+AS_IF([test "x$have_bgr_deps" = "xyes"], , [
+  AS_IF([test "x$have_git_receiver" = "xyes"], [
+    have_tests=no
+    TESTS="disabled"
+    AS_IF([test "x$enable_tests" = "xyes"], [
       AC_MSG_ERROR([tests requested for blogc-git-receiver but git and/or tar not found])
+    ], [
+      AC_MSG_WARN([git and/or tar not found, install it to run blogc-git-receiver tests])
     ])
   ])
 ])
