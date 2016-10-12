@@ -147,11 +147,12 @@ AS_IF([test "x$enable_tests" != "xno"], [
   ], [
     have_bgr_deps=yes
   ])
+  AC_PATH_PROG([bash], [bash])
   AC_PATH_PROG([tee], [tee])
-  AS_IF([test "x$ac_cv_path_tee" = "x"], [
-    have_tee=no
+  AS_IF([test "x$ac_cv_path_bash" = "x" -o "x$ac_cv_path_tee" = "x"], [
+    have_blogc_deps=no
   ], [
-    have_tee=yes
+    have_blogc_deps=yes
   ])
 ], [
   have_tests=no
@@ -161,8 +162,8 @@ AS_IF([test "x$have_tests" = "xyes"], [
   AS_IF([test "x$have_cmocka" = "xyes"],, [
     AC_MSG_ERROR([tests requested but cmocka not found])
   ])
-  AS_IF([test "x$have_tee" = "xyes"],, [
-    AC_MSG_ERROR([tests requested but tee not found])
+  AS_IF([test "x$have_blogc_deps" = "xyes"],, [
+    AC_MSG_ERROR([tests requested but bash and/or tee not found])
   ])
   AS_IF([test "x$have_bgr_deps" = "xyes"], , [
     AS_IF([test "x$have_git_receiver" = "xyes"], [
@@ -173,6 +174,8 @@ AS_IF([test "x$have_tests" = "xyes"], [
 AM_CONDITIONAL([BUILD_TESTS], [test "x$have_tests" = "xyes"])
 AM_CONDITIONAL([USE_CMOCKA], [test "x$have_cmocka" = "xyes"])
 AM_CONDITIONAL([USE_BGR_DEPS], [test "x$have_bgr_deps" = "xyes"])
+BASH="$ac_cv_path_bash"
+AC_SUBST(BASH)
 
 AC_CHECK_HEADERS([sys/stat.h time.h])
 
@@ -182,6 +185,12 @@ AC_CONFIG_FILES([
   Makefile
   blogc.spec
 ])
+AC_CONFIG_FILES([tests/blogc-git-receiver/check_pre_receive.sh],
+                [chmod +x tests/blogc-git-receiver/check_pre_receive.sh])
+AC_CONFIG_FILES([tests/blogc-git-receiver/check_post_receive.sh],
+                [chmod +x tests/blogc-git-receiver/check_post_receive.sh])
+AC_CONFIG_FILES([tests/blogc-git-receiver/check_shell.sh],
+                [chmod +x tests/blogc-git-receiver/check_shell.sh])
 
 AC_OUTPUT
 

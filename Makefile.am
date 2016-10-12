@@ -92,7 +92,7 @@ endif
 check_PROGRAMS = \
 	$(NULL)
 
-dist_check_SCRIPTS = \
+check_SCRIPTS = \
 	$(NULL)
 
 
@@ -322,7 +322,7 @@ endif
 if BUILD_TESTS
 
 if BUILD_GIT_RECEIVER
-dist_check_SCRIPTS += \
+check_SCRIPTS += \
 	tests/blogc-git-receiver/check_post_receive.sh \
 	tests/blogc-git-receiver/check_pre_receive.sh \
 	tests/blogc-git-receiver/check_shell.sh \
@@ -654,7 +654,11 @@ endif
 
 TESTS = \
 	$(check_PROGRAMS) \
-	$(dist_check_SCRIPTS) \
+	$(check_SCRIPTS) \
+	$(NULL)
+
+CLEANFILES += \
+	$(check_SCRIPTS) \
 	$(NULL)
 
 
@@ -684,5 +688,5 @@ if USE_VALGRIND
 valgrind: all
 	$(MAKE) check TESTS_ENVIRONMENT=" \
 		VALGRIND=$(VALGRIND) \
-		$(top_srcdir)/build-aux/valgrind.sh"
+		$(BASH) -e $(top_srcdir)/build-aux/valgrind.sh"
 endif
