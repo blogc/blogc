@@ -116,8 +116,6 @@ TESTS="disabled"
 AC_ARG_ENABLE([tests], AS_HELP_STRING([--disable-tests],
               [disable unit tests, ignoring presence of cmocka]))
 AS_IF([test "x$enable_tests" != "xno"], [
-  TESTS="enabled"
-  have_tests=yes
   PKG_CHECK_MODULES([CMOCKA], [cmocka], [
     AC_MSG_CHECKING([whether the linker supports -wrap])
     save_LDFLAGS="$LDFLAGS"
@@ -153,12 +151,12 @@ AS_IF([test "x$enable_tests" != "xno"], [
     have_blogc_deps=no
   ], [
     have_blogc_deps=yes
+    have_tests=yes
+    TESTS="enabled"
   ])
-], [
-  have_tests=no
 ])
 
-AS_IF([test "x$have_tests" = "xyes"], [
+AS_IF([test "x$enable_tests" = "xyes"], [
   AS_IF([test "x$have_cmocka" = "xyes"],, [
     AC_MSG_ERROR([tests requested but cmocka not found])
   ])

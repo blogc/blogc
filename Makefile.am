@@ -322,11 +322,13 @@ endif
 if BUILD_TESTS
 
 if BUILD_GIT_RECEIVER
+if USE_BGR_DEPS
 check_SCRIPTS += \
 	tests/blogc-git-receiver/check_post_receive.sh \
 	tests/blogc-git-receiver/check_pre_receive.sh \
 	tests/blogc-git-receiver/check_shell.sh \
 	$(NULL)
+endif
 endif
 
 if USE_CMOCKA
