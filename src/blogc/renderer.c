@@ -6,7 +6,6 @@
  * See the file LICENSE.
  */
 
-#include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -82,11 +81,11 @@ blogc_format_variable(const char *name, bc_trie_t *global, bc_trie_t *local,
     for (i = last - 1; i > 0 && var[i] >= '0' && var[i] <= '9'; i--);
 
     if (var[i] == '_' && (i + 1) < last) {  // var ends with '_[0-9]+'
-        // passing NULL to endptr because our string was previously validated
-        len = strtol(var + i + 1, NULL, 10);
-        if (errno != 0) {
-            fprintf(stderr, "warning: invalid variable size for '%s' (%s), "
-                "ignoring.\n", var, strerror(errno));
+        char *endptr;
+        len = strtol(var + i + 1, &endptr, 10);
+        if (*endptr != '\0') {
+            fprintf(stderr, "warning: invalid variable size for '%s', "
+                "ignoring.\n", var);
             len = -1;
         }
         else {
