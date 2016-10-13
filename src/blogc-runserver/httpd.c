@@ -212,6 +212,11 @@ int
 br_httpd_run(const char *host, unsigned short port, const char *docroot,
     size_t max_threads)
 {
+    if (port == 0) {
+        fprintf(stderr, "Invalid port: 0\n");
+        return 1;
+    }
+
     thread_data_t threads[max_threads];
     for (size_t i = 0; i < max_threads; i++)
         threads[i].initialized = false;

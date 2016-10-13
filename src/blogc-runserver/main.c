@@ -54,6 +54,8 @@ main(int argc, char **argv)
     char *docroot = NULL;
     unsigned short port = 8080;
     size_t max_threads = 20;
+    char *ptr;
+    char *endptr;
 
     unsigned int args = 0;
 
@@ -74,15 +76,23 @@ main(int argc, char **argv)
                     break;
                 case 'p':
                     if (argv[i][2] != '\0')
-                        port = strtoul(argv[i] + 2, NULL, 10);
+                        ptr = argv[i] + 2;
                     else
-                        port = strtoul(argv[++i], NULL, 10);
+                        ptr = argv[++i];
+                    port = strtoul(ptr, &endptr, 10);
+                    if (*ptr != '\0' && *endptr != '\0')
+                        fprintf(stderr, "blogc-runserver: warning: invalid value "
+                            "for -p argument: %s. using %hu instead\n", ptr, port);
                     break;
                 case 'm':
                     if (argv[i][2] != '\0')
-                        max_threads = strtoul(argv[i] + 2, NULL, 10);
+                        ptr = argv[i] + 2;
                     else
-                        max_threads = strtoul(argv[++i], NULL, 10);
+                        ptr = argv[++i];
+                    max_threads = strtoul(argv[++i], NULL, 10);
+                    if (*ptr != '\0' && *endptr != '\0')
+                        fprintf(stderr, "blogc-runserver: warning: invalid value "
+                            "for -m argument: %s. using %zu instead\n", ptr, max_threads);
                     break;
                 default:
                     print_usage();

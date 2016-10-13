@@ -9,6 +9,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "source-parser.h"
@@ -105,11 +106,22 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
     const char *filter_page = bc_trie_lookup(conf, "FILTER_PAGE");
     const char *filter_per_page = bc_trie_lookup(conf, "FILTER_PER_PAGE");
 
-    long page = strtol(filter_page != NULL ? filter_page : "", NULL, 10);
+    const char *ptr;
+    char *endptr;
+
+    ptr = filter_page != NULL ? filter_page : "";
+    long page = strtol(ptr, &endptr, 10);
+    if (*ptr != '\0' && *endptr != '\0')
+        fprintf(stderr, "warning: invalid value for 'FILTER_PAGE' variable: "
+            "%s. using %ld instead\n", ptr, page);
     if (page <= 0)
         page = 1;
-    long per_page = strtol(filter_per_page != NULL ? filter_per_page : "10",
-        NULL, 10);
+
+    ptr = filter_per_page != NULL ? filter_per_page : "10";
+    long per_page = strtol(ptr, &endptr, 10);
+    if (*ptr != '\0' && *endptr != '\0')
+        fprintf(stderr, "warning: invalid value for 'FILTER_PER_PAGE' variable: "
+            "%s. using %ld instead\n", ptr, per_page);
     if (per_page <= 0)
         per_page = 10;
 
