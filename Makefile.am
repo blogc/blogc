@@ -99,6 +99,7 @@ check_SCRIPTS = \
 libblogc_la_SOURCES = \
 	src/blogc/content-parser.c \
 	src/blogc/datetime-parser.c \
+	src/blogc/debug.c \
 	src/blogc/loader.c \
 	src/blogc/renderer.c \
 	src/blogc/source-parser.c \
@@ -130,7 +131,6 @@ libblogc_common_la_CFLAGS = \
 
 blogc_SOURCES = \
 	src/blogc/main.c \
-	src/blogc/debug.c \
 	$(NULL)
 
 blogc_CFLAGS = \
