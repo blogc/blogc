@@ -9,10 +9,6 @@ addons:
       - rpm
       - valgrind
 
-git:
-  depth: 100
-
-
 compiler:
   - clang
   - gcc
@@ -29,7 +25,9 @@ matrix:
 
 install: gem install ronn
 
-before_script: ./autogen.sh
+before_script:
+  - git fetch --unshallow
+  - ./autogen.sh
 
 script:
   - ./build-aux/travis-build.sh
