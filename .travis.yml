@@ -9,6 +9,10 @@ addons:
       - rpm
       - valgrind
 
+git:
+  depth: 100
+
+
 compiler:
   - clang
   - gcc
