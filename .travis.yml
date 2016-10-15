@@ -25,7 +25,9 @@ matrix:
 
 install: gem install ronn
 
-before_script: ./autogen.sh
+before_script:
+  - git fetch --tags
+  - ./autogen.sh
 
 script:
   - ./build-aux/travis-build.sh
