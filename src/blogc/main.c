@@ -110,12 +110,11 @@ blogc_read_stdin_to_list(bc_slist_t *l)
 {
     char buffer[4096];
     while (NULL != fgets(buffer, 4096, stdin)) {
-        char *tmp = bc_str_strip(buffer);
-        if (tmp[0] == '\0')
+        if (buffer[0] == '\0')
             continue;
-        if (tmp[0] == '#')
+        if (buffer[0] == '#')
             continue;
-        l = bc_slist_append(l, bc_strdup(tmp));
+        l = bc_slist_append(l, bc_strdup(buffer));
     }
     return l;
 }
