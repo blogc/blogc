@@ -115,7 +115,7 @@ blogc_read_stdin_to_list(bc_slist_t *l)
             continue;
         if (buffer[0] == '#')
             continue;
-        if (len >= 2 && (buffer[len - 2] == '\r') || (buffer[len - 2] == '\n'))
+        if (len >= 2 && ((buffer[len - 2] == '\r') || (buffer[len - 2] == '\n')))
             buffer[len - 2] = '\0';
         if ((buffer[len - 1] == '\r') || (buffer[len - 1] == '\n'))
             buffer[len - 1] = '\0';

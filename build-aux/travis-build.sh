@@ -5,6 +5,8 @@ set -ex
 rm -rf build
 mkdir -p build
 
+build-aux/git-version-gen .tarball-version
+
 pushd build > /dev/null
 
 ../configure \
