@@ -3,9 +3,15 @@ blogc(1) -- a blog compiler
 
 ## SYNOPSIS
 
-`blogc` `-d` [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] <SOURCE><br>
-`blogc` `-d` `-l` [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] [<SOURCE> ...]<br>
-`blogc` `-d` `-l` `-p` <KEY> [`-D` <KEY>=<VALUE> ...] [<SOURCE> ...]<br>
+`blogc` [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] <SOURCE><br>
+`blogc` `-l` [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] [<SOURCE> ...]<br>
+`blogc` `-l` `-p` <KEY> [`-d`] [`-D` <KEY>=<VALUE> ...] [<SOURCE> ...]<br>
+`blogc` `-i` [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] &lt; <FILE_LIST><br>
+`blogc` `-i` `-l` [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] &lt; <FILE_LIST><br>
+`blogc` `-i` `-l` `-p` <KEY> [`-d`] [`-D` <KEY>=<VALUE> ...] &lt; <FILE_LIST><br>
+`echo` `-e` "<SOURCE>\n..." | `blogc` `-i` [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>]<br>
+`echo` `-e` "<SOURCE>\n..." | `blogc` `-i` `-l` [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>]<br>
+`echo` `-e` "<SOURCE>\n..." | `blogc` `-i` `-l` `-p` <KEY> [`-d`] [`-D` <KEY>=<VALUE> ...]<br>
 `blogc` [`-h`|`-v`]
 
 ## DESCRIPTION
@@ -32,6 +38,13 @@ designed to be used with make(1).
 
   * `-d`:
     Activates debug.
+
+  * `-i`:
+    Reads list of source files from standard input. Content of standard input is
+    parsed as a file where each line is a file path. Empty lines and lines
+    starting with `#` are ignored. If some source files are provided to command
+    line while using this option, they will be parsed **before** the files read
+    from standard input.
 
   * `-l`:
     Activates listing mode, allowing user to provide multiple source files. See

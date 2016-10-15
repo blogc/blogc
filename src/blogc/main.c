@@ -27,6 +27,7 @@
 #include "loader.h"
 #include "renderer.h"
 #include "../common/error.h"
+#include "../common/file.h"
 #include "../common/utf8.h"
 #include "../common/utils.h"
 
@@ -40,7 +41,7 @@ blogc_print_help(void)
 {
     printf(
         "usage:\n"
-        "    blogc [-h] [-v] [-d] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
+        "    blogc [-h] [-v] [-d] [-i] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
         "          [-o OUTPUT] [SOURCE ...] - A blog compiler.\n"
         "\n"
         "positional arguments:\n"
@@ -50,6 +51,7 @@ blogc_print_help(void)
         "    -h            show this help message and exit\n"
         "    -v            show version and exit\n"
         "    -d            enable debug\n"
+        "    -i            read list of source files from standard input\n"
         "    -l            build listing page, from multiple source files\n"
         "    -D KEY=VALUE  set global configuration parameter\n"
         "    -p KEY        show the value of a global configuration parameter\n"
@@ -63,7 +65,7 @@ static void
 blogc_print_usage(void)
 {
     printf(
-        "usage: blogc [-h] [-v] [-d] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
+        "usage: blogc [-h] [-v] [-d] [-i] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
         "             [-o OUTPUT] [SOURCE ...]\n");
 }
 
@@ -103,6 +105,22 @@ blogc_mkdir_recursive(const char *filename)
 }
 
 
+static bc_slist_t*
+blogc_read_stdin_to_list(bc_slist_t *l)
+{
+    char buffer[4096];
+    while (NULL != fgets(buffer, 4096, stdin)) {
+        char *tmp = bc_str_strip(buffer);
+        if (tmp[0] == '\0')
+            continue;
+        if (tmp[0] == '#')
+            continue;
+        l = bc_slist_append(l, bc_strdup(tmp));
+    }
+    return l;
+}
+
+
 int
 main(int argc, char **argv)
 {
@@ -111,6 +129,7 @@ main(int argc, char **argv)
     int rv = 0;
 
     bool debug = false;
+    bool input_stdin = false;
     bool listing = false;
     char *template = NULL;
     char *output = NULL;
@@ -134,6 +153,9 @@ main(int argc, char **argv)
                     goto cleanup;
                 case 'd':
                     debug = true;
+                    break;
+                case 'i':
+                    input_stdin = true;
                     break;
                 case 'l':
                     listing = true;
@@ -203,6 +225,9 @@ main(int argc, char **argv)
         else
             sources = bc_slist_append(sources, bc_strdup(argv[i]));
     }
+
+    if (input_stdin)
+        sources = blogc_read_stdin_to_list(sources);
 
     if (!listing && bc_slist_length(sources) == 0) {
         blogc_print_usage();
