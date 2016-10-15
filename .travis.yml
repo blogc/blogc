@@ -5,6 +5,7 @@ language: c
 addons:
   apt:
     packages:
+      - git
       - libcmocka-dev
       - rpm
       - valgrind
