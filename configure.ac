@@ -146,8 +146,9 @@ AS_IF([test "x$enable_tests" != "xno"], [
     have_bgr_deps=yes
   ])
   AC_PATH_PROG([bash], [bash])
+  AC_PATH_PROG([diff], [diff])
   AC_PATH_PROG([tee], [tee])
-  AS_IF([test "x$ac_cv_path_bash" = "x" -o "x$ac_cv_path_tee" = "x"], [
+  AS_IF([test "x$ac_cv_path_bash" = "x" -o "x$ac_cv_path_diff" = "x" -o "x$ac_cv_path_tee" = "x"], [
     have_blogc_deps=no
   ], [
     have_blogc_deps=yes
@@ -169,9 +170,9 @@ AS_IF([test "x$have_blogc_deps" = "xyes"],, [
   have_tests=no
   TESTS="disabled"
   AS_IF([test "x$enable_tests" = "xyes"], [
-    AC_MSG_ERROR([tests requested but bash and/or tee not found])
+    AC_MSG_ERROR([tests requested but bash, diff and/or tee not found])
   ], [
-    AC_MSG_WARN([bash and/or tee not found, install it to run tests])
+    AC_MSG_WARN([bash, diff and/or tee not found, install it to run tests])
   ])
 ])
 AS_IF([test "x$have_bgr_deps" = "xyes"], , [
@@ -199,6 +200,8 @@ AC_CONFIG_FILES([
   Makefile
   blogc.spec
 ])
+AC_CONFIG_FILES([tests/blogc/check_blogc.sh],
+                [chmod +x tests/blogc/check_blogc.sh])
 AC_CONFIG_FILES([tests/blogc-git-receiver/check_pre_receive.sh],
                 [chmod +x tests/blogc-git-receiver/check_pre_receive.sh])
 AC_CONFIG_FILES([tests/blogc-git-receiver/check_post_receive.sh],

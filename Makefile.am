@@ -331,6 +331,10 @@ check_SCRIPTS += \
 endif
 endif
 
+check_SCRIPTS += \
+	tests/blogc/check_blogc.sh \
+	$(NULL)
+
 if USE_CMOCKA
 
 check_PROGRAMS += \

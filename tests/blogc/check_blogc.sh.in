@@ -1,0 +1,379 @@
+#!@BASH@
+
+set -xe -o pipefail
+
+export LC_ALL=C
+
+TEMP="$(mktemp -d)"
+[[ -n "${TEMP}" ]]
+
+trap_func() {
+    [[ -n "${TEMP}" ]] && rm -rf "${TEMP}"
+}
+
+trap trap_func EXIT
+
+${TESTS_ENVIRONMENT} ./blogc -v | grep blogc
+
+cat > "${TEMP}/post1.txt" <<EOF
+TITLE: foo
+DATE: 2010-01-01 11:11:11
+-------------------------
+foo?
+EOF
+
+cat > "${TEMP}/post2.txt" <<EOF
+TITLE: bar
+DATE: 2010-01-01 22:22:22
+-------------------------
+bar?
+EOF
+
+cat > "${TEMP}/atom.tmpl" <<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">{{ SITE_TITLE }}</title>
+  <id>{{ BASE_URL }}/atom.xml</id>
+  <updated>{{ DATE_FIRST_FORMATTED }}</updated>
+  <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/" />
+  <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/atom.xml" rel="self" />
+  <author>
+    <name>{{ AUTHOR_NAME }}</name>
+    <email>{{ AUTHOR_EMAIL }}</email>
+  </author>
+  <subtitle type="text">{{ SITE_TAGLINE }}</subtitle>
+  {% block listing %}
+  <entry>
+    <title type="text">{{ TITLE }}</title>
+    <id>{{ BASE_URL }}/post/{{ FILENAME }}/</id>
+    <updated>{{ DATE_FORMATTED }}</updated>
+    <published>{{ DATE_FORMATTED }}</published>
+    <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/post/{{ FILENAME }}/" />
+    <author>
+      <name>{{ AUTHOR_NAME }}</name>
+      <email>{{ AUTHOR_EMAIL }}</email>
+    </author>
+    <content type="html"><![CDATA[{{ CONTENT_4 }}]]></content>
+  </entry>
+  {% endblock %}
+</feed>
+EOF
+
+cat > "${TEMP}/expected-output.xml" <<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">Chunda's website</title>
+  <id>/atom.xml</id>
+  <updated>2010-01-01T11:11:11Z</updated>
+  <link href="http://bola.com//" />
+  <link href="http://bola.com//atom.xml" rel="self" />
+  <author>
+    <name>Chunda</name>
+    <email>chunda@bola.com</email>
+  </author>
+  <subtitle type="text"></subtitle>
+  
+  <entry>
+    <title type="text">foo</title>
+    <id>/post/post1/</id>
+    <updated>2010-01-01T11:11:11Z</updated>
+    <published>2010-01-01T11:11:11Z</published>
+    <link href="http://bola.com//post/post1/" />
+    <author>
+      <name>Chunda</name>
+      <email>chunda@bola.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>f]]></content>
+  </entry>
+  
+  <entry>
+    <title type="text">bar</title>
+    <id>/post/post2/</id>
+    <updated>2010-01-01T22:22:22Z</updated>
+    <published>2010-01-01T22:22:22Z</published>
+    <link href="http://bola.com//post/post2/" />
+    <author>
+      <name>Chunda</name>
+      <email>chunda@bola.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>b]]></content>
+  </entry>
+  
+</feed>
+EOF
+
+${TESTS_ENVIRONMENT} ./blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D AUTHOR_NAME=Chunda \
+    -D AUTHOR_EMAIL=chunda@bola.com \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%Y-%m-%dT%H:%M:%SZ" \
+    -t "${TEMP}/atom.tmpl" \
+    -o "${TEMP}/output.xml" \
+    -l \
+    "${TEMP}/post1.txt" "${TEMP}/post2.txt"
+
+diff -uN "${TEMP}/output.xml" "${TEMP}/expected-output.xml"
+
+echo -e "${TEMP}/post1.txt\n${TEMP}/post2.txt" | ${TESTS_ENVIRONMENT} ./blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D AUTHOR_NAME=Chunda \
+    -D AUTHOR_EMAIL=chunda@bola.com \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%Y-%m-%dT%H:%M:%SZ" \
+    -t "${TEMP}/atom.tmpl" \
+    -o "${TEMP}/output2.xml" \
+    -l \
+    -i
+
+diff -uN "${TEMP}/output2.xml" "${TEMP}/expected-output.xml"
+
+${TESTS_ENVIRONMENT} ./blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D AUTHOR_NAME=Chunda \
+    -D AUTHOR_EMAIL=chunda@bola.com \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%Y-%m-%dT%H:%M:%SZ" \
+    -t "${TEMP}/atom.tmpl" \
+    -l \
+    "${TEMP}/post1.txt" "${TEMP}/post2.txt" > "${TEMP}/output3.xml"
+
+diff -uN "${TEMP}/output3.xml" "${TEMP}/expected-output.xml"
+
+echo -e "${TEMP}/post1.txt\n${TEMP}/post2.txt" | ${TESTS_ENVIRONMENT} ./blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D AUTHOR_NAME=Chunda \
+    -D AUTHOR_EMAIL=chunda@bola.com \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%Y-%m-%dT%H:%M:%SZ" \
+    -t "${TEMP}/atom.tmpl" \
+    -l \
+    -i > "${TEMP}/output4.xml"
+
+diff -uN "${TEMP}/output4.xml" "${TEMP}/expected-output.xml"
+
+cat > "${TEMP}/main.tmpl" <<EOF
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{% block entry %}{{ TITLE }}{% endblock %}{% block listing_once %}{{ SITE_TITLE }}{% endblock %}</title>
+  </head>
+  <body>
+    <a href="{{ BASE_URL }}/"><div class="name">{{ SITE_TITLE }}</div></a>
+    {% block listing_once %}
+    <section class="main">
+      <div class="container">
+        <div class="content">
+          <div class="page-heading">Blog</div>
+          <ul>
+    {% endblock %}
+    {% block listing %}
+            <li class="post-item">
+              <div class="meta">{{ DATE_FORMATTED }}</div>
+              <a href="{{ BASE_URL }}/post/{{ FILENAME }}/"><div>{{ TITLE }}</div></a>
+            </li>
+    {% endblock %}
+    {% block listing_once %}
+          </ul>
+        </div>
+      </div>
+    </section>
+    {% endblock %}
+    {% block entry %}
+    <section class="main{% ifdef IS_POST %} post non-narrow zero-top-spacing{% endif %}">
+      <div class="container">
+        <div class="content">
+          {% ifdef IS_POST %}<div class="front-matter">{% endif %}
+            <div class="title-container">
+              <div class="page-heading">{{ TITLE }}</div>
+            </div>
+          {% ifdef IS_POST %}
+            <div class="meta">
+              <div class="date">{{ DATE_FORMATTED }}</div>
+            </div>
+          </div>
+          {% endif %}
+          <div class="markdown">
+            {{ CONTENT }}
+            {% ifdef IS_POST %}
+            <br>
+            <p><a href="{{ BASE_URL }}/">Back to posts</a></p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </section>
+    {% endblock %}
+  </body>
+</html>
+EOF
+
+cat > "${TEMP}/expected-output.html" <<EOF
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Chunda's website</title>
+  </head>
+  <body>
+    <a href="/"><div class="name">Chunda's website</div></a>
+    
+    <section class="main">
+      <div class="container">
+        <div class="content">
+          <div class="page-heading">Blog</div>
+          <ul>
+    
+    
+            <li class="post-item">
+              <div class="meta">Jan 01, 2010, 11:11 AM GMT</div>
+              <a href="/post/post1/"><div>foo</div></a>
+            </li>
+    
+            <li class="post-item">
+              <div class="meta">Jan 01, 2010, 10:22 PM GMT</div>
+              <a href="/post/post2/"><div>bar</div></a>
+            </li>
+    
+    
+          </ul>
+        </div>
+      </div>
+    </section>
+    
+    
+  </body>
+</html>
+EOF
+
+${TESTS_ENVIRONMENT} ./blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -t "${TEMP}/main.tmpl" \
+    -o "${TEMP}/output.html" \
+    -l \
+    "${TEMP}/post1.txt" "${TEMP}/post2.txt"
+
+diff -uN "${TEMP}/output.html" "${TEMP}/expected-output.html"
+
+echo -e "${TEMP}/post1.txt\n${TEMP}/post2.txt" | ${TESTS_ENVIRONMENT} ./blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -t "${TEMP}/main.tmpl" \
+    -o "${TEMP}/output2.html" \
+    -l \
+    -i
+
+diff -uN "${TEMP}/output2.html" "${TEMP}/expected-output.html"
+
+${TESTS_ENVIRONMENT} ./blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -t "${TEMP}/main.tmpl" \
+    -l \
+    "${TEMP}/post1.txt" "${TEMP}/post2.txt" > "${TEMP}/output3.html"
+
+diff -uN "${TEMP}/output3.html" "${TEMP}/expected-output.html"
+
+echo -e "${TEMP}/post1.txt\n${TEMP}/post2.txt" | ${TESTS_ENVIRONMENT} ./blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -t "${TEMP}/main.tmpl" \
+    -l \
+    -i > "${TEMP}/output4.html"
+
+diff -uN "${TEMP}/output4.html" "${TEMP}/expected-output.html"
+
+cat > "${TEMP}/expected-output2.html" <<EOF
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>foo</title>
+  </head>
+  <body>
+    <a href="/"><div class="name">Chunda's website</div></a>
+    
+    
+    
+    
+    <section class="main">
+      <div class="container">
+        <div class="content">
+          
+            <div class="title-container">
+              <div class="page-heading">foo</div>
+            </div>
+          
+          <div class="markdown">
+            <p>foo?</p>
+
+            
+          </div>
+        </div>
+      </div>
+    </section>
+    
+  </body>
+</html>
+EOF
+
+${TESTS_ENVIRONMENT} ./blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -t "${TEMP}/main.tmpl" \
+    -o "${TEMP}/output5.html" \
+    "${TEMP}/post1.txt"
+
+diff -uN "${TEMP}/output5.html" "${TEMP}/expected-output2.html"
+
+echo -e "${TEMP}/post1.txt" | ${TESTS_ENVIRONMENT} ./blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -t "${TEMP}/main.tmpl" \
+    -o "${TEMP}/output6.html" \
+    -i
+
+diff -uN "${TEMP}/output6.html" "${TEMP}/expected-output2.html"
+
+${TESTS_ENVIRONMENT} ./blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -t "${TEMP}/main.tmpl" \
+    "${TEMP}/post1.txt" > "${TEMP}/output7.html"
+
+diff -uN "${TEMP}/output7.html" "${TEMP}/expected-output2.html"
+
+echo -e "${TEMP}/post1.txt" | ${TESTS_ENVIRONMENT} ./blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -t "${TEMP}/main.tmpl" \
+    -i > "${TEMP}/output8.html"
+
+diff -uN "${TEMP}/output8.html" "${TEMP}/expected-output2.html"
+
+echo "{% block listig %}foo{% endblock %}\n" > "${TEMP}/error.tmpl"
+
+${TESTS_ENVIRONMENT} ./blogc \
+    -t "${TEMP}/error.tmpl" \
+    "${TEMP}/post1.txt" 2>&1 | tee "${TEMP}/output.txt" || true
+
+grep "blogc: error: template: Invalid block type" "${TEMP}/output.txt"
