@@ -6,9 +6,9 @@ Group: Applications/Text
 Summary: A blog compiler
 URL: @PACKAGE_URL@
 Source0: https://github.com/blogc/blogc/releases/download/v@PACKAGE_VERSION@/blogc-@PACKAGE_VERSION@.tar.xz
-BuildRequires: libcmocka-devel
+BuildRequires: libcmocka-devel, bash, coreutils, diffutils
 %if ! 0%{?el6}
-BuildRequires: git
+BuildRequires: git, tar, make
 %endif
 
 %description

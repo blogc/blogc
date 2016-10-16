@@ -149,33 +149,10 @@ AS_IF([test "x$enable_tests" != "xno"], [
   ])
 
   AC_PATH_PROG([git], [git])
+  AC_PATH_PROG([make], [make])
   AC_PATH_PROG([tar], [tar])
-  AS_IF([test "x$ac_cv_path_git" = "x" -o "x$ac_cv_path_tar" = "x"], [
+  AS_IF([test "x$ac_cv_path_git" = "x" -o "x$ac_cv_path_make" = "x" -o "x$ac_cv_path_tar" = "x"], [
     have_bgr_deps=no
-  ], [
-    have_bgr_deps=yes
-  ])
-  AS_IF([test "x$have_blogc_deps" = "xyes"],, [
-    have_tests=no
-    TESTS="disabled"
-    AS_IF([test "x$enable_tests" = "xyes"], [
-      AC_MSG_ERROR([tests requested but bash, diff and/or tee not found])
-    ], [
-      AC_MSG_WARN([bash, diff and/or tee not found, install it to run tests])
-    ])
-  ])
-
-  AC_PATH_PROG([bash], [bash])
-  AC_PATH_PROG([diff], [diff])
-  AC_PATH_PROG([tee], [tee])
-  AS_IF([test "x$ac_cv_path_bash" = "x" -o "x$ac_cv_path_diff" = "x" -o "x$ac_cv_path_tee" = "x"], [
-    have_blogc_deps=no
-  ], [
-    have_blogc_deps=yes
-    have_tests=yes
-    TESTS="enabled"
-  ])
-  AS_IF([test "x$have_bgr_deps" = "xyes"],, [
     AS_IF([test "x$have_git_receiver" = "xyes"], [
       have_tests=no
       TESTS="disabled"
@@ -185,6 +162,24 @@ AS_IF([test "x$enable_tests" != "xno"], [
         AC_MSG_WARN([git and/or tar not found, install it to run blogc-git-receiver tests])
       ])
     ])
+  ], [
+    have_bgr_deps=yes
+  ])
+
+  AC_PATH_PROG([bash], [bash])
+  AC_PATH_PROG([diff], [diff])
+  AC_PATH_PROG([tee], [tee])
+  AS_IF([test "x$ac_cv_path_bash" = "x" -o "x$ac_cv_path_diff" = "x" -o "x$ac_cv_path_tee" = "x"], [
+    have_tests=no
+    TESTS="disabled"
+    AS_IF([test "x$enable_tests" = "xyes"], [
+      AC_MSG_ERROR([tests requested but bash, diff and/or tee not found])
+    ], [
+      AC_MSG_WARN([bash, diff and/or tee not found, install it to run tests])
+    ])
+  ], [
+    have_tests=yes
+    TESTS="enabled"
   ])
 ])
 AM_CONDITIONAL([BUILD_TESTS], [test "x$have_tests" = "xyes"])
