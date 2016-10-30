@@ -72,6 +72,9 @@ rm -rf $RPM_BUILD_ROOT
 %license LICENSE
 
 %changelog
+* Sun Oct 30 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.12.0-1
+- New release.
+
 * Sun Jul 17 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.11.1-1
 - New release.
 
