@@ -3,11 +3,14 @@
 ACLOCAL_AMFLAGS = -I m4
 
 AM_DISTCHECK_CONFIGURE_FLAGS = \
-	--enable-tests \
-	--disable-ronn \
-	--disable-valgrind \
+	CFLAGS="-Wall -g -O0" \
 	--enable-git-receiver \
-	--enable-runserver \
+	--enable-ronn \
+	--enable-runserver
+	--enable-tests \
+	--enable-valgrind \
+	--disable-silent-rules \
+	--disable-valgrind \
 	$(NULL)
 
 
