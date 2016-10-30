@@ -6,7 +6,7 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 	CFLAGS="-Wall -g -O0" \
 	--enable-git-receiver \
 	--enable-ronn \
-	--enable-runserver
+	--enable-runserver \
 	--enable-tests \
 	--enable-valgrind \
 	--disable-silent-rules \
