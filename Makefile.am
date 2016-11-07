@@ -8,7 +8,6 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-ronn \
 	--enable-runserver \
 	--enable-tests \
-	--enable-valgrind \
 	--disable-silent-rules \
 	--disable-valgrind \
 	$(NULL)
