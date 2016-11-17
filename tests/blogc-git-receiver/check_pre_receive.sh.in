@@ -151,12 +151,24 @@ HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/pre-receive 2>&1 | tee "${TEMP}/outp
 [[ "${DEST}" != "$(readlink htdocs)" ]]
 [[ ! -e "${DEST}" ]]
 
-DEST="$(readlink htdocs)"
-HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/pre-receive 2>&1 | tee "${TEMP}/output.txt"
+cd ..
 
-[[ -h htdocs ]]
-[[ "$(cat htdocs/foo.txt)" == "lol" ]]
-[[ "${DEST}" != "$(readlink htdocs)" ]]
+DEST="$(readlink foo3.git/htdocs)"
+HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./foo3.git/hooks/pre-receive 2>&1 | tee "${TEMP}/output.txt"
+
+[[ -h foo3.git/htdocs ]]
+[[ "$(cat foo3.git/htdocs/foo.txt)" == "lol" ]]
+[[ "${DEST}" != "$(readlink foo3.git/htdocs)" ]]
+[[ ! -e "${DEST}" ]]
+
+cd ..
+
+DEST="$(readlink repos/foo3.git/htdocs)"
+HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./repos/foo3.git/hooks/pre-receive 2>&1 | tee "${TEMP}/output.txt"
+
+[[ -h repos/foo3.git/htdocs ]]
+[[ "$(cat repos/foo3.git/htdocs/foo.txt)" == "lol" ]]
+[[ "${DEST}" != "$(readlink repos/foo3.git/htdocs)" ]]
 [[ ! -e "${DEST}" ]]
 
 rm "${TEMP}/output.txt"

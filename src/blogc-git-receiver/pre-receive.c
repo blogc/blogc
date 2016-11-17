@@ -104,6 +104,11 @@ bgr_pre_receive_hook(int argc, char *argv[])
             return 1;
         }
         char *repo_dir = dirname(real_hooks_dir);
+        if (0 != chdir(repo_dir)) {
+            fprintf(stderr, "error: failed to change to repository root\n");
+            free(real_hooks_dir);
+            return 1;
+        }
         char *htdocs_sym = bc_strdup_printf("%s/htdocs", repo_dir);
         free(real_hooks_dir);
         if (0 != access(htdocs_sym, F_OK)) {
