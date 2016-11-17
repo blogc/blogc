@@ -51,7 +51,8 @@ If for some reason you want to rebuild the last successful build of a given webs
 you can run its `pre-receive` hook manually in the server:
 
     # su -s /bin/sh - blogc
-    $ ./repos/blogs/blogc-example.git/hooks/pre-receive
+    $ cd ~/repos/blogs/blogc-example.git
+    $ ./hooks/pre-receive
 
 This should re-run the last build as if it was pushed to git.
 
@@ -99,7 +100,7 @@ value of the `mirror` variable is the URL that should be used to push.
 To create the configuration file (recommended):
 
     # su -s /bin/sh - blogc
-    # cat > ~/blogc-git-receiver.ini <<EOF
+    $ cat > ~/blogc-git-receiver.ini <<EOF
     [repo:myblog.git]
     mirror=$YOUR_GIT_MIRROR_URL
     EOF
