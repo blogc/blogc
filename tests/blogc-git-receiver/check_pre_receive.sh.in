@@ -143,4 +143,20 @@ grep "echo lol" "${TEMP}/output.txt" &> /dev/null
 [[ "${DEST}" != "$(readlink htdocs)" ]]
 [[ ! -e "${DEST}" ]]
 
+DEST="$(readlink htdocs)"
+HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/pre-receive 2>&1 | tee "${TEMP}/output.txt"
+
+[[ -h htdocs ]]
+[[ "$(cat htdocs/foo.txt)" == "lol" ]]
+[[ "${DEST}" != "$(readlink htdocs)" ]]
+[[ ! -e "${DEST}" ]]
+
+DEST="$(readlink htdocs)"
+HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/pre-receive 2>&1 | tee "${TEMP}/output.txt"
+
+[[ -h htdocs ]]
+[[ "$(cat htdocs/foo.txt)" == "lol" ]]
+[[ "${DEST}" != "$(readlink htdocs)" ]]
+[[ ! -e "${DEST}" ]]
+
 rm "${TEMP}/output.txt"

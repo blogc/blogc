@@ -45,6 +45,16 @@ This will deploy the example to the server, creating a symlink to the built cont
 in `/home/blogc/repos/blogs/blogc-example.git/htdocs`. This symlink should be used
 as the document root for the web server virtual host.
 
+### Rebuild last successful build
+
+If for some reason you want to rebuild the last successful build of a given website,
+you can run its `pre-receive` hook manually in the server:
+
+    # su -s /bin/sh - blogc
+    $ ./repos/blogs/blogc-example.git/hooks/pre-receive
+
+This should re-run the last build as if it was pushed to git.
+
 ### Setup with SELinux enabled (Fedora)
 
 Supposing the usage of nginx as webserver, running as the `nginx` user:

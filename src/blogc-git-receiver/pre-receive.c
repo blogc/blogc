@@ -7,6 +7,7 @@
  */
 
 #include <stdio.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -15,6 +16,7 @@
 #include <sys/wait.h>
 #include <dirent.h>
 #include <time.h>
+#include <libgen.h>
 #include "../common/utils.h"
 #include "../common/stdin.h"
 #include "pre-receive-parser.h"
@@ -92,10 +94,45 @@ bgr_pre_receive_hook(int argc, char *argv[])
 {
     int rv = 0;
     char buffer[4096];
+    char *master = NULL;
 
-    char *input = bc_stdin_read();
-    char *master = bgr_pre_receive_parse(input);
-    free(input);
+    if (isatty(STDIN_FILENO)) {
+        char *hooks_dir = dirname(argv[0]);  // this was validated by main()
+        char *real_hooks_dir = realpath(hooks_dir, NULL);
+        if (real_hooks_dir == NULL) {
+            fprintf(stderr, "error: failed to guess repository root.\n");
+            return 1;
+        }
+        char *repo_dir = dirname(real_hooks_dir);
+        char *htdocs_sym = bc_strdup_printf("%s/htdocs", repo_dir);
+        free(real_hooks_dir);
+        if (0 != access(htdocs_sym, F_OK)) {
+            fprintf(stderr, "error: no previous build found. nothing to "
+                "rebuild.\n");
+            return 1;
+        }
+        char *build_dir = realpath(htdocs_sym, NULL);
+        free(htdocs_sym);
+        if (build_dir == NULL) {
+            fprintf(stderr, "error: failed to get the hash of last built "
+                "commit.\n");
+            return 1;
+        }
+        char **pieces = bc_str_split(basename(build_dir), '-', 2);
+        free(build_dir);
+        if (bc_strv_length(pieces) != 2) {
+            fprintf(stderr, "error: failed to parse the hash of last built "
+                "commit.\n");
+            return 1;
+        }
+        master = bc_strdup(pieces[0]);
+        bc_strv_free(pieces);
+    }
+    else {
+        char *input = bc_stdin_read();
+        master = bgr_pre_receive_parse(input);
+        free(input);
+    }
 
     if (master == NULL) {
         fprintf(stderr, "warning: no reference to master branch found. "
@@ -168,6 +205,13 @@ bgr_pre_receive_hook(int argc, char *argv[])
 
     unsigned long epoch = time(NULL);
     output_dir = bc_strdup_printf("%s/builds/%s-%lu", home, master, epoch);
+
+    if (0 == access(output_dir, F_OK)) {
+        char *tmp = output_dir;
+        output_dir = bc_strdup_printf("%s-", tmp);
+        free(tmp);
+    }
+
     char *gmake_cmd = bc_strdup_printf(
         "%s -j%d OUTPUT_DIR=\"%s\" BLOGC_GIT_RECEIVER=1", make_impl,
         cpu_count(), output_dir);
