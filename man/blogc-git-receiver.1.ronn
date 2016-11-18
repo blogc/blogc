@@ -133,6 +133,18 @@ as `root`:
 
     # su -s /bin/sh - blogc
 
+### Push to mirror manually
+
+If for some reason you want to push the repository of a given website to remote
+mirror, you can run its `post-receive` hook manually in the server:
+
+    # su -s /bin/sh - blogc
+    $ cd ~/repos/blogs/blogc-example.git
+    $ ./hooks/post-receive
+
+WARNING: If you push manually and your server's repository is empty, you'll clean
+your mirror repository.
+
 ## ENVIRONMENT VARIABLES
 
 `blogc-git-receiver` will export an environment variable called `BLOGC_GIT_RECEIVER`
