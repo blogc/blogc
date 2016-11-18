@@ -93,7 +93,6 @@ int
 bgr_pre_receive_hook(int argc, char *argv[])
 {
     int rv = 0;
-    char buffer[4096];
     char *master = NULL;
 
     if (isatty(STDIN_FILENO)) {
@@ -148,14 +147,13 @@ bgr_pre_receive_hook(int argc, char *argv[])
     char *repo_dir = NULL;
     char *output_dir = NULL;
 
-    if (NULL == getcwd(buffer, sizeof(buffer))) {
-        fprintf(stderr, "error: failed to get repository remote path: %s\n",
+    repo_dir = getcwd(NULL, 0);
+    if (repo_dir == NULL) {
+        fprintf(stderr, "error: failed to get repository path: %s\n",
             strerror(errno));
         rv = 1;
         goto cleanup;
     }
-
-    repo_dir = bc_strdup(buffer);
 
     char dir[] = "/tmp/blogc_XXXXXX";
     if (NULL == mkdtemp(dir)) {
@@ -239,18 +237,13 @@ bgr_pre_receive_hook(int argc, char *argv[])
         goto cleanup;
     }
 
-    char *htdocs_sym = NULL;
-    ssize_t htdocs_sym_len = readlink("htdocs", buffer, sizeof(buffer));
-    if (0 < htdocs_sym_len) {
-        if (0 != unlink("htdocs")) {
-            fprintf(stderr, "error: failed to remove symlink (%s/htdocs): %s\n",
-                repo_dir, strerror(errno));
-            rmdir_recursive(output_dir);
-            rv = 1;
-            goto cleanup;
-        }
-        buffer[htdocs_sym_len] = '\0';
-        htdocs_sym = buffer;
+    char *htdocs_sym = realpath("htdocs", NULL);
+    if ((htdocs_sym != NULL) && (0 != unlink("htdocs"))) {
+        fprintf(stderr, "error: failed to remove symlink (%s/htdocs): %s\n",
+            repo_dir, strerror(errno));
+        rmdir_recursive(output_dir);
+        rv = 1;
+        goto cleanup2;
     }
 
     if (0 != symlink(output_dir, "htdocs")) {
@@ -258,11 +251,14 @@ bgr_pre_receive_hook(int argc, char *argv[])
             repo_dir, strerror(errno));
         rmdir_recursive(output_dir);
         rv = 1;
-        goto cleanup;
+        goto cleanup2;
     }
 
     if (htdocs_sym != NULL)
         rmdir_recursive(htdocs_sym);
+
+cleanup2:
+    free(htdocs_sym);
 
 cleanup:
     free(master);
