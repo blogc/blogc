@@ -83,4 +83,34 @@ git init --bare "${TEMP}/repos/bar4.git" &> /dev/null
 HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/post-receive 2>&1 | tee "${TEMP}/output.txt"
 grep "warning: failed to parse configuration file " "${TEMP}/output.txt" &> /dev/null
 
+cd ..
+cat > "${TEMP}/blogc-git-receiver.ini" <<EOF
+[repo:boo.git]
+mirror = 123
+
+[repo:foo.git]
+mirror = ${TEMP}/repos/bar5.git
+
+[repo:bar.git]
+mirror = lol
+EOF
+git init --bare "${TEMP}/repos/bar5.git" &> /dev/null
+HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./foo.git/hooks/post-receive 2>&1 | tee "${TEMP}/output.txt"
+grep "[new branch] *master" "${TEMP}/output.txt" &> /dev/null
+
+cd ..
+cat > "${TEMP}/blogc-git-receiver.ini" <<EOF
+[repo:boo.git]
+mirror = 123
+
+[repo:foo.git]
+mirror = ${TEMP}/repos/bar6.git
+
+[repo:bar.git]
+mirror = lol
+EOF
+git init --bare "${TEMP}/repos/bar6.git" &> /dev/null
+HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./repos/foo.git/hooks/post-receive 2>&1 | tee "${TEMP}/output.txt"
+grep "[new branch] *master" "${TEMP}/output.txt" &> /dev/null
+
 rm "${TEMP}/output.txt"
