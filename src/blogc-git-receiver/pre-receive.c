@@ -38,6 +38,8 @@ cpu_count(void)
 static void
 rmdir_recursive(const char *dir)
 {
+    if (dir == NULL)
+        return;
     struct stat buf;
     if (0 != stat(dir, &buf)) {
         fprintf(stderr, "warning: failed to remove directory (%s): %s\n", dir,
@@ -94,40 +96,48 @@ bgr_pre_receive_hook(int argc, char *argv[])
 {
     int rv = 0;
     char *master = NULL;
+    char *output_dir = NULL;
+    char *tmpdir = NULL;
+
+    char *hooks_dir = dirname(argv[0]);  // this was validated by main()
+    char *real_hooks_dir = realpath(hooks_dir, NULL);
+    if (real_hooks_dir == NULL) {
+        fprintf(stderr, "error: failed to guess repository root.\n");
+        return 1;
+    }
+
+    char *repo_dir = bc_strdup(dirname(real_hooks_dir));
+    free(real_hooks_dir);
+    if (0 != chdir(repo_dir)) {
+        fprintf(stderr, "error: failed to change to repository root\n");
+        rv = 1;
+        goto cleanup;
+    }
 
     if (isatty(STDIN_FILENO)) {
-        char *hooks_dir = dirname(argv[0]);  // this was validated by main()
-        char *real_hooks_dir = realpath(hooks_dir, NULL);
-        if (real_hooks_dir == NULL) {
-            fprintf(stderr, "error: failed to guess repository root.\n");
-            return 1;
-        }
-        char *repo_dir = dirname(real_hooks_dir);
-        if (0 != chdir(repo_dir)) {
-            fprintf(stderr, "error: failed to change to repository root\n");
-            free(real_hooks_dir);
-            return 1;
-        }
         char *htdocs_sym = bc_strdup_printf("%s/htdocs", repo_dir);
-        free(real_hooks_dir);
         if (0 != access(htdocs_sym, F_OK)) {
             fprintf(stderr, "error: no previous build found. nothing to "
                 "rebuild.\n");
-            return 1;
+            free(htdocs_sym);
+            rv = 1;
+            goto cleanup;
         }
         char *build_dir = realpath(htdocs_sym, NULL);
         free(htdocs_sym);
         if (build_dir == NULL) {
             fprintf(stderr, "error: failed to get the hash of last built "
                 "commit.\n");
-            return 1;
+            rv = 1;
+            goto cleanup;
         }
         char **pieces = bc_str_split(basename(build_dir), '-', 2);
         free(build_dir);
         if (bc_strv_length(pieces) != 2) {
             fprintf(stderr, "error: failed to parse the hash of last built "
                 "commit.\n");
-            return 1;
+            rv = 1;
+            goto cleanup;
         }
         master = bc_strdup(pieces[0]);
         bc_strv_free(pieces);
@@ -141,17 +151,6 @@ bgr_pre_receive_hook(int argc, char *argv[])
     if (master == NULL) {
         fprintf(stderr, "warning: no reference to master branch found. "
             "nothing to deploy.\n");
-        return rv;
-    }
-
-    char *repo_dir = NULL;
-    char *output_dir = NULL;
-
-    repo_dir = getcwd(NULL, 0);
-    if (repo_dir == NULL) {
-        fprintf(stderr, "error: failed to get repository path: %s\n",
-            strerror(errno));
-        rv = 1;
         goto cleanup;
     }
 
@@ -160,20 +159,21 @@ bgr_pre_receive_hook(int argc, char *argv[])
         rv = 1;
         goto cleanup;
     }
+    tmpdir = dir;
 
     char *git_archive_cmd = bc_strdup_printf(
-        "git archive \"%s\" | tar -x -C \"%s\" -f -", master, dir);
+        "git archive \"%s\" | tar -x -C \"%s\" -f -", master, tmpdir);
     if (0 != system(git_archive_cmd)) {
         fprintf(stderr, "error: failed to extract git content to temporary "
-            "directory: %s\n", dir);
+            "directory: %s\n", tmpdir);
         rv = 1;
         free(git_archive_cmd);
         goto cleanup;
     }
     free(git_archive_cmd);
 
-    if (0 != chdir(dir)) {
-        fprintf(stderr, "error: failed to chdir (%s): %s\n", dir,
+    if (0 != chdir(tmpdir)) {
+        fprintf(stderr, "error: failed to chdir (%s): %s\n", tmpdir,
             strerror(errno));
         rv = 1;
         goto cleanup;
@@ -263,7 +263,7 @@ cleanup2:
 cleanup:
     free(master);
     free(output_dir);
-    rmdir_recursive(dir);
+    rmdir_recursive(tmpdir);
     free(repo_dir);
     return rv;
 }
