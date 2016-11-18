@@ -116,7 +116,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
 
     if (isatty(STDIN_FILENO)) {
         char *htdocs_sym = bc_strdup_printf("%s/htdocs", repo_dir);
-        if (0 != access(htdocs_sym, F_OK)) {
+        if (0 != access(htdocs_sym, R_OK)) {
             fprintf(stderr, "error: no previous build found. nothing to "
                 "rebuild.\n");
             free(htdocs_sym);
@@ -136,6 +136,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
         if (bc_strv_length(pieces) != 2) {
             fprintf(stderr, "error: failed to parse the hash of last built "
                 "commit.\n");
+            bc_strv_free(pieces);
             rv = 1;
             goto cleanup;
         }
