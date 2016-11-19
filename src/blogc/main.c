@@ -27,7 +27,6 @@
 #include "loader.h"
 #include "renderer.h"
 #include "../common/error.h"
-#include "../common/file.h"
 #include "../common/utf8.h"
 #include "../common/utils.h"
 

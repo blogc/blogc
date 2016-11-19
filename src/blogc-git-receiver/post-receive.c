@@ -6,13 +6,13 @@
  * See the file LICENSE.
  */
 
-#include <errno.h>
 #include <stdio.h>
 #include <libgen.h>
-#include <limits.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include "../common/utils.h"
 #include "../common/config-parser.h"
 #include "../common/error.h"
 #include "../common/file.h"
