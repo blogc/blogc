@@ -144,5 +144,5 @@ push:
 cleanup:
     free(repo_path);
 
-    return 0;
+    return rv;
 }
