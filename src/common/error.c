@@ -131,7 +131,7 @@ bc_error_print(bc_error_t *err, const char *prefix)
             fprintf(stderr, "warning: datetime: %s\n", err->msg);
             break;
         default:
-            fprintf(stderr, "blogc: error: %s\n", err->msg);
+            fprintf(stderr, "error: %s\n", err->msg);
     }
 }
 
