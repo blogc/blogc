@@ -157,7 +157,7 @@ bc_config_parse(const char *src, size_t src_len, bc_error_t **err)
 
 
 static void
-list_keys(const char *key, const char value, bc_slist_t **l)
+list_keys(const char *key, const char *value, bc_slist_t **l)
 {
     *l = bc_slist_append(*l, bc_strdup(key));
 }
