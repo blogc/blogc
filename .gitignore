@@ -87,4 +87,10 @@ blogc-*.rpm
 # scan-build reports
 *.plist
 
+# blogc-github-lambda
+/src/blogc-github-lambda/blogc
+/src/blogc-github-lambda/LICENSE
+/src/blogc-github-lambda/*.pyc
+/src/blogc-github-lambda/*.pyo
+
 /build/

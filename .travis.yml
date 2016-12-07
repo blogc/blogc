@@ -17,11 +17,14 @@ env:
   - TARGET=valgrind
   - TARGET=distcheck
   - TARGET=dist-srpm
+  - TARGET=blogc-github-lambda
 
 matrix:
   exclude:
     - compiler: clang
       env: TARGET=dist-srpm
+    - compiler: clang
+      env: TARGET=blogc-github-lambda
 
 install: gem install ronn
 

@@ -23,6 +23,7 @@ EXTRA_DIST = \
 	blogc.spec \
 	LICENSE \
 	README.md \
+	src/blogc-github-lambda/lambda_function.py
 	$(NULL)
 
 CLEANFILES = \
@@ -667,6 +668,8 @@ TESTS = \
 
 CLEANFILES += \
 	$(check_SCRIPTS) \
+	src/blogc-github-lambda/README \
+	src/blogc-github-lambda/blogc \
 	$(NULL)
 
 
@@ -698,3 +701,26 @@ valgrind: all
 		VALGRIND=$(VALGRIND) \
 		$(BASH) -e $(top_srcdir)/build-aux/valgrind.sh"
 endif
+
+
+## Helpers: blogc-github-lambda
+
+$(top_builddir)/blogc-github-lambda-$(VERSION).zip: $(top_builddir)/blogc $(top_srcdir)/LICENSE $(top_srcdir)/src/blogc-github-lambda/lambda_function.py
+	-rm -f $(top_builddir)/blogc-github-lambda-$(VERSION).zip
+	$(MKDIR_P) $(top_builddir)/src/blogc-github-lambda
+	$(INSTALL) -m 644 \
+		$(top_srcdir)/LICENSE \
+		$(top_builddir)/src/blogc-github-lambda/
+	$(INSTALL) -m 644 -C \
+		$(top_srcdir)/src/blogc-github-lambda/lambda_function.py \
+		$(top_builddir)/src/blogc-github-lambda/
+	$(INSTALL) -m 755 \
+		$(top_builddir)/blogc \
+		$(top_builddir)/src/blogc-github-lambda/blogc
+	cd $(top_builddir)/src/blogc-github-lambda && \
+		zip -rq $(abs_top_builddir)/blogc-github-lambda-$(VERSION).zip LICENSE blogc lambda_function.py
+
+blogc-github-lambda: $(top_builddir)/blogc-github-lambda-$(VERSION).zip
+
+
+.PHONY: dist-srpm valgrind blogc-github-lambda
