@@ -717,6 +717,7 @@ blogc-github-lambda-$(VERSION).zip: blogc $(top_srcdir)/LICENSE $(top_srcdir)/sr
 	$(INSTALL) -m 755 \
 		blogc \
 		src/blogc-github-lambda/blogc
+	$(STRIP) src/blogc-github-lambda/blogc
 	cd src/blogc-github-lambda && \
 		zip -rq $(abs_top_builddir)/blogc-github-lambda-$(VERSION).zip LICENSE blogc lambda_function.py
 
