@@ -17,7 +17,6 @@ import json
 import mimetypes
 import os
 import subprocess
-import sys
 import tarfile
 import urllib2
 import shutil
