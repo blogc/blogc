@@ -7,13 +7,8 @@ mkdir -p build
 
 pushd build > /dev/null
 
-export CFLAGS="-Wall -g -O0"
-
-if [[ "x${TARGET}" = "xblogc-github-lambda" ]]; then
-    export LDFLAGS="-static"
-fi
-
 ../configure \
+    CFLAGS="-Wall -g -O0" \
     --enable-ronn \
     --disable-silent-rules \
     --enable-tests \
@@ -24,7 +19,7 @@ fi
 popd > /dev/null
 
 if [[ "x${TARGET}" = "xblogc-github-lambda" ]]; then
-    export LDFLAGS="-all-static"
+    make -C build LDFLAGS="-all-static" "${TARGET}"
+else
+    make -C build "${TARGET}"
 fi
-
-make -C build "${TARGET}"
