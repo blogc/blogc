@@ -11,7 +11,6 @@ rm -rf build
 mkdir -p build
 
 pushd build > /dev/null
-
 ../configure \
     CFLAGS="-Wall -g -O0" \
     --enable-ronn \
@@ -20,5 +19,6 @@ pushd build > /dev/null
     --enable-valgrind \
     --enable-git-receiver \
     --enable-runserver
+popd > /dev/null
 
 make -C build "${TARGET}"

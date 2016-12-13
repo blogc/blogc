@@ -25,7 +25,7 @@ fi
 if [[ "x${TARGET}" = "xdist-srpm" ]]; then
     FILES=( build/*.src.rpm )
 elif [[ "x${TARGET}" = "xblogc-github-lambda" ]]; then
-    FILES=( build/*.zip )
+    FILES=( *.zip )
 else
     FILES=( build/*.{*.tar.{gz,bz2,xz},zip} )
 fi
