@@ -19,12 +19,12 @@ tar -xvf "${A_DEPS}" -C root/
 pushd build > /dev/null
 ../configure \
     CFLAGS="-Wall -g -O0" \
-    --enable-ronn \
+    --disable-ronn \
     --disable-silent-rules \
-    --enable-tests \
-    --enable-valgrind \
-    --enable-git-receiver \
-    --enable-runserver
+    --disable-tests \
+    --disable-valgrind \
+    --disable-git-receiver \
+    --disable-runserver
 popd > /dev/null
 
 make -C build LDFLAGS="-all-static" blogc
