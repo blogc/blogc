@@ -2,6 +2,11 @@
 
 set -ex
 
+if [[ "x${TARGET}" = "xblogc-github-lambda" ]]; then
+    build-aux/travis-build-github-lambda.sh
+    exit $?
+fi
+
 rm -rf build
 mkdir -p build
 
@@ -16,10 +21,4 @@ pushd build > /dev/null
     --enable-git-receiver \
     --enable-runserver
 
-popd > /dev/null
-
-if [[ "x${TARGET}" = "xblogc-github-lambda" ]]; then
-    make -C build LDFLAGS="-all-static" "${TARGET}"
-else
-    make -C build "${TARGET}"
-fi
+make -C build "${TARGET}"

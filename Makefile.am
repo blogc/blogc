@@ -703,25 +703,4 @@ valgrind: all
 endif
 
 
-## Helpers: blogc-github-lambda
-
-blogc-github-lambda-$(VERSION).zip: blogc $(top_srcdir)/LICENSE $(top_srcdir)/src/blogc-github-lambda/lambda_function.py
-	-rm -f blogc-github-lambda-$(VERSION).zip
-	$(MKDIR_P) src/blogc-github-lambda
-	$(INSTALL) -m 644 \
-		$(top_srcdir)/LICENSE \
-		src/blogc-github-lambda/
-	$(INSTALL) -m 644 -C \
-		$(top_srcdir)/src/blogc-github-lambda/lambda_function.py \
-		src/blogc-github-lambda/
-	$(INSTALL) -m 755 \
-		blogc \
-		src/blogc-github-lambda/blogc
-	$(STRIP) src/blogc-github-lambda/blogc
-	cd src/blogc-github-lambda && \
-		zip -rq $(abs_top_builddir)/blogc-github-lambda-$(VERSION).zip LICENSE blogc lambda_function.py
-
-blogc-github-lambda: blogc-github-lambda-$(VERSION).zip
-
-
-.PHONY: dist-srpm valgrind blogc-github-lambda
+.PHONY: dist-srpm valgrind
