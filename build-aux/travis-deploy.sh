@@ -52,7 +52,7 @@ for f in "${FILES[@]}"; do
     echo " * Processing file: $(basename ${f}):"
 
     echo -n "   Generating SHA512 checksum ... "
-    pushd build > /dev/null
+    pushd "$(dirname ${f})" > /dev/null
     sha512sum "$(basename ${f})" > "$(basename ${f}).sha512"
     popd > /dev/null
     echo "done"
