@@ -37,5 +37,5 @@ install -m 644 LICENSE root/licenses/blogc
 strip root/bin/blogc
 
 pushd root/ > /dev/null
-zip -rq "../blogc-github-lambda-${PV}.zip" *
+zip --symlinks -rq "../blogc-github-lambda-${PV}.zip" *
 popd > /dev/null
