@@ -1,11 +1,11 @@
 # coding: utf-8
-"""
-  blogc: A blog compiler.
-  Copyright (C) 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br>
-
-  This program can be distributed under the terms of the BSD License.
-  See the file LICENSE.
-"""
+#
+# blogc: A blog compiler.
+# Copyright (C) 2016 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+#
+# This program can be distributed under the terms of the BSD License.
+# See the license for details.
+#
 
 from contextlib import closing
 from StringIO import StringIO
@@ -26,6 +26,8 @@ bindir = os.path.join(cwd, 'bin')
 
 os.environ['PATH'] = '%s:%s' % (bindir, os.environ.get('PATH', ''))
 
+s3 = boto3.resource('s3')
+
 GITHUB_AUTH = os.environ.get('GITHUB_AUTH')
 if GITHUB_AUTH is not None and ':' not in GITHUB_AUTH:
     GITHUB_AUTH = boto3.client('kms').decrypt(
@@ -39,7 +41,7 @@ for binary in subprocess.check_output([os.path.join(bindir, 'busybox'),
     if not os.path.islink(dst):
         os.symlink('busybox', dst)
     else:
-        break
+        break  # if one symlink exists, all the others will likely exist
 
 
 def get_tarball(repo_name):
@@ -89,7 +91,13 @@ def translate_filename(filename):
 
 
 def sync_s3(src, dest, settings_file):
-    s3 = boto3.resource('s3')
+    if os.path.exists(settings_file):
+        with open(settings_file, 'r') as fp:
+            settings = json.load(fp)
+
+    content_types = settings.get('content-type', {})
+    dest = settings.get('bucket', dest)
+
     bucket = s3.Bucket(dest)
 
     remote_files = {}
@@ -123,12 +131,6 @@ def sync_s3(src, dest, settings_file):
         else:
             to_delete.append(file)
 
-    content_types = {}
-    if os.path.exists(settings_file):
-        with open(settings_file, 'r') as fp:
-            settings = json.load(fp)
-            content_types = settings.get('content-type', {})
-
     for file in to_upload:
         with open(os.path.join(src, file), 'rb') as fp:
             mime = content_types.get(file, mimetypes.guess_type(file)[0])
@@ -148,18 +150,18 @@ def lambda_handler(event, context):
     message = event['Records'][0]['Sns']['Message']
     payload = json.loads(message)
 
-    debug = 'DEBUG' in os.environ
-
     if payload['ref'] == 'refs/heads/master':
-        repo_name = payload['repository']['name']
-        repo_full_name = payload['repository']['full_name']
-        rootdir = get_tarball(repo_full_name)
+        debug = 'DEBUG' in os.environ
+        stream = None if debug else subprocess.PIPE
+
+        rootdir = get_tarball(payload['repository']['full_name'])
         rv = subprocess.call([os.path.join(bindir, 'make'), '-C', rootdir,
-                              'OUTPUT_DIR=_build',
-                              'BLOGC=%s' % os.path.join(bindir, 'blogc')],
-                             stdout=None if debug else subprocess.PIPE,
-                             stderr=None if debug else subprocess.PIPE)
+                              'BLOGC=%s' % os.path.join(bindir, 'blogc'),
+                              'OUTPUT_DIR=_build'],
+                             stdout=stream, stderr=stream)
         if rv != 0:
             raise RuntimeError('Failed to run make')
-        sync_s3(os.path.join(rootdir, '_build'), repo_name,
+
+        sync_s3(os.path.join(rootdir, '_build'),
+                payload['repository']['name'],
                 os.path.join(rootdir, 's3.json'))
