@@ -109,42 +109,43 @@ def sync_s3(src, dest, settings_file):
     local_files = {}
     for root, dirs, files in os.walk(src):
         real_root = root[len(src):].lstrip('/')
-        for file in files:
-            f = os.path.join(real_root, file)
+        for filename in files:
+            f = os.path.join(real_root, filename)
             local_files[translate_filename(f)] = f
 
     to_upload = []
-    for file in local_files:
-        if file not in remote_files:
-            to_upload.append(local_files[file])
+    for filename in local_files:
+        if filename not in remote_files:
+            to_upload.append(local_files[filename])
 
     to_delete = []
-    for file in remote_files:
-        if file in local_files:
-            with open(os.path.join(src, local_files[file])) as fp:
+    for filename in remote_files:
+        if filename in local_files:
+            with open(os.path.join(src, local_files[filename])) as fp:
                 l = hashlib.sha1(fp.read())
 
-            with closing(remote_files[file].get()['Body']) as fp:
+            with closing(remote_files[filename].get()['Body']) as fp:
                 r = hashlib.sha1(fp.read())
 
             if l.hexdigest() != r.hexdigest():
-                to_upload.append(local_files[file])
+                to_upload.append(local_files[filename])
         else:
-            to_delete.append(file)
+            to_delete.append(filename)
 
-    for file in to_upload:
-        with open(os.path.join(src, file), 'rb') as fp:
-            mime = content_types.get(file, mimetypes.guess_type(file)[0])
-            file = translate_filename(file)
-            print 'Uploading file: %s; content-type: "%s"' % (file, mime)
+    for filename in to_upload:
+        with open(os.path.join(src, filename), 'rb') as fp:
+            mime = content_types.get(filename,
+                                     mimetypes.guess_type(filename)[0])
+            filename = translate_filename(filename)
+            print 'Uploading file: %s; content-type: "%s"' % (filename, mime)
             if mime is not None:
-                bucket.put_object(Key=file, Body=fp, ContentType=mime)
+                bucket.put_object(Key=filename, Body=fp, ContentType=mime)
             else:
-                bucket.put_object(Key=file, Body=fp)
+                bucket.put_object(Key=filename, Body=fp)
 
-    for file in to_delete:
-        print 'Deleting file:', file
-        remote_files[file].delete()
+    for filename in to_delete:
+        print 'Deleting file:', filename
+        remote_files[filename].delete()
 
 
 def lambda_handler(event, context):
