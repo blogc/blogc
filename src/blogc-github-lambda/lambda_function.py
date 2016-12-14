@@ -91,6 +91,7 @@ def translate_filename(filename):
 
 
 def sync_s3(src, dest, settings_file):
+    settings = {}
     if os.path.exists(settings_file):
         with open(settings_file, 'r') as fp:
             settings = json.load(fp)
