@@ -29,6 +29,7 @@ test_config_empty(void **state)
     assert_non_null(c);
     assert_non_null(c->root);
     assert_int_equal(bc_trie_size(c->root), 0);
+    assert_string_equal(bc_config_get_with_default(c, "bola", "foo", "bar"), "bar");
     bc_config_free(c);
 }
 
@@ -369,7 +370,9 @@ test_config_error_start(void **state)
     assert_non_null(err);
     assert_null(c);
     assert_int_equal(err->type, BC_ERROR_CONFIG_PARSER);
-    assert_string_equal(err->msg, "File must start with section");
+    assert_string_equal(err->msg,
+        "File must start with section.\n"
+        "Error occurred near line 1, position 1: asd");
     bc_error_free(err);
 }
 
@@ -384,7 +387,9 @@ test_config_error_section_with_newline(void **state)
     assert_non_null(err);
     assert_null(c);
     assert_int_equal(err->type, BC_ERROR_CONFIG_PARSER);
-    assert_string_equal(err->msg, "Section names can't have new lines");
+    assert_string_equal(err->msg,
+        "Section names can't have new lines.\n"
+        "Error occurred near line 1, position 5: [foo");
     bc_error_free(err);
 }
 
@@ -401,7 +406,9 @@ test_config_error_key_without_value(void **state)
     assert_non_null(err);
     assert_null(c);
     assert_int_equal(err->type, BC_ERROR_CONFIG_PARSER);
-    assert_string_equal(err->msg, "Key without value: foo");
+    assert_string_equal(err->msg,
+        "Key without value: foo.\n"
+        "Error occurred near line 3, position 3: foo");
     bc_error_free(err);
     a =
         "[foobar]\n"
@@ -412,7 +419,9 @@ test_config_error_key_without_value(void **state)
     assert_non_null(err);
     assert_null(c);
     assert_int_equal(err->type, BC_ERROR_CONFIG_PARSER);
-    assert_string_equal(err->msg, "Key without value: foo");
+    assert_string_equal(err->msg,
+        "Key without value: foo.\n"
+        "Error occurred near line 3, position 4: foo");
     bc_error_free(err);
 }
 

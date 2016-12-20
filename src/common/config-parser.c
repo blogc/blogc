@@ -70,8 +70,8 @@ bc_config_parse(const char *src, size_t src_len, bc_error_t **err)
                     continue;
                 }
                 if (err != NULL)
-                    *err = bc_error_new_printf(BC_ERROR_CONFIG_PARSER,
-                        "File must start with section");
+                    *err = bc_error_parser(BC_ERROR_CONFIG_PARSER, src, src_len,
+                        current, "File must start with section.");
                 break;
 
             case CONFIG_SECTION_START:
@@ -92,8 +92,8 @@ bc_config_parse(const char *src, size_t src_len, bc_error_t **err)
                 if (c != '\r' && c != '\n')
                     break;
                 if (err != NULL)
-                    *err = bc_error_new_printf(BC_ERROR_CONFIG_PARSER,
-                        "Section names can't have new lines");
+                    *err = bc_error_parser(BC_ERROR_CONFIG_PARSER, src, src_len,
+                        current, "Section names can't have new lines.");
                 break;
 
             case CONFIG_SECTION_KEY:
@@ -109,8 +109,8 @@ bc_config_parse(const char *src, size_t src_len, bc_error_t **err)
                     size_t end = is_last && c != '\n' && c != '\r' ? src_len :
                         current;
                     key = bc_strndup(src + start, end - start);
-                    *err = bc_error_new_printf(BC_ERROR_CONFIG_PARSER,
-                        "Key without value: %s", key);
+                    *err = bc_error_parser(BC_ERROR_CONFIG_PARSER, src, src_len,
+                        current, "Key without value: %s.", key);
                     free(key);
                     key = NULL;
                 }
@@ -222,6 +222,17 @@ bc_config_get(bc_config_t *config, const char *section, const char *key)
         return NULL;
 
     return bc_trie_lookup(s, key);
+}
+
+
+const char*
+bc_config_get_with_default(bc_config_t *config, const char *section, const char *key,
+    const char *default_)
+{
+    const char *rv = bc_config_get(config, section, key);
+    if (rv == NULL)
+        return default_;
+    return rv;
 }
 
 
