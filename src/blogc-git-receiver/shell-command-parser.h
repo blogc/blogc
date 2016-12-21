@@ -10,6 +10,5 @@
 #define _SHELL_COMMAND_PARSER_H
 
 char* bgr_shell_command_parse(const char *command);
-char* bgr_shell_quote(const char *command);
 
 #endif /* _SHELL_COMMAND_PARSER_H */

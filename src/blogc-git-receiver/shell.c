@@ -51,7 +51,7 @@ bgr_shell(int argc, char *argv[])
     }
 
     repo = bc_strdup_printf("%s/repos/%s", home, tmp_repo);
-    quoted_repo = bgr_shell_quote(repo);
+    quoted_repo = bc_shell_quote(repo);
     free(tmp_repo);
 
     if (0 == strncmp(argv[2], "git-upload-", 11))  // no need to check len here

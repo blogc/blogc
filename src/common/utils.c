@@ -643,3 +643,27 @@ bc_trie_foreach(bc_trie_t *trie, bc_trie_foreach_func_t func,
     bc_trie_foreach_node(trie->root, str, func, user_data);
     bc_string_free(str, true);
 }
+
+
+char*
+bc_shell_quote(const char *command)
+{
+    bc_string_t *rv = bc_string_new();
+    bc_string_append_c(rv, '\'');
+    if (command != NULL) {
+        for (size_t i = 0; i < strlen(command); i++) {
+            switch (command[i]) {
+                case '!':
+                    bc_string_append(rv, "'\\!'");
+                    break;
+                case '\'':
+                    bc_string_append(rv, "'\\''");
+                    break;
+                default:
+                    bc_string_append_c(rv, command[i]);
+            }
+        }
+    }
+    bc_string_append_c(rv, '\'');
+    return bc_string_free(rv, false);
+}

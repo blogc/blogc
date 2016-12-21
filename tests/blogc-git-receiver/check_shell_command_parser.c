@@ -205,40 +205,11 @@ test_shell_command_parse(void **state)
 }
 
 
-static void
-test_shell_quote(void **state)
-{
-    char *t;
-    t = bgr_shell_quote(NULL);
-    assert_string_equal(t, "''");
-    free(t);
-    t = bgr_shell_quote("!bola");
-    assert_string_equal(t, "''\\!'bola'");
-    free(t);
-    t = bgr_shell_quote("'bola");
-    assert_string_equal(t, "''\\''bola'");
-    free(t);
-    t = bgr_shell_quote("bo!bola");
-    assert_string_equal(t, "'bo'\\!'bola'");
-    free(t);
-    t = bgr_shell_quote("bo'bola");
-    assert_string_equal(t, "'bo'\\''bola'");
-    free(t);
-    t = bgr_shell_quote("bola!");
-    assert_string_equal(t, "'bola'\\!''");
-    free(t);
-    t = bgr_shell_quote("bola'");
-    assert_string_equal(t, "'bola'\\'''");
-    free(t);
-}
-
-
 int
 main(void)
 {
     const UnitTest tests[] = {
         unit_test(test_shell_command_parse),
-        unit_test(test_shell_quote),
     };
     return run_tests(tests);
 }

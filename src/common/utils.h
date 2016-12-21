@@ -99,4 +99,9 @@ size_t bc_trie_size(bc_trie_t *trie);
 void bc_trie_foreach(bc_trie_t *trie, bc_trie_foreach_func_t func,
     void *user_data);
 
+
+// shell
+
+char* bc_shell_quote(const char *command);
+
 #endif /* _UTILS_H */
