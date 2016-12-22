@@ -35,6 +35,10 @@ void bc_slist_free(bc_slist_t *l);
 void bc_slist_free_full(bc_slist_t *l, bc_free_func_t free_func);
 size_t bc_slist_length(bc_slist_t *l);
 
+// here i'm just extending slist, instead of implementing a fully featuered
+// queue for the sake of simplicity
+bc_slist_t* bc_slist_pop(bc_slist_t *l, void **data);
+
 
 // strfuncs
 

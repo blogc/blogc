@@ -105,6 +105,19 @@ bc_slist_length(bc_slist_t *l)
 }
 
 
+bc_slist_t*
+bc_slist_pop(bc_slist_t *l, void **data)
+{
+    if (l == NULL)
+        return l;
+    bc_slist_t *tmp = l;
+    l = l->next;
+    *data = tmp->data;
+    free(tmp);
+    return l;
+}
+
+
 char*
 bc_strdup(const char *s)
 {

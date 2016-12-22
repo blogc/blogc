@@ -87,6 +87,38 @@ test_slist_length(void **state)
 
 
 static void
+test_slist_pop(void **state)
+{
+    bc_slist_t *l = NULL;
+    l = bc_slist_append(l, (void*) bc_strdup("bola"));
+    l = bc_slist_append(l, (void*) bc_strdup("guda"));
+    l = bc_slist_append(l, (void*) bc_strdup("chula"));
+    char *v = NULL;
+    l = bc_slist_pop(l, &v);
+    assert_string_equal(v, "bola");
+    assert_non_null(l);
+    assert_string_equal(l->data, "guda");
+    assert_string_equal(l->next->data, "chula");
+    assert_null(l->next->next);
+    free(v);
+    l = bc_slist_pop(l, &v);
+    assert_string_equal(v, "guda");
+    assert_non_null(l);
+    assert_string_equal(l->data, "chula");
+    assert_null(l->next);
+    free(v);
+    l = bc_slist_pop(l, &v);
+    assert_string_equal(v, "chula");
+    assert_null(l);
+    free(v);
+    v = NULL;
+    l = bc_slist_pop(l, &v);
+    assert_null(v);
+    assert_null(l);
+}
+
+
+static void
 test_strdup(void **state)
 {
     char *str = bc_strdup("bola");
@@ -1026,6 +1058,7 @@ main(void)
         unit_test(test_slist_prepend),
         unit_test(test_slist_free),
         unit_test(test_slist_length),
+        unit_test(test_slist_pop),
 
         // strfuncs
         unit_test(test_strdup),
