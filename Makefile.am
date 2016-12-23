@@ -65,6 +65,7 @@ noinst_HEADERS = \
 	src/common/error.h \
 	src/common/file.h \
 	src/common/stdin.h \
+	src/common/thread-pool.h \
 	src/common/utf8.h \
 	src/common/utils.h \
 	$(NULL)
@@ -111,6 +112,12 @@ noinst_LTLIBRARIES += \
 	$(NULL)
 endif
 
+if USE_THREADS
+noinst_LTLIBRARIES += \
+	libblogc_common_tp.la \
+	$(NULL)
+endif
+
 check_PROGRAMS = \
 	$(NULL)
 
@@ -150,6 +157,22 @@ libblogc_common_la_SOURCES = \
 libblogc_common_la_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NULL)
+
+
+if USE_THREADS
+libblogc_common_tp_la_SOURCES = \
+	src/common/thread-pool.c \
+	$(NULL)
+
+libblogc_common_tp_la_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(PTHREAD_CFLAGS) \
+	$(NULL)
+
+libblogc_common_tp_la_LIBADD = \
+	$(PTHREAD_LIBS) \
+	$(NULL)
+endif
 
 
 blogc_SOURCES = \

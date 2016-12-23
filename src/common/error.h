@@ -17,6 +17,7 @@ typedef enum {
     // errors for src/common
     BC_ERROR_CONFIG_PARSER = 1,
     BC_ERROR_FILE,
+    BC_ERROR_THREADPOOL,
 
     // errors for src/blogc
     BLOGC_ERROR_SOURCE_PARSER = 100,
