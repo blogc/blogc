@@ -31,7 +31,10 @@ __wrap_realpath(const char *path, char *resolved_path)
 static void
 test_post_receive_get_config_section(void **state)
 {
-    bc_config_t *config = bc_config_parse("", 0, NULL);
+    bc_error_t *err = NULL;
+
+    bc_config_t *config = bc_config_parse("", 0, &err);
+    assert_null(err);
     assert_null(bgr_post_receive_get_config_section(config,
         "/home/blogc/repos/foo.git", "/home/blogc"));
     bc_config_free(config);
@@ -48,7 +51,8 @@ test_post_receive_get_config_section(void **state)
         "[repo:baz.git]\n"
         "mirror = baz\n"
         "\n";
-    config = bc_config_parse(conf, strlen(conf), NULL);
+    config = bc_config_parse(conf, strlen(conf), &err);
+    assert_null(err);
     char *s = bgr_post_receive_get_config_section(config,
         "/home/blogc/repos/bar.git", "/home/blogc");
     assert_string_equal(s, "repo:bar.git");
@@ -67,7 +71,8 @@ test_post_receive_get_config_section(void **state)
         "[repo:asd/baz.git]\n"
         "mirror = baz\n"
         "\n";
-    config = bc_config_parse(conf, strlen(conf), NULL);
+    config = bc_config_parse(conf, strlen(conf), &err);
+    assert_null(err);
     s = bgr_post_receive_get_config_section(config,
         "/home/blogc/repos/asd/bar.git", "/home/blogc");
     assert_string_equal(s, "repo:asd/bar.git");
