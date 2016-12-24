@@ -33,7 +33,7 @@ test_post_receive_get_config_section(void **state)
 {
     bc_error_t *err = NULL;
 
-    bc_config_t *config = bc_config_parse("", 0, &err);
+    bc_config_t *config = bc_config_parse("", 0, NULL, &err);
     assert_null(err);
     assert_null(bgr_post_receive_get_config_section(config,
         "/home/blogc/repos/foo.git", "/home/blogc"));
@@ -51,7 +51,7 @@ test_post_receive_get_config_section(void **state)
         "[repo:baz.git]\n"
         "mirror = baz\n"
         "\n";
-    config = bc_config_parse(conf, strlen(conf), &err);
+    config = bc_config_parse(conf, strlen(conf), NULL, &err);
     assert_null(err);
     char *s = bgr_post_receive_get_config_section(config,
         "/home/blogc/repos/bar.git", "/home/blogc");
@@ -71,7 +71,7 @@ test_post_receive_get_config_section(void **state)
         "[repo:asd/baz.git]\n"
         "mirror = baz\n"
         "\n";
-    config = bc_config_parse(conf, strlen(conf), &err);
+    config = bc_config_parse(conf, strlen(conf), NULL, &err);
     assert_null(err);
     s = bgr_post_receive_get_config_section(config,
         "/home/blogc/repos/asd/bar.git", "/home/blogc");

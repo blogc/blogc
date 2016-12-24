@@ -102,7 +102,7 @@ bgr_post_receive_hook(int argc, char *argv[])
         goto cleanup;
     }
 
-    bc_config_t *config = bc_config_parse(config_content, len, &err);
+    bc_config_t *config = bc_config_parse(config_content, len, NULL, &err);
     free(config_content);
     if (err != NULL) {
         fprintf(stderr, "warning: failed to parse configuration file (%s), "

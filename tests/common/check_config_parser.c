@@ -24,7 +24,7 @@ test_config_empty(void **state)
 {
     const char *a = "";
     bc_error_t *err = NULL;
-    bc_config_t *c = bc_config_parse(a, strlen(a), &err);
+    bc_config_t *c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_null(err);
     assert_non_null(c);
     assert_non_null(c->root);
@@ -39,7 +39,7 @@ test_config_section_empty(void **state)
 {
     const char *a = "[foo]";
     bc_error_t *err = NULL;
-    bc_config_t *c = bc_config_parse(a, strlen(a), &err);
+    bc_config_t *c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_null(err);
     assert_non_null(c);
     assert_non_null(c->root);
@@ -66,7 +66,7 @@ test_config_section(void **state)
         "[foo]\n"
         "asd = zxc";
     bc_error_t *err = NULL;
-    bc_config_t *c = bc_config_parse(a, strlen(a), &err);
+    bc_config_t *c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_null(err);
     assert_non_null(c);
     assert_non_null(c->root);
@@ -90,7 +90,7 @@ test_config_section(void **state)
         "[foo]\n"
         "asd = zxc\n";
     err = NULL;
-    c = bc_config_parse(a, strlen(a), &err);
+    c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_null(err);
     assert_non_null(c);
     assert_non_null(c->root);
@@ -114,7 +114,7 @@ test_config_section(void **state)
         "[foo]\r\n"
         "asd = zxc\r\n";
     err = NULL;
-    c = bc_config_parse(a, strlen(a), &err);
+    c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_null(err);
     assert_non_null(c);
     assert_non_null(c->root);
@@ -145,7 +145,7 @@ test_config_section_multiple_keys(void **state)
         "qwe = rty\n"
         "zxc = vbn";
     bc_error_t *err = NULL;
-    bc_config_t *c = bc_config_parse(a, strlen(a), &err);
+    bc_config_t *c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_null(err);
     assert_non_null(c);
     assert_non_null(c->root);
@@ -175,7 +175,7 @@ test_config_section_multiple_keys(void **state)
         "qwe = rty\n"
         "zxc = vbn\n";
     err = NULL;
-    c = bc_config_parse(a, strlen(a), &err);
+    c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_null(err);
     assert_non_null(c);
     assert_non_null(c->root);
@@ -205,7 +205,7 @@ test_config_section_multiple_keys(void **state)
         "qwe = rty\r\n"
         "zxc = vbn\r\n";
     err = NULL;
-    c = bc_config_parse(a, strlen(a), &err);
+    c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_null(err);
     assert_non_null(c);
     assert_non_null(c->root);
@@ -243,7 +243,7 @@ test_config_section_multiple_sections(void **state)
         "[bar]\n"
         "lol = hehe";
     bc_error_t *err = NULL;
-    bc_config_t *c = bc_config_parse(a, strlen(a), &err);
+    bc_config_t *c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_null(err);
     assert_non_null(c);
     assert_non_null(c->root);
@@ -284,7 +284,7 @@ test_config_section_multiple_sections(void **state)
         "[bar]\n"
         "lol = hehe\n";
     err = NULL;
-    c = bc_config_parse(a, strlen(a), &err);
+    c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_null(err);
     assert_non_null(c);
     assert_non_null(c->root);
@@ -325,7 +325,7 @@ test_config_section_multiple_sections(void **state)
         "[bar]\r\n"
         "lol = hehe\r\n";
     err = NULL;
-    c = bc_config_parse(a, strlen(a), &err);
+    c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_null(err);
     assert_non_null(c);
     assert_non_null(c->root);
@@ -360,13 +360,145 @@ test_config_section_multiple_sections(void **state)
 
 
 static void
+test_config_section_list(void **state)
+{
+    const char *a =
+        "[foo]\n"
+        "asd = zxc\n"
+        "qwe = rty\n"
+        "zxc = vbn\n"
+        "\n"
+        "[bar]\n"
+        "lol = hehe\n"
+        "asdasdadssad";
+    bc_error_t *err = NULL;
+    const char *sections[] = {"bar", NULL};
+    bc_config_t *c = bc_config_parse(a, strlen(a), sections, &err);
+    assert_null(err);
+    assert_non_null(c);
+    assert_non_null(c->root);
+    assert_int_equal(bc_trie_size(c->root), 2);
+    char **s = bc_config_list_sections(c);
+    assert_non_null(s);
+    assert_int_equal(bc_strv_length(s), 2);
+    assert_string_equal(s[0], "foo");
+    assert_string_equal(s[1], "bar");
+    assert_null(s[2]);
+    bc_strv_free(s);
+    assert_string_equal(bc_config_get(c, "foo", "asd"), "zxc");
+    assert_string_equal(bc_config_get(c, "foo", "qwe"), "rty");
+    assert_string_equal(bc_config_get(c, "foo", "zxc"), "vbn");
+    bc_slist_t *foo = bc_config_get_list(c, "bar");
+    assert_non_null(foo);
+    assert_string_equal(foo->data, "lol = hehe");
+    assert_string_equal(foo->next->data, "asdasdadssad");
+    assert_null(foo->next->next);
+    char **k = bc_config_list_keys(c, "foo");
+    assert_non_null(k);
+    assert_int_equal(bc_strv_length(k), 3);
+    assert_string_equal(k[0], "asd");
+    assert_string_equal(k[1], "qwe");
+    assert_string_equal(k[2], "zxc");
+    assert_null(k[3]);
+    bc_strv_free(k);
+    k = bc_config_list_keys(c, "bar");
+    assert_null(k);
+    bc_config_free(c);
+
+    a =
+        "[foo]\n"
+        "asd = zxc\n"
+        "qwe = rty\n"
+        "zxc = vbn\n"
+        "\n"
+        "[bar]\n"
+        "lol = hehe\n"
+        "asdasdadssad\n";
+    err = NULL;
+    c = bc_config_parse(a, strlen(a), sections, &err);
+    assert_null(err);
+    assert_non_null(c);
+    assert_non_null(c->root);
+    assert_int_equal(bc_trie_size(c->root), 2);
+    s = bc_config_list_sections(c);
+    assert_non_null(s);
+    assert_int_equal(bc_strv_length(s), 2);
+    assert_string_equal(s[0], "foo");
+    assert_string_equal(s[1], "bar");
+    assert_null(s[2]);
+    bc_strv_free(s);
+    assert_string_equal(bc_config_get(c, "foo", "asd"), "zxc");
+    assert_string_equal(bc_config_get(c, "foo", "qwe"), "rty");
+    assert_string_equal(bc_config_get(c, "foo", "zxc"), "vbn");
+    foo = bc_config_get_list(c, "bar");
+    assert_non_null(foo);
+    assert_string_equal(foo->data, "lol = hehe");
+    assert_string_equal(foo->next->data, "asdasdadssad");
+    assert_null(foo->next->next);
+    k = bc_config_list_keys(c, "foo");
+    assert_non_null(k);
+    assert_int_equal(bc_strv_length(k), 3);
+    assert_string_equal(k[0], "asd");
+    assert_string_equal(k[1], "qwe");
+    assert_string_equal(k[2], "zxc");
+    assert_null(k[3]);
+    bc_strv_free(k);
+    k = bc_config_list_keys(c, "bar");
+    assert_null(k);
+    bc_config_free(c);
+
+    a =
+        "[foo]\r\n"
+        "asd = zxc\r\n"
+        "qwe = rty\r\n"
+        "zxc = vbn\r\n"
+        "\r\n"
+        "[bar]\r\n"
+        "lol = hehe\r\n"
+        "asdasdadssad\r\n";
+    err = NULL;
+    c = bc_config_parse(a, strlen(a), sections, &err);
+    assert_null(err);
+    assert_non_null(c);
+    assert_non_null(c->root);
+    assert_int_equal(bc_trie_size(c->root), 2);
+    s = bc_config_list_sections(c);
+    assert_non_null(s);
+    assert_int_equal(bc_strv_length(s), 2);
+    assert_string_equal(s[0], "foo");
+    assert_string_equal(s[1], "bar");
+    assert_null(s[2]);
+    bc_strv_free(s);
+    assert_string_equal(bc_config_get(c, "foo", "asd"), "zxc");
+    assert_string_equal(bc_config_get(c, "foo", "qwe"), "rty");
+    assert_string_equal(bc_config_get(c, "foo", "zxc"), "vbn");
+    foo = bc_config_get_list(c, "bar");
+    assert_non_null(foo);
+    assert_string_equal(foo->data, "lol = hehe");
+    assert_string_equal(foo->next->data, "asdasdadssad");
+    assert_null(foo->next->next);
+    k = bc_config_list_keys(c, "foo");
+    assert_non_null(k);
+    assert_int_equal(bc_strv_length(k), 3);
+    assert_string_equal(k[0], "asd");
+    assert_string_equal(k[1], "qwe");
+    assert_string_equal(k[2], "zxc");
+    assert_null(k[3]);
+    bc_strv_free(k);
+    k = bc_config_list_keys(c, "bar");
+    assert_null(k);
+    bc_config_free(c);
+}
+
+
+static void
 test_config_error_start(void **state)
 {
     const char *a =
         "asd\n"
         "[foo]";
     bc_error_t *err = NULL;
-    bc_config_t *c = bc_config_parse(a, strlen(a), &err);
+    bc_config_t *c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_non_null(err);
     assert_null(c);
     assert_int_equal(err->type, BC_ERROR_CONFIG_PARSER);
@@ -383,7 +515,7 @@ test_config_error_section_with_newline(void **state)
     const char *a =
         "[foo\nbar]";
     bc_error_t *err = NULL;
-    bc_config_t *c = bc_config_parse(a, strlen(a), &err);
+    bc_config_t *c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_non_null(err);
     assert_null(c);
     assert_int_equal(err->type, BC_ERROR_CONFIG_PARSER);
@@ -402,7 +534,7 @@ test_config_error_key_without_value(void **state)
         "asd = 12\n"
         "foo";
     bc_error_t *err = NULL;
-    bc_config_t *c = bc_config_parse(a, strlen(a), &err);
+    bc_config_t *c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_non_null(err);
     assert_null(c);
     assert_int_equal(err->type, BC_ERROR_CONFIG_PARSER);
@@ -415,7 +547,7 @@ test_config_error_key_without_value(void **state)
         "asd = 12\n"
         "foo\n";
     err = NULL;
-    c = bc_config_parse(a, strlen(a), &err);
+    c = bc_config_parse(a, strlen(a), NULL, &err);
     assert_non_null(err);
     assert_null(c);
     assert_int_equal(err->type, BC_ERROR_CONFIG_PARSER);
@@ -435,6 +567,7 @@ main(void)
         unit_test(test_config_section),
         unit_test(test_config_section_multiple_keys),
         unit_test(test_config_section_multiple_sections),
+        unit_test(test_config_section_list),
         unit_test(test_config_error_start),
         unit_test(test_config_error_section_with_newline),
         unit_test(test_config_error_key_without_value),

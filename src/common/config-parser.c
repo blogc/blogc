@@ -8,6 +8,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include "error.h"
 #include "utils.h"
 #include "config-parser.h"
@@ -20,11 +21,41 @@ typedef enum {
     CONFIG_SECTION_KEY,
     CONFIG_SECTION_VALUE_START,
     CONFIG_SECTION_VALUE,
+    CONFIG_SECTION_LIST,
 } bc_configparser_state_t;
+
+typedef enum {
+    CONFIG_SECTION_TYPE_MAP = 1,
+    CONFIG_SECTION_TYPE_LIST,
+} bc_configparser_section_type_t;
+
+typedef struct {
+    bc_configparser_section_type_t type;
+    void *data;
+} bc_configparser_section_t;
+
+
+static void
+free_section(bc_configparser_section_t *section)
+{
+    if (section == NULL)
+        return;
+
+    switch (section->type) {
+        case CONFIG_SECTION_TYPE_MAP:
+            bc_trie_free(section->data);
+            break;
+        case CONFIG_SECTION_TYPE_LIST:
+            bc_slist_free_full(section->data, free);
+            break;
+    }
+    free(section);
+}
 
 
 bc_config_t*
-bc_config_parse(const char *src, size_t src_len, bc_error_t **err)
+bc_config_parse(const char *src, size_t src_len, const char *list_sections[],
+    bc_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -32,14 +63,14 @@ bc_config_parse(const char *src, size_t src_len, bc_error_t **err)
     size_t current = 0;
     size_t start = 0;
 
-    bc_trie_t *section = NULL;
+    bc_configparser_section_t *section = NULL;
 
     char *section_name = NULL;
     char *key = NULL;
     char *value = NULL;
 
     bc_config_t *rv = bc_malloc(sizeof(bc_config_t));
-    rv->root = bc_trie_new((bc_free_func_t) bc_trie_free);
+    rv->root = bc_trie_new((bc_free_func_t) free_section);
 
     bc_configparser_state_t state = CONFIG_START;
 
@@ -66,7 +97,14 @@ bc_config_parse(const char *src, size_t src_len, bc_error_t **err)
                 }
                 if (section != NULL) {
                     start = current;
-                    state = CONFIG_SECTION_KEY;
+                    switch (section->type) {
+                        case CONFIG_SECTION_TYPE_MAP:
+                            state = CONFIG_SECTION_KEY;
+                            break;
+                        case CONFIG_SECTION_TYPE_LIST:
+                            state = CONFIG_SECTION_LIST;
+                            break;
+                    }
                     continue;
                 }
                 *err = bc_error_parser(BC_ERROR_CONFIG_PARSER, src, src_len,
@@ -81,7 +119,24 @@ bc_config_parse(const char *src, size_t src_len, bc_error_t **err)
             case CONFIG_SECTION:
                 if (c == ']') {
                     section_name = bc_strndup(src + start, current - start);
-                    section = bc_trie_new(free);
+                    section = bc_malloc(sizeof(bc_configparser_section_t));
+                    section->type = CONFIG_SECTION_TYPE_MAP;
+                    if (list_sections != NULL) {
+                        for (size_t i = 0; list_sections[i] != NULL; i++) {
+                            if (0 == strcmp(section_name, list_sections[i])) {
+                                section->type = CONFIG_SECTION_TYPE_LIST;
+                                break;
+                            }
+                        }
+                    }
+                    switch (section->type) {
+                        case CONFIG_SECTION_TYPE_MAP:
+                            section->data = bc_trie_new(free);
+                            break;
+                        case CONFIG_SECTION_TYPE_LIST:
+                            section->data = NULL;
+                            break;
+                    }
                     bc_trie_insert(rv->root, section_name, section);
                     free(section_name);
                     section_name = NULL;
@@ -122,7 +177,7 @@ bc_config_parse(const char *src, size_t src_len, bc_error_t **err)
                     size_t end = is_last && c != '\n' && c != '\r' ? src_len :
                         current;
                     value = bc_strndup(src + start, end - start);
-                    bc_trie_insert(section, bc_str_strip(key),
+                    bc_trie_insert(section->data, bc_str_strip(key),
                         bc_strdup(bc_str_strip(value)));
                     free(key);
                     key = NULL;
@@ -130,6 +185,21 @@ bc_config_parse(const char *src, size_t src_len, bc_error_t **err)
                     value = NULL;
                     state = CONFIG_START;
                     break;
+                }
+                break;
+
+            case CONFIG_SECTION_LIST:
+                if (c == '\r' || c == '\n' || is_last) {
+                    size_t end = is_last && c != '\n' && c != '\r' ? src_len :
+                        current;
+                    value = bc_strndup(src + start, end - start);
+                    section->data = bc_slist_append(section->data,
+                        bc_strdup(bc_str_strip(value)));
+                    free(value);
+                    value = NULL;
+                    state = CONFIG_START;
+                    break;
+
                 }
                 break;
 
@@ -187,12 +257,15 @@ bc_config_list_keys(bc_config_t *config, const char *section)
     if (config == NULL)
         return NULL;
 
-    bc_trie_t *s = bc_trie_lookup(config->root, section);
+    bc_configparser_section_t *s = bc_trie_lookup(config->root, section);
     if (s == NULL)
         return NULL;
 
+    if (s->type != CONFIG_SECTION_TYPE_MAP)
+        return NULL;
+
     bc_slist_t *l = NULL;
-    bc_trie_foreach(s, (bc_trie_foreach_func_t) list_keys, &l);
+    bc_trie_foreach(s->data, (bc_trie_foreach_func_t) list_keys, &l);
 
     char **rv = bc_malloc(sizeof(char*) * (bc_slist_length(l) + 1));
 
@@ -213,11 +286,14 @@ bc_config_get(bc_config_t *config, const char *section, const char *key)
     if (config == NULL)
         return NULL;
 
-    bc_trie_t *s = bc_trie_lookup(config->root, section);
+    bc_configparser_section_t *s = bc_trie_lookup(config->root, section);
     if (s == NULL)
         return NULL;
 
-    return bc_trie_lookup(s, key);
+    if (s->type != CONFIG_SECTION_TYPE_MAP)
+        return NULL;
+
+    return bc_trie_lookup(s->data, key);
 }
 
 
@@ -229,6 +305,23 @@ bc_config_get_with_default(bc_config_t *config, const char *section, const char 
     if (rv == NULL)
         return default_;
     return rv;
+}
+
+
+bc_slist_t*
+bc_config_get_list(bc_config_t *config, const char *section)
+{
+    if (config == NULL)
+        return NULL;
+
+    bc_configparser_section_t *s = bc_trie_lookup(config->root, section);
+    if (s == NULL)
+        return NULL;
+
+    if (s->type != CONFIG_SECTION_TYPE_LIST)
+        return NULL;
+
+    return s->data;
 }
 
 
