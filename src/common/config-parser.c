@@ -240,7 +240,7 @@ bc_config_list_sections(bc_config_t *config)
 
     char **rv = bc_malloc(sizeof(char*) * (bc_slist_length(l) + 1));
 
-    unsigned int i = 0;
+    size_t i = 0;
     for (bc_slist_t *tmp = l; tmp != NULL; tmp = tmp->next, i++)
         rv[i] = tmp->data;
     rv[i] = NULL;
@@ -269,7 +269,7 @@ bc_config_list_keys(bc_config_t *config, const char *section)
 
     char **rv = bc_malloc(sizeof(char*) * (bc_slist_length(l) + 1));
 
-    unsigned int i = 0;
+    size_t i = 0;
     for (bc_slist_t *tmp = l; tmp != NULL; tmp = tmp->next, i++)
         rv[i] = tmp->data;
     rv[i] = NULL;
@@ -308,7 +308,7 @@ bc_config_get_with_default(bc_config_t *config, const char *section, const char 
 }
 
 
-bc_slist_t*
+char**
 bc_config_get_list(bc_config_t *config, const char *section)
 {
     if (config == NULL)
@@ -321,7 +321,14 @@ bc_config_get_list(bc_config_t *config, const char *section)
     if (s->type != CONFIG_SECTION_TYPE_LIST)
         return NULL;
 
-    return s->data;
+    char **rv = bc_malloc(sizeof(char*) * (bc_slist_length(s->data) + 1));
+
+    size_t i = 0;
+    for (bc_slist_t *tmp = s->data; tmp != NULL; tmp = tmp->next, i++)
+        rv[i] = bc_strdup(tmp->data);
+    rv[i] = NULL;
+
+    return rv;
 }
 
 

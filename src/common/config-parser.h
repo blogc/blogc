@@ -25,7 +25,7 @@ const char* bc_config_get(bc_config_t *config, const char *section,
     const char *key);
 const char* bc_config_get_with_default(bc_config_t *config, const char *section,
     const char *key, const char *default_);
-bc_slist_t* bc_config_get_list(bc_config_t *config, const char *section);
+char** bc_config_get_list(bc_config_t *config, const char *section);
 void bc_config_free(bc_config_t *config);
 
 #endif /* _CONFIG_PARSER_H */
