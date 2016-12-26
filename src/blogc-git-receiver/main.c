@@ -28,5 +28,5 @@ main(int argc, char *argv[])
         return bgr_shell(argc, argv);
 
     fprintf(stderr, "error: this is a special shell, go away!\n");
-    return 1;
+    return 3;
 }

@@ -212,7 +212,7 @@ br_httpd_run(const char *host, unsigned short port, const char *docroot,
 {
     if (port == 0) {
         fprintf(stderr, "Invalid port: 0\n");
-        return 1;
+        return 3;
     }
 
     thread_data_t threads[max_threads];
@@ -222,7 +222,7 @@ br_httpd_run(const char *host, unsigned short port, const char *docroot,
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
         fprintf(stderr, "Failed to open server socket: %s\n", strerror(errno));
-        return 1;
+        return 3;
     }
 
     int rv = 0;
@@ -230,7 +230,7 @@ br_httpd_run(const char *host, unsigned short port, const char *docroot,
     int value = 1;
     if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(int)) < 0) {
         fprintf(stderr, "Failed to set socket option: %s\n", strerror(errno));
-        rv = 1;
+        rv = 3;
         goto cleanup;
     }
 
@@ -240,7 +240,7 @@ br_httpd_run(const char *host, unsigned short port, const char *docroot,
     server_addr.sin_port = htons(port);
     if ((server_addr.sin_addr.s_addr = inet_addr(host)) == -1) {
         fprintf(stderr, "Invalid server listen address: %s\n", host);
-        rv = 1;
+        rv = 3;
         goto cleanup;
     }
 
@@ -249,13 +249,13 @@ br_httpd_run(const char *host, unsigned short port, const char *docroot,
     {
         fprintf(stderr, "Failed to bind to server socket (%s:%d): %s\n",
             host, port, strerror(errno));
-        rv = 1;
+        rv = 3;
         goto cleanup;
     }
 
     if (listen(server_socket, LISTEN_BACKLOG) == -1) {
         fprintf(stderr, "Failed to listen to server socket: %s\n", strerror(errno));
-        rv = 1;
+        rv = 3;
         goto cleanup;
     }
 
@@ -275,7 +275,7 @@ br_httpd_run(const char *host, unsigned short port, const char *docroot,
             (struct sockaddr *) &client_addr, &len);
         if (client_socket == -1) {
             fprintf(stderr, "Failed to accept connection: %s\n", strerror(errno));
-            rv = 1;
+            rv = 3;
             goto cleanup;
         }
 
@@ -288,14 +288,14 @@ br_httpd_run(const char *host, unsigned short port, const char *docroot,
         if (threads[current_thread].initialized) {
             if (pthread_join(threads[current_thread].thread, NULL) != 0) {
                 fprintf(stderr, "Failed to join thread\n");
-                rv = 1;
+                rv = 3;
                 goto cleanup;
             }
         }
 
         if (pthread_create(&(threads[current_thread].thread), NULL, handle_request, arg) != 0) {
             fprintf(stderr, "Failed to create thread\n");
-            rv = 1;
+            rv = 3;
             goto cleanup;
         }
 

@@ -101,14 +101,14 @@ bgr_pre_receive_hook(int argc, char *argv[])
     char *real_hooks_dir = realpath(hooks_dir, NULL);
     if (real_hooks_dir == NULL) {
         fprintf(stderr, "error: failed to guess repository root.\n");
-        return 1;
+        return 3;
     }
 
     char *repo_dir = bc_strdup(dirname(real_hooks_dir));
     free(real_hooks_dir);
     if (0 != chdir(repo_dir)) {
         fprintf(stderr, "error: failed to change to repository root\n");
-        rv = 1;
+        rv = 3;
         goto cleanup;
     }
 
@@ -118,7 +118,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
             fprintf(stderr, "error: no previous build found. nothing to "
                 "rebuild.\n");
             free(htdocs_sym);
-            rv = 1;
+            rv = 3;
             goto cleanup;
         }
         char *build_dir = realpath(htdocs_sym, NULL);
@@ -126,7 +126,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
         if (build_dir == NULL) {
             fprintf(stderr, "error: failed to get the hash of last built "
                 "commit.\n");
-            rv = 1;
+            rv = 3;
             goto cleanup;
         }
         char **pieces = bc_str_split(basename(build_dir), '-', 2);
@@ -135,7 +135,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
             fprintf(stderr, "error: failed to parse the hash of last built "
                 "commit.\n");
             bc_strv_free(pieces);
-            rv = 1;
+            rv = 3;
             goto cleanup;
         }
         master = bc_strdup(pieces[0]);
@@ -155,7 +155,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
 
     char dir[] = "/tmp/blogc_XXXXXX";
     if (NULL == mkdtemp(dir)) {
-        rv = 1;
+        rv = 3;
         goto cleanup;
     }
     tmpdir = dir;
@@ -165,7 +165,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
     if (0 != system(git_archive_cmd)) {
         fprintf(stderr, "error: failed to extract git content to temporary "
             "directory: %s\n", tmpdir);
-        rv = 1;
+        rv = 3;
         free(git_archive_cmd);
         goto cleanup;
     }
@@ -174,7 +174,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
     if (0 != chdir(tmpdir)) {
         fprintf(stderr, "error: failed to chdir (%s): %s\n", tmpdir,
             strerror(errno));
-        rv = 1;
+        rv = 3;
         goto cleanup;
     }
 
@@ -186,7 +186,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
     char *home = getenv("HOME");
     if (home == NULL) {
         fprintf(stderr, "error: failed to find user home path\n");
-        rv = 1;
+        rv = 3;
         goto cleanup;
     }
 
@@ -201,7 +201,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
 
     if (make_impl == NULL) {
         fprintf(stderr, "error: no 'make' implementation found\n");
-        rv = 1;
+        rv = 3;
         goto cleanup;
     }
 
@@ -223,7 +223,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
         fprintf(stderr, "error: failed to build website ...\n");
         rmdir_recursive(output_dir);
         free(gmake_cmd);
-        rv = 1;
+        rv = 3;
         goto cleanup;
     }
     free(gmake_cmd);
@@ -232,7 +232,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
         fprintf(stderr, "error: failed to chdir (%s): %s\n", repo_dir,
             strerror(errno));
         rmdir_recursive(output_dir);
-        rv = 1;
+        rv = 3;
         goto cleanup;
     }
 
@@ -241,7 +241,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
         fprintf(stderr, "error: failed to remove symlink (%s/htdocs): %s\n",
             repo_dir, strerror(errno));
         rmdir_recursive(output_dir);
-        rv = 1;
+        rv = 3;
         goto cleanup2;
     }
 
@@ -249,7 +249,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
         fprintf(stderr, "error: failed to create symlink (%s/htdocs): %s\n",
             repo_dir, strerror(errno));
         rmdir_recursive(output_dir);
-        rv = 1;
+        rv = 3;
         goto cleanup2;
     }
 

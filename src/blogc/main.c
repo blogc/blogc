@@ -199,7 +199,7 @@ main(int argc, char **argv)
                             fprintf(stderr, "blogc: error: invalid value for "
                                 "-D (must have an '='): %s\n", tmp);
                             bc_strv_free(pieces);
-                            rv = 2;
+                            rv = 3;
                             goto cleanup;
                         }
                         for (unsigned int j = 0; pieces[0][j] != '\0'; j++) {
@@ -210,7 +210,7 @@ main(int argc, char **argv)
                                     "for -D (configuration key must be uppercase "
                                     "with '_'): %s\n", pieces[0]);
                                 bc_strv_free(pieces);
-                                rv = 2;
+                                rv = 3;
                                 goto cleanup;
                             }
                         }
@@ -223,7 +223,7 @@ main(int argc, char **argv)
                     blogc_print_usage();
                     fprintf(stderr, "blogc: error: invalid argument: -%c\n",
                         argv[i][1]);
-                    rv = 2;
+                    rv = 3;
                     goto cleanup;
             }
         }
@@ -237,7 +237,7 @@ main(int argc, char **argv)
     if (!listing && bc_slist_length(sources) == 0) {
         blogc_print_usage();
         fprintf(stderr, "blogc: error: one source file is required\n");
-        rv = 2;
+        rv = 3;
         goto cleanup;
     }
 
@@ -245,7 +245,7 @@ main(int argc, char **argv)
         blogc_print_usage();
         fprintf(stderr, "blogc: error: only one source file should be provided, "
             "if running without '-l'\n");
-        rv = 2;
+        rv = 3;
         goto cleanup;
     }
 
@@ -254,7 +254,7 @@ main(int argc, char **argv)
     bc_slist_t *s = blogc_source_parse_from_files(config, sources, &err);
     if (err != NULL) {
         bc_error_print(err, "blogc");
-        rv = 2;
+        rv = 3;
         goto cleanup2;
     }
 
@@ -263,7 +263,7 @@ main(int argc, char **argv)
         if (val == NULL) {
             fprintf(stderr, "blogc: error: configuration variable not found: %s\n",
                 print);
-            rv = 2;
+            rv = 3;
         }
         else {
             printf("%s\n", val);
@@ -274,14 +274,14 @@ main(int argc, char **argv)
     if (template == NULL) {
         blogc_print_usage();
         fprintf(stderr, "blogc: error: argument -t is required when rendering content\n");
-        rv = 2;
+        rv = 3;
         goto cleanup2;
     }
 
     bc_slist_t* l = blogc_template_parse_from_file(template, &err);
     if (err != NULL) {
         bc_error_print(err, "blogc");
-        rv = 2;
+        rv = 3;
         goto cleanup3;
     }
 
@@ -299,7 +299,7 @@ main(int argc, char **argv)
         if (fp == NULL) {
             fprintf(stderr, "blogc: error: failed to open output file (%s): %s\n",
                 output, strerror(errno));
-            rv = 2;
+            rv = 3;
             goto cleanup4;
         }
     }
