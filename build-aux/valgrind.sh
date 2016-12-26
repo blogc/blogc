@@ -8,7 +8,7 @@ export TESTS_ENVIRONMENT="
 		--show-possibly-lost=no"
 
 if [[ "${1}" == *.sh ]]; then
-    exec "${1}"
+    exec "${@}"
 else
-    exec ${TESTS_ENVIRONMENT} "${1}"
+    exec ${TESTS_ENVIRONMENT} "${@}"
 fi
