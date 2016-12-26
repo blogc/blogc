@@ -117,6 +117,7 @@ libblogc_la_CFLAGS = \
 
 libblogc_la_LIBADD = \
 	$(LIBM) \
+	libblogc_common.la \
 	$(NULL)
 
 
@@ -175,6 +176,7 @@ libblogc_git_receiver_la_CFLAGS = \
 	$(NULL)
 
 libblogc_git_receiver_la_LIBADD = \
+	libblogc_common.la \
 	$(NULL)
 endif
 
@@ -208,6 +210,7 @@ libblogc_runserver_la_CFLAGS = \
 
 libblogc_runserver_la_LIBADD = \
 	$(PTHREAD_LIBS) \
+	libblogc_common.la \
 	$(NULL)
 endif
 
