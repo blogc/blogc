@@ -89,7 +89,7 @@ main(int argc, char **argv)
                         ptr = argv[i] + 2;
                     else
                         ptr = argv[++i];
-                    max_threads = strtoul(argv[++i], NULL, 10);
+                    max_threads = strtoul(ptr, &endptr, 10);
                     if (*ptr != '\0' && *endptr != '\0')
                         fprintf(stderr, "blogc-runserver: warning: invalid value "
                             "for -m argument: %s. using %zu instead\n", ptr, max_threads);
