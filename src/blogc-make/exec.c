@@ -183,7 +183,14 @@ bm_exec_build_blogc_cmd(bm_settings_t *settings, bc_trie_t *variables,
         free(tmp);
     }
 
-    bc_string_append(rv, "blogc");
+    // use blogc binary from environment, if provided
+    const char *blogc_bin = getenv("BLOGC");
+    if (blogc_bin != NULL) {
+        bc_string_append(rv, blogc_bin);
+    }
+    else {
+        bc_string_append(rv, "blogc");
+    }
 
     if (settings != NULL) {
         bc_trie_foreach(settings->env,

@@ -142,16 +142,30 @@ def lambda_handler(event, context):
 
     if payload['ref'] == 'refs/heads/master':
         debug = 'DEBUG' in os.environ
-        stream = None if debug else subprocess.PIPE
+
+        env = os.environ.copy()
+        env['BLOGC'] = os.path.join(cwd, 'blogc')
+        env['OUTPUT_DIR'] = '_build_lambda'
 
         rootdir = get_tarball(payload['repository']['full_name'])
-        rv = subprocess.call(['make', '-C', rootdir,
-                              'BLOGC=%s' % os.path.join(cwd, 'blogc'),
-                              'OUTPUT_DIR=_build'],
-                             stdout=stream, stderr=stream)
-        if rv != 0:
-            raise RuntimeError('Failed to run make')
+        settings_file = os.path.join(rootdir, 'settings.ini')
 
-        sync_s3(os.path.join(rootdir, '_build'),
+        if os.path.isfile(settings_file):
+            # deploy using blogc-make
+            args = [os.path.join(cwd, 'blogc'), '-m', '-f', settings_file,
+                    'all']
+            if debug:
+                args.append('-V')
+            rv = subprocess.call(args, env=env)
+        else:
+            # fallback to using make. please note that this will break if
+            # amazon removes gnu make from lambda images
+            stream = None if debug else subprocess.PIPE
+            rv = subprocess.call(['make', '-C', rootdir], env=env,
+                                 stdout=stream, stderr=stream)
+        if rv != 0:
+            raise RuntimeError('Failed to run the build tool.')
+
+        sync_s3(os.path.join(rootdir, env['OUTPUT_DIR']),
                 payload['repository']['name'],
                 os.path.join(rootdir, 's3.json'))

@@ -81,6 +81,13 @@ bm_ctx_new(const char *settings_file, bc_error_t **err)
     }
     free(content);
 
+    // fix output_dir, if forced from environment variable
+    const char *output_dir_env = getenv("OUTPUT_DIR");
+    if (output_dir_env != NULL) {
+        bc_trie_insert(settings->settings, "output_dir",
+            bc_strdup(output_dir_env));
+    }
+
     char *atom_template = bm_atom_deploy(settings, err);
     if (*err != NULL) {
         return NULL;
