@@ -263,7 +263,7 @@ bm_exec_blogc(bm_settings_t *settings, bc_trie_t *variables, bool listing,
     if (rv != 0) {
         if (verbose) {
             fprintf(stderr,
-                "error: Failed to execute command.\n"
+                "blogc-make: error: Failed to execute command.\n"
                 "\n"
                 "STATUS CODE: %d\n", rv);
             if (input->len > 0) {
@@ -290,8 +290,8 @@ bm_exec_blogc(bm_settings_t *settings, bc_trie_t *variables, bool listing,
         }
         else {
             fprintf(stderr,
-                "error: Failed to execute command, returned status code: %d\n",
-                rv);
+                "blogc-make: error: Failed to execute command, returned "
+                "status code: %d\n", rv);
         }
     }
 
@@ -324,12 +324,21 @@ bm_exec_blogc_runserver(bm_settings_t *settings, bool verbose)
     fflush(stdout);
 
     // we don't need pipes to run blogc-runserver, because it is "interactive"
-    int rv = system(cmd);
+    int rv = WEXITSTATUS(system(cmd));
     free(cmd);
 
-    if (rv != 0)
-        fprintf(stderr,
-            "error: Failed to execute command, returned status code: %d\n", rv);
+    if (rv != 0) {
+        if (rv == 127) {
+            fprintf(stderr,
+                "blogc-make: error: blogc-runserver command not found. Maybe "
+                "it is not installed?\n");
+        }
+        else {
+            fprintf(stderr,
+                "blogc-make: error: Failed to execute command, returned "
+                "status code: %d\n", rv);
+        }
+    }
 
     return rv;
 }
