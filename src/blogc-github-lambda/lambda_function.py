@@ -22,9 +22,7 @@ import urllib2
 import shutil
 
 cwd = os.path.dirname(os.path.abspath(__file__))
-bindir = os.path.join(cwd, 'bin')
-
-os.environ['PATH'] = '%s:%s' % (bindir, os.environ.get('PATH', ''))
+os.environ['PATH'] = '%s:%s' % (cwd, os.environ.get('PATH', ''))
 
 s3 = boto3.resource('s3')
 
@@ -32,16 +30,6 @@ GITHUB_AUTH = os.environ.get('GITHUB_AUTH')
 if GITHUB_AUTH is not None and ':' not in GITHUB_AUTH:
     GITHUB_AUTH = boto3.client('kms').decrypt(
         CiphertextBlob=base64.b64decode(GITHUB_AUTH))['Plaintext']
-
-# this is just a safeguard, just in case lambda stops supporting symlinks
-# in zip files
-for binary in subprocess.check_output([os.path.join(bindir, 'busybox'),
-                                       '--list']).split():
-    dst = os.path.join(bindir, binary)
-    if not os.path.islink(dst):
-        os.symlink('busybox', dst)
-    else:
-        break  # if one symlink exists, all the others will likely exist
 
 
 def get_tarball(repo_name):
@@ -157,8 +145,8 @@ def lambda_handler(event, context):
         stream = None if debug else subprocess.PIPE
 
         rootdir = get_tarball(payload['repository']['full_name'])
-        rv = subprocess.call([os.path.join(bindir, 'make'), '-C', rootdir,
-                              'BLOGC=%s' % os.path.join(bindir, 'blogc'),
+        rv = subprocess.call(['make', '-C', rootdir,
+                              'BLOGC=%s' % os.path.join(cwd, 'blogc'),
                               'OUTPUT_DIR=_build'],
                              stdout=stream, stderr=stream)
         if rv != 0:
