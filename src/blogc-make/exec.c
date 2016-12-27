@@ -332,6 +332,7 @@ bm_exec_blogc_runserver(bm_settings_t *settings, bool verbose)
             fprintf(stderr,
                 "blogc-make: error: blogc-runserver command not found. Maybe "
                 "it is not installed?\n");
+            rv = 3;  // blogc-make exists, so we should not return 127
         }
         else {
             fprintf(stderr,
