@@ -530,8 +530,7 @@ clean_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
 {
     int rv = 0;
 
-    for (bc_slist_t *l = outputs; l != NULL; l = l->next)
-    {
+    for (bc_slist_t *l = outputs; l != NULL; l = l->next) {
         bm_filectx_t *fctx = l->data;
         if (fctx == NULL)
             continue;
@@ -547,7 +546,16 @@ clean_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
 }
 
 
+static int all_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose);
+
 const bm_rule_t const rules[] = {
+    {
+        .name = "all",
+        .help = "run all build rules",
+        .outputlist_func = NULL,
+        .exec_func = all_exec,
+        .generate_files = false,
+    },
     {
         .name = "index",
         .help = "build website index from posts",
@@ -615,25 +623,35 @@ const bm_rule_t const rules[] = {
 };
 
 
+// ALL RULE
+
+static int
+all_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
+{
+    for (size_t i = 0; rules[i].name != NULL; i++) {
+        if (!rules[i].generate_files) {
+            continue;
+        }
+
+        int rv = bm_rule_execute(ctx, &(rules[i]), verbose);
+        if (rv != 0) {
+            return rv;
+        }
+    }
+    return 0;
+}
+
+
 int
 bm_rule_executor(bm_ctx_t *ctx, bc_slist_t *rule_list, bool verbose)
 {
+    if (ctx == NULL)
+        return 3;
+
     const bm_rule_t *rule = NULL;
     int rv = 0;
 
     for (bc_slist_t *l = rule_list; l != NULL; l = l->next) {
-        if (0 == strcmp("all", (char*) l->data)) {
-            bc_slist_t *s = NULL;
-            for (size_t i = 0; rules[i].name != NULL; i++) {
-                if (!rules[i].generate_files) {
-                    continue;
-                }
-                s = bc_slist_append(s, bc_strdup(rules[i].name));
-            }
-            rv = bm_rule_executor(ctx, s, verbose);
-            bc_slist_free_full(s, free);
-            continue;
-        }
         rule = NULL;
         for (size_t i = 0; rules[i].name != NULL; i++) {
             if (0 == strcmp((char*) l->data, rules[i].name)) {
@@ -657,10 +675,14 @@ bm_rule_executor(bm_ctx_t *ctx, bc_slist_t *rule_list, bool verbose)
 int
 bm_rule_execute(bm_ctx_t *ctx, const bm_rule_t *rule, bool verbose)
 {
-    if (rule == NULL)
+    if (ctx == NULL || rule == NULL)
         return 3;
 
-    bc_slist_t *outputs = rule->outputlist_func(ctx);
+    bc_slist_t *outputs = NULL;
+    if (rule->outputlist_func != NULL) {
+        outputs = rule->outputlist_func(ctx);
+    }
+
     int rv = rule->exec_func(ctx, outputs, verbose);
 
     bc_slist_free_full(outputs, (bc_free_func_t) bm_filectx_free);
@@ -741,12 +763,16 @@ bm_rule_list_built_files(bm_ctx_t *ctx)
 void
 bm_rule_print_help(void)
 {
-    printf(
-        "\n"
-        "build rules:\n"
-        "    all           run all rules that generate output files\n");
-
+    printf("\nhelper rules:\n");
     for (size_t i = 0; rules[i].name != NULL; i++) {
-        printf("    %-12s  %s\n", rules[i].name, rules[i].help);
+        if (!rules[i].generate_files) {
+            printf("    %-12s  %s\n", rules[i].name, rules[i].help);
+        }
+    }
+    printf("\nbuild rules:\n");
+    for (size_t i = 0; rules[i].name != NULL; i++) {
+        if (rules[i].generate_files) {
+            printf("    %-12s  %s\n", rules[i].name, rules[i].help);
+        }
     }
 }
