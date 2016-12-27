@@ -18,6 +18,7 @@ env:
   - TARGET=distcheck
   - TARGET=dist-srpm
   - TARGET=blogc-github-lambda
+  - TARGET=blogc-make-embedded
 
 matrix:
   exclude:
@@ -25,6 +26,8 @@ matrix:
       env: TARGET=dist-srpm
     - compiler: clang
       env: TARGET=blogc-github-lambda
+    - compiler: clang
+      env: TARGET=blogc-make-embedded
 
 install: gem install ronn
 

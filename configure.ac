@@ -97,6 +97,29 @@ AS_IF([test "x$enable_git_receiver" = "xyes"], [
 ])
 AM_CONDITIONAL([BUILD_GIT_RECEIVER], [test "x$have_git_receiver" = "xyes"])
 
+MAKE_="disabled"
+AC_ARG_ENABLE([make-embedded], AS_HELP_STRING([--enable-make-embedded],
+              [build blogc-make tool embedded on blogc binary]))
+AC_ARG_ENABLE([make], AS_HELP_STRING([--enable-make],
+              [build blogc-make tool]))
+AS_IF([test "x$enable_make" = "xyes" -o "x$enable_make_embedded" = "xyes"], [
+  AX_PTHREAD([], [
+    AC_MSG_ERROR([blogc-make tool requested but pthread is not supported])
+  ])
+  have_make_lib=yes
+  AS_IF([test "x$enable_make_embedded" = "xyes"], [
+    MAKE_="enabled (embedded)"
+    have_make_embedded=yes
+    AC_DEFINE([MAKE_EMBEDDED], [], [Build blogc-make embedded to blogc binary])
+  ], [
+    MAKE_="enabled"
+    have_make=yes
+  ])
+])
+AM_CONDITIONAL([BUILD_MAKE], [test "x$have_make" = "xyes"])
+AM_CONDITIONAL([BUILD_MAKE_LIB], [test "x$have_make_lib" = "xyes"])
+AM_CONDITIONAL([BUILD_MAKE_EMBEDDED], [test "x$have_make_embedded" = "xyes"])
+
 RUNSERVER="disabled"
 AC_ARG_ENABLE([runserver], AS_HELP_STRING([--enable-runserver],
               [build blogc-runserver tool]))
@@ -219,6 +242,7 @@ AS_ECHO("
         ldflags:             ${LDFLAGS}
 
         blogc-git-receiver:  ${GIT_RECEIVER}
+        blogc-make:          ${MAKE_}
         blogc-runserver:     ${RUNSERVER}
 
         tests:               ${TESTS}

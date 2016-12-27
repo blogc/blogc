@@ -24,7 +24,8 @@ pushd build > /dev/null
     --disable-tests \
     --disable-valgrind \
     --disable-git-receiver \
-    --disable-runserver
+    --disable-runserver \
+    --enable-make-embedded
 popd > /dev/null
 
 make -C build LDFLAGS="-all-static" blogc

@@ -23,6 +23,12 @@ typedef enum {
     BLOGC_ERROR_TEMPLATE_PARSER,
     BLOGC_ERROR_LOADER,
     BLOGC_WARNING_DATETIME_PARSER,
+
+    // errors for src/blogc-make
+    BLOGC_MAKE_ERROR_SETTINGS = 300,
+    BLOGC_MAKE_ERROR_EXEC,
+    BLOGC_MAKE_ERROR_ATOM,
+
 } bc_error_type_t;
 
 typedef struct {

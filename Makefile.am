@@ -5,6 +5,7 @@ ACLOCAL_AMFLAGS = -I m4
 AM_DISTCHECK_CONFIGURE_FLAGS = \
 	CFLAGS="-Wall -g -O0" \
 	--enable-git-receiver \
+	--enable-make \
 	--enable-ronn \
 	--enable-runserver \
 	--enable-tests \
@@ -51,6 +52,12 @@ noinst_HEADERS = \
 	src/blogc-git-receiver/pre-receive-parser.h \
 	src/blogc-git-receiver/shell.h \
 	src/blogc-git-receiver/shell-command-parser.h \
+	src/blogc-make/atom.h \
+	src/blogc-make/ctx.h \
+	src/blogc-make/exec.h \
+	src/blogc-make/exec-native.h \
+	src/blogc-make/rules.h \
+	src/blogc-make/settings.h \
 	src/blogc-runserver/httpd.h \
 	src/blogc-runserver/httpd-utils.h \
 	src/blogc-runserver/mime.h \
@@ -81,6 +88,16 @@ bin_PROGRAMS += \
 
 noinst_LTLIBRARIES += \
 	libblogc_git_receiver.la \
+	$(NULL)
+endif
+
+if BUILD_MAKE
+bin_PROGRAMS += \
+	blogc-make \
+	$(NULL)
+
+noinst_LTLIBRARIES += \
+	libblogc_make.la \
 	$(NULL)
 endif
 
@@ -148,6 +165,16 @@ blogc_LDADD = \
 	libblogc_common.la \
 	$(NULL)
 
+if BUILD_MAKE_EMBEDDED
+blogc_SOURCES += \
+	src/blogc-make/main.c \
+	$(NULL)
+
+blogc_LDADD += \
+	libblogc_make.la \
+	$(NULL)
+endif
+
 
 if BUILD_GIT_RECEIVER
 blogc_git_receiver_SOURCES = \
@@ -176,6 +203,46 @@ libblogc_git_receiver_la_CFLAGS = \
 	$(NULL)
 
 libblogc_git_receiver_la_LIBADD = \
+	libblogc_common.la \
+	$(NULL)
+endif
+
+
+if BUILD_MAKE
+blogc_make_SOURCES = \
+	src/blogc-make/main.c \
+	$(NULL)
+
+blogc_make_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(PTHREAD_CFLAGS) \
+	$(NULL)
+
+blogc_make_LDADD = \
+	$(PTHREAD_LIBS) \
+	libblogc_make.la \
+	libblogc_common.la \
+	$(NULL)
+endif
+
+if BUILD_MAKE_LIB
+libblogc_make_la_SOURCES = \
+	src/blogc-make/atom.c \
+	src/blogc-make/ctx.c \
+	src/blogc-make/exec.c \
+	src/blogc-make/exec-native.c \
+	src/blogc-make/rules.c \
+	src/blogc-make/settings.c \
+	$(NULL)
+
+libblogc_make_la_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(PTHREAD_CFLAGS) \
+	$(NULL)
+
+libblogc_make_la_LIBADD = \
+	$(LIBM) \
+	$(PTHREAD_LIBS) \
 	libblogc_common.la \
 	$(NULL)
 endif
@@ -658,6 +725,30 @@ tests_blogc_git_receiver_check_shell_command_parser_LDFLAGS = \
 tests_blogc_git_receiver_check_shell_command_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_git_receiver.la \
+	libblogc_common.la \
+	$(NULL)
+endif
+
+if BUILD_MAKE_LIB
+check_PROGRAMS += \
+	tests/blogc-make/check_settings \
+	$(NULL)
+
+tests_blogc_make_check_settings_SOURCES = \
+	tests/blogc-make/check_settings.c \
+	$(NULL)
+
+tests_blogc_make_check_settings_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_make_check_settings_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_blogc_make_check_settings_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_make.la \
 	libblogc_common.la \
 	$(NULL)
 endif

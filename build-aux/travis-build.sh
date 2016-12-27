@@ -7,6 +7,12 @@ if [[ "x${TARGET}" = "xblogc-github-lambda" ]]; then
     exit $?
 fi
 
+MAKE_CONFIGURE="--enable-make"
+if [[ "x${TARGET}" = "xblogc-make-embedded" ]]; then
+    MAKE_CONFIGURE="--enable-make-embedded"
+    TARGET="check"
+fi
+
 rm -rf build
 mkdir -p build
 
@@ -18,7 +24,8 @@ pushd build > /dev/null
     --enable-tests \
     --enable-valgrind \
     --enable-git-receiver \
-    --enable-runserver
+    --enable-runserver \
+    ${MAKE_CONFIGURE}
 popd > /dev/null
 
 make -C build "${TARGET}"

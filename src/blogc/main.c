@@ -30,6 +30,10 @@
 #include "../common/utf8.h"
 #include "../common/utils.h"
 
+#ifdef MAKE_EMBEDDED
+extern int bm_main(int argc, char **argv);
+#endif
+
 #ifndef PACKAGE_VERSION
 #define PACKAGE_VERSION "Unknown"
 #endif
@@ -40,7 +44,11 @@ blogc_print_help(void)
 {
     printf(
         "usage:\n"
-        "    blogc [-h] [-v] [-d] [-i] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
+        "    blogc "
+#ifdef MAKE_EMBEDDED
+        "[-m] "
+#endif
+        "[-h] [-v] [-d] [-i] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
         "          [-o OUTPUT] [SOURCE ...] - A blog compiler.\n"
         "\n"
         "positional arguments:\n"
@@ -56,7 +64,11 @@ blogc_print_help(void)
         "    -p KEY        show the value of a global configuration parameter\n"
         "                  after source parsing and exit\n"
         "    -t TEMPLATE   template file\n"
-        "    -o OUTPUT     output file\n");
+        "    -o OUTPUT     output file\n"
+#ifdef MAKE_EMBEDDED
+        "    -m            call and pass arguments to embedded blogc-make\n"
+#endif
+        );
 }
 
 
@@ -64,7 +76,11 @@ static void
 blogc_print_usage(void)
 {
     printf(
-        "usage: blogc [-h] [-v] [-d] [-i] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
+        "usage: blogc "
+#ifdef MAKE_EMBEDDED
+        "[-m] "
+#endif
+        "[-h] [-v] [-d] [-i] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
         "             [-o OUTPUT] [SOURCE ...]\n");
 }
 
@@ -129,6 +145,14 @@ blogc_read_stdin_to_list(bc_slist_t *l)
 int
 main(int argc, char **argv)
 {
+#ifdef MAKE_EMBEDDED
+    // this isn't going to work on windows, but -m can still be used there.
+    if (bc_str_ends_with(argv[0], "/blogc-make"))
+        return bm_main(argc, argv);
+
+    bool embedded = false;
+#endif
+
     setlocale(LC_ALL, "");
 
     int rv = 0;
@@ -219,6 +243,11 @@ main(int argc, char **argv)
                         pieces = NULL;
                     }
                     break;
+#ifdef MAKE_EMBEDDED
+                case 'm':
+                    embedded = true;
+                    break;
+#endif
                 default:
                     blogc_print_usage();
                     fprintf(stderr, "blogc: error: invalid argument: -%c\n",
@@ -227,8 +256,17 @@ main(int argc, char **argv)
                     goto cleanup;
             }
         }
-        else
+        else {
             sources = bc_slist_append(sources, bc_strdup(argv[i]));
+        }
+
+#ifdef MAKE_EMBEDDED
+        if (embedded) {
+            rv = bm_main(argc, argv);
+            goto cleanup;
+        }
+#endif
+
     }
 
     if (input_stdin)
