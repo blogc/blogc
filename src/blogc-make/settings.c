@@ -97,7 +97,16 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
     char **env = bc_config_list_keys(config, "environment");
     if (env != NULL) {
         for (size_t i = 0; env[i] != NULL; i++) {
-            // FIXME: validate keys
+            for (size_t j = 0; env[i][j] != '\0'; j++) {
+                if (!((env[i][j] >= 'A' && env[i][j] <= 'Z') || env[i][j] == '_')) {
+                    *err = bc_error_new_printf(BLOGC_MAKE_ERROR_SETTINGS,
+                        "Invalid [environment] key: %s", env[i]);
+                    bc_strv_free(env);
+                    bm_settings_free(rv);
+                    rv = NULL;
+                    goto cleanup;
+                }
+            }
             bc_trie_insert(rv->env, env[i],
                 bc_strdup(bc_config_get(config, "environment", env[i])));
         }
