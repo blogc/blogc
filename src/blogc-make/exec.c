@@ -300,7 +300,7 @@ bm_exec_blogc(bm_settings_t *settings, bc_trie_t *variables, bool listing,
     free(out);
     free(err);
 
-    return rv;
+    return rv == 127 ? 3 : rv;
 }
 
 
