@@ -302,3 +302,34 @@ bm_exec_blogc(bm_settings_t *settings, bc_trie_t *variables, bool listing,
 
     return rv;
 }
+
+
+int
+bm_exec_blogc_runserver(bm_settings_t *settings, bool verbose)
+{
+    // use blogc binary from environment, if provided
+    const char *blogc_runserver = getenv("BLOGC_RUNSERVER");
+
+    char *cmd = bc_strdup_printf("%s -t %s -p %s -m %s %s",
+        blogc_runserver != NULL ? blogc_runserver : "blogc-runserver",
+        bc_trie_lookup(settings->settings, "runserver_host"),
+        bc_trie_lookup(settings->settings, "runserver_port"),
+        bc_trie_lookup(settings->settings, "runserver_threads"),
+        bc_trie_lookup(settings->settings, "output_dir"));
+
+    if (verbose)
+        printf("%s\n", cmd);
+    else
+        printf("\n");
+    fflush(stdout);
+
+    // we don't need pipes to run blogc-runserver, because it is "interactive"
+    int rv = system(cmd);
+    free(cmd);
+
+    if (rv != 0)
+        fprintf(stderr,
+            "error: Failed to execute command, returned status code: %d\n", rv);
+
+    return rv;
+}

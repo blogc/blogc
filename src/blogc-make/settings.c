@@ -44,6 +44,11 @@ static const struct default_settings_map {
     {"atom_prefix", "atom"},
     {"atom_ext", ".xml"},
 
+    // runserver
+    {"runserver_host", "127.0.0.1"},
+    {"runserver_port", "8080"},
+    {"runserver_threads", "20"},
+
     // generic
     {"date_format", "%b %d, %Y, %I:%M %p GMT"},
     {"locale", NULL},

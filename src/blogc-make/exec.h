@@ -20,5 +20,6 @@ char* bm_exec_build_blogc_cmd(bm_settings_t *settings, bc_trie_t *variables,
 int bm_exec_blogc(bm_settings_t *settings, bc_trie_t *variables, bool listing,
     bm_filectx_t *template, bm_filectx_t *output, bc_slist_t *sources,
     bool verbose, bool only_first_source);
+int bm_exec_blogc_runserver(bm_settings_t *settings, bool verbose);
 
 #endif /* _MAKE_EXEC_H */

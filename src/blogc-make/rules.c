@@ -548,6 +548,19 @@ clean_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
 
 static int all_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose);
 
+
+// RUNSERVER RULE
+static int
+runserver_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
+{
+    int rv = all_exec(ctx, NULL, verbose);
+    if (rv != 0)
+        return rv;
+
+    return bm_exec_blogc_runserver(ctx->settings, verbose);
+}
+
+
 const bm_rule_t const rules[] = {
     {
         .name = "all",
@@ -617,6 +630,13 @@ const bm_rule_t const rules[] = {
         .help = "clean built files and empty directories in output directory",
         .outputlist_func = clean_outputlist,
         .exec_func = clean_exec,
+        .generate_files = false,
+    },
+    {
+        .name = "runserver",
+        .help = "run blogc-runserver pointing to output directory, if available",
+        .outputlist_func = NULL,
+        .exec_func = runserver_exec,
         .generate_files = false,
     },
     {NULL, NULL, NULL, NULL, false},
