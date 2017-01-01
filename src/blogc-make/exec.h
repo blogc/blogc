@@ -9,8 +9,10 @@
 #ifndef _MAKE_EXEC_H
 #define _MAKE_EXEC_H
 
+#include <stdbool.h>
 #include "../common/error.h"
 #include "../common/utils.h"
+#include "ctx.h"
 #include "settings.h"
 
 int bm_exec_command(const char *cmd, const char *input, char **output,

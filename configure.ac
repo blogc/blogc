@@ -227,7 +227,8 @@ AC_CONFIG_FILES([tests/blogc-git-receiver/check_post_receive.sh],
                 [chmod +x tests/blogc-git-receiver/check_post_receive.sh])
 AC_CONFIG_FILES([tests/blogc-git-receiver/check_shell.sh],
                 [chmod +x tests/blogc-git-receiver/check_shell.sh])
-
+AC_CONFIG_FILES([tests/blogc-make/check_blogc_make.sh],
+                [chmod +x tests/blogc-make/check_blogc_make.sh])
 AC_OUTPUT
 
 AS_ECHO("

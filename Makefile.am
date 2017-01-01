@@ -406,6 +406,12 @@ check_SCRIPTS += \
 endif
 endif
 
+if BUILD_MAKE
+check_SCRIPTS += \
+	tests/blogc-make/check_blogc_make.sh \
+	$(NULL)
+endif
+
 check_SCRIPTS += \
 	tests/blogc/check_blogc.sh \
 	$(NULL)
@@ -731,7 +737,45 @@ endif
 
 if BUILD_MAKE_LIB
 check_PROGRAMS += \
+	tests/blogc-make/check_atom \
+	tests/blogc-make/check_exec \
 	tests/blogc-make/check_settings \
+	$(NULL)
+
+tests_blogc_make_check_atom_SOURCES = \
+	tests/blogc-make/check_atom.c \
+	$(NULL)
+
+tests_blogc_make_check_atom_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_make_check_atom_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_blogc_make_check_atom_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_make.la \
+	libblogc_common.la \
+	$(NULL)
+
+tests_blogc_make_check_exec_SOURCES = \
+	tests/blogc-make/check_exec.c \
+	$(NULL)
+
+tests_blogc_make_check_exec_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_make_check_exec_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_blogc_make_check_exec_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_make.la \
+	libblogc_common.la \
 	$(NULL)
 
 tests_blogc_make_check_settings_SOURCES = \
