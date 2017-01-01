@@ -21,12 +21,10 @@ typedef enum {
     CONFIG_SECTION_KEY,
     CONFIG_SECTION_VALUE_START,
     CONFIG_SECTION_VALUE_QUOTE,
-    CONFIG_SECTION_VALUE_SQUOTE,
     CONFIG_SECTION_VALUE_POST_QUOTED,
     CONFIG_SECTION_VALUE,
     CONFIG_SECTION_LIST_START,
     CONFIG_SECTION_LIST_QUOTE,
-    CONFIG_SECTION_LIST_SQUOTE,
     CONFIG_SECTION_LIST_POST_QUOTED,
     CONFIG_SECTION_LIST,
 } bc_configparser_state_t;
@@ -199,29 +197,12 @@ bc_config_parse(const char *src, size_t src_len, const char *list_sections[],
                     state = CONFIG_SECTION_VALUE_QUOTE;
                     break;
                 }
-                if (c == '\'') {
-                    state = CONFIG_SECTION_VALUE_SQUOTE;
-                    break;
-                }
                 bc_string_append_c(value, c);
                 state = CONFIG_SECTION_VALUE;
                 break;
 
             case CONFIG_SECTION_VALUE_QUOTE:
                 if (c == '"') {
-                    bc_trie_insert(section->data, bc_str_strip(key),
-                        bc_string_free(value, false));
-                    free(key);
-                    key = NULL;
-                    value = NULL;
-                    state = CONFIG_SECTION_VALUE_POST_QUOTED;
-                    break;
-                }
-                bc_string_append_c(value, c);
-                break;
-
-            case CONFIG_SECTION_VALUE_SQUOTE:
-                if (c == '\'') {
                     bc_trie_insert(section->data, bc_str_strip(key),
                         bc_string_free(value, false));
                     free(key);
@@ -268,28 +249,12 @@ bc_config_parse(const char *src, size_t src_len, const char *list_sections[],
                     state = CONFIG_SECTION_LIST_QUOTE;
                     break;
                 }
-                if (c == '\'') {
-                    state = CONFIG_SECTION_LIST_SQUOTE;
-                    break;
-                }
                 bc_string_append_c(value, c);
                 state = CONFIG_SECTION_LIST;
                 break;
 
             case CONFIG_SECTION_LIST_QUOTE:
                 if (c == '"') {
-                    section->data = bc_slist_append(section->data,
-                        bc_string_free(value, false));
-                    value = NULL;
-                    state = CONFIG_SECTION_LIST_POST_QUOTED;
-                    break;
-
-                }
-                bc_string_append_c(value, c);
-                break;
-
-            case CONFIG_SECTION_LIST_SQUOTE:
-                if (c == '\'') {
                     section->data = bc_slist_append(section->data,
                         bc_string_free(value, false));
                     value = NULL;

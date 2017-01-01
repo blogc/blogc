@@ -537,12 +537,12 @@ test_config_quoted_values(void **state)
     assert_string_equal(bc_config_get(c, "foo", "a"), "lol");
     assert_string_equal(bc_config_get(c, "foo", "b"), "lo\"l");
     assert_string_equal(bc_config_get(c, "foo", "c"), "lo'l");
-    assert_string_equal(bc_config_get(c, "foo", "d"), "lol");
-    assert_string_equal(bc_config_get(c, "foo", "e"), "lo'l");
-    assert_string_equal(bc_config_get(c, "foo", "f"), "lo\"l");
+    assert_string_equal(bc_config_get(c, "foo", "d"), "'lol'");
+    assert_string_equal(bc_config_get(c, "foo", "e"), "'lo'l'");
+    assert_string_equal(bc_config_get(c, "foo", "f"), "'lo\"l'");
     assert_string_equal(bc_config_get(c, "foo", "g"), "\\asd");
     assert_string_equal(bc_config_get(c, "foo", "h"), "\\asd");
-    assert_string_equal(bc_config_get(c, "foo", "i"), "\\asd");
+    assert_string_equal(bc_config_get(c, "foo", "i"), "'\\asd'");
     bc_config_free(c);
 
     a =
@@ -578,17 +578,17 @@ test_config_quoted_values(void **state)
     assert_string_equal(bar[0], "lol");
     assert_string_equal(bar[1], "lo\"l");
     assert_string_equal(bar[2], "lo'l");
-    assert_string_equal(bar[3], "lol");
-    assert_string_equal(bar[4], "lo'l");
-    assert_string_equal(bar[5], "lo\"l");
+    assert_string_equal(bar[3], "'lol'");
+    assert_string_equal(bar[4], "'lo'l'");
+    assert_string_equal(bar[5], "'lo\"l'");
     assert_string_equal(bar[6], "\\asd");
     assert_string_equal(bar[7], "\\asd");
-    assert_string_equal(bar[8], "\\asd");
+    assert_string_equal(bar[8], "'\\asd'");
     assert_null(bar[9]);
     bc_strv_free(bar);
     bar = bc_config_get_list(c, "bar");
     assert_non_null(bar);
-    assert_string_equal(bar[0], "lol = hehe");
+    assert_string_equal(bar[0], "'lol = hehe'");
     assert_string_equal(bar[1], "  asdasdadssad  ");
     assert_null(bar[2]);
     bc_strv_free(bar);
