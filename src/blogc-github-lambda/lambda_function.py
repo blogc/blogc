@@ -148,11 +148,11 @@ def lambda_handler(event, context):
         env['OUTPUT_DIR'] = '_build_lambda'
 
         rootdir = get_tarball(payload['repository']['full_name'])
-        settings_file = os.path.join(rootdir, 'settings.ini')
+        blogcfile = os.path.join(rootdir, 'blogcfile')
 
-        if os.path.isfile(settings_file):
+        if os.path.isfile(blogcfile):
             # deploy using blogc-make
-            args = [os.path.join(cwd, 'blogc'), '-m', '-f', settings_file,
+            args = [os.path.join(cwd, 'blogc'), '-m', '-f', blogcfile,
                     'all']
             if debug:
                 args.append('-V')

@@ -19,7 +19,7 @@ mkdir -p "${TEMP}"/proj{,/templates,/content/post}
 
 ### minimal settings, will produce no file
 
-cat > "${TEMP}/proj/settings.ini" <<EOF
+cat > "${TEMP}/proj/blogcfile" <<EOF
 [environment]
 AUTHOR_NAME = Lol
 AUTHOR_EMAIL = author@example.com
@@ -28,7 +28,7 @@ SITE_TAGLINE = WAT?!
 BASE_DOMAIN = http://example.org
 EOF
 
-${TESTS_ENVIRONMENT} ./blogc-make -f "${TEMP}/proj/settings.ini" 2>&1
+${TESTS_ENVIRONMENT} ./blogc-make -f "${TEMP}/proj/blogcfile" 2>&1
 
 
 ### default settings with some posts
@@ -58,13 +58,13 @@ Listing: {% ifdef FILTER_TAG %}{{ FILTER_TAG }} - {% endif %}{{ TITLE }} - {{ DA
 {% endblock %}
 EOF
 
-cat >> "${TEMP}/proj/settings.ini" <<EOF
+cat >> "${TEMP}/proj/blogcfile" <<EOF
 [posts]
 foo
 bar
 EOF
 
-${TESTS_ENVIRONMENT} ./blogc-make -f "${TEMP}/proj/settings.ini" 2>&1 | tee "${TEMP}/output.txt"
+${TESTS_ENVIRONMENT} ./blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
 grep "_build/index\\.html" "${TEMP}/output.txt"
 grep "_build/atom\\.xml" "${TEMP}/output.txt"
 grep "_build/page/1/index\\.html" "${TEMP}/output.txt"
@@ -165,14 +165,14 @@ TAGS: tag1 tag2
 This is baz.
 EOF
 
-cat >> "${TEMP}/proj/settings.ini" <<EOF
+cat >> "${TEMP}/proj/blogcfile" <<EOF
 baz
 [tags]
 tag1
 tag2
 EOF
 
-${TESTS_ENVIRONMENT} ./blogc-make -f "${TEMP}/proj/settings.ini" 2>&1 | tee "${TEMP}/output.txt"
+${TESTS_ENVIRONMENT} ./blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
 grep "_build/index\\.html" "${TEMP}/output.txt"
 grep "_build/atom\\.xml" "${TEMP}/output.txt"
 grep "_build/atom/tag1\\.xml" "${TEMP}/output.txt"
@@ -369,13 +369,13 @@ TITLE: Page 2
 This is page 2.
 EOF
 
-cat >> "${TEMP}/proj/settings.ini" <<EOF
+cat >> "${TEMP}/proj/blogcfile" <<EOF
 [pages]
 page1
 page2
 EOF
 
-${TESTS_ENVIRONMENT} ./blogc-make -f "${TEMP}/proj/settings.ini" 2>&1 | tee "${TEMP}/output.txt"
+${TESTS_ENVIRONMENT} ./blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
 grep "_build/index\\.html" "${TEMP}/output.txt"
 grep "_build/atom\\.xml" "${TEMP}/output.txt"
 grep "_build/atom/tag1\\.xml" "${TEMP}/output.txt"
@@ -459,7 +459,7 @@ Listing: {% ifdef FILTER_TAG %}{{ FILTER_TAG }} - {% endif %}{{ TITLE }} - {{ DA
 {% endblock %}
 EOF
 
-cat > "${TEMP}/proj/settings.ini" <<EOF
+cat > "${TEMP}/proj/blogcfile" <<EOF
 [settings]
 content_dir = contents
 template_dir = temp
@@ -490,7 +490,7 @@ foo
 bar
 EOF
 
-${TESTS_ENVIRONMENT} ./blogc-make -f "${TEMP}/proj/settings.ini" 2>&1 | tee "${TEMP}/output.txt"
+${TESTS_ENVIRONMENT} ./blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
 grep "_blogc_build/posts\\.html" "${TEMP}/output.txt"
 grep "_blogc_build/atoom/index\\.xml" "${TEMP}/output.txt"
 grep "_blogc_build/pagination/1\\.html" "${TEMP}/output.txt"
@@ -584,14 +584,14 @@ TAGS: tag1 tag2
 This is baz.
 EOF
 
-cat >> "${TEMP}/proj/settings.ini" <<EOF
+cat >> "${TEMP}/proj/blogcfile" <<EOF
 baz
 [tags]
 tag1
 tag2
 EOF
 
-${TESTS_ENVIRONMENT} ./blogc-make -f "${TEMP}/proj/settings.ini" 2>&1 | tee "${TEMP}/output.txt"
+${TESTS_ENVIRONMENT} ./blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
 grep "_blogc_build/posts\\.html" "${TEMP}/output.txt"
 grep "_blogc_build/atoom/index\\.xml" "${TEMP}/output.txt"
 grep "_blogc_build/atoom/tag1/index\\.xml" "${TEMP}/output.txt"
@@ -731,13 +731,13 @@ TITLE: Page 2
 This is page 2.
 EOF
 
-cat >> "${TEMP}/proj/settings.ini" <<EOF
+cat >> "${TEMP}/proj/blogcfile" <<EOF
 [pages]
 page1
 page2
 EOF
 
-${TESTS_ENVIRONMENT} ./blogc-make -f "${TEMP}/proj/settings.ini" 2>&1 | tee "${TEMP}/output.txt"
+${TESTS_ENVIRONMENT} ./blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
 grep "_blogc_build/posts\\.html" "${TEMP}/output.txt"
 grep "_blogc_build/atoom/index\\.xml" "${TEMP}/output.txt"
 grep "_blogc_build/atoom/tag1/index\\.xml" "${TEMP}/output.txt"

@@ -36,7 +36,7 @@ print_help(void)
         "    -h            show this help message and exit\n"
         "    -v            show version and exit\n"
         "    -V            be verbose when executing commands\n"
-        "    -f FILE       settings file (default: settings.ini)\n");
+        "    -f FILE       read FILE as blogcfile\n");
     bm_rule_print_help();
 }
 
@@ -62,7 +62,7 @@ main(int argc, char **argv)
 
     bc_slist_t *rules = NULL;
     bool verbose = false;
-    char *settings_file = NULL;
+    char *blogcfile = NULL;
     bm_ctx_t *ctx = NULL;
 
     for (unsigned int i = 1; i < argc; i++) {
@@ -79,9 +79,9 @@ main(int argc, char **argv)
                     break;
                 case 'f':
                     if (argv[i][2] != '\0')
-                        settings_file = bc_strdup(argv[i] + 2);
+                        blogcfile = bc_strdup(argv[i] + 2);
                     else if (i + 1 < argc)
-                        settings_file = bc_strdup(argv[++i]);
+                        blogcfile = bc_strdup(argv[++i]);
                     break;
 #ifdef MAKE_EMBEDDED
                 case 'm':
@@ -105,7 +105,7 @@ main(int argc, char **argv)
         rules = bc_slist_append(rules, bc_strdup("all"));
     }
 
-    ctx = bm_ctx_new(settings_file ? settings_file : "settings.ini", &err);
+    ctx = bm_ctx_new(blogcfile ? blogcfile : "blogcfile", &err);
     if (err != NULL) {
         bc_error_print(err, "blogc-make");
         rv = 3;
@@ -117,7 +117,7 @@ main(int argc, char **argv)
 cleanup:
 
     bc_slist_free_full(rules, free);
-    free(settings_file);
+    free(blogcfile);
     bm_ctx_free(ctx);
     bc_error_free(err);
 
