@@ -20,7 +20,14 @@ typedef enum {
     CONFIG_SECTION,
     CONFIG_SECTION_KEY,
     CONFIG_SECTION_VALUE_START,
+    CONFIG_SECTION_VALUE_QUOTE,
+    CONFIG_SECTION_VALUE_SQUOTE,
+    CONFIG_SECTION_VALUE_POST_QUOTED,
     CONFIG_SECTION_VALUE,
+    CONFIG_SECTION_LIST_START,
+    CONFIG_SECTION_LIST_QUOTE,
+    CONFIG_SECTION_LIST_SQUOTE,
+    CONFIG_SECTION_LIST_POST_QUOTED,
     CONFIG_SECTION_LIST,
 } bc_configparser_state_t;
 
@@ -67,7 +74,8 @@ bc_config_parse(const char *src, size_t src_len, const char *list_sections[],
 
     char *section_name = NULL;
     char *key = NULL;
-    char *value = NULL;
+    bc_string_t *value = NULL;
+    bool escaped = false;
 
     bc_config_t *rv = bc_malloc(sizeof(bc_config_t));
     rv->root = bc_trie_new((bc_free_func_t) free_section);
@@ -77,6 +85,19 @@ bc_config_parse(const char *src, size_t src_len, const char *list_sections[],
     while (current < src_len) {
         char c = src[current];
         bool is_last = current == src_len - 1;
+
+        if (escaped) {
+            bc_string_append_c(value, c);
+            escaped = false;
+            current++;
+            continue;
+        }
+
+        if (value != NULL && c == '\\') {
+            escaped = true;
+            current++;
+            continue;
+        }
 
         switch (state) {
 
@@ -102,7 +123,9 @@ bc_config_parse(const char *src, size_t src_len, const char *list_sections[],
                             state = CONFIG_SECTION_KEY;
                             break;
                         case CONFIG_SECTION_TYPE_LIST:
-                            state = CONFIG_SECTION_LIST;
+                            state = CONFIG_SECTION_LIST_START;
+                            if (value == NULL)
+                                value = bc_string_new();
                             break;
                     }
                     continue;
@@ -153,6 +176,8 @@ bc_config_parse(const char *src, size_t src_len, const char *list_sections[],
                 if (c == '=') {
                     key = bc_strndup(src + start, current - start);
                     state = CONFIG_SECTION_VALUE_START;
+                    if (value == NULL)
+                        value = bc_string_new();
                     break;
                 }
                 if (c != '\r' && c != '\n' && !is_last)
@@ -168,39 +193,138 @@ bc_config_parse(const char *src, size_t src_len, const char *list_sections[],
                 break;
 
             case CONFIG_SECTION_VALUE_START:
-                start = current;
+                if (c == ' ' || c == '\t' || c == '\f' || c == '\v')
+                    break;
+                if (c == '"') {
+                    state = CONFIG_SECTION_VALUE_QUOTE;
+                    break;
+                }
+                if (c == '\'') {
+                    state = CONFIG_SECTION_VALUE_SQUOTE;
+                    break;
+                }
+                bc_string_append_c(value, c);
                 state = CONFIG_SECTION_VALUE;
+                break;
+
+            case CONFIG_SECTION_VALUE_QUOTE:
+                if (c == '"') {
+                    bc_trie_insert(section->data, bc_str_strip(key),
+                        bc_string_free(value, false));
+                    free(key);
+                    key = NULL;
+                    value = NULL;
+                    state = CONFIG_SECTION_VALUE_POST_QUOTED;
+                    break;
+                }
+                bc_string_append_c(value, c);
+                break;
+
+            case CONFIG_SECTION_VALUE_SQUOTE:
+                if (c == '\'') {
+                    bc_trie_insert(section->data, bc_str_strip(key),
+                        bc_string_free(value, false));
+                    free(key);
+                    key = NULL;
+                    value = NULL;
+                    state = CONFIG_SECTION_VALUE_POST_QUOTED;
+                    break;
+                }
+                bc_string_append_c(value, c);
+                break;
+
+            case CONFIG_SECTION_VALUE_POST_QUOTED:
+                if (c == ' ' || c == '\t' || c == '\f' || c == '\v')
+                    break;
+                if (c == '\r' || c == '\n' || is_last) {
+                    state = CONFIG_START;
+                    break;
+                }
+                *err = bc_error_parser(BC_ERROR_CONFIG_PARSER, src, src_len,
+                    current, "Invalid value for key, should not have anything "
+                    "after quotes.");
                 break;
 
             case CONFIG_SECTION_VALUE:
                 if (c == '\r' || c == '\n' || is_last) {
-                    size_t end = is_last && c != '\n' && c != '\r' ? src_len :
-                        current;
-                    value = bc_strndup(src + start, end - start);
+                    if (is_last && c != '\r' && c != '\n')
+                        bc_string_append_c(value, c);
                     bc_trie_insert(section->data, bc_str_strip(key),
-                        bc_strdup(bc_str_strip(value)));
+                        bc_strdup(bc_str_rstrip(value->str)));
                     free(key);
                     key = NULL;
-                    free(value);
+                    bc_string_free(value, true);
                     value = NULL;
                     state = CONFIG_START;
                     break;
                 }
+                bc_string_append_c(value, c);
+                break;
+
+            case CONFIG_SECTION_LIST_START:
+                if (c == ' ' || c == '\t' || c == '\f' || c == '\v')
+                    break;
+                if (c == '"') {
+                    state = CONFIG_SECTION_LIST_QUOTE;
+                    break;
+                }
+                if (c == '\'') {
+                    state = CONFIG_SECTION_LIST_SQUOTE;
+                    break;
+                }
+                bc_string_append_c(value, c);
+                state = CONFIG_SECTION_LIST;
+                break;
+
+            case CONFIG_SECTION_LIST_QUOTE:
+                if (c == '"') {
+                    section->data = bc_slist_append(section->data,
+                        bc_string_free(value, false));
+                    value = NULL;
+                    state = CONFIG_SECTION_LIST_POST_QUOTED;
+                    break;
+
+                }
+                bc_string_append_c(value, c);
+                break;
+
+            case CONFIG_SECTION_LIST_SQUOTE:
+                if (c == '\'') {
+                    section->data = bc_slist_append(section->data,
+                        bc_string_free(value, false));
+                    value = NULL;
+                    state = CONFIG_SECTION_LIST_POST_QUOTED;
+                    break;
+
+                }
+                bc_string_append_c(value, c);
+                break;
+
+            case CONFIG_SECTION_LIST_POST_QUOTED:
+                if (c == ' ' || c == '\t' || c == '\f' || c == '\v')
+                    break;
+                if (c == '\r' || c == '\n' || is_last) {
+                    state = CONFIG_START;
+                    break;
+                }
+                *err = bc_error_parser(BC_ERROR_CONFIG_PARSER, src, src_len,
+                    current, "Invalid value for list item, should not have "
+                    "anything after quotes.");
                 break;
 
             case CONFIG_SECTION_LIST:
                 if (c == '\r' || c == '\n' || is_last) {
-                    size_t end = is_last && c != '\n' && c != '\r' ? src_len :
-                        current;
-                    value = bc_strndup(src + start, end - start);
+                    if (is_last && c != '\r' && c != '\n')
+                        bc_string_append_c(value, c);
                     section->data = bc_slist_append(section->data,
-                        bc_strdup(bc_str_strip(value)));
-                    free(value);
+                        bc_strdup(bc_str_strip(value->str)));
+                    bc_string_free(value, true);
                     value = NULL;
                     state = CONFIG_START;
                     break;
 
                 }
+                bc_string_append_c(value, c);
                 break;
 
         }
@@ -216,7 +340,7 @@ bc_config_parse(const char *src, size_t src_len, const char *list_sections[],
 
     free(section_name);
     free(key);
-    free(value);
+    bc_string_free(value, true);
 
     return rv;
 }
