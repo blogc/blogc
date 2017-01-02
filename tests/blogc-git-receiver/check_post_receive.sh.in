@@ -17,7 +17,7 @@ trap trap_func EXIT
 mkdir -p "${TEMP}/repos"
 git init --bare "${TEMP}/repos/foo.git" &> /dev/null
 
-ln -s "${PWD}/blogc-git-receiver" "${TEMP}/repos/foo.git/hooks/post-receive"
+ln -s "@abs_top_builddir@/blogc-git-receiver" "${TEMP}/repos/foo.git/hooks/post-receive"
 
 cat > "${TEMP}/tmp.txt" <<EOF
 blob

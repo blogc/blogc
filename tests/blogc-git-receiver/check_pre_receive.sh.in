@@ -17,7 +17,7 @@ trap trap_func EXIT
 mkdir -p "${TEMP}/repos"
 git init --bare "${TEMP}/repos/foo.git" &> /dev/null
 
-SELF="${PWD}/blogc-git-receiver"
+SELF="@abs_top_builddir@/blogc-git-receiver"
 
 ln -s "${SELF}" "${TEMP}/repos/foo.git/hooks/pre-receive"
 
