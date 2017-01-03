@@ -112,7 +112,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
         goto cleanup;
     }
 
-    if (isatty(STDIN_FILENO)) {
+    if (NULL == getenv("GIT_DIR")) {
         char *htdocs_sym = bc_strdup_printf("%s/htdocs", repo_dir);
         if (0 != access(htdocs_sym, R_OK)) {
             fprintf(stderr, "error: no previous build found. nothing to "

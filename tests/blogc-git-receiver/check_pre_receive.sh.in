@@ -28,7 +28,7 @@ EOF
 
 cd "${TEMP}/repos/foo.git"
 
-SHELL="${SELF}" HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
+SHELL="${SELF}" HOME="${TEMP}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
 grep "warning: no reference to master branch found. nothing to deploy." "${TEMP}/output.txt" &> /dev/null
 
 cat > "${TEMP}/tmp.txt" <<EOF
@@ -58,7 +58,7 @@ cat > "${TEMP}/payload.txt" <<EOF
 0000000000000000000000000000000000000000 0000000000000000000000000000000000000000 refs/heads/bar
 EOF
 
-SHELL="${SELF}" HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
+SHELL="${SELF}" HOME="${TEMP}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
 grep "warning: no makefile found. skipping ..." "${TEMP}/output.txt" &> /dev/null
 
 cd "${TEMP}"
@@ -93,7 +93,7 @@ cat > "${TEMP}/payload.txt" <<EOF
 0000000000000000000000000000000000000000 0000000000000000000000000000000000000000 refs/heads/bar
 EOF
 
-SHELL="${SELF}" HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
+SHELL="${SELF}" HOME="${TEMP}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
 grep "echo lol" "${TEMP}/output.txt" &> /dev/null
 
 [[ -h htdocs ]]
@@ -135,7 +135,7 @@ cat > "${TEMP}/payload.txt" <<EOF
 0000000000000000000000000000000000000000 0000000000000000000000000000000000000000 refs/heads/bar
 EOF
 
-SHELL="${SELF}" HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
+SHELL="${SELF}" HOME="${TEMP}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
 grep "echo lol" "${TEMP}/output.txt" &> /dev/null
 
 [[ -h htdocs ]]
