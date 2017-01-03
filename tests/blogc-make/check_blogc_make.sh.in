@@ -795,4 +795,67 @@ Page 2
 EOF
 diff -uN "${TEMP}/proj/_blogc_build/page2.html" "${TEMP}/expected-page2.html"
 
-rm -rf "${TEMP}/proj/_blogc_build"
+
+### clean rule
+
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" clean 2>&1 | tee "${TEMP}/output.txt"
+grep "_blogc_build/posts\\.html" "${TEMP}/output.txt"
+grep "_blogc_build/atoom/index\\.xml" "${TEMP}/output.txt"
+grep "_blogc_build/atoom/tag1/index\\.xml" "${TEMP}/output.txt"
+grep "_blogc_build/atoom/tag2/index\\.xml" "${TEMP}/output.txt"
+grep "_blogc_build/pagination/1\\.html" "${TEMP}/output.txt"
+grep "_blogc_build/pagination/2\\.html" "${TEMP}/output.txt"
+grep "_blogc_build/pagination/3\\.html" "${TEMP}/output.txt"
+grep "_blogc_build/poost/foo\\.html" "${TEMP}/output.txt"
+grep "_blogc_build/poost/bar\\.html" "${TEMP}/output.txt"
+grep "_blogc_build/poost/baz\\.html" "${TEMP}/output.txt"
+grep "_blogc_build/taag/tag1\\.html" "${TEMP}/output.txt"
+grep "_blogc_build/taag/tag2\\.html" "${TEMP}/output.txt"
+grep "_blogc_build/page1\\.html" "${TEMP}/output.txt"
+grep "_blogc_build/page2\\.html" "${TEMP}/output.txt"
+
+rm "${TEMP}/output.txt"
+
+[[ ! -d "${TEMP}/proj/_blogc_build" ]]
+
+export OUTPUT_DIR="${TEMP}/___blogc_build"
+
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
+grep "___blogc_build/posts\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/atoom/index\\.xml" "${TEMP}/output.txt"
+grep "___blogc_build/atoom/tag1/index\\.xml" "${TEMP}/output.txt"
+grep "___blogc_build/atoom/tag2/index\\.xml" "${TEMP}/output.txt"
+grep "___blogc_build/pagination/1\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/pagination/2\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/pagination/3\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/poost/foo\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/poost/bar\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/poost/baz\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/taag/tag1\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/taag/tag2\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/page1\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/page2\\.html" "${TEMP}/output.txt"
+
+rm "${TEMP}/output.txt"
+
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" clean 2>&1 | tee "${TEMP}/output.txt"
+grep "___blogc_build/posts\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/atoom/index\\.xml" "${TEMP}/output.txt"
+grep "___blogc_build/atoom/tag1/index\\.xml" "${TEMP}/output.txt"
+grep "___blogc_build/atoom/tag2/index\\.xml" "${TEMP}/output.txt"
+grep "___blogc_build/pagination/1\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/pagination/2\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/pagination/3\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/poost/foo\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/poost/bar\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/poost/baz\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/taag/tag1\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/taag/tag2\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/page1\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/page2\\.html" "${TEMP}/output.txt"
+
+rm "${TEMP}/output.txt"
+
+[[ ! -d "${OUTPUT_DIR}" ]]
+
+unset OUTPUT_DIR

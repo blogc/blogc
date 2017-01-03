@@ -89,7 +89,7 @@ bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
 
 
 int
-bm_exec_native_rm(bm_filectx_t *dest, bool verbose)
+bm_exec_native_rm(const char *output_dir, bm_filectx_t *dest, bool verbose)
 {
     if (verbose)
         printf("Removing file '%s'\n", dest->path);
@@ -111,8 +111,7 @@ bm_exec_native_rm(bm_filectx_t *dest, bool verbose)
     char *dir_short = dirname(short_path);
     char *dir = dirname(path);
 
-    while (0 != strcmp(dir_short, ".")) {
-
+    while ((0 != strcmp(dir_short, ".")) && (0 != strcmp(dir, output_dir))) {
         DIR *d = opendir(dir);
         if (d == NULL) {
             fprintf(stderr, "error: failed to open directory (%s): %s\n",
@@ -153,6 +152,11 @@ bm_exec_native_rm(bm_filectx_t *dest, bool verbose)
         dir_short = dirname(dir_short);
         dir = dirname(dir);
     }
+
+    // try to remove output dir
+    // this is done on a best-effort basis, if we can't remove it, it probably
+    // have files, so we don't really want to remove it.
+    rmdir(output_dir);
 
     free(short_path);
     free(path);

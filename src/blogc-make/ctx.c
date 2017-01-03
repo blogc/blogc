@@ -98,12 +98,18 @@ bm_ctx_new(const char *settings_file, bc_error_t **err)
 
     char *real_filename = realpath(settings_file, NULL);
     rv->settings_fctx = bm_filectx_new(rv, real_filename);
-    rv->root_dir = bc_strdup(dirname(real_filename));
+    rv->root_dir = realpath(dirname(real_filename), NULL);
     free(real_filename);
 
     const char *output_dir = bc_trie_lookup(settings->settings, "output_dir");
-    rv->output_dir = output_dir[0] == '/' ? bc_strdup(output_dir) :
-        bc_strdup_printf("%s/%s", rv->root_dir, output_dir);
+    if (output_dir[0] == '/') {
+        rv->output_dir = realpath(output_dir, NULL);
+    }
+    else {
+        char *tmp = bc_strdup_printf("%s/%s", rv->root_dir, output_dir);
+        rv->output_dir = realpath(tmp, NULL);
+        free(tmp);
+    }
 
     const char *template_dir = bc_trie_lookup(settings->settings,
         "template_dir");

@@ -536,7 +536,7 @@ clean_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
             continue;
 
         if (fctx->readable) {
-            rv = bm_exec_native_rm(fctx, verbose);
+            rv = bm_exec_native_rm(ctx->output_dir, fctx, verbose);
             if (rv != 0)
                 break;
         }
