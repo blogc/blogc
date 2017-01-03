@@ -11,10 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
-#include <libgen.h>
 #include "../common/error.h"
 #include "../common/file.h"
 #include "../common/utils.h"

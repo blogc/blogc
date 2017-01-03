@@ -6,13 +6,12 @@
  * See the file LICENSE.
  */
 
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <libgen.h>
 #include <time.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "../common/error.h"
 #include "../common/file.h"
 #include "../common/utils.h"
 #include "atom.h"

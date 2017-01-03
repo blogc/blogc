@@ -7,6 +7,7 @@
  */
 
 #include <libgen.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include "../common/config-parser.h"
 #include "../common/error.h"

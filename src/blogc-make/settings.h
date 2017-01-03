@@ -9,6 +9,7 @@
 #ifndef _MAKE_SETTINGS_H
 #define _MAKE_SETTINGS_H
 
+#include <stddef.h>
 #include "../common/error.h"
 #include "../common/utils.h"
 

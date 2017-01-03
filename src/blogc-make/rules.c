@@ -11,15 +11,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <math.h>
 #include "../common/utils.h"
 #include "ctx.h"
 #include "exec.h"
 #include "exec-native.h"
 #include "rules.h"
+#include "settings.h"
 
 
 // INDEX RULE
@@ -561,7 +559,7 @@ runserver_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
 }
 
 
-const bm_rule_t const rules[] = {
+const bm_rule_t rules[] = {
     {
         .name = "all",
         .help = "run all build rules",

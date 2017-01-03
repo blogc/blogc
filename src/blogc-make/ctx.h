@@ -12,6 +12,8 @@
 #include <stdbool.h>
 #include <time.h>
 #include "settings.h"
+#include "../common/error.h"
+#include "../common/utils.h"
 
 typedef struct {
     char *path;
