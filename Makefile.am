@@ -287,12 +287,14 @@ endif
 EXTRA_DIST += \
 	man/blogc.1.ronn \
 	man/blogc-git-receiver.1.ronn \
+	man/blogc-make.1.ronn \
 	man/blogc-runserver.1.ronn \
 	man/blogc-source.7.ronn \
 	man/blogc-template.7.ronn \
 	man/blogc-pagination.7.ronn \
 	man/index.txt \
 	blogc-git-receiver.1 \
+	blogc-make.1 \
 	blogc-runserver.1 \
 	$(NULL)
 
@@ -306,6 +308,12 @@ dist_man_MANS = \
 if BUILD_GIT_RECEIVER
 dist_man_MANS += \
 	blogc-git-receiver.1 \
+	$(NULL)
+endif
+
+if BUILD_MAKE_LIB
+dist_man_MANS += \
+	blogc-make.1 \
 	$(NULL)
 endif
 
@@ -336,6 +344,14 @@ blogc-git-receiver.1: man/blogc-git-receiver.1.ronn
 		--organization "Rafael G. Martins" \
 		--manual "$(PACKAGE_NAME) Manual" \
 		$(top_srcdir)/man/blogc-git-receiver.1.ronn > blogc-git-receiver.1
+
+blogc-make.1: man/blogc-make.1.ronn
+	$(AM_V_GEN)$(RONN) \
+		--roff \
+		--pipe \
+		--organization "Rafael G. Martins" \
+		--manual "$(PACKAGE_NAME) Manual" \
+		$(top_srcdir)/man/blogc-make.1.ronn > blogc-make.1
 
 blogc-runserver.1: man/blogc-runserver.1.ronn
 	$(AM_V_GEN)$(RONN) \
@@ -375,6 +391,9 @@ blogc.1:
 	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
 
 blogc-git-receiver.1:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
+blogc-make.1:
 	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
 
 blogc-runserver.1:

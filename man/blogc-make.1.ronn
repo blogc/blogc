@@ -1,0 +1,79 @@
+blogc-make(1) -- a simple build tool for blogc
+==============================================
+
+## SYNOPSIS
+
+`blogc-make` [`-V`] [`-f` <FILE>] [<RULE> ...]<br>
+`blogc-make` [`-h`|`-v`]
+
+## DESCRIPTION
+
+**blogc-make** is a simple build tool for blogc websites.
+
+EXPAND-ME!
+
+## OPTIONS
+
+  * `-V`:
+    Activates verbose mode, that will give more details of commands runs.
+
+  * `-f` <FILE>:
+    Reads <FILE> as `blogcfile`.
+
+  * `-v`:
+    Show program name, version and exit.
+
+  * `-h`:
+    Show help message and exit.
+
+## RULES
+
+TODO
+
+## FILES
+
+The `blogc-make` command expects a settings file, called `blogcfile` by default,
+or any other file passed to `-f` option. `blogcfile` must have valid UTF-8 content.
+
+The `blogc-make` command will read any files listed on `blogcfile`, and may write
+files to the configured output directory.
+
+## ENVIRONMENT
+
+  * `BLOGC`:
+    Path to `blogc(1)` binary. If not provided, the `blogc` binary in `$PATH` will
+    be used.
+
+  * `BLOGC_RUNSERVER`:
+    Path to `blogc-runserver(1)` binary. If not provided, the `blogc-runserver`
+    binary in `$PATH` will be used, if available.
+
+  * `OUTPUT_DIR`:
+    Path to the directory where `blogc-make` should write (or instruct blogc(1) to
+    write) output files. This is usually configured in `blogcfile`, but being able
+    to override it with an environment variable is useful for automated builds.
+
+Any other environment variables are inherited by blogc(1) and blogc-runserver(1),
+when called by `blogc-make`.
+
+## EXAMPLES
+
+Build all files:
+
+    $ blogc-make all
+
+Clean built files:
+
+    $ blogc-make clean
+
+## BUGS
+
+Please report any issues to: <https://github.com/blogc/blogc>
+
+## AUTHOR
+
+Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
+
+## SEE ALSO
+
+blogc(1), blogc-runserver(1)
