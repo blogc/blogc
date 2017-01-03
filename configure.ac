@@ -103,6 +103,9 @@ AC_ARG_ENABLE([make-embedded], AS_HELP_STRING([--enable-make-embedded],
 AC_ARG_ENABLE([make], AS_HELP_STRING([--enable-make],
               [build blogc-make tool]))
 AS_IF([test "x$enable_make" = "xyes" -o "x$enable_make_embedded" = "xyes"], [
+  AC_CHECK_HEADERS([dirent.h fcntl.h libgen.h sys/stat.h sys/wait.h time.h unistd.h],, [
+    AC_MSG_ERROR([blogc-make tool requested but required headers not found])
+  ])
   AX_PTHREAD([], [
     AC_MSG_ERROR([blogc-make tool requested but pthread is not supported])
   ])
