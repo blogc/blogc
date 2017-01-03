@@ -25,6 +25,13 @@ Requires: git, tar, make
 blogc-git-receiver is a simple login shell/git hook to deploy blogc websites.
 %endif
 
+%package make
+Summary: A simple build tool for blogc
+Group: Development/Tools
+
+%description make
+blogc-make is a simple build tool for blogc websites.
+
 %package runserver
 Summary: A simple HTTP server to test blogc websites
 Group: Development/Tools
@@ -37,9 +44,9 @@ blogc-runserver is a simple HTTP server to test blogc websites.
 
 %build
 %if 0%{?el6}
-%configure --disable-git-receiver --enable-runserver --enable-tests
+%configure --disable-git-receiver --enable-make --enable-runserver --enable-tests
 %else
-%configure --enable-git-receiver --enable-runserver --enable-tests
+%configure --enable-git-receiver --enable-make --enable-runserver --enable-tests
 %endif
 make %{?_smp_mflags}
 
@@ -65,6 +72,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/blogc-git-receiver
 %license LICENSE
 %endif
+
+%files make
+%{_mandir}/man*/blogc-make.*
+%{_bindir}/blogc-make
+%license LICENSE
 
 %files runserver
 %{_mandir}/man*/blogc-runserver.*
