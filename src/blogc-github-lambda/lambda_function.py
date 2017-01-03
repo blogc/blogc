@@ -98,8 +98,26 @@ def sync_s3(src, dest, settings_file):
     for root, dirs, files in os.walk(src):
         real_root = root[len(src):].lstrip('/')
         for filename in files:
-            f = os.path.join(real_root, filename)
-            local_files[translate_filename(f)] = f
+            real_filename = os.path.join(real_root, filename)
+            data = {'Key': real_filename}
+
+            mime = content_types.get(real_filename,
+                                     mimetypes.guess_type(real_filename)[0])
+            if mime is not None:
+                data['ContentType'] = mime
+
+            with open(os.path.join(src, real_filename), 'rb') as fp:
+                data['Body'] = fp.read()
+
+            # always push the original file to its place
+            local_files[real_filename] = data
+
+            # if we need a copy on s3 for index or something, push it too
+            translated_filename = translate_filename(real_filename)
+            if translated_filename != real_filename:
+                translated_data = data.copy()
+                translated_data['Key'] = translated_filename
+                local_files[translated_filename] = translated_data
 
     to_upload = []
     for filename in local_files:
@@ -109,8 +127,7 @@ def sync_s3(src, dest, settings_file):
     to_delete = []
     for filename in remote_files:
         if filename in local_files:
-            with open(os.path.join(src, local_files[filename])) as fp:
-                l = hashlib.sha1(fp.read())
+            l = hashlib.sha1(local_files[filename]['Body'])
 
             with closing(remote_files[filename].get()['Body']) as fp:
                 r = hashlib.sha1(fp.read())
@@ -120,16 +137,12 @@ def sync_s3(src, dest, settings_file):
         else:
             to_delete.append(filename)
 
-    for filename in to_upload:
-        with open(os.path.join(src, filename), 'rb') as fp:
-            mime = content_types.get(filename,
-                                     mimetypes.guess_type(filename)[0])
-            filename = translate_filename(filename)
-            print 'Uploading file: %s; content-type: "%s"' % (filename, mime)
-            if mime is not None:
-                bucket.put_object(Key=filename, Body=fp, ContentType=mime)
-            else:
-                bucket.put_object(Key=filename, Body=fp)
+    for data in to_upload:
+        print 'Uploading file: %s; content-type: "%s"' % (
+            data['Key'],
+            data.get('ContentType'),
+        )
+        bucket.put_object(**data)
 
     for filename in to_delete:
         print 'Deleting file:', filename
