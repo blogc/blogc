@@ -40,8 +40,6 @@ rmdir_recursive(const char *dir)
         return;
     struct stat buf;
     if (0 != stat(dir, &buf)) {
-        fprintf(stderr, "warning: failed to remove directory (%s): %s\n", dir,
-            strerror(errno));
         return;
     }
     if (!S_ISDIR(buf.st_mode)) {
@@ -178,29 +176,9 @@ bgr_pre_receive_hook(int argc, char *argv[])
         goto cleanup;
     }
 
-    if ((0 != access("Makefile", F_OK)) && (0 != access("GNUMakefile", F_OK))) {
-        fprintf(stderr, "warning: no makefile found. skipping ...\n");
-        goto cleanup;
-    }
-
     char *home = getenv("HOME");
     if (home == NULL) {
         fprintf(stderr, "error: failed to find user home path\n");
-        rv = 3;
-        goto cleanup;
-    }
-
-    const char *make_impl = NULL;
-
-    if (127 != WEXITSTATUS(system("gmake -f /dev/null 2> /dev/null > /dev/null"))) {
-        make_impl = "gmake";
-    }
-    else if (127 != WEXITSTATUS(system("make -f /dev/null 2> /dev/null > /dev/null"))) {
-        make_impl = "make";
-    }
-
-    if (make_impl == NULL) {
-        fprintf(stderr, "error: no 'make' implementation found\n");
         rv = 3;
         goto cleanup;
     }
@@ -214,19 +192,52 @@ bgr_pre_receive_hook(int argc, char *argv[])
         free(tmp);
     }
 
-    char *gmake_cmd = bc_strdup_printf(
-        "%s -j%d OUTPUT_DIR=\"%s\" BLOGC_GIT_RECEIVER=1", make_impl,
-        cpu_count(), output_dir);
-    fprintf(stdout, "running command: %s\n\n", gmake_cmd);
+    // detect if we will run blogc-make, make or nothing, and generate the
+    // command.
+    char *build_cmd = NULL;
+    if (0 == access("blogcfile", F_OK)) {
+        if (127 == WEXITSTATUS(system("blogc-make -v 2> /dev/null > /dev/null"))) {
+            fprintf(stderr, "error: failed to find blogc-make binary\n");
+            rv = 3;
+            goto cleanup;
+        }
+        build_cmd = bc_strdup_printf("OUTPUT_DIR=\"%s\" blogc-make -V all",
+            output_dir);
+    }
+    else if ((0 == access("Makefile", F_OK)) || (0 == access("GNUMakefile", F_OK))) {
+        const char *make_impl = NULL;
+
+        if (127 != WEXITSTATUS(system("gmake -f /dev/null 2> /dev/null > /dev/null"))) {
+            make_impl = "gmake";
+        }
+        else if (127 != WEXITSTATUS(system("make -f /dev/null 2> /dev/null > /dev/null"))) {
+            make_impl = "make";
+        }
+
+        if (make_impl == NULL) {
+            fprintf(stderr, "error: no 'make' implementation found\n");
+            rv = 3;
+            goto cleanup;
+        }
+        build_cmd = bc_strdup_printf(
+            "%s -j%d OUTPUT_DIR=\"%s\" BLOGC_GIT_RECEIVER=1", make_impl,
+            cpu_count(), output_dir);
+    }
+    else {
+        fprintf(stderr, "warning: no blogcfile or Makefile found. skipping ...\n");
+        goto cleanup;
+    }
+
+    fprintf(stdout, "running command: %s\n\n", build_cmd);
     fflush(stdout);
-    if (0 != system(gmake_cmd)) {
+    if (0 != system(build_cmd)) {
         fprintf(stderr, "error: failed to build website ...\n");
         rmdir_recursive(output_dir);
-        free(gmake_cmd);
+        free(build_cmd);
         rv = 3;
         goto cleanup;
     }
-    free(gmake_cmd);
+    free(build_cmd);
 
     if (0 != chdir(repo_dir)) {
         fprintf(stderr, "error: failed to chdir (%s): %s\n", repo_dir,
