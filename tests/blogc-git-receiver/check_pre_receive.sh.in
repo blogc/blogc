@@ -171,11 +171,12 @@ HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./repos/foo3.git/hooks/pre-receive 2>&1 | te
 [[ "${DEST}" != "$(readlink repos/foo3.git/htdocs)" ]]
 [[ ! -e "${DEST}" ]]
 
-cd "${TEMP}"
-git init --bare "${TEMP}/repos/foo4.git" &> /dev/null
-ln -s "${SELF}" "${TEMP}/repos/foo4.git/hooks/pre-receive"
+if [[ "x@MAKE_@" == "xenabled" ]]; then
+    cd "${TEMP}"
+    git init --bare "${TEMP}/repos/foo4.git" &> /dev/null
+    ln -s "${SELF}" "${TEMP}/repos/foo4.git/hooks/pre-receive"
 
-cat > "${TEMP}/tmp.txt" <<EOF
+    cat > "${TEMP}/tmp.txt" <<EOF
 blob
 mark :1
 data 0
@@ -191,14 +192,15 @@ M 100644 :1 blogcfile
 
 EOF
 
-cd "${TEMP}/repos/foo4.git"
-git fast-import < "${TEMP}/tmp.txt" &> /dev/null
+    cd "${TEMP}/repos/foo4.git"
+    git fast-import < "${TEMP}/tmp.txt" &> /dev/null
 
-cat > "${TEMP}/payload.txt" <<EOF
+    cat > "${TEMP}/payload.txt" <<EOF
 0000000000000000000000000000000000000000 $(git rev-parse HEAD) refs/heads/master
 EOF
 
-SHELL="${SELF}" HOME="${TEMP}" PATH="@abs_top_builddir@:${PATH}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt" || true
-grep "blogc-make: error: settings: " "${TEMP}/output.txt" &> /dev/null
+    SHELL="${SELF}" HOME="${TEMP}" PATH="@abs_top_builddir@:${PATH}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt" || true
+    grep "blogc-make: error: settings: " "${TEMP}/output.txt" &> /dev/null
+fi
 
 rm "${TEMP}/output.txt"
