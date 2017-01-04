@@ -20,6 +20,7 @@ blog/website resources.
 Summary: A simple login shell/git hook to deploy blogc websites
 Group: System Environment/Shells
 Requires: git, tar, make
+Requires: %{name}-make = %{version}-%{release}
 
 %description git-receiver
 blogc-git-receiver is a simple login shell/git hook to deploy blogc websites.
@@ -28,6 +29,8 @@ blogc-git-receiver is a simple login shell/git hook to deploy blogc websites.
 %package make
 Summary: A simple build tool for blogc
 Group: Development/Tools
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-runserver = %{version}-%{release}
 
 %description make
 blogc-make is a simple build tool for blogc websites.

@@ -14,7 +14,7 @@ If installing from Git repository, [ronn](https://github.com/rtomayko/ronn) and 
 Inside the source directory, run the following commands:
 
     $ ./autogen.sh  # if installing from git
-    $ ./configure [--enable-git-receiver] [--enable-runserver]
+    $ ./configure [--enable-git-receiver] [--enable-make] [--enable-runserver]
     $ make
     # make install
 
