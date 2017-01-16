@@ -106,9 +106,6 @@ AS_IF([test "x$enable_make" = "xyes" -o "x$enable_make_embedded" = "xyes"], [
   AC_CHECK_HEADERS([dirent.h fcntl.h libgen.h sys/stat.h sys/wait.h time.h unistd.h],, [
     AC_MSG_ERROR([blogc-make tool requested but required headers not found])
   ])
-  AX_PTHREAD([], [
-    AC_MSG_ERROR([blogc-make tool requested but pthread is not supported])
-  ])
   have_make_lib=yes
   AS_IF([test "x$enable_make_embedded" = "xyes"], [
     MAKE_="enabled (embedded)"
