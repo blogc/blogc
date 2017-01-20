@@ -1,3 +1,5 @@
+#!/bin/sh
+
 export TESTS_ENVIRONMENT="
 	${VALGRIND:-valgrind} \
 		--tool=memcheck \
