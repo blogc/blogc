@@ -10,7 +10,7 @@ export TESTS_ENVIRONMENT="
 		--show-possibly-lost=no"
 
 if [[ "${1}" == *.sh ]]; then
-    exec "${@}"
+	exec "${@}"
 else
-    exec ${TESTS_ENVIRONMENT} "${@}"
+	exec ${TESTS_ENVIRONMENT} "${@}"
 fi
