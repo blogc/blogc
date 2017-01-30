@@ -102,12 +102,10 @@ bm_ctx_new(const char *settings_file, bc_error_t **err)
 
     const char *output_dir = bc_trie_lookup(settings->settings, "output_dir");
     if (output_dir[0] == '/') {
-        rv->output_dir = realpath(output_dir, NULL);
+        rv->output_dir = bc_strdup(output_dir);
     }
     else {
-        char *tmp = bc_strdup_printf("%s/%s", rv->root_dir, output_dir);
-        rv->output_dir = realpath(tmp, NULL);
-        free(tmp);
+        rv->output_dir = bc_strdup_printf("%s/%s", rv->root_dir, output_dir);
     }
 
     const char *template_dir = bc_trie_lookup(settings->settings,

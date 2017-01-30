@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <libgen.h>
 #include <errno.h>
+#include "../common/error.h"
 #include "../common/file.h"
 #include "../common/utils.h"
 #include "exec-native.h"
@@ -87,6 +88,42 @@ bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
 }
 
 
+bool
+bm_exec_empty_dir(const char *dir, bc_error_t **err)
+{
+    DIR *d = opendir(dir);
+    if (d == NULL) {
+        if (errno == ENOENT) {
+            return true;
+        }
+        if (err != NULL) {
+            *err = bc_error_new_printf(0, "failed to open directory (%s): %s\n",
+                dir, strerror(errno));
+        }
+        return true;
+    }
+
+    struct dirent *e;
+    size_t count = 0;
+    while (NULL != (e = readdir(d))) {
+        if ((0 == strcmp(e->d_name, ".")) || (0 == strcmp(e->d_name, "..")))
+            continue;
+        count++;
+        break;
+    }
+
+    if (0 != closedir(d)) {
+        if (err != NULL) {
+            *err = bc_error_new_printf(0, "failed to close directory (%s): %s\n",
+                dir, strerror(errno));
+        }
+        return true;
+    }
+
+    return count == 0;
+}
+
+
 int
 bm_exec_native_rm(const char *output_dir, bm_filectx_t *dest, bool verbose)
 {
@@ -110,52 +147,37 @@ bm_exec_native_rm(const char *output_dir, bm_filectx_t *dest, bool verbose)
     char *dir_short = dirname(short_path);
     char *dir = dirname(path);
 
-    while ((0 != strcmp(dir_short, ".")) && (0 != strcmp(dir, output_dir))) {
-        DIR *d = opendir(dir);
-        if (d == NULL) {
-            fprintf(stderr, "error: failed to open directory (%s): %s\n",
+    bc_error_t *err = NULL;
+
+    while ((0 != strcmp(dir_short, ".")) && (0 != strcmp(dir_short, "/"))) {
+        bool empty = bm_exec_empty_dir(dir, &err);
+        if (err != NULL) {
+            fprintf(stderr, "blogc-make: error: %s\n", err->msg);
+            bc_error_free(err);
+            rv = 3;
+            break;
+        }
+        if (!empty) {
+            break;
+        }
+        if (verbose) {
+            printf("Removing directory '%s'\n", dir);
+            fflush(stdout);
+        }
+        if (0 != rmdir(dir)) {
+            fprintf(stderr,
+                "blogc-make: error: failed to remove directory(%s): %s\n",
                 dir, strerror(errno));
             rv = 3;
             break;
         }
-
-        struct dirent *e;
-        size_t count = 0;
-        while (NULL != (e = readdir(d))) {
-            if ((0 == strcmp(e->d_name, ".")) || (0 == strcmp(e->d_name, "..")))
-                continue;
-            count++;
+        if (0 == strcmp(dir, output_dir)) {
             break;
-        }
-
-        if (0 != closedir(d)) {
-            fprintf(stderr, "error: failed to close directory (%s): %s\n",
-                dir, strerror(errno));
-            rv = 3;
-            break;
-        }
-
-        if (count == 0) {
-            if (verbose) {
-                printf("Removing directory '%s'\n", dir);
-                fflush(stdout);
-            }
-            if (0 != rmdir(dir)) {
-                fprintf(stderr, "error: failed to remove directory(%s): %s\n",
-                    dir, strerror(errno));
-                rv = 3;
-                break;
-            }
         }
 
         dir_short = dirname(dir_short);
         dir = dirname(dir);
     }
-
-    // try to remove output dir
-    // this is done on a best-effort basis, if we can't remove it, it probably
-    // have files, so we don't really want to remove it.
-    rmdir(output_dir);
 
     free(short_path);
     free(path);
