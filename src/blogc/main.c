@@ -145,18 +145,13 @@ blogc_read_stdin_to_list(bc_slist_t *l)
 int
 main(int argc, char **argv)
 {
-#ifdef MAKE_EMBEDDED
-    // this isn't going to work on windows, but -m can still be used there.
-    if (bc_str_ends_with(argv[0], "/blogc-make"))
-        return bm_main(argc, argv);
-
-    bool embedded = false;
-#endif
-
     setlocale(LC_ALL, "");
 
     int rv = 0;
 
+#ifdef MAKE_EMBEDDED
+    bool embedded = false;
+#endif
     bool debug = false;
     bool input_stdin = false;
     bool listing = false;
