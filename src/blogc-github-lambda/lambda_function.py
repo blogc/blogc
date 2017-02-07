@@ -149,11 +149,11 @@ def sync_s3(src, dest, settings_file):
         remote_files[filename].delete()
 
 
-def lambda_handler(event, context):
-    message = event['Records'][0]['Sns']['Message']
+def sns_handler(message):
     payload = json.loads(message)
 
     if payload['ref'] == 'refs/heads/master':
+        print 'Building: %s' % payload['repository']['full_name']
         debug = 'DEBUG' in os.environ
 
         env = os.environ.copy()
@@ -182,3 +182,11 @@ def lambda_handler(event, context):
         sync_s3(os.path.join(rootdir, env['OUTPUT_DIR']),
                 payload['repository']['name'],
                 os.path.join(rootdir, 's3.json'))
+
+    else:
+        print "Commit not for master branch, skipping: %s" % payload['ref']
+
+def lambda_handler(event, context):
+    for record in event['Records']:
+        if 'Sns' in record:
+            sns_handler(record['Sns']['Message'])
