@@ -55,19 +55,19 @@ test_build_blogc_cmd_with_settings(void **state)
     rv = bm_exec_build_blogc_cmd(settings, variables, true, "main.tmpl",
         "foo.html", true);
     assert_string_equal(rv,
-        "LC_ALL='en_US.utf8' /path/to/blogc -D FOO='BAR' -D BAR='BAZ' "
+        "LC_ALL='en_US.utf8' '/path/to/blogc' -D FOO='BAR' -D BAR='BAZ' "
         "-D LOL='HEHE' -l -t 'main.tmpl' -o 'foo.html' -i");
     free(rv);
 
     rv = bm_exec_build_blogc_cmd(settings, variables, false, NULL, NULL, false);
     assert_string_equal(rv,
-        "LC_ALL='en_US.utf8' /path/to/blogc -D FOO='BAR' -D BAR='BAZ' "
+        "LC_ALL='en_US.utf8' '/path/to/blogc' -D FOO='BAR' -D BAR='BAZ' "
         "-D LOL='HEHE'");
     free(rv);
 
     rv = bm_exec_build_blogc_cmd(settings, NULL, false, NULL, NULL, false);
     assert_string_equal(rv,
-        "LC_ALL='en_US.utf8' /path/to/blogc -D FOO='BAR' -D BAR='BAZ'");
+        "LC_ALL='en_US.utf8' '/path/to/blogc' -D FOO='BAR' -D BAR='BAZ'");
     free(rv);
 
     unsetenv("BLOGC");
@@ -108,17 +108,17 @@ test_build_blogc_cmd_without_settings(void **state)
     rv = bm_exec_build_blogc_cmd(NULL, variables, true, "main.tmpl", "foo.html",
         true);
     assert_string_equal(rv,
-        "/path/to/blogc -D LOL='HEHE' -l -t 'main.tmpl' -o 'foo.html' -i");
+        "'/path/to/blogc' -D LOL='HEHE' -l -t 'main.tmpl' -o 'foo.html' -i");
     free(rv);
 
     rv = bm_exec_build_blogc_cmd(NULL, variables, false, NULL, NULL, false);
     assert_string_equal(rv,
-        "/path/to/blogc -D LOL='HEHE'");
+        "'/path/to/blogc' -D LOL='HEHE'");
     free(rv);
 
     rv = bm_exec_build_blogc_cmd(NULL, NULL, false, NULL, NULL, false);
     assert_string_equal(rv,
-        "/path/to/blogc");
+        "'/path/to/blogc'");
     free(rv);
 
     unsetenv("BLOGC");

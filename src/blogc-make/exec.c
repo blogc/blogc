@@ -184,7 +184,9 @@ bm_exec_build_blogc_cmd(bm_settings_t *settings, bc_trie_t *variables,
     // use blogc binary from environment, if provided
     const char *blogc_bin = getenv("BLOGC");
     if (blogc_bin != NULL) {
-        bc_string_append(rv, blogc_bin);
+        char *tmp = bc_shell_quote(blogc_bin);
+        bc_string_append(rv, tmp);
+        free(tmp);
     }
     else {
         bc_string_append(rv, "blogc");
@@ -305,25 +307,53 @@ bm_exec_blogc(bm_settings_t *settings, bc_trie_t *variables, bool listing,
 int
 bm_exec_blogc_runserver(bm_settings_t *settings, bool verbose)
 {
-    // use blogc binary from environment, if provided
-    const char *blogc_runserver = getenv("BLOGC_RUNSERVER");
+    bc_string_t *cmd = bc_string_new();
 
-    char *cmd = bc_strdup_printf("%s -t %s -p %s -m %s %s",
-        blogc_runserver != NULL ? blogc_runserver : "blogc-runserver",
-        bc_trie_lookup(settings->settings, "runserver_host"),
-        bc_trie_lookup(settings->settings, "runserver_port"),
-        bc_trie_lookup(settings->settings, "runserver_threads"),
-        bc_trie_lookup(settings->settings, "output_dir"));
+    // use blogc-runserver binary from environment, if provided
+    const char *blogc_runserver = getenv("BLOGC_RUNSERVER");
+    if (blogc_runserver != NULL) {
+        char *tmp = bc_shell_quote(blogc_runserver);
+        bc_string_append(cmd, tmp);
+        free(tmp);
+    }
+    else {
+        bc_string_append(cmd, "blogc-runserver");
+    }
+
+    const char *runserver_host_tmp = getenv("RUNSERVER_HOST");
+    if (runserver_host_tmp != NULL) {
+        char *tmp = bc_shell_quote(runserver_host_tmp);
+        bc_string_append_printf(cmd, " -t %s", tmp);
+        free(tmp);
+    }
+
+    const char *runserver_port_tmp = getenv("RUNSERVER_PORT");
+    if (runserver_port_tmp != NULL) {
+        char *tmp = bc_shell_quote(runserver_port_tmp);
+        bc_string_append_printf(cmd, " -p %s", tmp);
+        free(tmp);
+    }
+
+    const char *runserver_threads_tmp = getenv("RUNSERVER_THREADS");
+    if (runserver_threads_tmp != NULL) {
+        char *tmp = bc_shell_quote(runserver_threads_tmp);
+        bc_string_append_printf(cmd, " -m %s", tmp);
+        free(tmp);
+    }
+
+    char *tmp = bc_shell_quote(bc_trie_lookup(settings->settings, "output_dir"));
+    bc_string_append_printf(cmd, " %s", tmp);
+    free(tmp);
 
     if (verbose)
-        printf("%s\n", cmd);
+        printf("%s\n", cmd->str);
     else
         printf("\n");
     fflush(stdout);
 
     // we don't need pipes to run blogc-runserver, because it is "interactive"
-    int rv = WEXITSTATUS(system(cmd));
-    free(cmd);
+    int rv = WEXITSTATUS(system(cmd->str));
+    bc_string_free(cmd, true);
 
     if (rv != 0) {
         if (rv == 127) {
