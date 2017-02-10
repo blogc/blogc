@@ -12,7 +12,7 @@ if [[ "x${TRAVIS_BRANCH}" != "xmaster" ]] && [[ "x${TRAVIS_TAG}" != xv* ]]; then
     exit 0
 fi
 
-if [[ "x${CC}" != "xgcc" ]] || [[ "x${TARGET}" = "xvalgrind" ]] || [[ "x${TARGET}" = "xblogc-make-embedded" ]]; then
+if [[ "x${CC}" != "xgcc" ]] || [[ "x${TARGET}" = "xvalgrind" ]] || [[ "x${TARGET}" = "xmake-embedded" ]]; then
     echo "Invalid target for deploy. skipping ..."
     exit 0
 fi
