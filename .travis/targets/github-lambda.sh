@@ -4,11 +4,11 @@ build() {
         CFLAGS="-Wall -g -O0" \
         --enable-ronn \
         --disable-silent-rules \
-        --enable-tests \
-        --enable-valgrind \
-        --enable-git-receiver \
+        --disable-tests \
+        --disable-valgrind \
+        --disable-git-receiver \
         --enable-make-embedded \
-        --enable-runserver
+        --disable-runserver
     popd > /dev/null
 
     make -C build LDFLAGS="-all-static" blogc

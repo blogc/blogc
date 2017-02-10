@@ -5,6 +5,8 @@ language: c
 addons:
   apt:
     packages:
+      - gcc-mingw-w64-i686
+      - gcc-mingw-w64-x86-64
       - libcmocka-dev
       - rpm
       - valgrind
@@ -19,6 +21,8 @@ env:
   - TARGET=dist-srpm
   - TARGET=github-lambda
   - TARGET=make-embedded
+  - TARGET=win32
+  - TARGET=win64
 
 matrix:
   exclude:
@@ -28,6 +32,10 @@ matrix:
       env: TARGET=github-lambda
     - compiler: clang
       env: TARGET=make-embedded
+    - compiler: clang
+      env: TARGET=win32
+    - compiler: clang
+      env: TARGET=win64
 
 install: gem install ronn
 
