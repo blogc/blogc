@@ -22,13 +22,15 @@ if [[ ! -d build ]]; then
     exit 1
 fi
 
-if [[ "x${TARGET}" = "xdist-srpm" ]]; then
-    FILES=( build/*.src.rpm )
-elif [[ "x${TARGET}" = "xblogc-github-lambda" ]]; then
-    FILES=( *.zip )
+FILES=
+if [[ -n "${TARGET}" ]] && [[ -e "travis/targets/${TARGET}.sh" ]]; then
+    source "travis/targets/${TARGET}.sh"
 else
-    FILES=( build/*.{*.tar.{gz,bz2,xz},zip} )
+    echo "Target not defined or invalid!"
+    exit 1
 fi
+
+deploy
 
 TARNAME="$(grep PACKAGE_TARNAME build/config.h | cut -d\" -f2)"
 VERSION="$(grep PACKAGE_VERSION build/config.h | cut -d\" -f2)"

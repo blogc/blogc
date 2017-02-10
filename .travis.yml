@@ -17,17 +17,17 @@ env:
   - TARGET=valgrind
   - TARGET=distcheck
   - TARGET=dist-srpm
-  - TARGET=blogc-github-lambda
-  - TARGET=blogc-make-embedded
+  - TARGET=github-lambda
+  - TARGET=make-embedded
 
 matrix:
   exclude:
     - compiler: clang
       env: TARGET=dist-srpm
     - compiler: clang
-      env: TARGET=blogc-github-lambda
+      env: TARGET=github-lambda
     - compiler: clang
-      env: TARGET=blogc-make-embedded
+      env: TARGET=make-embedded
 
 install: gem install ronn
 
@@ -36,5 +36,5 @@ before_script:
   - ./autogen.sh
 
 script:
-  - ./build-aux/travis-build.sh
-  - ./build-aux/travis-deploy.sh
+  - ./travis/build.sh
+  - ./travis/deploy.sh
