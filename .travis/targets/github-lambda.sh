@@ -24,7 +24,7 @@ build() {
     strip build/root/blogc
 
     pushd build/root/ > /dev/null
-    zip -rq "../blogc-github-lambda-${PV}.zip" *
+    zip "../blogc-github-lambda-${PV}.zip" *
     popd > /dev/null
 }
 
