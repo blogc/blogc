@@ -36,5 +36,5 @@ before_script:
   - ./autogen.sh
 
 script:
-  - ./travis/build.sh
-  - ./travis/deploy.sh
+  - ./.travis/build.sh
+  - ./.travis/deploy.sh
