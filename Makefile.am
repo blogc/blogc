@@ -215,9 +215,11 @@ blogc_make_SOURCES = \
 
 blogc_make_CFLAGS = \
 	$(AM_CFLAGS) \
+	$(PTHREAD_CFLAGS) \
 	$(NULL)
 
 blogc_make_LDADD = \
+	$(PTHREAD_LIBS) \
 	libblogc_make.la \
 	libblogc_common.la \
 	$(NULL)
@@ -235,10 +237,12 @@ libblogc_make_la_SOURCES = \
 
 libblogc_make_la_CFLAGS = \
 	$(AM_CFLAGS) \
+	$(PTHREAD_CFLAGS) \
 	$(NULL)
 
 libblogc_make_la_LIBADD = \
 	$(LIBM) \
+	$(PTHREAD_LIBS) \
 	libblogc_common.la \
 	$(NULL)
 endif
