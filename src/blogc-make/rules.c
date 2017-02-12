@@ -624,7 +624,7 @@ runserver_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
         return 3;
     }
 
-    bm_exec_blogc_runserver(ctx->settings, verbose);
+    bm_exec_blogc_runserver(ctx->output_dir, verbose);
     return 0;
 }
 

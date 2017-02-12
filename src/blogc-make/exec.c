@@ -305,7 +305,7 @@ bm_exec_blogc(bm_settings_t *settings, bc_trie_t *variables, bool listing,
 
 
 int
-bm_exec_blogc_runserver(bm_settings_t *settings, bool verbose)
+bm_exec_blogc_runserver(const char *output_dir, bool verbose)
 {
     bc_string_t *cmd = bc_string_new();
 
@@ -341,7 +341,7 @@ bm_exec_blogc_runserver(bm_settings_t *settings, bool verbose)
         free(tmp);
     }
 
-    char *tmp = bc_shell_quote(bc_trie_lookup(settings->settings, "output_dir"));
+    char *tmp = bc_shell_quote(output_dir);
     bc_string_append_printf(cmd, " %s", tmp);
     free(tmp);
 
