@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <signal.h>
 #include "../common/utils.h"
 #include "ctx.h"
 #include "exec.h"
@@ -552,14 +555,77 @@ static int all_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose);
 
 
 // RUNSERVER RULE
+
+typedef struct {
+    bm_ctx_t *ctx;
+    bool verbose;
+} runserver_args_t;
+
+static runserver_args_t *args = NULL;
+
+static void
+runserver_sig_handler(int sig)
+{
+    free(args);
+    args = NULL;
+}
+
+static void*
+runserver_thread(void *arg)
+{
+    signal(SIGINT, runserver_sig_handler);
+    signal(SIGTERM, runserver_sig_handler);
+    args = arg;
+    while (true) {
+        bm_ctx_reload(args->ctx);
+        if (args->ctx == NULL) {
+            fprintf(stderr, "blogc-make: error: failed to reload context. "
+                "reloader disabled!\n");
+            goto runserver_cleanup;
+        }
+        if (0 != all_exec(args->ctx, NULL, args->verbose)) {
+            fprintf(stderr, "blogc-make: error: failed to rebuild website. "
+                "reloader disabled!\n");
+            goto runserver_cleanup;
+        }
+        sleep(1);
+    }
+
+runserver_cleanup:
+    free(args);
+    args = NULL;
+
+    return NULL;
+}
+
 static int
 runserver_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
 {
+    // first 'all' call is syncronous, to do a 'sanity check'
     int rv = all_exec(ctx, NULL, verbose);
     if (rv != 0)
         return rv;
 
-    return bm_exec_blogc_runserver(ctx->settings, verbose);
+    runserver_args_t *args = bc_malloc(sizeof(runserver_args_t));
+    args->ctx = ctx;
+    args->verbose = verbose;
+
+    pthread_t thread;
+
+    if (0 != pthread_create(&thread, NULL, runserver_thread, args)) {
+        fprintf(stderr, "blogc-make: error: failed to create blogc-runserver "
+            "thread!\n");
+        return 3;
+    }
+
+    if (0 != pthread_detach(thread)) {
+        fprintf(stderr, "blogc-make: error: failed to detach blogc-runserver "
+            "thread!\n");
+        return 3;
+    }
+
+    bm_exec_blogc_runserver(ctx->settings, verbose);
+    return 0;
 }
 
 

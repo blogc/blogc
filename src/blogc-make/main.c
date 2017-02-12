@@ -104,7 +104,7 @@ main(int argc, char **argv)
         rules = bc_slist_append(rules, bc_strdup("all"));
     }
 
-    ctx = bm_ctx_new(blogcfile ? blogcfile : "blogcfile", &err);
+    ctx = bm_ctx_new(NULL, blogcfile ? blogcfile : "blogcfile", &err);
     if (err != NULL) {
         bc_error_print(err, "blogc-make");
         rv = 3;
