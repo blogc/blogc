@@ -141,15 +141,14 @@ bm_exec_native_rm(const char *output_dir, bm_filectx_t *dest, bool verbose)
 
     int rv = 0;
 
-    char *short_path = bc_strdup(dest->short_path);
-    char *path = bc_strdup(dest->path);
-
-    char *dir_short = dirname(short_path);
-    char *dir = dirname(path);
+    // blame freebsd's libc for all of those memory allocations around dirname
+    // calls!
+    char *short_dir = bc_strdup(dirname(dest->short_path));
+    char *dir = bc_strdup(dirname(dest->path));
 
     bc_error_t *err = NULL;
 
-    while ((0 != strcmp(dir_short, ".")) && (0 != strcmp(dir_short, "/"))) {
+    while ((0 != strcmp(short_dir, ".")) && (0 != strcmp(short_dir, "/"))) {
         bool empty = bm_exec_empty_dir(dir, &err);
         if (err != NULL) {
             fprintf(stderr, "blogc-make: error: %s\n", err->msg);
@@ -175,12 +174,16 @@ bm_exec_native_rm(const char *output_dir, bm_filectx_t *dest, bool verbose)
             break;
         }
 
-        dir_short = dirname(dir_short);
-        dir = dirname(dir);
+        char *tmp = short_dir;
+        short_dir = bc_strdup(dirname(short_dir));
+        free(tmp);
+        tmp = dir;
+        dir = bc_strdup(dirname(dir));
+        free(tmp);
     }
 
-    free(short_path);
-    free(path);
+    free(short_dir);
+    free(dir);
 
     return rv;
 }
