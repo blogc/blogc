@@ -197,11 +197,11 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, bc_error_t **err)
         }
     }
 
-    rv->copy_files_fctx = NULL;
-    if (settings->copy_files != NULL) {
-        for (size_t i = 0; settings->copy_files[i] != NULL; i++) {
-            rv->copy_files_fctx = bc_slist_append(rv->copy_files_fctx,
-                bm_filectx_new(rv, settings->copy_files[i]));
+    rv->copy_fctx = NULL;
+    if (settings->copy != NULL) {
+        for (size_t i = 0; settings->copy[i] != NULL; i++) {
+            rv->copy_fctx = bc_slist_append(rv->copy_fctx,
+                bm_filectx_new(rv, settings->copy[i]));
         }
     }
 
@@ -241,7 +241,7 @@ bm_ctx_reload(bm_ctx_t *ctx)
     for (bc_slist_t *tmp = ctx->pages_fctx; tmp != NULL; tmp = tmp->next)
         bm_filectx_reload((bm_filectx_t*) tmp->data);
 
-    for (bc_slist_t *tmp = ctx->copy_files_fctx; tmp != NULL; tmp = tmp->next)
+    for (bc_slist_t *tmp = ctx->copy_fctx; tmp != NULL; tmp = tmp->next)
         bm_filectx_reload((bm_filectx_t*) tmp->data);
 }
 
@@ -273,8 +273,8 @@ bm_ctx_free_internal(bm_ctx_t *ctx)
     ctx->posts_fctx = NULL;
     bc_slist_free_full(ctx->pages_fctx, (bc_free_func_t) bm_filectx_free);
     ctx->pages_fctx = NULL;
-    bc_slist_free_full(ctx->copy_files_fctx, (bc_free_func_t) bm_filectx_free);
-    ctx->copy_files_fctx = NULL;
+    bc_slist_free_full(ctx->copy_fctx, (bc_free_func_t) bm_filectx_free);
+    ctx->copy_fctx = NULL;
 }
 
 

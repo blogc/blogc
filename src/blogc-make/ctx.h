@@ -34,7 +34,7 @@ typedef struct {
 
     bc_slist_t *posts_fctx;
     bc_slist_t *pages_fctx;
-    bc_slist_t *copy_files_fctx;
+    bc_slist_t *copy_fctx;
 } bm_ctx_t;
 
 bm_filectx_t* bm_filectx_new(bm_ctx_t *ctx, const char *filename);

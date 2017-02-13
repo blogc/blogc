@@ -475,15 +475,15 @@ pages_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
 // COPY FILES RULE
 
 static bc_slist_t*
-copy_files_outputlist(bm_ctx_t *ctx)
+copy_outputlist(bm_ctx_t *ctx)
 {
-    if (ctx == NULL || ctx->settings->copy_files == NULL)
+    if (ctx == NULL || ctx->settings->copy == NULL)
         return NULL;
 
     bc_slist_t *rv = NULL;
     const char *dir = bc_trie_lookup(ctx->settings->settings, "output_dir");
-    for (size_t i = 0; ctx->settings->copy_files[i] != NULL; i++) {
-        char *f = bc_strdup_printf("%s/%s", dir, ctx->settings->copy_files[i]);
+    for (size_t i = 0; ctx->settings->copy[i] != NULL; i++) {
+        char *f = bc_strdup_printf("%s/%s", dir, ctx->settings->copy[i]);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
         free(f);
     }
@@ -491,16 +491,16 @@ copy_files_outputlist(bm_ctx_t *ctx)
 }
 
 static int
-copy_files_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
+copy_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
 {
-    if (ctx == NULL || ctx->settings->copy_files == NULL)
+    if (ctx == NULL || ctx->settings->copy == NULL)
         return 0;
 
     int rv = 0;
 
     bc_slist_t *s, *o;
 
-    for (s = ctx->copy_files_fctx, o = outputs; s != NULL && o != NULL;
+    for (s = ctx->copy_fctx, o = outputs; s != NULL && o != NULL;
             s = s->next, o = o->next)
     {
         bm_filectx_t *o_fctx = o->data;
@@ -687,10 +687,10 @@ const bm_rule_t rules[] = {
         .generate_files = true,
     },
     {
-        .name = "copy_files",
+        .name = "copy",
         .help = "copy static files from source directory to output directory",
-        .outputlist_func = copy_files_outputlist,
-        .exec_func = copy_files_exec,
+        .outputlist_func = copy_outputlist,
+        .exec_func = copy_exec,
         .generate_files = true,
     },
     {

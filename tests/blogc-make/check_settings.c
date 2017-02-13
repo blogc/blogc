@@ -89,7 +89,7 @@ test_settings2(void **state)
         "\n"
         "  hhhh\n"
         "iiii\n"
-        "[copy_files]\n"
+        "[copy]\n"
         "jjjj\n"
         "kkkk\n"
         "llll\n";
@@ -135,11 +135,11 @@ test_settings2(void **state)
     assert_string_equal(s->pages[1], "eeee");
     assert_string_equal(s->pages[2], "ffff");
     assert_null(s->pages[3]);
-    assert_non_null(s->copy_files);
-    assert_string_equal(s->copy_files[0], "jjjj");
-    assert_string_equal(s->copy_files[1], "kkkk");
-    assert_string_equal(s->copy_files[2], "llll");
-    assert_null(s->copy_files[3]);
+    assert_non_null(s->copy);
+    assert_string_equal(s->copy[0], "jjjj");
+    assert_string_equal(s->copy[1], "kkkk");
+    assert_string_equal(s->copy[2], "llll");
+    assert_null(s->copy[3]);
     assert_non_null(s->tags);
     assert_string_equal(s->tags[0], "gggg");
     assert_string_equal(s->tags[1], "hhhh");

@@ -71,7 +71,7 @@ static const char* required_environment[] = {
 static const char* list_sections[] = {
     "posts",
     "pages",
-    "copy_files",
+    "copy",
     "tags",
     NULL,
 };
@@ -97,7 +97,7 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
     rv->settings = bc_trie_new(free);
     rv->posts = NULL;
     rv->pages = NULL;
-    rv->copy_files = NULL;
+    rv->copy = NULL;
     rv->tags = NULL;
 
     char **env = bc_config_list_keys(config, "environment");
@@ -143,7 +143,7 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
 
     rv->posts = bc_config_get_list(config, "posts");
     rv->pages = bc_config_get_list(config, "pages");
-    rv->copy_files = bc_config_get_list(config, "copy_files");
+    rv->copy = bc_config_get_list(config, "copy");
     rv->tags = bc_config_get_list(config, "tags");
 
 cleanup:
@@ -184,7 +184,7 @@ bm_settings_free(bm_settings_t *settings)
     bc_trie_free(settings->settings);
     bc_strv_free(settings->posts);
     bc_strv_free(settings->pages);
-    bc_strv_free(settings->copy_files);
+    bc_strv_free(settings->copy);
     bc_strv_free(settings->tags);
     free(settings);
 }

@@ -19,7 +19,7 @@ typedef struct {
     bc_trie_t *settings;
     char **posts;
     char **pages;
-    char **copy_files;
+    char **copy;
     char **tags;
 } bm_settings_t;
 
