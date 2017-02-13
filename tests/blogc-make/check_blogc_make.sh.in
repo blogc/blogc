@@ -54,7 +54,7 @@ cat > "${TEMP}/proj/templates/main.tmpl" <<EOF
 Listing: {% ifdef FILTER_TAG %}{{ FILTER_TAG }} - {% endif %}{{ TITLE }} - {{ DATE_FORMATTED }}
 {% endblock %}
 {% block entry %}
-{{ TITLE }}{% if BM_TYPE == "post" %} - {{ DATE_FORMATTED }}{% endif %}
+{{ TITLE }}{% if MAKE_TYPE == "post" %} - {{ DATE_FORMATTED }}{% endif %}
 
 {{ CONTENT }}
 {% endblock %}
@@ -455,7 +455,7 @@ cat > "${TEMP}/proj/temp/main.html" <<EOF
 Listing: {% ifdef FILTER_TAG %}{{ FILTER_TAG }} - {% endif %}{{ TITLE }} - {{ DATE_FORMATTED }}
 {% endblock %}
 {% block entry %}
-{{ TITLE }}{% if BM_TYPE == "post" %} - {{ DATE_FORMATTED }}{% endif %}
+{{ TITLE }}{% if MAKE_TYPE == "post" %} - {{ DATE_FORMATTED }}{% endif %}
 
 {{ CONTENT }}
 {% endblock %}

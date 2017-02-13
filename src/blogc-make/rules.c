@@ -61,8 +61,8 @@ index_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
     bc_trie_insert(variables, "FILTER_PAGE", bc_strdup("1"));
     bc_trie_insert(variables, "DATE_FORMAT",
         bc_strdup(bc_trie_lookup(ctx->settings->settings, "date_format")));
-    bc_trie_insert(variables, "BM_RULE", bc_strdup("index"));
-    bc_trie_insert(variables, "BM_TYPE", bc_strdup("post"));
+    bc_trie_insert(variables, "MAKE_RULE", bc_strdup("index"));
+    bc_trie_insert(variables, "MAKE_TYPE", bc_strdup("post"));
 
     for (bc_slist_t *l = outputs; l != NULL; l = l->next) {
         bm_filectx_t *fctx = l->data;
@@ -119,8 +119,8 @@ atom_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
         "atom_posts_per_page")));
     bc_trie_insert(variables, "FILTER_PAGE", bc_strdup("1"));
     bc_trie_insert(variables, "DATE_FORMAT", bc_strdup("%Y-%m-%dT%H:%M:%SZ"));
-    bc_trie_insert(variables, "BM_RULE", bc_strdup("atom"));
-    bc_trie_insert(variables, "BM_TYPE", bc_strdup("atom"));
+    bc_trie_insert(variables, "MAKE_RULE", bc_strdup("atom"));
+    bc_trie_insert(variables, "MAKE_TYPE", bc_strdup("atom"));
 
     for (bc_slist_t *l = outputs; l != NULL; l = l->next) {
         bm_filectx_t *fctx = l->data;
@@ -181,8 +181,8 @@ atom_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
         "atom_posts_per_page")));
     bc_trie_insert(variables, "FILTER_PAGE", bc_strdup("1"));
     bc_trie_insert(variables, "DATE_FORMAT", bc_strdup("%Y-%m-%dT%H:%M:%SZ"));
-    bc_trie_insert(variables, "BM_RULE", bc_strdup("atom_tags"));
-    bc_trie_insert(variables, "BM_TYPE", bc_strdup("atom"));
+    bc_trie_insert(variables, "MAKE_RULE", bc_strdup("atom_tags"));
+    bc_trie_insert(variables, "MAKE_TYPE", bc_strdup("atom"));
 
     for (bc_slist_t *l = outputs; l != NULL; l = l->next, i++) {
         bm_filectx_t *fctx = l->data;
@@ -254,8 +254,8 @@ pagination_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
         bc_strdup(bc_trie_lookup(ctx->settings->settings, "posts_per_page")));
     bc_trie_insert(variables, "DATE_FORMAT",
         bc_strdup(bc_trie_lookup(ctx->settings->settings, "date_format")));
-    bc_trie_insert(variables, "BM_RULE", bc_strdup("pagination"));
-    bc_trie_insert(variables, "BM_TYPE", bc_strdup("post"));
+    bc_trie_insert(variables, "MAKE_RULE", bc_strdup("pagination"));
+    bc_trie_insert(variables, "MAKE_TYPE", bc_strdup("post"));
 
     for (bc_slist_t *l = outputs; l != NULL; l = l->next, page++) {
         bm_filectx_t *fctx = l->data;
@@ -315,8 +315,8 @@ posts_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
     bc_trie_insert(variables, "IS_POST", bc_strdup("1"));
     bc_trie_insert(variables, "DATE_FORMAT",
         bc_strdup(bc_trie_lookup(ctx->settings->settings, "date_format")));
-    bc_trie_insert(variables, "BM_RULE", bc_strdup("posts"));
-    bc_trie_insert(variables, "BM_TYPE", bc_strdup("post"));
+    bc_trie_insert(variables, "MAKE_RULE", bc_strdup("posts"));
+    bc_trie_insert(variables, "MAKE_TYPE", bc_strdup("post"));
 
     bc_slist_t *s, *o;
 
@@ -381,8 +381,8 @@ tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
     bc_trie_insert(variables, "FILTER_PAGE", bc_strdup("1"));
     bc_trie_insert(variables, "DATE_FORMAT",
         bc_strdup(bc_trie_lookup(ctx->settings->settings, "date_format")));
-    bc_trie_insert(variables, "BM_RULE", bc_strdup("tags"));
-    bc_trie_insert(variables, "BM_TYPE", bc_strdup("post"));
+    bc_trie_insert(variables, "MAKE_RULE", bc_strdup("tags"));
+    bc_trie_insert(variables, "MAKE_TYPE", bc_strdup("post"));
 
     for (bc_slist_t *l = outputs; l != NULL; l = l->next, i++) {
         bm_filectx_t *fctx = l->data;
@@ -445,8 +445,8 @@ pages_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
     bc_trie_t *variables = bc_trie_new(free);
     bc_trie_insert(variables, "DATE_FORMAT",
         bc_strdup(bc_trie_lookup(ctx->settings->settings, "date_format")));
-    bc_trie_insert(variables, "BM_RULE", bc_strdup("pages"));
-    bc_trie_insert(variables, "BM_TYPE", bc_strdup("page"));
+    bc_trie_insert(variables, "MAKE_RULE", bc_strdup("pages"));
+    bc_trie_insert(variables, "MAKE_TYPE", bc_strdup("page"));
 
     bc_slist_t *s, *o;
 
