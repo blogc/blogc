@@ -30,7 +30,7 @@ test_source_parse(void **state)
     bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(bc_trie_size(source), 6);
+    assert_int_equal(bc_trie_size(source), 7);
     assert_string_equal(bc_trie_lookup(source, "VAR1"), "asd asd");
     assert_string_equal(bc_trie_lookup(source, "VAR2"), "123chunda");
     assert_string_equal(bc_trie_lookup(source, "EXCERPT"),
@@ -43,6 +43,7 @@ test_source_parse(void **state)
         "# This is a test\n"
         "\n"
         "bola\n");
+    assert_string_equal(bc_trie_lookup(source, "TITLE"), "This is a test");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
     bc_trie_free(source);
 }
@@ -62,7 +63,7 @@ test_source_parse_crlf(void **state)
     bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(bc_trie_size(source), 6);
+    assert_int_equal(bc_trie_size(source), 7);
     assert_string_equal(bc_trie_lookup(source, "VAR1"), "asd asd");
     assert_string_equal(bc_trie_lookup(source, "VAR2"), "123chunda");
     assert_string_equal(bc_trie_lookup(source, "EXCERPT"),
@@ -75,6 +76,7 @@ test_source_parse_crlf(void **state)
         "# This is a test\r\n"
         "\r\n"
         "bola\r\n");
+    assert_string_equal(bc_trie_lookup(source, "TITLE"), "This is a test");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
     bc_trie_free(source);
 }
@@ -96,7 +98,7 @@ test_source_parse_with_spaces(void **state)
     bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(bc_trie_size(source), 6);
+    assert_int_equal(bc_trie_size(source), 7);
     assert_string_equal(bc_trie_lookup(source, "VAR1"), "chunda");
     assert_string_equal(bc_trie_lookup(source, "BOLA"), "guda");
     assert_string_equal(bc_trie_lookup(source, "EXCERPT"),
@@ -109,6 +111,7 @@ test_source_parse_with_spaces(void **state)
         "# This is a test\n"
         "\n"
         "bola\n");
+    assert_string_equal(bc_trie_lookup(source, "TITLE"), "This is a test");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
     bc_trie_free(source);
 }
@@ -133,7 +136,7 @@ test_source_parse_with_excerpt(void **state)
     bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(bc_trie_size(source), 6);
+    assert_int_equal(bc_trie_size(source), 7);
     assert_string_equal(bc_trie_lookup(source, "VAR1"), "asd asd");
     assert_string_equal(bc_trie_lookup(source, "VAR2"), "123chunda");
     assert_string_equal(bc_trie_lookup(source, "EXCERPT"),
@@ -153,6 +156,41 @@ test_source_parse_with_excerpt(void **state)
         "\n"
         "guda\n"
         "yay");
+    assert_string_equal(bc_trie_lookup(source, "TITLE"), "This is a test");
+    assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
+    bc_trie_free(source);
+}
+
+
+static void
+test_source_parse_with_title(void **state)
+{
+    const char *a =
+        "VAR1: asd asd\n"
+        "VAR2: 123chunda\n"
+        "TITLE: THIS IS CHUNDA!\n"
+        "----------\n"
+        "# This is a test\n"
+        "\n"
+        "bola\n";
+    bc_error_t *err = NULL;
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(source);
+    assert_int_equal(bc_trie_size(source), 7);
+    assert_string_equal(bc_trie_lookup(source, "VAR1"), "asd asd");
+    assert_string_equal(bc_trie_lookup(source, "VAR2"), "123chunda");
+    assert_string_equal(bc_trie_lookup(source, "EXCERPT"),
+        "<h1 id=\"this-is-a-test\">This is a test</h1>\n"
+        "<p>bola</p>\n");
+    assert_string_equal(bc_trie_lookup(source, "CONTENT"),
+        "<h1 id=\"this-is-a-test\">This is a test</h1>\n"
+        "<p>bola</p>\n");
+    assert_string_equal(bc_trie_lookup(source, "RAW_CONTENT"),
+        "# This is a test\n"
+        "\n"
+        "bola\n");
+    assert_string_equal(bc_trie_lookup(source, "TITLE"), "THIS IS CHUNDA!");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
     bc_trie_free(source);
 }
@@ -173,7 +211,7 @@ test_source_parse_with_description(void **state)
     bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(bc_trie_size(source), 6);
+    assert_int_equal(bc_trie_size(source), 7);
     assert_string_equal(bc_trie_lookup(source, "VAR1"), "asd asd");
     assert_string_equal(bc_trie_lookup(source, "VAR2"), "123chunda");
     assert_string_equal(bc_trie_lookup(source, "EXCERPT"),
@@ -186,6 +224,7 @@ test_source_parse_with_description(void **state)
         "# This is a test\n"
         "\n"
         "bola\n");
+    assert_string_equal(bc_trie_lookup(source, "TITLE"), "This is a test");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "huehuehuebrbr");
     bc_trie_free(source);
 }
@@ -517,6 +556,7 @@ main(void)
         unit_test(test_source_parse_crlf),
         unit_test(test_source_parse_with_spaces),
         unit_test(test_source_parse_with_excerpt),
+        unit_test(test_source_parse_with_title),
         unit_test(test_source_parse_with_description),
         unit_test(test_source_parse_config_empty),
         unit_test(test_source_parse_config_invalid_key),
