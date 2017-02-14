@@ -75,7 +75,7 @@ This is how a `listing_once` block is defined:
     {% endblock %}
 
 This is a 'real life' usage example of a `listing_once` block, supposing
-that each source file defines a `TITLE` variable:
+that the `TITLE` variable is defined:
 
     {% block listing_once %}
     <ul>

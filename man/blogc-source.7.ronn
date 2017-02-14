@@ -52,6 +52,12 @@ that stores the name of the source file, without its extension. This is useful
 for building permalinks in templates. This variable can't be overriden by an
 explicit definition in source file.
 
+The variable `TITLE` is created by the source parser by default, containing the
+unparsed value of the first header found in the source file. The content is not
+parsed but HTML entities are encoded. Headers inside blockquotes are ignored.
+This variable can be overriden by an explicit definition in source file, that
+must have the HTML entities escaped manually.
+
 Another variable, `DESCRIPTION`, will be automatically created by the source
 parser. It contains the unparsed content of the first paragraph found in the
 source file. The content is not parsed but HTML entities are encoded. Paragraphs

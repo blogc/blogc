@@ -836,7 +836,7 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **title,
                         (real_end != 0 ? real_end : current);
                     tmp = bc_strndup(src + start, end - start);
                     if (title != NULL && *title == NULL)
-                        *title = bc_strdup(tmp);
+                        *title = blogc_htmlentities(tmp);
                     parsed = blogc_content_parse_inline(tmp);
                     slug = blogc_slugify(tmp);
                     if (slug == NULL)
