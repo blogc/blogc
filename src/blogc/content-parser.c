@@ -674,7 +674,7 @@ blogc_is_ordered_list_item(const char *str, size_t prefix_len)
 
 
 char*
-blogc_content_parse(const char *src, size_t *end_excerpt, char **title,
+blogc_content_parse(const char *src, size_t *end_excerpt, char **first_header,
     char **description)
 {
     // src is always nul-terminated.
@@ -835,8 +835,8 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **title,
                     end = is_last && c != '\n' && c != '\r' ? src_len :
                         (real_end != 0 ? real_end : current);
                     tmp = bc_strndup(src + start, end - start);
-                    if (title != NULL && *title == NULL)
-                        *title = blogc_htmlentities(tmp);
+                    if (first_header != NULL && *first_header == NULL)
+                        *first_header = blogc_htmlentities(tmp);
                     parsed = blogc_content_parse_inline(tmp);
                     slug = blogc_slugify(tmp);
                     if (slug == NULL)

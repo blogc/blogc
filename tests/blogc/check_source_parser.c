@@ -43,7 +43,7 @@ test_source_parse(void **state)
         "# This is a test\n"
         "\n"
         "bola\n");
-    assert_string_equal(bc_trie_lookup(source, "TITLE"), "This is a test");
+    assert_string_equal(bc_trie_lookup(source, "FIRST_HEADER"), "This is a test");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
     bc_trie_free(source);
 }
@@ -76,7 +76,7 @@ test_source_parse_crlf(void **state)
         "# This is a test\r\n"
         "\r\n"
         "bola\r\n");
-    assert_string_equal(bc_trie_lookup(source, "TITLE"), "This is a test");
+    assert_string_equal(bc_trie_lookup(source, "FIRST_HEADER"), "This is a test");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
     bc_trie_free(source);
 }
@@ -111,7 +111,7 @@ test_source_parse_with_spaces(void **state)
         "# This is a test\n"
         "\n"
         "bola\n");
-    assert_string_equal(bc_trie_lookup(source, "TITLE"), "This is a test");
+    assert_string_equal(bc_trie_lookup(source, "FIRST_HEADER"), "This is a test");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
     bc_trie_free(source);
 }
@@ -156,19 +156,19 @@ test_source_parse_with_excerpt(void **state)
         "\n"
         "guda\n"
         "yay");
-    assert_string_equal(bc_trie_lookup(source, "TITLE"), "This is a test");
+    assert_string_equal(bc_trie_lookup(source, "FIRST_HEADER"), "This is a test");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
     bc_trie_free(source);
 }
 
 
 static void
-test_source_parse_with_title(void **state)
+test_source_parse_with_first_header(void **state)
 {
     const char *a =
         "VAR1: asd asd\n"
         "VAR2: 123chunda\n"
-        "TITLE: THIS IS CHUNDA!\n"
+        "FIRST_HEADER: THIS IS CHUNDA!\n"
         "----------\n"
         "# This is a test\n"
         "\n"
@@ -190,7 +190,7 @@ test_source_parse_with_title(void **state)
         "# This is a test\n"
         "\n"
         "bola\n");
-    assert_string_equal(bc_trie_lookup(source, "TITLE"), "THIS IS CHUNDA!");
+    assert_string_equal(bc_trie_lookup(source, "FIRST_HEADER"), "THIS IS CHUNDA!");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
     bc_trie_free(source);
 }
@@ -224,7 +224,7 @@ test_source_parse_with_description(void **state)
         "# This is a test\n"
         "\n"
         "bola\n");
-    assert_string_equal(bc_trie_lookup(source, "TITLE"), "This is a test");
+    assert_string_equal(bc_trie_lookup(source, "FIRST_HEADER"), "This is a test");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "huehuehuebrbr");
     bc_trie_free(source);
 }
@@ -556,7 +556,7 @@ main(void)
         unit_test(test_source_parse_crlf),
         unit_test(test_source_parse_with_spaces),
         unit_test(test_source_parse_with_excerpt),
-        unit_test(test_source_parse_with_title),
+        unit_test(test_source_parse_with_first_header),
         unit_test(test_source_parse_with_description),
         unit_test(test_source_parse_config_empty),
         unit_test(test_source_parse_config_invalid_key),

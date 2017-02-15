@@ -150,19 +150,19 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
                 if (current == (src_len - 1)) {
                     tmp = bc_strndup(src + start, src_len - start);
                     bc_trie_insert(rv, "RAW_CONTENT", tmp);
-                    char *title = NULL;
+                    char *first_header = NULL;
                     char *description = NULL;
-                    content = blogc_content_parse(tmp, &end_excerpt, &title,
-                        &description);
-                    if (title != NULL) {
-                        // do not override source-provided title.
-                        if (NULL == bc_trie_lookup(rv, "TITLE")) {
+                    content = blogc_content_parse(tmp, &end_excerpt,
+                        &first_header, &description);
+                    if (first_header != NULL) {
+                        // do not override source-provided first_header.
+                        if (NULL == bc_trie_lookup(rv, "FIRST_HEADER")) {
                             // no need to free, because we are transfering memory
                             // ownership to the trie.
-                            bc_trie_insert(rv, "TITLE", title);
+                            bc_trie_insert(rv, "FIRST_HEADER", first_header);
                         }
                         else {
-                            free(title);
+                            free(first_header);
                         }
                     }
                     if (description != NULL) {

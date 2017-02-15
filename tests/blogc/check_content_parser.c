@@ -1162,7 +1162,7 @@ test_content_parse_ordered_list_crlf(void **state)
 
 
 static void
-test_content_parse_title(void **state)
+test_content_parse_first_header(void **state)
 {
     char *t = NULL;
     char *html = blogc_content_parse("# foo", NULL, &t, NULL);
@@ -1240,7 +1240,7 @@ test_content_parse_title(void **state)
 
 
 static void
-test_content_parse_title_crlf(void **state)
+test_content_parse_first_header_crlf(void **state)
 {
     char *t = NULL;
     char *html = blogc_content_parse("# foo\r\n", NULL, &t, NULL);
@@ -2355,8 +2355,8 @@ main(void)
         unit_test(test_content_parse_unordered_list_crlf),
         unit_test(test_content_parse_ordered_list),
         unit_test(test_content_parse_ordered_list_crlf),
-        unit_test(test_content_parse_title),
-        unit_test(test_content_parse_title_crlf),
+        unit_test(test_content_parse_first_header),
+        unit_test(test_content_parse_first_header_crlf),
         unit_test(test_content_parse_description),
         unit_test(test_content_parse_description_crlf),
         unit_test(test_content_parse_invalid_excerpt),
