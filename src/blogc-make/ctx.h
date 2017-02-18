@@ -15,6 +15,12 @@
 #include "../common/error.h"
 #include "../common/utils.h"
 
+#ifdef __APPLE__
+#ifndef st_mtim
+#define st_mtim st_mtimespec
+#endif
+#endif
+
 typedef struct {
     char *path;
     char *short_path;

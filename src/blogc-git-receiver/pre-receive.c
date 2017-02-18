@@ -196,7 +196,8 @@ bgr_pre_receive_hook(int argc, char *argv[])
     // command.
     char *build_cmd = NULL;
     if (0 == access("blogcfile", F_OK)) {
-        if (127 == WEXITSTATUS(system("blogc-make -v 2> /dev/null > /dev/null"))) {
+        int status_bmake = system("blogc-make -v 2> /dev/null > /dev/null");
+        if (127 == WEXITSTATUS(status_bmake)) {
             fprintf(stderr, "error: failed to find blogc-make binary\n");
             rv = 3;
             goto cleanup;
@@ -207,11 +208,15 @@ bgr_pre_receive_hook(int argc, char *argv[])
     else if ((0 == access("Makefile", F_OK)) || (0 == access("GNUMakefile", F_OK))) {
         const char *make_impl = NULL;
 
-        if (127 != WEXITSTATUS(system("gmake -f /dev/null 2> /dev/null > /dev/null"))) {
+        int status_gmake = system("gmake -f /dev/null 2> /dev/null > /dev/null");
+        if (127 != WEXITSTATUS(status_gmake)) {
             make_impl = "gmake";
         }
-        else if (127 != WEXITSTATUS(system("make -f /dev/null 2> /dev/null > /dev/null"))) {
-            make_impl = "make";
+        else {
+            int status_make = system("make -f /dev/null 2> /dev/null > /dev/null");
+            if (127 != WEXITSTATUS(status_make)) {
+                make_impl = "make";
+            }
         }
 
         if (make_impl == NULL) {

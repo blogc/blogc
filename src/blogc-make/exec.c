@@ -352,7 +352,8 @@ bm_exec_blogc_runserver(const char *output_dir, bool verbose)
     fflush(stdout);
 
     // we don't need pipes to run blogc-runserver, because it is "interactive"
-    int rv = WEXITSTATUS(system(cmd->str));
+    int status = system(cmd->str);
+    int rv = WEXITSTATUS(status);
     bc_string_free(cmd, true);
 
     if (rv != 0) {
