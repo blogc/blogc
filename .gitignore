@@ -70,6 +70,7 @@ blogc*.html
 /tests/blogc-make/check_atom
 /tests/blogc-make/check_blogc_make.sh
 /tests/blogc-make/check_exec
+/tests/blogc-make/check_rules
 /tests/blogc-make/check_settings
 /tests/blogc-runserver/check_httpd_utils
 /tests/blogc-runserver/check_mime

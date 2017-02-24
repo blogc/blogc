@@ -48,7 +48,7 @@ index_outputlist(bm_ctx_t *ctx)
 }
 
 static int
-index_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
+index_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
 {
     if (ctx == NULL || ctx->settings->posts == NULL)
         return 0;
@@ -106,7 +106,7 @@ atom_outputlist(bm_ctx_t *ctx)
 }
 
 static int
-atom_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
+atom_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
 {
     if (ctx == NULL || ctx->settings->posts == NULL)
         return 0;
@@ -167,7 +167,7 @@ atom_tags_outputlist(bm_ctx_t *ctx)
 }
 
 static int
-atom_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
+atom_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
 {
     if (ctx == NULL || ctx->settings->posts == NULL || ctx->settings->tags == NULL)
         return 0;
@@ -241,7 +241,7 @@ pagination_outputlist(bm_ctx_t *ctx)
 }
 
 static int
-pagination_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
+pagination_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
 {
     if (ctx == NULL || ctx->settings->posts == NULL)
         return 0;
@@ -304,7 +304,7 @@ posts_outputlist(bm_ctx_t *ctx)
 }
 
 static int
-posts_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
+posts_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
 {
     if (ctx == NULL || ctx->settings->posts == NULL)
         return 0;
@@ -366,7 +366,7 @@ tags_outputlist(bm_ctx_t *ctx)
 }
 
 static int
-tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
+tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
 {
     if (ctx == NULL || ctx->settings->posts == NULL || ctx->settings->tags == NULL)
         return 0;
@@ -435,7 +435,7 @@ pages_outputlist(bm_ctx_t *ctx)
 }
 
 static int
-pages_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
+pages_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
 {
     if (ctx == NULL || ctx->settings->pages == NULL)
         return 0;
@@ -491,7 +491,7 @@ copy_outputlist(bm_ctx_t *ctx)
 }
 
 static int
-copy_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
+copy_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
 {
     if (ctx == NULL || ctx->settings->copy == NULL)
         return 0;
@@ -527,7 +527,7 @@ clean_outputlist(bm_ctx_t *ctx)
 }
 
 static int
-clean_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
+clean_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
 {
     int rv = 0;
 
@@ -551,7 +551,8 @@ clean_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
 }
 
 
-static int all_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose);
+static int all_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args,
+    bool verbose);
 
 
 // RUNSERVER RULE
@@ -583,7 +584,7 @@ runserver_thread(void *arg)
                 "reloader disabled!\n");
             goto runserver_cleanup;
         }
-        if (0 != all_exec(args->ctx, NULL, args->verbose)) {
+        if (0 != all_exec(args->ctx, NULL, NULL, args->verbose)) {
             fprintf(stderr, "blogc-make: error: failed to rebuild website. "
                 "reloader disabled!\n");
             goto runserver_cleanup;
@@ -599,20 +600,20 @@ runserver_cleanup:
 }
 
 static int
-runserver_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
+runserver_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
 {
     // first 'all' call is syncronous, to do a 'sanity check'
-    int rv = all_exec(ctx, NULL, verbose);
+    int rv = all_exec(ctx, NULL, NULL, verbose);
     if (rv != 0)
         return rv;
 
-    runserver_args_t *args = bc_malloc(sizeof(runserver_args_t));
-    args->ctx = ctx;
-    args->verbose = verbose;
+    runserver_args_t *r_args = bc_malloc(sizeof(runserver_args_t));
+    r_args->ctx = ctx;
+    r_args->verbose = verbose;
 
     pthread_t thread;
 
-    if (0 != pthread_create(&thread, NULL, runserver_thread, args)) {
+    if (0 != pthread_create(&thread, NULL, runserver_thread, r_args)) {
         fprintf(stderr, "blogc-make: error: failed to create blogc-runserver "
             "thread!\n");
         return 3;
@@ -624,7 +625,8 @@ runserver_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
         return 3;
     }
 
-    bm_exec_blogc_runserver(ctx->output_dir, verbose);
+    bm_exec_blogc_runserver(ctx->output_dir, bc_trie_lookup(args, "host"),
+        bc_trie_lookup(args, "port"), bc_trie_lookup(args, "threads"), verbose);
     return 0;
 }
 
@@ -714,19 +716,49 @@ const bm_rule_t rules[] = {
 // ALL RULE
 
 static int
-all_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bool verbose)
+all_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
 {
     for (size_t i = 0; rules[i].name != NULL; i++) {
         if (!rules[i].generate_files) {
             continue;
         }
 
-        int rv = bm_rule_execute(ctx, &(rules[i]), verbose);
+        int rv = bm_rule_execute(ctx, &(rules[i]), NULL, verbose);
         if (rv != 0) {
             return rv;
         }
     }
     return 0;
+}
+
+
+bc_trie_t*
+bm_rule_parse_args(const char *sep)
+{
+    if (sep == NULL || *sep == '\0' || *sep != ':')
+        return NULL;
+
+    bc_trie_t *rv = bc_trie_new(free);
+    char *end = (char*) sep + 1;
+    char *kv_sep;
+    while (NULL != (kv_sep = strchr(end, '='))) {
+        char *key = bc_strndup(end, kv_sep - end);
+        end = kv_sep + 1;
+        kv_sep = strchr(end, ',');
+        if (kv_sep == NULL)
+            kv_sep = strchr(end, '\0');
+        char *value = bc_strndup(end, kv_sep - end);
+        bc_trie_insert(rv, key, value);
+        free(key);
+        if (*kv_sep == '\0')
+            break;
+        end = kv_sep + 1;
+    }
+    if (kv_sep == NULL) {
+        bc_trie_free(rv);
+        return NULL;
+    }
+    return rv;
 }
 
 
@@ -740,18 +772,36 @@ bm_rule_executor(bm_ctx_t *ctx, bc_slist_t *rule_list, bool verbose)
     int rv = 0;
 
     for (bc_slist_t *l = rule_list; l != NULL; l = l->next) {
+
+        char *rule_str = l->data;
+        char *sep = strchr(rule_str, ':');
+
+        bc_trie_t *args = NULL;
+        if (sep == NULL) {
+            sep = strchr(rule_str, '\0');
+        }
+        else {
+            args = bm_rule_parse_args(sep);
+            if (args == NULL) {
+                fprintf(stderr, "blogc-make: warning: failed to parse rule "
+                    "arguments, ignoring: %s\n", rule_str);
+            }
+        }
+
         rule = NULL;
         for (size_t i = 0; rules[i].name != NULL; i++) {
-            if (0 == strcmp((char*) l->data, rules[i].name)) {
+            if (strlen(rules[i].name) < (sep - rule_str))
+                continue;
+            if (0 == strncmp(rule_str, rules[i].name, sep - rule_str)) {
                 rule = &(rules[i]);
-                rv = bm_rule_execute(ctx, rule, verbose);
+                rv = bm_rule_execute(ctx, rule, args, verbose);
                 if (rv != 0)
                     return rv;
             }
         }
         if (rule == NULL) {
-            fprintf(stderr, "blogc-make: error: rule not found: %s\n",
-                (char*) l->data);
+            fprintf(stderr, "blogc-make: error: rule not found: %.*s\n",
+                (int) (sep - rule_str), rule_str);
             rv = 3;
         }
     }
@@ -761,7 +811,8 @@ bm_rule_executor(bm_ctx_t *ctx, bc_slist_t *rule_list, bool verbose)
 
 
 int
-bm_rule_execute(bm_ctx_t *ctx, const bm_rule_t *rule, bool verbose)
+bm_rule_execute(bm_ctx_t *ctx, const bm_rule_t *rule, bc_trie_t *args,
+    bool verbose)
 {
     if (ctx == NULL || rule == NULL)
         return 3;
@@ -771,7 +822,7 @@ bm_rule_execute(bm_ctx_t *ctx, const bm_rule_t *rule, bool verbose)
         outputs = rule->outputlist_func(ctx);
     }
 
-    int rv = rule->exec_func(ctx, outputs, verbose);
+    int rv = rule->exec_func(ctx, outputs, args, verbose);
 
     bc_slist_free_full(outputs, (bc_free_func_t) bm_filectx_free);
 

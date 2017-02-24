@@ -15,7 +15,7 @@
 
 typedef bc_slist_t* (*bm_rule_outputlist_func_t) (bm_ctx_t *ctx);
 typedef int (*bm_rule_exec_func_t) (bm_ctx_t *ctx, bc_slist_t *outputs,
-    bool verbose);
+    bc_trie_t *args, bool verbose);
 
 typedef struct {
     const char *name;
@@ -25,8 +25,10 @@ typedef struct {
     bool generate_files;
 } bm_rule_t;
 
+bc_trie_t* bm_rule_parse_args(const char *sep);
 int bm_rule_executor(bm_ctx_t *ctx, bc_slist_t *rule_list, bool verbose);
-int bm_rule_execute(bm_ctx_t *ctx, const bm_rule_t *rule, bool verbose);
+int bm_rule_execute(bm_ctx_t *ctx, const bm_rule_t *rule, bc_trie_t *args,
+    bool verbose);
 bool bm_rule_need_rebuild(bc_slist_t *sources, bm_filectx_t *settings,
     bm_filectx_t *template, bm_filectx_t *output, bool only_first_source);
 bc_slist_t* bm_rule_list_built_files(bm_ctx_t *ctx);

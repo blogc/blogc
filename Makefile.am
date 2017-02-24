@@ -758,6 +758,7 @@ if BUILD_MAKE_LIB
 check_PROGRAMS += \
 	tests/blogc-make/check_atom \
 	tests/blogc-make/check_exec \
+	tests/blogc-make/check_rules \
 	tests/blogc-make/check_settings \
 	$(NULL)
 
@@ -792,6 +793,24 @@ tests_blogc_make_check_exec_LDFLAGS = \
 	$(NULL)
 
 tests_blogc_make_check_exec_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_make.la \
+	libblogc_common.la \
+	$(NULL)
+
+tests_blogc_make_check_rules_SOURCES = \
+	tests/blogc-make/check_rules.c \
+	$(NULL)
+
+tests_blogc_make_check_rules_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_make_check_rules_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_blogc_make_check_rules_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_make.la \
 	libblogc_common.la \

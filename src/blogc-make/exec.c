@@ -305,7 +305,8 @@ bm_exec_blogc(bm_settings_t *settings, bc_trie_t *variables, bool listing,
 
 
 int
-bm_exec_blogc_runserver(const char *output_dir, bool verbose)
+bm_exec_blogc_runserver(const char *output_dir, const char *host,
+    const char *port, const char *threads, bool verbose)
 {
     bc_string_t *cmd = bc_string_new();
 
@@ -320,23 +321,20 @@ bm_exec_blogc_runserver(const char *output_dir, bool verbose)
         bc_string_append(cmd, "blogc-runserver");
     }
 
-    const char *runserver_host_tmp = getenv("RUNSERVER_HOST");
-    if (runserver_host_tmp != NULL) {
-        char *tmp = bc_shell_quote(runserver_host_tmp);
+    if (host != NULL) {
+        char *tmp = bc_shell_quote(host);
         bc_string_append_printf(cmd, " -t %s", tmp);
         free(tmp);
     }
 
-    const char *runserver_port_tmp = getenv("RUNSERVER_PORT");
-    if (runserver_port_tmp != NULL) {
-        char *tmp = bc_shell_quote(runserver_port_tmp);
+    if (port != NULL) {
+        char *tmp = bc_shell_quote(port);
         bc_string_append_printf(cmd, " -p %s", tmp);
         free(tmp);
     }
 
-    const char *runserver_threads_tmp = getenv("RUNSERVER_THREADS");
-    if (runserver_threads_tmp != NULL) {
-        char *tmp = bc_shell_quote(runserver_threads_tmp);
+    if (threads != NULL) {
+        char *tmp = bc_shell_quote(threads);
         bc_string_append_printf(cmd, " -m %s", tmp);
         free(tmp);
     }
