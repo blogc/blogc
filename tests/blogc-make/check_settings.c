@@ -264,6 +264,98 @@ test_settings_env2(void **state)
 }
 
 
+static void
+test_settings_copy_files(void **state)
+{
+    const char *a =
+        "[settings]\n"
+        "output_dir = bola\n"
+        "content_dir = guda\n"
+        "main_template = foo.tmpl\n"
+        "\n"
+        "[global]\n"
+        "BOLA = asd\n"
+        "GUDA = qwe\n"
+        "AUTHOR_NAME = chunda\n"
+        "AUTHOR_EMAIL = chunda@example.com\n"
+        "SITE_TITLE = Fuuuuuuuuu\n"
+        "SITE_TAGLINE = My cool tagline\n"
+        "BASE_DOMAIN = http://example.com\n"
+        "\n"
+        "[posts]\n"
+        "\n"
+        "aaaa\n"
+        "bbbb\n"
+        "cccc\n"
+        "[pages]\n"
+        "  dddd\n"
+        "eeee\n"
+        "ffff\n"
+        "[tags]\n"
+        "gggg\n"
+        "\n"
+        "  hhhh\n"
+        "iiii\n"
+        "[copy_files]\n"
+        "jjjj\n"
+        "kkkk\n"
+        "llll\n";
+    bc_error_t *err = NULL;
+    bm_settings_t *s = bm_settings_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(s);
+    assert_null(s->root_dir);
+    assert_int_equal(bc_trie_size(s->env), 7);
+    assert_string_equal(bc_trie_lookup(s->env, "BOLA"), "asd");
+    assert_string_equal(bc_trie_lookup(s->env, "GUDA"), "qwe");
+    assert_string_equal(bc_trie_lookup(s->env, "AUTHOR_NAME"), "chunda");
+    assert_string_equal(bc_trie_lookup(s->env, "AUTHOR_EMAIL"), "chunda@example.com");
+    assert_string_equal(bc_trie_lookup(s->env, "SITE_TITLE"), "Fuuuuuuuuu");
+    assert_string_equal(bc_trie_lookup(s->env, "SITE_TAGLINE"), "My cool tagline");
+    assert_string_equal(bc_trie_lookup(s->env, "BASE_DOMAIN"), "http://example.com");
+    assert_int_equal(bc_trie_size(s->settings), 17);
+    assert_string_equal(bc_trie_lookup(s->settings, "source_ext"), ".txt");
+    assert_string_equal(bc_trie_lookup(s->settings, "html_ext"), "/index.html");
+    assert_string_equal(bc_trie_lookup(s->settings, "output_dir"), "bola");
+    assert_string_equal(bc_trie_lookup(s->settings, "content_dir"), "guda");
+    assert_string_equal(bc_trie_lookup(s->settings, "template_dir"), "templates");
+    assert_string_equal(bc_trie_lookup(s->settings, "main_template"), "foo.tmpl");
+    assert_string_equal(bc_trie_lookup(s->settings, "date_format"),
+        "%b %d, %Y, %I:%M %p GMT");
+    assert_string_equal(bc_trie_lookup(s->settings, "posts_per_page"), "10");
+    assert_string_equal(bc_trie_lookup(s->settings, "atom_prefix"), "atom");
+    assert_string_equal(bc_trie_lookup(s->settings, "atom_ext"), ".xml");
+    assert_string_equal(bc_trie_lookup(s->settings, "atom_posts_per_page"), "10");
+    assert_string_equal(bc_trie_lookup(s->settings, "pagination_prefix"), "page");
+    assert_string_equal(bc_trie_lookup(s->settings, "post_prefix"), "post");
+    assert_string_equal(bc_trie_lookup(s->settings, "tag_prefix"), "tag");
+    assert_string_equal(bc_trie_lookup(s->settings, "runserver_host"), "127.0.0.1");
+    assert_string_equal(bc_trie_lookup(s->settings, "runserver_port"), "8080");
+    assert_string_equal(bc_trie_lookup(s->settings, "runserver_threads"), "20");
+    assert_non_null(s->posts);
+    assert_string_equal(s->posts[0], "aaaa");
+    assert_string_equal(s->posts[1], "bbbb");
+    assert_string_equal(s->posts[2], "cccc");
+    assert_null(s->posts[3]);
+    assert_non_null(s->pages);
+    assert_string_equal(s->pages[0], "dddd");
+    assert_string_equal(s->pages[1], "eeee");
+    assert_string_equal(s->pages[2], "ffff");
+    assert_null(s->pages[3]);
+    assert_non_null(s->copy);
+    assert_string_equal(s->copy[0], "jjjj");
+    assert_string_equal(s->copy[1], "kkkk");
+    assert_string_equal(s->copy[2], "llll");
+    assert_null(s->copy[3]);
+    assert_non_null(s->tags);
+    assert_string_equal(s->tags[0], "gggg");
+    assert_string_equal(s->tags[1], "hhhh");
+    assert_string_equal(s->tags[2], "iiii");
+    assert_null(s->tags[3]);
+    bm_settings_free(s);
+}
+
+
 int
 main(void)
 {
@@ -273,6 +365,7 @@ main(void)
         unit_test(test_settings_env),
         unit_test(test_settings2),
         unit_test(test_settings_env2),
+        unit_test(test_settings_copy_files),
     };
     return run_tests(tests);
 }

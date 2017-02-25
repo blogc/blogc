@@ -72,6 +72,7 @@ static const char* list_sections[] = {
     "posts",
     "pages",
     "copy",
+    "copy_files",  // backward compatibility
     "tags",
     NULL,
 };
@@ -160,8 +161,12 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
 
     rv->posts = bc_config_get_list(config, "posts");
     rv->pages = bc_config_get_list(config, "pages");
-    rv->copy = bc_config_get_list(config, "copy");
     rv->tags = bc_config_get_list(config, "tags");
+
+    // this is for backward compatibility too.
+    rv->copy = bc_config_get_list(config, "copy");
+    if (rv->copy == NULL)
+        rv->copy = bc_config_get_list(config, "copy_files");
 
 cleanup:
 
