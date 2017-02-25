@@ -169,9 +169,9 @@ AS_IF([test "x$enable_tests" != "xno"], [
     have_tests=no
     TESTS="disabled"
     AS_IF([test "x$enable_tests" = "xyes"], [
-      AC_MSG_ERROR([tests requested but cmocka not found])
+      AC_MSG_ERROR([tests requested but cmocka was not found or -wrap is not supported by your linker])
     ], [
-      AC_MSG_WARN([cmocka not found, install it to run tests])
+      AC_MSG_WARN([cmocka was not found or -wrap is not supported by your linker, disabling tests])
     ])
   ])
 
