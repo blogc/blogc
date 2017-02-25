@@ -58,7 +58,7 @@ static const struct default_settings_map {
 };
 
 
-static const char* required_environment[] = {
+static const char* required_global[] = {
     "AUTHOR_NAME",
     "AUTHOR_EMAIL",
     "SITE_TITLE",
@@ -100,13 +100,30 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
     rv->copy = NULL;
     rv->tags = NULL;
 
-    char **env = bc_config_list_keys(config, "environment");
+    // this is some code for compatibility with the [environment] section,
+    // even if I never released a version with it, but some people is using
+    // it already.
+    const char *section = NULL;
+    char **env = bc_config_list_keys(config, "global");
+    if (env != NULL) {
+        section = "global";
+    }
+    else {
+        env = bc_config_list_keys(config, "environment");
+        if (env != NULL) {
+            section = "environment";
+        }
+        else {
+            section = "global";
+        }
+    }
+
     if (env != NULL) {
         for (size_t i = 0; env[i] != NULL; i++) {
             for (size_t j = 0; env[i][j] != '\0'; j++) {
                 if (!((env[i][j] >= 'A' && env[i][j] <= 'Z') || env[i][j] == '_')) {
                     *err = bc_error_new_printf(BLOGC_MAKE_ERROR_SETTINGS,
-                        "Invalid [environment] key: %s", env[i]);
+                        "Invalid [%s] key: %s", section, env[i]);
                     bc_strv_free(env);
                     bm_settings_free(rv);
                     rv = NULL;
@@ -114,17 +131,17 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
                 }
             }
             bc_trie_insert(rv->env, env[i],
-                bc_strdup(bc_config_get(config, "environment", env[i])));
+                bc_strdup(bc_config_get(config, section, env[i])));
         }
     }
     bc_strv_free(env);
 
-    for (size_t i = 0; required_environment[i] != NULL; i++) {
-        const char *value = bc_trie_lookup(rv->env, required_environment[i]);
+    for (size_t i = 0; required_global[i] != NULL; i++) {
+        const char *value = bc_trie_lookup(rv->env, required_global[i]);
         if (value == NULL || value[0] == '\0') {
             *err = bc_error_new_printf(BLOGC_MAKE_ERROR_SETTINGS,
-                "[environment] key required but not found or empty: %s",
-                required_environment[i]);
+                "[%s] key required but not found or empty: %s", section,
+                required_global[i]);
             bm_settings_free(rv);
             rv = NULL;
             goto cleanup;

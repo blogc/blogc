@@ -22,7 +22,7 @@ mkdir -p "${TEMP}"/proj{,/templates,/content/post}
 ### minimal settings, will produce no file
 
 cat > "${TEMP}/proj/blogcfile" <<EOF
-[environment]
+[global]
 AUTHOR_NAME = Lol
 AUTHOR_EMAIL = author@example.com
 SITE_TITLE = Lol's Website
@@ -480,7 +480,7 @@ atom_ext = /index.xml
 date_format = %b %d, %Y
 locale = en_US.utf8
 
-[environment]
+[global]
 AUTHOR_NAME = Lol
 AUTHOR_EMAIL = author@example.com
 SITE_TITLE = Lol's Website
