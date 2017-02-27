@@ -13,12 +13,48 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <errno.h>
+#include <libgen.h>
 #include "../common/error.h"
 #include "../common/file.h"
 #include "../common/utils.h"
 #include "ctx.h"
 #include "exec.h"
 #include "settings.h"
+
+
+char*
+bm_exec_find_binary(const char *bin, const char *env)
+{
+    // first try: env var
+    const char *env_bin = getenv(env);
+    if (env_bin != NULL) {
+        return bc_shell_quote(env_bin);
+    }
+
+    // second try: same dir as current exec
+    char *path = realpath("/proc/self/exe", NULL);  // Linux
+    if (path == NULL) {
+        path = realpath("/proc/curproc/file", NULL);  // FreeBSD
+        if (path == NULL) {
+            path = realpath("/proc/self/path/a.out", NULL);  // Solaris
+        }
+    }
+    if (path != NULL) {
+        char *dir = bc_strdup(dirname(path));
+        free(path);
+        char *tmp = bc_strdup_printf("%s/%s", dir, bin);
+        free(dir);
+        if (0 == access(tmp, X_OK)) {
+            char *rv = bc_shell_quote(tmp);
+            free(tmp);
+            return rv;
+        }
+        free(tmp);
+    }
+
+    // last try: $PATH
+    return bc_strdup(bin);
+}
 
 
 int
@@ -181,16 +217,9 @@ bm_exec_build_blogc_cmd(bm_settings_t *settings, bc_trie_t *variables,
         free(tmp);
     }
 
-    // use blogc binary from environment, if provided
-    const char *blogc_bin = getenv("BLOGC");
-    if (blogc_bin != NULL) {
-        char *tmp = bc_shell_quote(blogc_bin);
-        bc_string_append(rv, tmp);
-        free(tmp);
-    }
-    else {
-        bc_string_append(rv, "blogc");
-    }
+    char *blogc_bin = bm_exec_find_binary("blogc", "BLOGC");
+    bc_string_append(rv, blogc_bin);
+    free(blogc_bin);
 
     if (settings != NULL) {
         bc_trie_foreach(settings->env,
@@ -310,16 +339,10 @@ bm_exec_blogc_runserver(const char *output_dir, const char *host,
 {
     bc_string_t *cmd = bc_string_new();
 
-    // use blogc-runserver binary from environment, if provided
-    const char *blogc_runserver = getenv("BLOGC_RUNSERVER");
-    if (blogc_runserver != NULL) {
-        char *tmp = bc_shell_quote(blogc_runserver);
-        bc_string_append(cmd, tmp);
-        free(tmp);
-    }
-    else {
-        bc_string_append(cmd, "blogc-runserver");
-    }
+    char *blogc_runserver = bm_exec_find_binary("blogc-runserver",
+        "BLOGC_RUNSERVER");
+    bc_string_append(cmd, blogc_runserver);
+    free(blogc_runserver);
 
     if (host != NULL) {
         char *tmp = bc_shell_quote(host);

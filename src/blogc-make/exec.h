@@ -15,6 +15,7 @@
 #include "ctx.h"
 #include "settings.h"
 
+char* bm_exec_find_binary(const char *bin, const char *env);
 int bm_exec_command(const char *cmd, const char *input, char **output,
     char **error, bc_error_t **err);
 char* bm_exec_build_blogc_cmd(bm_settings_t *settings, bc_trie_t *variables,
