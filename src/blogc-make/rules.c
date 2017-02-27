@@ -560,24 +560,14 @@ static int all_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args,
 typedef struct {
     bm_ctx_t *ctx;
     bool verbose;
+    bool running;
 } runserver_args_t;
-
-static runserver_args_t *args = NULL;
-
-static void
-runserver_sig_handler(int sig)
-{
-    free(args);
-    args = NULL;
-}
 
 static void*
 runserver_thread(void *arg)
 {
-    signal(SIGINT, runserver_sig_handler);
-    signal(SIGTERM, runserver_sig_handler);
-    args = arg;
-    while (true) {
+    runserver_args_t *args = arg;
+    while (args->running) {
         bm_ctx_reload(args->ctx);
         if (args->ctx == NULL) {
             fprintf(stderr, "blogc-make: error: failed to reload context. "
@@ -594,8 +584,6 @@ runserver_thread(void *arg)
 
 runserver_cleanup:
     free(args);
-    args = NULL;
-
     return NULL;
 }
 
@@ -610,24 +598,39 @@ runserver_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose
     runserver_args_t *r_args = bc_malloc(sizeof(runserver_args_t));
     r_args->ctx = ctx;
     r_args->verbose = verbose;
+    r_args->running = true;
+
+    int err;
+    pthread_attr_t attr;
+
+    if (0 != (err = pthread_attr_init(&attr))) {
+        fprintf(stderr, "blogc-make: error: failed to initialize reloader "
+            "thread attributes: %s\n", strerror(err));
+        return 3;
+    }
+
+    // we run the thread detached, because we don't want to wait it to join
+    // before exiting. the OS can clean it properly
+    if (0 != (err = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED))) {
+        fprintf(stderr, "blogc-make: error: failed to mark reloader thread as "
+            "detached: %s\n", strerror(err));
+        return 3;
+    }
 
     pthread_t thread;
 
-    if (0 != pthread_create(&thread, NULL, runserver_thread, r_args)) {
-        fprintf(stderr, "blogc-make: error: failed to create blogc-runserver "
-            "thread!\n");
+    if (0 != (err = pthread_create(&thread, &attr, runserver_thread, r_args))) {
+        fprintf(stderr, "blogc-make: error: failed to create reloader "
+            "thread: %s\n", strerror(err));
         return 3;
     }
 
-    if (0 != pthread_detach(thread)) {
-        fprintf(stderr, "blogc-make: error: failed to detach blogc-runserver "
-            "thread!\n");
-        return 3;
-    }
-
-    bm_exec_blogc_runserver(ctx->output_dir, bc_trie_lookup(args, "host"),
+    rv = bm_exec_blogc_runserver(ctx->output_dir, bc_trie_lookup(args, "host"),
         bc_trie_lookup(args, "port"), bc_trie_lookup(args, "threads"), verbose);
-    return 0;
+
+    r_args->running = false;
+
+    return rv;
 }
 
 
