@@ -14,6 +14,13 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <libgen.h>
+
+#ifdef __FreeBSD__
+#include <limits.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#endif
+
 #include "../common/error.h"
 #include "../common/file.h"
 #include "../common/utils.h"
@@ -33,12 +40,24 @@ bm_exec_find_binary(const char *bin, const char *env)
 
     // second try: same dir as current exec
     char *path = realpath("/proc/self/exe", NULL);  // Linux
+#ifdef __FreeBSD__
     if (path == NULL) {
-        path = realpath("/proc/curproc/file", NULL);  // FreeBSD
+        path = realpath("/proc/curproc/file", NULL);  // FreeBSD with /proc
         if (path == NULL) {
-            path = realpath("/proc/self/path/a.out", NULL);  // Solaris
+            // FreeBSD without /proc (default for 11.0)
+            int name[4];
+            name[0] = CTL_KERN;
+            name[1] = KERN_PROC;
+            name[2] = KERN_PROC_PATHNAME;
+            name[3] = -1;
+            char buf[PATH_MAX];
+            size_t buf_len = sizeof(buf);
+            if (-1 != sysctl(name, 4, buf, &buf_len, NULL, 0)) {
+                path = bc_strdup_printf("%.*s", buf_len, buf);
+            }
         }
     }
+#endif
     if (path != NULL) {
         char *dir = bc_strdup(dirname(path));
         free(path);
