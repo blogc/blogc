@@ -18,6 +18,8 @@
 #include "../../src/blogc-make/settings.h"
 #include "../../src/common/utils.h"
 
+const char *argv0 = NULL;
+
 
 static void
 test_build_blogc_cmd_with_settings(void **state)

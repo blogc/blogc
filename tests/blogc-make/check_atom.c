@@ -20,6 +20,8 @@
 #include "../../src/common/error.h"
 #include "../../src/common/utils.h"
 
+const char *argv0 = NULL;
+
 
 static void
 test_atom_file(void **state)

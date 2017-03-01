@@ -19,6 +19,10 @@
 #include "ctx.h"
 #include "rules.h"
 
+// is this beautiful? no. but there's no point in passing something that is
+// essentially global to every function in exec.c
+const char *argv0 = NULL;
+
 
 static void
 print_help(void)
@@ -56,6 +60,11 @@ main(int argc, char **argv)
 #endif
 {
     setlocale(LC_ALL, "");
+
+    // i really hope that no operating system omits argv[0], but ...
+    if (argc > 0) {
+        argv0 = argv[0];
+    }
 
     int rv = 0;
     bc_error_t *err = NULL;

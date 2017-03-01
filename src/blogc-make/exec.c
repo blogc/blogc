@@ -14,19 +14,14 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <libgen.h>
-
-#ifdef __FreeBSD__
-#include <limits.h>
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#endif
-
 #include "../common/error.h"
 #include "../common/file.h"
 #include "../common/utils.h"
 #include "ctx.h"
 #include "exec.h"
 #include "settings.h"
+
+extern const char *argv0;
 
 
 char*
@@ -39,26 +34,15 @@ bm_exec_find_binary(const char *bin, const char *env)
     }
 
     // second try: same dir as current exec
-    char *path = realpath("/proc/self/exe", NULL);  // Linux
-#ifdef __FreeBSD__
-    if (path == NULL) {
-        path = realpath("/proc/curproc/file", NULL);  // FreeBSD with /proc
-        if (path == NULL) {
-            // FreeBSD without /proc (default for 11.0)
-            int name[4];
-            name[0] = CTL_KERN;
-            name[1] = KERN_PROC;
-            name[2] = KERN_PROC_PATHNAME;
-            name[3] = -1;
-            char buf[PATH_MAX];
-            size_t buf_len = sizeof(buf);
-            if (-1 != sysctl(name, 4, buf, &buf_len, NULL, 0)) {
-                path = bc_strdup_printf("%.*s", buf_len, buf);
-            }
-        }
-    }
-#endif
-    if (path != NULL) {
+    // we rely on some assumptions here:
+    //
+    // - if binary is called without a directory, that means location will
+    //   be resolved from $PATH, we don't care about doing a dir lookup.
+    // - we *never* call chdir anywhere in the code, so we can assume
+    //   that relative paths will work as expected.
+    // - windows path sep is not supported
+    if (argv0 != NULL && (NULL != strchr(argv0, '/'))) {
+        char *path = bc_strdup(argv0);
         char *dir = bc_strdup(dirname(path));
         free(path);
         char *tmp = bc_strdup_printf("%s/%s", dir, bin);
