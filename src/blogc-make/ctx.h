@@ -29,6 +29,8 @@ typedef struct {
 } bm_filectx_t;
 
 typedef struct {
+    bool verbose;
+
     bm_settings_t *settings;
 
     char *root_dir;

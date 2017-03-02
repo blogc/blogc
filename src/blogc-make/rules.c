@@ -71,9 +71,8 @@ index_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->main_template_fctx, fctx, false))
         {
-            rv = bm_exec_blogc(ctx->settings, variables, true,
-                ctx->main_template_fctx, fctx, ctx->posts_fctx, verbose,
-                false);
+            rv = bm_exec_blogc(ctx, variables, true, ctx->main_template_fctx,
+                fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -129,9 +128,8 @@ atom_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL,
                 fctx, false))
         {
-            rv = bm_exec_blogc(ctx->settings, variables, true,
-                ctx->atom_template_fctx, fctx, ctx->posts_fctx, verbose,
-                false);
+            rv = bm_exec_blogc(ctx, variables, true, ctx->atom_template_fctx,
+                fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -195,9 +193,8 @@ atom_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL,
                 fctx, false))
         {
-            rv = bm_exec_blogc(ctx->settings, variables, true,
-                ctx->atom_template_fctx, fctx, ctx->posts_fctx, verbose,
-                false);
+            rv = bm_exec_blogc(ctx, variables, true, ctx->atom_template_fctx,
+                fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -265,8 +262,8 @@ pagination_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbos
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->main_template_fctx, fctx, false))
         {
-            rv = bm_exec_blogc(ctx->settings, variables, true,
-                ctx->main_template_fctx, fctx, ctx->posts_fctx, verbose, false);
+            rv = bm_exec_blogc(ctx, variables, true, ctx->main_template_fctx,
+                fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -329,8 +326,8 @@ posts_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
         if (bm_rule_need_rebuild(s, ctx->settings_fctx,
                 ctx->main_template_fctx, o_fctx, true))
         {
-            rv = bm_exec_blogc(ctx->settings, variables, false,
-                ctx->main_template_fctx, o_fctx, s, verbose, true);
+            rv = bm_exec_blogc(ctx, variables, false, ctx->main_template_fctx,
+                o_fctx, s, true);
             if (rv != 0)
                 break;
         }
@@ -395,9 +392,8 @@ tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->main_template_fctx, fctx, false))
         {
-            rv = bm_exec_blogc(ctx->settings, variables, true,
-                ctx->main_template_fctx, fctx, ctx->posts_fctx, verbose,
-                false);
+            rv = bm_exec_blogc(ctx, variables, true, ctx->main_template_fctx,
+                fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -459,8 +455,8 @@ pages_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose)
         if (bm_rule_need_rebuild(s, ctx->settings_fctx,
                 ctx->main_template_fctx, o_fctx, true))
         {
-            rv = bm_exec_blogc(ctx->settings, variables, false,
-                ctx->main_template_fctx, o_fctx, s, verbose, true);
+            rv = bm_exec_blogc(ctx, variables, false, ctx->main_template_fctx,
+                o_fctx, s, true);
             if (rv != 0)
                 break;
         }
@@ -625,8 +621,8 @@ runserver_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args, bool verbose
         return 3;
     }
 
-    rv = bm_exec_blogc_runserver(ctx->output_dir, bc_trie_lookup(args, "host"),
-        bc_trie_lookup(args, "port"), bc_trie_lookup(args, "threads"), verbose);
+    rv = bm_exec_blogc_runserver(ctx, bc_trie_lookup(args, "host"),
+        bc_trie_lookup(args, "port"), bc_trie_lookup(args, "threads"));
 
     r_args->running = false;
 

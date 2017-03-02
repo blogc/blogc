@@ -138,6 +138,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, bc_error_t **err)
     bm_ctx_t *rv = NULL;
     if (base == NULL) {
         rv = bc_malloc(sizeof(bm_ctx_t));
+        rv->verbose = false;
     }
     else {
         bm_ctx_free_internal(base);

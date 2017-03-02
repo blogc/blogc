@@ -120,6 +120,7 @@ main(int argc, char **argv)
         rv = 3;
         goto cleanup;
     }
+    ctx->verbose = verbose;
 
     rv = bm_rule_executor(ctx, rules, verbose);
 

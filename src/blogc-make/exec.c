@@ -256,10 +256,13 @@ bm_exec_build_blogc_cmd(bm_settings_t *settings, bc_trie_t *variables,
 
 
 int
-bm_exec_blogc(bm_settings_t *settings, bc_trie_t *variables, bool listing,
+bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *variables, bool listing,
     bm_filectx_t *template, bm_filectx_t *output, bc_slist_t *sources,
-    bool verbose, bool only_first_source)
+    bool only_first_source)
 {
+    if (ctx == NULL)
+        return 3;
+
     bc_string_t *input = bc_string_new();
     for (bc_slist_t *l = sources; l != NULL; l = l->next) {
         bc_string_append_printf(input, "%s\n", ((bm_filectx_t*) l->data)->path);
@@ -267,10 +270,10 @@ bm_exec_blogc(bm_settings_t *settings, bc_trie_t *variables, bool listing,
             break;
     }
 
-    char *cmd = bm_exec_build_blogc_cmd(settings, variables, listing,
+    char *cmd = bm_exec_build_blogc_cmd(ctx->settings, variables, listing,
         template->path, output->path, input->len > 0);
 
-    if (verbose)
+    if (ctx->verbose)
         printf("%s\n", cmd);
     else
         printf("  BLOGC    %s\n", output->short_path);
@@ -293,7 +296,7 @@ bm_exec_blogc(bm_settings_t *settings, bc_trie_t *variables, bool listing,
     }
 
     if (rv != 0) {
-        if (verbose) {
+        if (ctx->verbose) {
             fprintf(stderr,
                 "blogc-make: error: Failed to execute command.\n"
                 "\n"
@@ -337,9 +340,12 @@ bm_exec_blogc(bm_settings_t *settings, bc_trie_t *variables, bool listing,
 
 
 int
-bm_exec_blogc_runserver(const char *output_dir, const char *host,
-    const char *port, const char *threads, bool verbose)
+bm_exec_blogc_runserver(bm_ctx_t *ctx, const char *host, const char *port,
+    const char *threads)
 {
+    if (ctx == NULL)
+        return 3;
+
     bc_string_t *cmd = bc_string_new();
 
     char *blogc_runserver = bm_exec_find_binary("blogc-runserver",
@@ -365,11 +371,11 @@ bm_exec_blogc_runserver(const char *output_dir, const char *host,
         free(tmp);
     }
 
-    char *tmp = bc_shell_quote(output_dir);
+    char *tmp = bc_shell_quote(ctx->output_dir);
     bc_string_append_printf(cmd, " %s", tmp);
     free(tmp);
 
-    if (verbose)
+    if (ctx->verbose)
         printf("%s\n", cmd->str);
     else
         printf("\n");
