@@ -38,6 +38,10 @@ test_find_binary(void **state)
     assert_string_equal(bin, "blogc");
     free(bin);
 
+    bin = bm_exec_find_binary("blogc-make", "blogc", "BLOGC");
+    assert_string_equal(bin, "blogc");
+    free(bin);
+
     will_return(__wrap_access, "../blogc");
     will_return(__wrap_access, 0);
     bin = bm_exec_find_binary("../blogc-make", "blogc", "BLOGC");
