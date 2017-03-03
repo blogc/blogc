@@ -16,6 +16,7 @@
 #include "../common/utils.h"
 #include "atom.h"
 #include "settings.h"
+#include "exec.h"
 #include "ctx.h"
 
 
@@ -105,7 +106,8 @@ bm_filectx_free(bm_filectx_t *fctx)
 
 
 bm_ctx_t*
-bm_ctx_new(bm_ctx_t *base, const char *settings_file, bc_error_t **err)
+bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
+    bc_error_t **err)
 {
     if (settings_file == NULL || err == NULL || *err != NULL)
         return NULL;
@@ -138,6 +140,9 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, bc_error_t **err)
     bm_ctx_t *rv = NULL;
     if (base == NULL) {
         rv = bc_malloc(sizeof(bm_ctx_t));
+        rv->blogc = bm_exec_find_binary(argv0, "blogc", "BLOGC");
+        rv->blogc_runserver = bm_exec_find_binary(argv0, "blogc-runserver",
+            "BLOGC_RUNSERVER");
         rv->verbose = false;
     }
     else {
@@ -224,7 +229,7 @@ bm_ctx_reload(bm_ctx_t *ctx)
         // needs to dup path, because it may be freed when reloading.
         char *tmp = bc_strdup(ctx->settings_fctx->path);
         bc_error_t *err = NULL;
-        ctx = bm_ctx_new(ctx, tmp, &err);
+        ctx = bm_ctx_new(ctx, tmp, NULL, &err);
         free(tmp);
         if (err != NULL) {  // failed to reload, keep old ctx
             bc_error_print(err, "blogc-make");
@@ -283,5 +288,7 @@ void
 bm_ctx_free(bm_ctx_t *ctx)
 {
     bm_ctx_free_internal(ctx);
+    free(ctx->blogc);
+    free(ctx->blogc_runserver);
     free(ctx);
 }

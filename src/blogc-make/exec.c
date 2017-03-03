@@ -21,11 +21,9 @@
 #include "exec.h"
 #include "settings.h"
 
-extern const char *argv0;
-
 
 char*
-bm_exec_find_binary(const char *bin, const char *env)
+bm_exec_find_binary(const char *argv0, const char *bin, const char *env)
 {
     // first try: env var
     const char *env_bin = getenv(env);
@@ -205,8 +203,9 @@ list_variables(const char *key, const char *value, bc_string_t *str)
 
 
 char*
-bm_exec_build_blogc_cmd(bm_settings_t *settings, bc_trie_t *variables,
-    bool listing, const char *template, const char *output, bool sources_stdin)
+bm_exec_build_blogc_cmd(const char *blogc_bin, bm_settings_t *settings,
+    bc_trie_t *variables, bool listing, const char *template,
+    const char *output, bool sources_stdin)
 {
     bc_string_t *rv = bc_string_new();
 
@@ -220,9 +219,7 @@ bm_exec_build_blogc_cmd(bm_settings_t *settings, bc_trie_t *variables,
         free(tmp);
     }
 
-    char *blogc_bin = bm_exec_find_binary("blogc", "BLOGC");
     bc_string_append(rv, blogc_bin);
-    free(blogc_bin);
 
     if (settings != NULL) {
         bc_trie_foreach(settings->env,
@@ -270,8 +267,8 @@ bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *variables, bool listing,
             break;
     }
 
-    char *cmd = bm_exec_build_blogc_cmd(ctx->settings, variables, listing,
-        template->path, output->path, input->len > 0);
+    char *cmd = bm_exec_build_blogc_cmd(ctx->blogc, ctx->settings, variables,
+        listing, template->path, output->path, input->len > 0);
 
     if (ctx->verbose)
         printf("%s\n", cmd);
@@ -348,10 +345,7 @@ bm_exec_blogc_runserver(bm_ctx_t *ctx, const char *host, const char *port,
 
     bc_string_t *cmd = bc_string_new();
 
-    char *blogc_runserver = bm_exec_find_binary("blogc-runserver",
-        "BLOGC_RUNSERVER");
-    bc_string_append(cmd, blogc_runserver);
-    free(blogc_runserver);
+    bc_string_append(cmd, ctx->blogc_runserver);
 
     if (host != NULL) {
         char *tmp = bc_shell_quote(host);

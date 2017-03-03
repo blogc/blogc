@@ -790,6 +790,7 @@ tests_blogc_make_check_exec_CFLAGS = \
 
 tests_blogc_make_check_exec_LDFLAGS = \
 	-no-install \
+	-Wl,--wrap=access \
 	$(NULL)
 
 tests_blogc_make_check_exec_LDADD = \

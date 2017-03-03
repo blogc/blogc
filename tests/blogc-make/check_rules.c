@@ -17,8 +17,6 @@
 #include "../../src/blogc-make/rules.h"
 #include "../../src/common/utils.h"
 
-const char *argv0 = NULL;
-
 
 static void
 test_rule_parse_args(void **state)

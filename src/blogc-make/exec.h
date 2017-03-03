@@ -15,11 +15,12 @@
 #include "ctx.h"
 #include "settings.h"
 
-char* bm_exec_find_binary(const char *bin, const char *env);
+char* bm_exec_find_binary(const char *argv0, const char *bin, const char *env);
 int bm_exec_command(const char *cmd, const char *input, char **output,
     char **error, bc_error_t **err);
-char* bm_exec_build_blogc_cmd(bm_settings_t *settings, bc_trie_t *variables,
-    bool listing, const char *template, const char *output, bool sources_stdin);
+char* bm_exec_build_blogc_cmd(const char *blogc_bin, bm_settings_t *settings,
+    bc_trie_t *variables, bool listing, const char *template,
+    const char *output, bool sources_stdin);
 int bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *variables, bool listing,
     bm_filectx_t *template, bm_filectx_t *output, bc_slist_t *sources,
     bool only_first_source);

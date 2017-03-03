@@ -18,8 +18,6 @@
 #include "../../src/common/error.h"
 #include "../../src/common/utils.h"
 
-const char *argv0 = NULL;
-
 
 static void
 test_settings_empty(void **state)

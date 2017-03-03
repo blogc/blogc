@@ -19,10 +19,6 @@
 #include "ctx.h"
 #include "rules.h"
 
-// is this beautiful? no. but there's no point in passing something that is
-// essentially global to every function in exec.c
-const char *argv0 = NULL;
-
 
 static void
 print_help(void)
@@ -60,11 +56,6 @@ main(int argc, char **argv)
 #endif
 {
     setlocale(LC_ALL, "");
-
-    // i really hope that no operating system omits argv[0], but ...
-    if (argc > 0) {
-        argv0 = argv[0];
-    }
 
     int rv = 0;
     bc_error_t *err = NULL;
@@ -114,7 +105,8 @@ main(int argc, char **argv)
         rules = bc_slist_append(rules, bc_strdup("all"));
     }
 
-    ctx = bm_ctx_new(NULL, blogcfile ? blogcfile : "blogcfile", &err);
+    ctx = bm_ctx_new(NULL, blogcfile ? blogcfile : "blogcfile",
+        argc > 0 ? argv[0] : NULL, &err);
     if (err != NULL) {
         bc_error_print(err, "blogc-make");
         rv = 3;
