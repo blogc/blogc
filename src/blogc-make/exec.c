@@ -370,7 +370,7 @@ bm_exec_blogc_runserver(bm_ctx_t *ctx, const char *host, const char *port,
     free(tmp);
 
     if (ctx->verbose)
-        printf("%s\n", cmd->str);
+        printf("%s\n\n", cmd->str);
     else
         printf("\n");
     fflush(stdout);
