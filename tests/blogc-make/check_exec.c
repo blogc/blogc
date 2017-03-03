@@ -40,19 +40,19 @@ test_find_binary(void **state)
 
     will_return(__wrap_access, "../blogc");
     will_return(__wrap_access, 0);
-    bin = bm_exec_find_binary("../blogc", "blogc", "BLOGC");
+    bin = bm_exec_find_binary("../blogc-make", "blogc", "BLOGC");
     assert_string_equal(bin, "'../blogc'");
     free(bin);
 
     will_return(__wrap_access, "/usr/bin/blogc");
     will_return(__wrap_access, 0);
-    bin = bm_exec_find_binary("/usr/bin/blogc", "blogc", "BLOGC");
+    bin = bm_exec_find_binary("/usr/bin/blogc-make", "blogc", "BLOGC");
     assert_string_equal(bin, "'/usr/bin/blogc'");
     free(bin);
 
     will_return(__wrap_access, "../blogc");
     will_return(__wrap_access, 1);
-    bin = bm_exec_find_binary("../blogc", "blogc", "BLOGC");
+    bin = bm_exec_find_binary("../blogc-make", "blogc", "BLOGC");
     assert_string_equal(bin, "blogc");
     free(bin);
 
