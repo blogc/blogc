@@ -56,6 +56,7 @@ noinst_HEADERS = \
 	src/blogc-make/ctx.h \
 	src/blogc-make/exec.h \
 	src/blogc-make/exec-native.h \
+	src/blogc-make/reloader.h \
 	src/blogc-make/rules.h \
 	src/blogc-make/settings.h \
 	src/blogc-runserver/httpd.h \
@@ -231,6 +232,7 @@ libblogc_make_la_SOURCES = \
 	src/blogc-make/ctx.c \
 	src/blogc-make/exec.c \
 	src/blogc-make/exec-native.c \
+	src/blogc-make/reloader.c \
 	src/blogc-make/rules.c \
 	src/blogc-make/settings.c \
 	$(NULL)

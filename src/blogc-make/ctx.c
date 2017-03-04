@@ -215,11 +215,11 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
 }
 
 
-void
+bool
 bm_ctx_reload(bm_ctx_t *ctx)
 {
     if (ctx == NULL || ctx->settings_fctx == NULL)
-        return;
+        return false;
 
     if (bm_filectx_changed(ctx->settings_fctx, NULL)) {
         // reload everything! we could just reload settings_fctx, as this
@@ -231,11 +231,12 @@ bm_ctx_reload(bm_ctx_t *ctx)
         bc_error_t *err = NULL;
         ctx = bm_ctx_new(ctx, tmp, NULL, &err);
         free(tmp);
-        if (err != NULL) {  // failed to reload, keep old ctx
+        if (err != NULL) {
             bc_error_print(err, "blogc-make");
             bc_error_free(err);
+            return false;
         }
-        return;
+        return true;
     }
 
     bm_filectx_reload(ctx->main_template_fctx);
@@ -249,6 +250,8 @@ bm_ctx_reload(bm_ctx_t *ctx)
 
     for (bc_slist_t *tmp = ctx->copy_fctx; tmp != NULL; tmp = tmp->next)
         bm_filectx_reload((bm_filectx_t*) tmp->data);
+
+    return true;
 }
 
 

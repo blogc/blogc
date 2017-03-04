@@ -12,15 +12,13 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <signal.h>
 #include "../common/utils.h"
 #include "ctx.h"
 #include "exec.h"
 #include "exec-native.h"
-#include "rules.h"
+#include "reloader.h"
 #include "settings.h"
+#include "rules.h"
 
 
 // INDEX RULE
@@ -552,77 +550,15 @@ static int all_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args);
 
 // RUNSERVER RULE
 
-typedef struct {
-    bm_ctx_t *ctx;
-    bool running;
-} runserver_args_t;
-
-static void*
-runserver_thread(void *arg)
-{
-    runserver_args_t *args = arg;
-    while (args->running) {
-        bm_ctx_reload(args->ctx);
-        if (args->ctx == NULL) {
-            fprintf(stderr, "blogc-make: error: failed to reload context. "
-                "reloader disabled!\n");
-            goto runserver_cleanup;
-        }
-        if (0 != all_exec(args->ctx, NULL, NULL)) {
-            fprintf(stderr, "blogc-make: error: failed to rebuild website. "
-                "reloader disabled!\n");
-            goto runserver_cleanup;
-        }
-        sleep(1);
-    }
-
-runserver_cleanup:
-    free(args);
-    return NULL;
-}
-
 static int
 runserver_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 {
-    // first 'all' call is syncronous, to do a 'sanity check'
-    int rv = all_exec(ctx, NULL, NULL);
-    if (rv != 0)
-        return rv;
+    bm_reloader_t *reloader = bm_reloader_new(ctx, all_exec);
 
-    runserver_args_t *r_args = bc_malloc(sizeof(runserver_args_t));
-    r_args->ctx = ctx;
-    r_args->running = true;
-
-    int err;
-    pthread_attr_t attr;
-
-    if (0 != (err = pthread_attr_init(&attr))) {
-        fprintf(stderr, "blogc-make: error: failed to initialize reloader "
-            "thread attributes: %s\n", strerror(err));
-        return 3;
-    }
-
-    // we run the thread detached, because we don't want to wait it to join
-    // before exiting. the OS can clean it properly
-    if (0 != (err = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED))) {
-        fprintf(stderr, "blogc-make: error: failed to mark reloader thread as "
-            "detached: %s\n", strerror(err));
-        return 3;
-    }
-
-    pthread_t thread;
-
-    if (0 != (err = pthread_create(&thread, &attr, runserver_thread, r_args))) {
-        fprintf(stderr, "blogc-make: error: failed to create reloader "
-            "thread: %s\n", strerror(err));
-        return 3;
-    }
-
-    rv = bm_exec_blogc_runserver(ctx, bc_trie_lookup(args, "host"),
+    int rv = bm_exec_blogc_runserver(ctx, bc_trie_lookup(args, "host"),
         bc_trie_lookup(args, "port"), bc_trie_lookup(args, "threads"));
 
-    r_args->running = false;
-
+    bm_reloader_stop(reloader);
     return rv;
 }
 
