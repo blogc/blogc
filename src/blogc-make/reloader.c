@@ -11,7 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
-#include "../common/error.h"
+#include "../common/utils.h"
 #include "ctx.h"
 #include "rules.h"
 #include "reloader.h"
