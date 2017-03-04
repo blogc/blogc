@@ -259,11 +259,13 @@ br_httpd_run(const char *host, unsigned short port, const char *docroot,
         goto cleanup;
     }
 
-    fprintf(stderr,
-        " * Running on http://%s:%d/ (max threads: %zu)\n"
+    fprintf(stderr, " * Running on http://%s", host);
+    if (port != 80)
+        fprintf(stderr, ":%hu", port);
+    fprintf(stderr, "/ (max threads: %zu)\n"
         "\n"
         "WARNING!!! This is a development server, DO NOT RUN IT IN PRODUCTION!\n"
-        "\n", host, port, max_threads);
+        "\n", max_threads);
 
     socklen_t len = sizeof(struct sockaddr_in);
 
