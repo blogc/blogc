@@ -31,6 +31,7 @@ typedef struct {
 typedef struct {
     char *blogc;
     char *blogc_runserver;
+    char *lighttpd;
     bool verbose;
 
     bm_settings_t *settings;

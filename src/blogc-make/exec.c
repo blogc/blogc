@@ -19,6 +19,7 @@
 #include "../common/utils.h"
 #include "ctx.h"
 #include "exec.h"
+#include "lighttpd.h"
 #include "settings.h"
 
 
@@ -343,6 +344,38 @@ bm_exec_blogc_runserver(bm_ctx_t *ctx, const char *host, const char *port,
     if (ctx == NULL)
         return 3;
 
+    int rv = 0;
+
+    // check if lighttpd exists
+
+    // we need to mangle path, because lighttpd is usually installed to
+    // /usr/sbin
+    char *old_path = getenv("PATH");
+    char *path = NULL;
+    if (old_path != NULL) {
+        path = bc_strdup_printf("/usr/sbin:%s", path);
+        setenv("PATH", path, 1);
+    }
+
+    char *cmd_lighttpd = bc_strdup_printf("%s -v 2> /dev/null > /dev/null",
+        ctx->lighttpd);
+    int status_lighttpd = system(cmd_lighttpd);
+    free(cmd_lighttpd);
+
+    // if it exists, use it! :D
+    if (127 != WEXITSTATUS(status_lighttpd)) {
+        char *conf = bm_lighttpd_deploy(ctx->output_dir, host, port);
+        if (conf == NULL)
+            return 3;
+
+        cmd_lighttpd = bc_strdup_printf("%s -D -f %s", ctx->lighttpd, conf);
+        int status = system(cmd_lighttpd);
+        free(cmd_lighttpd);
+        bm_lighttpd_destroy(conf);
+        rv = WEXITSTATUS(status);
+        goto eval_rv;
+    }
+
     bc_string_t *cmd = bc_string_new();
 
     bc_string_append(cmd, ctx->blogc_runserver);
@@ -377,8 +410,16 @@ bm_exec_blogc_runserver(bm_ctx_t *ctx, const char *host, const char *port,
 
     // we don't need pipes to run blogc-runserver, because it is "interactive"
     int status = system(cmd->str);
-    int rv = WEXITSTATUS(status);
+    rv = WEXITSTATUS(status);
     bc_string_free(cmd, true);
+
+eval_rv:
+
+    // cleanup path changes
+    if (old_path != NULL) {
+        setenv("PATH", old_path, 1);
+        free(path);
+    }
 
     if (rv != 0) {
         if (rv == 127) {

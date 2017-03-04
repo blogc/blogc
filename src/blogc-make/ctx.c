@@ -143,6 +143,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
         rv->blogc = bm_exec_find_binary(argv0, "blogc", "BLOGC");
         rv->blogc_runserver = bm_exec_find_binary(argv0, "blogc-runserver",
             "BLOGC_RUNSERVER");
+        rv->lighttpd = bm_exec_find_binary(argv0, "lighttpd", "LIGHTTPD");
         rv->verbose = false;
     }
     else {
@@ -290,5 +291,6 @@ bm_ctx_free(bm_ctx_t *ctx)
     bm_ctx_free_internal(ctx);
     free(ctx->blogc);
     free(ctx->blogc_runserver);
+    free(ctx->lighttpd);
     free(ctx);
 }
