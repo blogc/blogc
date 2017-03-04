@@ -114,7 +114,7 @@ main(int argc, char **argv)
     }
     ctx->verbose = verbose;
 
-    rv = bm_rule_executor(ctx, rules, verbose);
+    rv = bm_rule_executor(ctx, rules);
 
 cleanup:
 
