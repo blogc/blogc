@@ -30,7 +30,7 @@ bm_reloader_thread(void *arg)
                 "reloader disabled!\n");
             break;
         }
-        if (0 != reloader->rule_exec(reloader->ctx, NULL, NULL)) {
+        if (0 != reloader->rule_exec(reloader->ctx, reloader->outputs, reloader->args)) {
             fprintf(stderr, "blogc-make: error: failed to rebuild website. "
                 "reloader disabled!\n");
             break;
@@ -44,10 +44,11 @@ bm_reloader_thread(void *arg)
 
 
 bm_reloader_t*
-bm_reloader_new(bm_ctx_t *ctx, bm_rule_exec_func_t rule_exec)
+bm_reloader_new(bm_ctx_t *ctx, bm_rule_exec_func_t rule_exec,
+    bc_slist_t *outputs, bc_trie_t *args)
 {
     // first rule_exec call is syncronous, to do a 'sanity check'
-    if (0 != rule_exec(ctx, NULL, NULL))
+    if (0 != rule_exec(ctx, outputs, args))
         return NULL;
 
     int err;
@@ -70,6 +71,8 @@ bm_reloader_new(bm_ctx_t *ctx, bm_rule_exec_func_t rule_exec)
     bm_reloader_t *rv = bc_malloc(sizeof(bm_reloader_t));
     rv->ctx = ctx;
     rv->rule_exec = rule_exec;
+    rv->outputs = outputs;
+    rv->args = args;
     rv->running = true;
 
     pthread_t thread;
