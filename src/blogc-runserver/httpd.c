@@ -270,6 +270,10 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
         if (server_socket == -1) {
             continue;
         }
+        int value = 1;
+        if (0 > setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(int))) {
+            continue;
+        }
         if (0 == bind(server_socket, rp->ai_addr, rp->ai_addrlen)) {
             f = rp;
             break;
@@ -287,13 +291,6 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
         threads[i].initialized = false;
 
     int rv = 0;
-
-    int value = 1;
-    if (0 > setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(int))) {
-        fprintf(stderr, "Failed to set socket option: %s\n", strerror(errno));
-        rv = 3;
-        goto cleanup;
-    }
 
     if (-1 == listen(server_socket, LISTEN_BACKLOG)) {
         fprintf(stderr, "Failed to listen to server socket: %s\n", strerror(errno));
