@@ -93,7 +93,7 @@ handle_request(void *arg)
     if (path == NULL) {
         status_code = 400;
         error(client_socket, 400, "Bad Request");
-        goto point1;
+        goto point2;
     }
 
     char *abs_path = bc_strdup_printf("%s/%s", docroot, path);
@@ -103,27 +103,27 @@ handle_request(void *arg)
     if (real_path == NULL) {
         status_code = 404;
         error(client_socket, 404, "Not Found");
-        goto point1;
+        goto point2;
     }
 
     char *real_root = realpath(docroot, NULL);
     if (real_root == NULL) {
         status_code = 500;
         error(client_socket, 500, "Internal Server Error");
-        goto point2;
+        goto point3;
     }
 
     if (0 != strncmp(real_root, real_path, strlen(real_root))) {
         status_code = 404;
         error(client_socket, 404, "Not Found");
-        goto point3;
+        goto point4;
     }
 
     struct stat st;
     if (0 > stat(real_path, &st)) {
         status_code = 404;
         error(client_socket, 404, "Not Found");
-        goto point3;
+        goto point4;
     }
 
     bool add_slash = false;
@@ -134,7 +134,7 @@ handle_request(void *arg)
         if (found == NULL) {
             status_code = 403;
             error(client_socket, 403, "Forbidden");
-            goto point3;
+            goto point4;
         }
 
         size_t path_len = strlen(path);
@@ -148,7 +148,7 @@ handle_request(void *arg)
     if (0 != access(real_path, F_OK)) {
         status_code = 500;
         error(client_socket, 500, "Internal Server Error");
-        goto point3;
+        goto point4;
     }
 
     if (add_slash) {
@@ -165,7 +165,7 @@ handle_request(void *arg)
             // do nothing, just avoid warnig
         }
         free(tmp);
-        goto point3;
+        goto point4;
     }
 
     size_t len;
@@ -175,7 +175,7 @@ handle_request(void *arg)
         status_code = 500;
         error(client_socket, 500, "Internal Server Error");
         bc_error_free(err);
-        goto point3;
+        goto point4;
     }
 
     char *out = bc_strdup_printf(
@@ -194,14 +194,15 @@ handle_request(void *arg)
     }
     free(contents);
 
-point3:
+point4:
     free(real_root);
-point2:
+point3:
     free(real_path);
+point2:
+    free(path);
 point1:
     fprintf(stderr, "[Thread-%zu] %s - - \"%s\" %d\n", thread_id + 1,
         ip, conn_line, status_code);
-    free(path);
     free(conn_line);
     bc_strv_free(pieces);
 point0:
@@ -261,29 +262,6 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
     if (0 != (err = getaddrinfo(host, port, &hints, &result))) {
         fprintf(stderr, "Failed to get host:port info: %s\n",
             gai_strerror(err));
-    }
-
-    struct addrinfo *f = NULL;
-    int server_socket;
-    for (struct addrinfo *rp = result; rp != NULL; rp = rp->ai_next) {
-        server_socket = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-        if (server_socket == -1) {
-            continue;
-        }
-        int value = 1;
-        if (0 > setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(int))) {
-            close(server_socket);
-            continue;
-        }
-        if (0 == bind(server_socket, rp->ai_addr, rp->ai_addrlen)) {
-            f = rp;
-            break;
-        }
-        close(server_socket);
-    }
-
-    if (f == NULL) {
-        fprintf(stderr, "Failed to open server socket: %s:%s\n", host, port);
         return 3;
     }
 
@@ -293,16 +271,62 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
 
     int rv = 0;
 
+    struct addrinfo *rp;
+    int server_socket;
+
+    char *final_host = NULL;
+    u_int16_t final_port;
+
+    for (rp = result; rp != NULL; rp = rp->ai_next) {
+        final_host = br_httpd_get_ip(rp->ai_family, rp->ai_addr);
+        final_port = br_httpd_get_port(rp->ai_family, rp->ai_addr);
+        server_socket = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (server_socket == -1) {
+            if (rp->ai_next == NULL) {
+                fprintf(stderr, "Failed to open server socket (%s:%d): %s\n",
+                    final_host, final_port, strerror(errno));
+                rv = 3;
+                goto cleanup0;
+            }
+            continue;
+        }
+        int value = 1;
+        if (0 > setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &value,
+            sizeof(int)))
+        {
+            if (rp->ai_next == NULL) {
+                fprintf(stderr, "Failed to set socket option (%s:%d): %s\n",
+                    final_host, final_port, strerror(errno));
+                rv = 3;
+                goto cleanup;
+            }
+            close(server_socket);
+            continue;
+        }
+        if (0 == bind(server_socket, rp->ai_addr, rp->ai_addrlen)) {
+            break;
+        }
+        else {
+            if (rp->ai_next == NULL) {
+                fprintf(stderr, "Failed to bind to server socket (%s:%d): %s\n",
+                    final_host, final_port, strerror(errno));
+                rv = 3;
+                goto cleanup;
+            }
+        }
+        free(final_host);
+        close(server_socket);
+    }
+
     if (-1 == listen(server_socket, LISTEN_BACKLOG)) {
-        fprintf(stderr, "Failed to listen to server socket: %s\n", strerror(errno));
+        fprintf(stderr, "Failed to listen to server socket (%s:%d): %s\n",
+            final_host, final_port, strerror(errno));
         rv = 3;
         goto cleanup;
     }
 
-    char *final_host = br_httpd_get_ip(f->ai_family, f->ai_addr);
-    u_int16_t final_port = br_httpd_get_port(f->ai_family, f->ai_addr);
     fprintf(stderr, " * Running on http://");
-    if (f->ai_family == AF_INET6)
+    if (rp->ai_family == AF_INET6)
         fprintf(stderr, "[%s]", final_host);
     else
         fprintf(stderr, "%s", final_host);
@@ -323,7 +347,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
         socklen_t addrlen;
         struct sockaddr *client_addr = NULL;
 
-        if (f->ai_family == AF_INET6) {
+        if (rp->ai_family == AF_INET6) {
             addrlen = sizeof(addr6);
             client_addr = (struct sockaddr*) &addr6;
         }
@@ -342,7 +366,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
         request_data_t *arg = malloc(sizeof(request_data_t));
         arg->thread_id = current_thread;
         arg->socket = client_socket;
-        arg->ip = br_httpd_get_ip(f->ai_family, client_addr);
+        arg->ip = br_httpd_get_ip(rp->ai_family, client_addr);
         arg->docroot = docroot;
 
         if (threads[current_thread].initialized) {
@@ -353,7 +377,9 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
             }
         }
 
-        if (pthread_create(&(threads[current_thread].thread), NULL, handle_request, arg) != 0) {
+        if (pthread_create(&(threads[current_thread].thread), NULL,
+            handle_request, arg) != 0)
+        {
             fprintf(stderr, "Failed to create thread\n");
             rv = 3;
             goto cleanup;
@@ -366,7 +392,10 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
     }
 
 cleanup:
-    freeaddrinfo(result);
     close(server_socket);
+
+cleanup0:
+    free(final_host);
+    freeaddrinfo(result);
     return rv;
 }
