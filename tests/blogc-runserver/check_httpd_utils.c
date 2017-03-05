@@ -33,8 +33,6 @@ test_readline(void **state)
     char *t;
     will_return(__wrap_read, 1234);
     will_return(__wrap_read, "bola");
-    will_return(__wrap_read, 1234);
-    will_return(__wrap_read, "");
     t = br_readline(1234);
     assert_string_equal(t, "bola");
     free(t);
@@ -52,36 +50,6 @@ test_readline(void **state)
     will_return(__wrap_read, "bola3\r\nguda\r\nxd");
     t = br_readline(1234);
     assert_string_equal(t, "bola3");
-    free(t);
-    will_return(__wrap_read, 1234);
-    will_return(__wrap_read, "bola");
-    will_return(__wrap_read, 1234);
-    will_return(__wrap_read, "guda");
-    will_return(__wrap_read, 1234);
-    will_return(__wrap_read, "");
-    t = br_readline(1234);
-    assert_string_equal(t, "bolaguda");
-    free(t);
-    will_return(__wrap_read, 1234);
-    will_return(__wrap_read, "bola1");
-    will_return(__wrap_read, 1234);
-    will_return(__wrap_read, "bola\nguda");
-    t = br_readline(1234);
-    assert_string_equal(t, "bola1bola");
-    free(t);
-    will_return(__wrap_read, 1234);
-    will_return(__wrap_read, "bola2");
-    will_return(__wrap_read, 1234);
-    will_return(__wrap_read, "bola\rguda");
-    t = br_readline(1234);
-    assert_string_equal(t, "bola2bola");
-    free(t);
-    will_return(__wrap_read, 1234);
-    will_return(__wrap_read, "bola3");
-    will_return(__wrap_read, 1234);
-    will_return(__wrap_read, "bola\r\nguda");
-    t = br_readline(1234);
-    assert_string_equal(t, "bola3bola");
     free(t);
 }
 
@@ -110,6 +78,7 @@ test_hextoi(void **state)
     assert_int_equal(br_hextoi('C'), 12);
     assert_int_equal(br_hextoi('D'), 13);
     assert_int_equal(br_hextoi('E'), 14);
+    assert_int_equal(br_hextoi('F'), 15);
     assert_int_equal(br_hextoi('g'), -1);
     assert_int_equal(br_hextoi('G'), -1);
     assert_int_equal(br_hextoi('-'), -1);

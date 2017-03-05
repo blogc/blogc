@@ -19,16 +19,25 @@ br_readline(int socket)
     bc_string_t *rv = bc_string_new();
     char buffer[READLINE_BUFFER_SIZE];
     ssize_t len;
+    bool end = false;
 
     while ((len = read(socket, buffer, READLINE_BUFFER_SIZE)) > 0) {
-        for (ssize_t i = 0; i < len; i++) {
-            if (buffer[i] == '\r' || buffer[i] == '\n' || buffer[i] == '\0')
-                goto end;
-            bc_string_append_c(rv, buffer[i]);
+        if (!end) {
+            for (ssize_t i = 0; i < len; i++) {
+                if (buffer[i] == '\r' || buffer[i] == '\n' || buffer[i] == '\0') {
+                    // we finished "recording", but still need to exhaust
+                    // request data.
+                    end = true;
+                    break;
+                }
+                bc_string_append_c(rv, buffer[i]);
+            }
+        }
+        if (len < READLINE_BUFFER_SIZE) {
+            break;
         }
     }
 
-end:
     return bc_string_free(rv, false);
 }
 
