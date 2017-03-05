@@ -318,22 +318,22 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
 
     size_t current_thread = 0;
 
-    struct sockaddr_in6 addr6;
-    struct sockaddr_in addr;
-
-    socklen_t addrlen;
-    struct sockaddr *client_addr = NULL;
-
-    if (f->ai_family == AF_INET6) {
-        addrlen = sizeof(addr6);
-        client_addr = (struct sockaddr*) &addr6;
-    }
-    else {
-        addrlen = sizeof(addr);
-        client_addr = (struct sockaddr*) &addr;
-    }
-
     while (1) {
+        struct sockaddr_in6 addr6;
+        struct sockaddr_in addr;
+
+        socklen_t addrlen;
+        struct sockaddr *client_addr = NULL;
+
+        if (f->ai_family == AF_INET6) {
+            addrlen = sizeof(addr6);
+            client_addr = (struct sockaddr*) &addr6;
+        }
+        else {
+            addrlen = sizeof(addr);
+            client_addr = (struct sockaddr*) &addr;
+        }
+
         int client_socket = accept(server_socket, client_addr, &addrlen);
         if (client_socket == -1) {
             fprintf(stderr, "Failed to accept connection: %s\n", strerror(errno));
