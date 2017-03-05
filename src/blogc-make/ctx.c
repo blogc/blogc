@@ -290,6 +290,8 @@ bm_ctx_free_internal(bm_ctx_t *ctx)
 void
 bm_ctx_free(bm_ctx_t *ctx)
 {
+    if (ctx == NULL)
+        return;
     bm_ctx_free_internal(ctx);
     free(ctx->blogc);
     free(ctx->blogc_runserver);
