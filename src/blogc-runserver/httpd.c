@@ -272,6 +272,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
         }
         int value = 1;
         if (0 > setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(int))) {
+            close(server_socket);
             continue;
         }
         if (0 == bind(server_socket, rp->ai_addr, rp->ai_addrlen)) {
