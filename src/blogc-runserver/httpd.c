@@ -190,6 +190,7 @@ handle_request(void *arg)
     if (write(client_socket, contents, len) == -1) {
         // do nothing, just avoid warnig
     }
+    free(contents);
 
 point3:
     free(real_root);
@@ -198,6 +199,8 @@ point2:
 point1:
     fprintf(stderr, "[Thread-%zu] %s - - \"%s\" %d\n", thread_id + 1,
         ip, conn_line, status_code);
+    free(path);
+    free(conn_line);
     bc_strv_free(pieces);
 point0:
     free(ip);
