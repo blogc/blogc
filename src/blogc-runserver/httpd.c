@@ -13,7 +13,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/socket.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <pthread.h>
@@ -209,12 +211,74 @@ point0:
 }
 
 
+static char*
+br_httpd_get_ip(int af, const struct sockaddr *addr)
+{
+    char host[INET6_ADDRSTRLEN];
+    if (af == AF_INET6) {
+        struct sockaddr_in6 *a = (struct sockaddr_in6*) addr;
+        inet_ntop(af, &(a->sin6_addr), host, INET6_ADDRSTRLEN);
+    }
+    else {
+        struct sockaddr_in *a = (struct sockaddr_in*) addr;
+        inet_ntop(af, &(a->sin_addr), host, INET6_ADDRSTRLEN);
+    }
+    return bc_strdup(host);
+}
+
+
+static u_int16_t
+br_httpd_get_port(int af, const struct sockaddr *addr)
+{
+    in_port_t port = 0;
+    if (af == AF_INET6) {
+        struct sockaddr_in6 *a = (struct sockaddr_in6*) addr;
+        port = a->sin6_port;
+    }
+    else {
+        struct sockaddr_in *a = (struct sockaddr_in*) addr;
+        port = a->sin_port;
+    }
+    return ntohs(port);
+}
+
+
 int
-br_httpd_run(const char *host, unsigned short port, const char *docroot,
+br_httpd_run(const char *host, const char *port, const char *docroot,
     size_t max_threads)
 {
-    if (port == 0) {
-        fprintf(stderr, "Invalid port: 0\n");
+    int err;
+    struct addrinfo *result;
+    struct addrinfo hints = {
+        .ai_family = AF_UNSPEC,
+        .ai_socktype = SOCK_STREAM,
+        .ai_flags = AI_PASSIVE,
+        .ai_protocol = 0,
+        .ai_canonname = NULL,
+        .ai_addr = NULL,
+        .ai_next = NULL,
+    };
+    if (0 != (err = getaddrinfo(host, port, &hints, &result))) {
+        fprintf(stderr, "Failed to get host:port info: %s\n",
+            gai_strerror(err));
+    }
+
+    struct addrinfo *f = NULL;
+    int server_socket;
+    for (struct addrinfo *rp = result; rp != NULL; rp = rp->ai_next) {
+        server_socket = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (server_socket == -1) {
+            continue;
+        }
+        if (0 == bind(server_socket, rp->ai_addr, rp->ai_addrlen)) {
+            f = rp;
+            break;
+        }
+        close(server_socket);
+    }
+
+    if (f == NULL) {
+        fprintf(stderr, "Failed to open server socket: %s:%s\n", host, port);
         return 3;
     }
 
@@ -222,62 +286,55 @@ br_httpd_run(const char *host, unsigned short port, const char *docroot,
     for (size_t i = 0; i < max_threads; i++)
         threads[i].initialized = false;
 
-    int server_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_socket == -1) {
-        fprintf(stderr, "Failed to open server socket: %s\n", strerror(errno));
-        return 3;
-    }
-
     int rv = 0;
 
     int value = 1;
-    if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(int)) < 0) {
+    if (0 > setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(int))) {
         fprintf(stderr, "Failed to set socket option: %s\n", strerror(errno));
         rv = 3;
         goto cleanup;
     }
 
-    struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(struct sockaddr_in));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(port);
-    if ((server_addr.sin_addr.s_addr = inet_addr(host)) == -1) {
-        fprintf(stderr, "Invalid server listen address: %s\n", host);
-        rv = 3;
-        goto cleanup;
-    }
-
-    if ((bind(server_socket, (struct sockaddr*) &server_addr,
-        sizeof(struct sockaddr_in))) == -1)
-    {
-        fprintf(stderr, "Failed to bind to server socket (%s:%d): %s\n",
-            host, port, strerror(errno));
-        rv = 3;
-        goto cleanup;
-    }
-
-    if (listen(server_socket, LISTEN_BACKLOG) == -1) {
+    if (-1 == listen(server_socket, LISTEN_BACKLOG)) {
         fprintf(stderr, "Failed to listen to server socket: %s\n", strerror(errno));
         rv = 3;
         goto cleanup;
     }
 
-    fprintf(stderr, " * Running on http://%s", host);
-    if (port != 80)
-        fprintf(stderr, ":%hu", port);
+    char *final_host = br_httpd_get_ip(f->ai_family, f->ai_addr);
+    u_int16_t final_port = br_httpd_get_port(f->ai_family, f->ai_addr);
+    fprintf(stderr, " * Running on http://");
+    if (f->ai_family == AF_INET6)
+        fprintf(stderr, "[%s]", final_host);
+    else
+        fprintf(stderr, "%s", final_host);
+    if (final_port != 80)
+        fprintf(stderr, ":%d", final_port);
     fprintf(stderr, "/ (max threads: %zu)\n"
         "\n"
         "WARNING!!! This is a development server, DO NOT RUN IT IN PRODUCTION!\n"
         "\n", max_threads);
-
-    socklen_t len = sizeof(struct sockaddr_in);
+    free(final_host);
 
     size_t current_thread = 0;
 
+    struct sockaddr_in6 addr6;
+    struct sockaddr_in addr;
+
+    socklen_t addrlen;
+    struct sockaddr *client_addr = NULL;
+
+    if (f->ai_family == AF_INET6) {
+        addrlen = sizeof(addr6);
+        client_addr = (struct sockaddr*) &addr6;
+    }
+    else {
+        addrlen = sizeof(addr);
+        client_addr = (struct sockaddr*) &addr;
+    }
+
     while (1) {
-        struct sockaddr_in client_addr;
-        int client_socket = accept(server_socket,
-            (struct sockaddr *) &client_addr, &len);
+        int client_socket = accept(server_socket, client_addr, &addrlen);
         if (client_socket == -1) {
             fprintf(stderr, "Failed to accept connection: %s\n", strerror(errno));
             rv = 3;
@@ -287,7 +344,7 @@ br_httpd_run(const char *host, unsigned short port, const char *docroot,
         request_data_t *arg = malloc(sizeof(request_data_t));
         arg->thread_id = current_thread;
         arg->socket = client_socket;
-        arg->ip = bc_strdup(inet_ntoa(client_addr.sin_addr));
+        arg->ip = br_httpd_get_ip(f->ai_family, client_addr);
         arg->docroot = docroot;
 
         if (threads[current_thread].initialized) {
@@ -311,6 +368,7 @@ br_httpd_run(const char *host, unsigned short port, const char *docroot,
     }
 
 cleanup:
+    freeaddrinfo(result);
     close(server_socket);
     return rv;
 }

@@ -58,8 +58,8 @@ main(int argc, char **argv)
 
     int rv = 0;
     char *host = NULL;
+    char *port = NULL;
     char *docroot = NULL;
-    unsigned short port = 8080;
     size_t max_threads = 20;
     char *ptr;
     char *endptr;
@@ -83,13 +83,9 @@ main(int argc, char **argv)
                     break;
                 case 'p':
                     if (argv[i][2] != '\0')
-                        ptr = argv[i] + 2;
+                        port = bc_strdup(argv[i] + 2);
                     else
-                        ptr = argv[++i];
-                    port = strtoul(ptr, &endptr, 10);
-                    if (*ptr != '\0' && *endptr != '\0')
-                        fprintf(stderr, "blogc-runserver: warning: invalid value "
-                            "for -p argument: %s. using %hu instead\n", ptr, port);
+                        port = bc_strdup(argv[++i]);
                     break;
                 case 'm':
                     if (argv[i][2] != '\0')
@@ -141,10 +137,14 @@ main(int argc, char **argv)
     if (host == NULL)
         host = bc_strdup("127.0.0.1");
 
+    if (port == NULL)
+        port = bc_strdup("8080");
+
     rv = br_httpd_run(host, port, docroot, max_threads);
 
 cleanup:
     free(host);
+    free(port);
     free(docroot);
 
     return rv;
