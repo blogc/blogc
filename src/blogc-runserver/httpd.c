@@ -50,8 +50,9 @@ error(int socket, int status_code, const char *error)
         "Connection: close\r\n"
         "\r\n"
         "<h1>%s</h1>\n", status_code, error, strlen(error) + 10, error);
-    if (write(socket, str, strlen(str)) == -1) {
-        // do nothing, just avoid warnig
+    size_t str_len = strlen(str);
+    if (str_len != write(socket, str, str_len)) {
+        fprintf(stderr, "warning: Failed to write full response header!\n");
     }
     free(str);
 }
@@ -161,8 +162,9 @@ handle_request(void *arg)
             "Connection: close\r\n"
             "\r\n", path);
         status_code = 302;
-        if (write(client_socket, tmp, strlen(tmp)) == -1) {
-            // do nothing, just avoid warnig
+        size_t tmp_len = strlen(tmp);
+        if (tmp_len != write(client_socket, tmp, tmp_len)) {
+            fprintf(stderr, "warning: Failed to write full response header!\n");
         }
         free(tmp);
         goto point4;
@@ -184,13 +186,14 @@ handle_request(void *arg)
         "Content-Length: %zu\r\n"
         "Connection: close\r\n"
         "\r\n", br_mime_guess_content_type(real_path), len);
-    if (write(client_socket, out, strlen(out)) == -1) {
-        // do nothing, just avoid warnig
+    size_t out_len = strlen(out);
+    if (out_len != write(client_socket, out, out_len)) {
+        fprintf(stderr, "warning: Failed to write full response header!\n");
     }
     free(out);
 
-    if (write(client_socket, contents, len) == -1) {
-        // do nothing, just avoid warnig
+    if (len != write(client_socket, contents, len)) {
+        fprintf(stderr, "warning: Failed to write full response body!\n");
     }
     free(contents);
 
