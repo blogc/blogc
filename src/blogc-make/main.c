@@ -36,7 +36,8 @@ print_help(void)
         "    -h            show this help message and exit\n"
         "    -v            show version and exit\n"
         "    -V            be verbose when executing commands\n"
-        "    -f FILE       read FILE as blogcfile\n");
+        "    -f FILE       read FILE as blogcfile\n"
+        "    -p            build for production environment\n");
     bm_rule_print_help();
 }
 
@@ -44,7 +45,7 @@ print_help(void)
 static void
 print_usage(void)
 {
-    printf("usage: blogc-make [-h] [-v] [-V] [-f FILE] [RULE ...]\n");
+    printf("usage: blogc-make [-h] [-v] [-V] [-f FILE] [-p] [RULE ...]\n");
 }
 
 
@@ -62,6 +63,7 @@ main(int argc, char **argv)
 
     bc_slist_t *rules = NULL;
     bool verbose = false;
+    bool production = false;
     char *blogcfile = NULL;
     bm_ctx_t *ctx = NULL;
 
@@ -82,6 +84,9 @@ main(int argc, char **argv)
                         blogcfile = bc_strdup(argv[i] + 2);
                     else if (i + 1 < argc)
                         blogcfile = bc_strdup(argv[++i]);
+                    break;
+                case 'p':
+                    production = true;
                     break;
 #ifdef MAKE_EMBEDDED
                 case 'm':
@@ -112,6 +117,7 @@ main(int argc, char **argv)
         rv = 3;
         goto cleanup;
     }
+    ctx->production = production;
     ctx->verbose = verbose;
 
     rv = bm_rule_executor(ctx, rules);

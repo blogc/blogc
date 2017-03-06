@@ -20,6 +20,10 @@ EXPAND-ME!
   * `-f` <FILE>:
     Reads <FILE> as `blogcfile`.
 
+  * `-p`:
+    Builds for production environment. Adds two global variables to all blogc(1)
+    calls: `MAKE_ENV_PRODUCTION=1` and `MAKE_ENV=production`.
+
   * `-v`:
     Show program name, version and exit.
 

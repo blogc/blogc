@@ -165,7 +165,7 @@ def sns_handler(message):
 
         if os.path.isfile(blogcfile):
             # deploy using blogc-make
-            args = [os.path.join(cwd, 'blogc'), '-m', '-f', blogcfile,
+            args = [os.path.join(cwd, 'blogc'), '-m', '-p', '-f', blogcfile,
                     'all']
             if debug:
                 args.append('-V')
@@ -185,6 +185,7 @@ def sns_handler(message):
 
     else:
         print "Commit not for master branch, skipping: %s" % payload['ref']
+
 
 def lambda_handler(event, context):
     for record in event['Records']:

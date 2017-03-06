@@ -143,6 +143,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
         rv->blogc = bm_exec_find_binary(argv0, "blogc", "BLOGC");
         rv->blogc_runserver = bm_exec_find_binary(argv0, "blogc-runserver",
             "BLOGC_RUNSERVER");
+        rv->production = false;
         rv->verbose = false;
     }
     else {

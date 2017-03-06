@@ -202,7 +202,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
             rv = 3;
             goto cleanup;
         }
-        build_cmd = bc_strdup_printf("OUTPUT_DIR=\"%s\" blogc-make -V all",
+        build_cmd = bc_strdup_printf("OUTPUT_DIR=\"%s\" blogc-make -p -V all",
             output_dir);
     }
     else if ((0 == access("Makefile", F_OK)) || (0 == access("GNUMakefile", F_OK))) {
