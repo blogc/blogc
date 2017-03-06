@@ -15,7 +15,7 @@
 
 typedef struct {
     char *root_dir;
-    bc_trie_t *env;
+    bc_trie_t *global;
     bc_trie_t *settings;
     char **posts;
     char **pages;

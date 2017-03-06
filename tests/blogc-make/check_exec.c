@@ -74,9 +74,9 @@ test_build_blogc_cmd_with_settings(void **state)
     bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
     settings->settings = bc_trie_new(free);
     bc_trie_insert(settings->settings, "locale", bc_strdup("en_US.utf8"));
-    settings->env = bc_trie_new(free);
-    bc_trie_insert(settings->env, "FOO", bc_strdup("BAR"));
-    bc_trie_insert(settings->env, "BAR", bc_strdup("BAZ"));
+    settings->global = bc_trie_new(free);
+    bc_trie_insert(settings->global, "FOO", bc_strdup("BAR"));
+    bc_trie_insert(settings->global, "BAR", bc_strdup("BAZ"));
     bc_trie_t *variables = bc_trie_new(free);
     bc_trie_insert(variables, "LOL", bc_strdup("HEHE"));
 
@@ -101,7 +101,7 @@ test_build_blogc_cmd_with_settings(void **state)
 
     bc_trie_free(variables);
     bc_trie_free(settings->settings);
-    bc_trie_free(settings->env);
+    bc_trie_free(settings->global);
     free(settings);
 }
 

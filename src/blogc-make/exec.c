@@ -222,7 +222,7 @@ bm_exec_build_blogc_cmd(const char *blogc_bin, bm_settings_t *settings,
     bc_string_append(rv, blogc_bin);
 
     if (settings != NULL) {
-        bc_trie_foreach(settings->env,
+        bc_trie_foreach(settings->global,
             (bc_trie_foreach_func_t) list_variables, rv);
     }
 

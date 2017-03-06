@@ -94,7 +94,7 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
 
     bm_settings_t *rv = bc_malloc(sizeof(bm_settings_t));
     rv->root_dir = NULL;
-    rv->env = bc_trie_new(free);
+    rv->global = bc_trie_new(free);
     rv->settings = bc_trie_new(free);
     rv->posts = NULL;
     rv->pages = NULL;
@@ -105,13 +105,13 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
     // even if I never released a version with it, but some people is using
     // it already.
     const char *section = NULL;
-    char **env = bc_config_list_keys(config, "global");
-    if (env != NULL) {
+    char **global = bc_config_list_keys(config, "global");
+    if (global != NULL) {
         section = "global";
     }
     else {
-        env = bc_config_list_keys(config, "environment");
-        if (env != NULL) {
+        global = bc_config_list_keys(config, "environment");
+        if (global != NULL) {
             section = "environment";
         }
         else {
@@ -119,26 +119,26 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
         }
     }
 
-    if (env != NULL) {
-        for (size_t i = 0; env[i] != NULL; i++) {
-            for (size_t j = 0; env[i][j] != '\0'; j++) {
-                if (!((env[i][j] >= 'A' && env[i][j] <= 'Z') || env[i][j] == '_')) {
+    if (global != NULL) {
+        for (size_t i = 0; global[i] != NULL; i++) {
+            for (size_t j = 0; global[i][j] != '\0'; j++) {
+                if (!((global[i][j] >= 'A' && global[i][j] <= 'Z') || global[i][j] == '_')) {
                     *err = bc_error_new_printf(BLOGC_MAKE_ERROR_SETTINGS,
-                        "Invalid [%s] key: %s", section, env[i]);
-                    bc_strv_free(env);
+                        "Invalid [%s] key: %s", section, global[i]);
+                    bc_strv_free(global);
                     bm_settings_free(rv);
                     rv = NULL;
                     goto cleanup;
                 }
             }
-            bc_trie_insert(rv->env, env[i],
-                bc_strdup(bc_config_get(config, section, env[i])));
+            bc_trie_insert(rv->global, global[i],
+                bc_strdup(bc_config_get(config, section, global[i])));
         }
     }
-    bc_strv_free(env);
+    bc_strv_free(global);
 
     for (size_t i = 0; required_global[i] != NULL; i++) {
-        const char *value = bc_trie_lookup(rv->env, required_global[i]);
+        const char *value = bc_trie_lookup(rv->global, required_global[i]);
         if (value == NULL || value[0] == '\0') {
             *err = bc_error_new_printf(BLOGC_MAKE_ERROR_SETTINGS,
                 "[%s] key required but not found or empty: %s", section,
@@ -202,7 +202,7 @@ bm_settings_free(bm_settings_t *settings)
     if (settings == NULL)
         return;
     free(settings->root_dir);
-    bc_trie_free(settings->env);
+    bc_trie_free(settings->global);
     bc_trie_free(settings->settings);
     bc_strv_free(settings->posts);
     bc_strv_free(settings->pages);
