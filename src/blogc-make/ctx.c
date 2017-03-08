@@ -36,14 +36,13 @@ bm_filectx_new(bm_ctx_t *ctx, const char *filename)
     struct stat buf;
 
     if (0 != stat(f, &buf)) {
-        struct timespec ts;
-        ts.tv_sec = 0;
-        ts.tv_nsec = 0;
-        rv->timestamp = ts;
+        rv->tv_sec = 0;
+        rv->tv_nsec = 0;
         rv->readable = false;
     }
     else {
-        rv->timestamp = buf.st_mtim;
+        rv->tv_sec = buf.st_mtim_tv_sec;
+        rv->tv_nsec = buf.st_mtim_tv_nsec;
         rv->readable = true;
     }
 
@@ -52,7 +51,7 @@ bm_filectx_new(bm_ctx_t *ctx, const char *filename)
 
 
 bool
-bm_filectx_changed(bm_filectx_t *ctx, struct timespec *ts)
+bm_filectx_changed(bm_filectx_t *ctx, time_t *tv_sec, long *tv_nsec)
 {
     if (ctx == NULL)
         return false;
@@ -60,16 +59,20 @@ bm_filectx_changed(bm_filectx_t *ctx, struct timespec *ts)
     struct stat buf;
 
     if (0 == stat(ctx->path, &buf)) {
-        if (buf.st_mtim.tv_sec == ctx->timestamp.tv_sec) {
-            if (buf.st_mtim.tv_nsec > ctx->timestamp.tv_nsec) {
-                if (ts != NULL)
-                    *ts = buf.st_mtim;
+        if (buf.st_mtim_tv_sec == ctx->tv_sec) {
+            if (buf.st_mtim_tv_nsec > ctx->tv_nsec) {
+                if (tv_sec != NULL)
+                    *tv_sec = buf.st_mtim_tv_sec;
+                if (tv_nsec != NULL)
+                    *tv_nsec = buf.st_mtim_tv_nsec;
                 return true;
             }
         }
-        else if (buf.st_mtim.tv_sec > ctx->timestamp.tv_sec) {
-            if (ts != NULL)
-                *ts = buf.st_mtim;
+        else if (buf.st_mtim_tv_sec > ctx->tv_sec) {
+            if (tv_sec != NULL)
+                *tv_sec = buf.st_mtim_tv_sec;
+            if (tv_nsec != NULL)
+                *tv_nsec = buf.st_mtim_tv_nsec;
             return true;
         }
     }
@@ -84,12 +87,14 @@ bm_filectx_reload(bm_filectx_t *ctx)
     if (ctx == NULL)
         return;
 
-    struct timespec ts;
+    time_t tv_sec;
+    long tv_nsec;
 
-    if (!bm_filectx_changed(ctx, &ts))
+    if (!bm_filectx_changed(ctx, &tv_sec, &tv_nsec))
         return;
 
-    ctx->timestamp = ts;
+    ctx->tv_sec = tv_sec;
+    ctx->tv_nsec = tv_nsec;
     ctx->readable = true;
 }
 
@@ -222,7 +227,7 @@ bm_ctx_reload(bm_ctx_t *ctx)
     if (ctx == NULL || ctx->settings_fctx == NULL)
         return false;
 
-    if (bm_filectx_changed(ctx->settings_fctx, NULL)) {
+    if (bm_filectx_changed(ctx->settings_fctx, NULL, NULL)) {
         // reload everything! we could just reload settings_fctx, as this
         // would force rebuilding everything, but we need to know new/deleted
         // files

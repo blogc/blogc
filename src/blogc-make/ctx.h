@@ -16,15 +16,28 @@
 #include "../common/utils.h"
 
 #ifdef __APPLE__
-#ifndef st_mtim
-#define st_mtim st_mtimespec
+#define st_mtim_tv_sec st_mtimespec.tv_sec
+#define st_mtim_tv_nsec st_mtimespec.tv_nsec
 #endif
+
+#ifdef __ANDROID__
+#define st_mtim_tv_sec st_mtime
+#define st_mtim_tv_nsec st_mtime_nsec
 #endif
+
+#ifndef st_mtim_tv_sec
+#define st_mtim_tv_sec st_mtim.tv_sec
+#endif
+#ifndef st_mtim_tv_nsec
+#define st_mtim_tv_nsec st_mtim.tv_nsec
+#endif
+
 
 typedef struct {
     char *path;
     char *short_path;
-    struct timespec timestamp;
+    time_t tv_sec;
+    long tv_nsec;
     bool readable;
 } bm_filectx_t;
 
@@ -50,7 +63,7 @@ typedef struct {
 } bm_ctx_t;
 
 bm_filectx_t* bm_filectx_new(bm_ctx_t *ctx, const char *filename);
-bool bm_filectx_changed(bm_filectx_t *ctx, struct timespec *ts);
+bool bm_filectx_changed(bm_filectx_t *ctx, time_t *tv_sec, long *tv_nsec);
 void bm_filectx_reload(bm_filectx_t *ctx);
 void bm_filectx_free(bm_filectx_t *fctx);
 bm_ctx_t* bm_ctx_new(bm_ctx_t *base, const char *settings_file,

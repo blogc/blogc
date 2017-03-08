@@ -790,13 +790,13 @@ bm_rule_need_rebuild(bc_slist_t *sources, bm_filectx_t *settings,
             rv = true;
             break;
         }
-        if (source->timestamp.tv_sec == output->timestamp.tv_sec) {
-            if (source->timestamp.tv_nsec > output->timestamp.tv_nsec) {
+        if (source->tv_sec == output->tv_sec) {
+            if (source->tv_nsec > output->tv_nsec) {
                 rv = true;
                 break;
             }
         }
-        else if (source->timestamp.tv_sec > output->timestamp.tv_sec) {
+        else if (source->tv_sec > output->tv_sec) {
             rv = true;
             break;
         }
