@@ -385,7 +385,7 @@ bm_exec_blogc_runserver(bm_ctx_t *ctx, const char *host, const char *port,
     int rv = WEXITSTATUS(status);
     bc_string_free(cmd, true);
 
-    if (rv != 0) {
+    if (rv != 0 && rv != 130) {
         if (rv == 127) {
             fprintf(stderr,
                 "blogc-make: error: blogc-runserver command not found. Maybe "
