@@ -165,7 +165,7 @@ def sns_handler(message):
 
         if os.path.isfile(blogcfile):
             # deploy using blogc-make
-            args = [os.path.join(cwd, 'blogc'), '-m', '-p', '-f', blogcfile,
+            args = [os.path.join(cwd, 'blogc'), '-m', '-f', blogcfile,
                     'all']
             if debug:
                 args.append('-V')

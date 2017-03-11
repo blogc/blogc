@@ -45,7 +45,7 @@ typedef struct {
     char *blogc;
     char *blogc_runserver;
 
-    bool production;
+    bool dev;
     bool verbose;
 
     bm_settings_t *settings;

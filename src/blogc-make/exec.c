@@ -205,7 +205,7 @@ list_variables(const char *key, const char *value, bc_string_t *str)
 char*
 bm_exec_build_blogc_cmd(const char *blogc_bin, bm_settings_t *settings,
     bc_trie_t *variables, bool listing, const char *template,
-    const char *output, bool production, bool sources_stdin)
+    const char *output, bool dev, bool sources_stdin)
 {
     bc_string_t *rv = bc_string_new();
 
@@ -228,9 +228,8 @@ bm_exec_build_blogc_cmd(const char *blogc_bin, bm_settings_t *settings,
 
     bc_trie_foreach(variables, (bc_trie_foreach_func_t) list_variables, rv);
 
-    if (production) {
-        bc_string_append(rv,
-            " -D MAKE_ENV_PRODUCTION=1 -D MAKE_ENV='production'");
+    if (dev) {
+        bc_string_append(rv, " -D MAKE_ENV_DEV=1 -D MAKE_ENV='dev'");
     }
 
     if (listing) {
@@ -273,7 +272,7 @@ bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *variables, bool listing,
     }
 
     char *cmd = bm_exec_build_blogc_cmd(ctx->blogc, ctx->settings, variables,
-        listing, template->path, output->path, ctx->production, input->len > 0);
+        listing, template->path, output->path, ctx->dev, input->len > 0);
 
     if (ctx->verbose)
         printf("%s\n", cmd);

@@ -107,7 +107,7 @@ test_build_blogc_cmd_with_settings(void **state)
 
 
 static void
-test_build_blogc_cmd_with_settings_and_production(void **state)
+test_build_blogc_cmd_with_settings_and_dev(void **state)
 {
     bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
     settings->settings = bc_trie_new(free);
@@ -122,22 +122,21 @@ test_build_blogc_cmd_with_settings_and_production(void **state)
         "main.tmpl", "foo.html", true, true);
     assert_string_equal(rv,
         "LC_ALL='en_US.utf8' blogc -D FOO='BAR' -D BAR='BAZ' -D LOL='HEHE' "
-        "-D MAKE_ENV_PRODUCTION=1 -D MAKE_ENV='production' -l -t 'main.tmpl' "
-        "-o 'foo.html' -i");
+        "-D MAKE_ENV_DEV=1 -D MAKE_ENV='dev' -l -t 'main.tmpl' -o 'foo.html' -i");
     free(rv);
 
     rv = bm_exec_build_blogc_cmd("blogc", settings, variables, false, NULL, NULL,
         true, false);
     assert_string_equal(rv,
         "LC_ALL='en_US.utf8' blogc -D FOO='BAR' -D BAR='BAZ' -D LOL='HEHE' "
-        "-D MAKE_ENV_PRODUCTION=1 -D MAKE_ENV='production'");
+        "-D MAKE_ENV_DEV=1 -D MAKE_ENV='dev'");
     free(rv);
 
     rv = bm_exec_build_blogc_cmd("blogc", settings, NULL, false, NULL, NULL,
         true, false);
     assert_string_equal(rv,
         "LC_ALL='en_US.utf8' blogc -D FOO='BAR' -D BAR='BAZ' "
-        "-D MAKE_ENV_PRODUCTION=1 -D MAKE_ENV='production'");
+        "-D MAKE_ENV_DEV=1 -D MAKE_ENV='dev'");
     free(rv);
 
     bc_trie_free(variables);
@@ -181,7 +180,7 @@ main(void)
     const UnitTest tests[] = {
         unit_test(test_find_binary),
         unit_test(test_build_blogc_cmd_with_settings),
-        unit_test(test_build_blogc_cmd_with_settings_and_production),
+        unit_test(test_build_blogc_cmd_with_settings_and_dev),
         unit_test(test_build_blogc_cmd_without_settings),
     };
     return run_tests(tests);

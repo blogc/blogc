@@ -14,15 +14,16 @@ EXPAND-ME!
 
 ## OPTIONS
 
+  * `-D`:
+    Builds for development environment. This option is useful to load local,
+    non-optimized assets for development purposes. It adds two global
+    variables to all blogc(1) calls: `MAKE_ENV_DEV=1` and `MAKE_ENV=dev`.
+
   * `-V`:
     Activates verbose mode, that will give more details of commands runs.
 
   * `-f` <FILE>:
     Reads <FILE> as `blogcfile`.
-
-  * `-p`:
-    Builds for production environment. Adds two global variables to all blogc(1)
-    calls: `MAKE_ENV_PRODUCTION=1` and `MAKE_ENV=production`.
 
   * `-v`:
     Show program name, version and exit.
