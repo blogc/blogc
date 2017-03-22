@@ -19,7 +19,7 @@ build() {
     PV="$(grep PACKAGE_VERSION build/config.h | cut -d\" -f2)"
 
     install -m 755 build/blogc build/root/blogc
-    install -m 644 src/blogc-github-lambda/lambda_function.py build/root/lambda_function.py
+    install -m 644 build/src/blogc-github-lambda/lambda_function.py build/root/lambda_function.py
     install -m 644 LICENSE build/root/LICENSE
     strip build/root/blogc
 
