@@ -99,6 +99,7 @@ blogc-*.rpm
 /src/blogc-github-lambda/LICENSE
 /src/blogc-github-lambda/*.pyc
 /src/blogc-github-lambda/*.pyo
+/src/blogc-github-lambda/*.py
 
 /build/
 /root/

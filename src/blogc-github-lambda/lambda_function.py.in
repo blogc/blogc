@@ -21,6 +21,8 @@ import tarfile
 import urllib2
 import shutil
 
+BLOGC_VERSION = '@PACKAGE_VERSION@'
+
 cwd = os.path.dirname(os.path.abspath(__file__))
 os.environ['PATH'] = '%s:%s' % (cwd, os.environ.get('PATH', ''))
 
@@ -150,6 +152,7 @@ def sync_s3(src, dest, settings_file):
 
 
 def sns_handler(message):
+    print 'blogc-github-lambda %s' % BLOGC_VERSION
     payload = json.loads(message)
 
     if payload['ref'] == 'refs/heads/master':
