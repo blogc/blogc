@@ -18,7 +18,7 @@
 
 
 static void
-print_help(void)
+print_help(const char *default_host, const char *default_port)
 {
     printf(
         "usage:\n"
@@ -31,9 +31,10 @@ print_help(void)
         "optional arguments:\n"
         "    -h            show this help message and exit\n"
         "    -v            show version and exit\n"
-        "    -t HOST       set server listen address (default: 127.0.0.1)\n"
-        "    -p PORT       set server listen port (default: 8080)\n"
-        "    -m THREADS    set maximum number of threads to spawn (default: 20)\n");
+        "    -t HOST       set server listen address (default: %s)\n"
+        "    -p PORT       set server listen port (default: %s)\n"
+        "    -m THREADS    set maximum number of threads to spawn (default: 20)\n",
+        default_host, default_port);
 }
 
 
@@ -64,13 +65,18 @@ main(int argc, char **argv)
     char *ptr;
     char *endptr;
 
+    char *tmp_host = getenv("BLOGC_RUNSERVER_DEFAULT_HOST");
+    char *default_host = bc_strdup(tmp_host != NULL ? tmp_host : "127.0.0.1");
+    char *tmp_port = getenv("BLOGC_RUNSERVER_DEFAULT_PORT");
+    char *default_port = bc_strdup(tmp_port != NULL ? tmp_port : "8080");
+
     unsigned int args = 0;
 
     for (unsigned int i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
             switch (argv[i][1]) {
                 case 'h':
-                    print_help();
+                    print_help(default_host, default_port);
                     goto cleanup;
                 case 'v':
                     printf("%s\n", PACKAGE_STRING);
@@ -134,15 +140,14 @@ main(int argc, char **argv)
         goto cleanup;
     }
 
-    if (host == NULL)
-        host = bc_strdup("127.0.0.1");
-
-    if (port == NULL)
-        port = bc_strdup("8080");
-
-    rv = br_httpd_run(host, port, docroot, max_threads);
+    rv = br_httpd_run(
+        host != NULL ? host : default_host,
+        port != NULL ? port : default_port,
+        docroot, max_threads);
 
 cleanup:
+    free(default_host);
+    free(default_port);
     free(host);
     free(port);
     free(docroot);

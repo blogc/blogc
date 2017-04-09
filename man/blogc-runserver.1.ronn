@@ -35,6 +35,14 @@ able to serve any website built by static site generators.
   * <DOCROOT>:
     HTTP server document root.
 
+## ENVIRONMENT
+
+  * `BLOGC_RUNSERVER_DEFAULT_HOST`:
+    Changes the default HTTP server listen address, if defined.
+
+  * `BLOGC_RUNSERVER_DEFAULT_PORT`:
+    Changes the default HTTP server listen port, if defined.
+
 ## BUGS
 
 Please report any issues to: <https://github.com/blogc/blogc>
