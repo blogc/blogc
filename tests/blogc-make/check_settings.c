@@ -129,7 +129,7 @@ test_settings2(void **state)
     assert_string_equal(bc_trie_lookup(s->global, "SITE_TITLE"), "Fuuuuuuuuu");
     assert_string_equal(bc_trie_lookup(s->global, "SITE_TAGLINE"), "My cool tagline");
     assert_string_equal(bc_trie_lookup(s->global, "BASE_DOMAIN"), "http://example.com");
-    assert_int_equal(bc_trie_size(s->settings), 17);
+    assert_int_equal(bc_trie_size(s->settings), 14);
     assert_string_equal(bc_trie_lookup(s->settings, "source_ext"), ".txt");
     assert_string_equal(bc_trie_lookup(s->settings, "html_ext"), "/index.html");
     assert_string_equal(bc_trie_lookup(s->settings, "output_dir"), "bola");
@@ -145,9 +145,6 @@ test_settings2(void **state)
     assert_string_equal(bc_trie_lookup(s->settings, "pagination_prefix"), "page");
     assert_string_equal(bc_trie_lookup(s->settings, "post_prefix"), "post");
     assert_string_equal(bc_trie_lookup(s->settings, "tag_prefix"), "tag");
-    assert_string_equal(bc_trie_lookup(s->settings, "runserver_host"), "127.0.0.1");
-    assert_string_equal(bc_trie_lookup(s->settings, "runserver_port"), "8080");
-    assert_string_equal(bc_trie_lookup(s->settings, "runserver_threads"), "20");
     assert_non_null(s->posts);
     assert_string_equal(s->posts[0], "aaaa");
     assert_string_equal(s->posts[1], "bbbb");
@@ -221,7 +218,7 @@ test_settings_env2(void **state)
     assert_string_equal(bc_trie_lookup(s->global, "SITE_TITLE"), "Fuuuuuuuuu");
     assert_string_equal(bc_trie_lookup(s->global, "SITE_TAGLINE"), "My cool tagline");
     assert_string_equal(bc_trie_lookup(s->global, "BASE_DOMAIN"), "http://example.com");
-    assert_int_equal(bc_trie_size(s->settings), 17);
+    assert_int_equal(bc_trie_size(s->settings), 14);
     assert_string_equal(bc_trie_lookup(s->settings, "source_ext"), ".txt");
     assert_string_equal(bc_trie_lookup(s->settings, "html_ext"), "/index.html");
     assert_string_equal(bc_trie_lookup(s->settings, "output_dir"), "bola");
@@ -237,9 +234,6 @@ test_settings_env2(void **state)
     assert_string_equal(bc_trie_lookup(s->settings, "pagination_prefix"), "page");
     assert_string_equal(bc_trie_lookup(s->settings, "post_prefix"), "post");
     assert_string_equal(bc_trie_lookup(s->settings, "tag_prefix"), "tag");
-    assert_string_equal(bc_trie_lookup(s->settings, "runserver_host"), "127.0.0.1");
-    assert_string_equal(bc_trie_lookup(s->settings, "runserver_port"), "8080");
-    assert_string_equal(bc_trie_lookup(s->settings, "runserver_threads"), "20");
     assert_non_null(s->posts);
     assert_string_equal(s->posts[0], "aaaa");
     assert_string_equal(s->posts[1], "bbbb");
@@ -313,7 +307,7 @@ test_settings_copy_files(void **state)
     assert_string_equal(bc_trie_lookup(s->global, "SITE_TITLE"), "Fuuuuuuuuu");
     assert_string_equal(bc_trie_lookup(s->global, "SITE_TAGLINE"), "My cool tagline");
     assert_string_equal(bc_trie_lookup(s->global, "BASE_DOMAIN"), "http://example.com");
-    assert_int_equal(bc_trie_size(s->settings), 17);
+    assert_int_equal(bc_trie_size(s->settings), 14);
     assert_string_equal(bc_trie_lookup(s->settings, "source_ext"), ".txt");
     assert_string_equal(bc_trie_lookup(s->settings, "html_ext"), "/index.html");
     assert_string_equal(bc_trie_lookup(s->settings, "output_dir"), "bola");
@@ -329,9 +323,6 @@ test_settings_copy_files(void **state)
     assert_string_equal(bc_trie_lookup(s->settings, "pagination_prefix"), "page");
     assert_string_equal(bc_trie_lookup(s->settings, "post_prefix"), "post");
     assert_string_equal(bc_trie_lookup(s->settings, "tag_prefix"), "tag");
-    assert_string_equal(bc_trie_lookup(s->settings, "runserver_host"), "127.0.0.1");
-    assert_string_equal(bc_trie_lookup(s->settings, "runserver_port"), "8080");
-    assert_string_equal(bc_trie_lookup(s->settings, "runserver_threads"), "20");
     assert_non_null(s->posts);
     assert_string_equal(s->posts[0], "aaaa");
     assert_string_equal(s->posts[1], "bbbb");
