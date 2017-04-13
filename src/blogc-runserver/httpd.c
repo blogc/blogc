@@ -275,10 +275,10 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
     int rv = 0;
 
     struct addrinfo *rp;
-    int server_socket;
+    int server_socket = 0;
 
     char *final_host = NULL;
-    u_int16_t final_port;
+    u_int16_t final_port = 0;
 
     for (rp = result; rp != NULL; rp = rp->ai_next) {
         final_host = br_httpd_get_ip(rp->ai_family, rp->ai_addr);
