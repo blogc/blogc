@@ -55,8 +55,7 @@ files to the configured output directory.
 
   * `OUTPUT_DIR`:
     Path to the directory where `blogc-make` should write (or instruct blogc(1) to
-    write) output files. This is usually configured in `blogcfile`, but being able
-    to override it with an environment variable is useful for automated builds.
+    write) output files.
 
 Any other environment variables are inherited by blogc(1) and blogc-runserver(1),
 when called by `blogc-make`.

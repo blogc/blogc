@@ -467,7 +467,6 @@ content_dir = contents
 template_dir = temp
 main_template = main.html
 source_ext = .blogc
-output_dir = _blogc_build
 pagination_prefix = pagination
 posts_per_page = 1
 atom_posts_per_page = 1
@@ -493,12 +492,12 @@ bar
 EOF
 
 ${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
-grep "_blogc_build/posts\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/atoom/index\\.xml" "${TEMP}/output.txt"
-grep "_blogc_build/pagination/1\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/pagination/2\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/poost/foo\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/poost/bar\\.html" "${TEMP}/output.txt"
+grep "_build/posts\\.html" "${TEMP}/output.txt"
+grep "_build/atoom/index\\.xml" "${TEMP}/output.txt"
+grep "_build/pagination/1\\.html" "${TEMP}/output.txt"
+grep "_build/pagination/2\\.html" "${TEMP}/output.txt"
+grep "_build/poost/foo\\.html" "${TEMP}/output.txt"
+grep "_build/poost/bar\\.html" "${TEMP}/output.txt"
 
 rm "${TEMP}/output.txt"
 
@@ -508,8 +507,8 @@ Listing: Foo - Oct 01, 2016
 
 
 EOF
-diff -uN "${TEMP}/proj/_blogc_build/posts.html" "${TEMP}/expected-index.html"
-diff -uN "${TEMP}/proj/_blogc_build/pagination/1.html" "${TEMP}/expected-index.html"
+diff -uN "${TEMP}/proj/_build/posts.html" "${TEMP}/expected-index.html"
+diff -uN "${TEMP}/proj/_build/pagination/1.html" "${TEMP}/expected-index.html"
 
 cat > "${TEMP}/expected-page-2.html" <<EOF
 
@@ -517,7 +516,7 @@ Listing: Bar - Sep 01, 2016
 
 
 EOF
-diff -uN "${TEMP}/proj/_blogc_build/pagination/2.html" "${TEMP}/expected-page-2.html"
+diff -uN "${TEMP}/proj/_build/pagination/2.html" "${TEMP}/expected-page-2.html"
 
 cat > "${TEMP}/expected-atom.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
@@ -549,7 +548,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
 </feed>
 EOF
-diff -uN "${TEMP}/proj/_blogc_build/atoom/index.xml" "${TEMP}/expected-atom.xml"
+diff -uN "${TEMP}/proj/_build/atoom/index.xml" "${TEMP}/expected-atom.xml"
 
 cat > "${TEMP}/expected-post-foo.html" <<EOF
 
@@ -560,7 +559,7 @@ Foo - Oct 01, 2016
 
 
 EOF
-diff -uN "${TEMP}/proj/_blogc_build/poost/foo.html" "${TEMP}/expected-post-foo.html"
+diff -uN "${TEMP}/proj/_build/poost/foo.html" "${TEMP}/expected-post-foo.html"
 
 cat > "${TEMP}/expected-post-bar.html" <<EOF
 
@@ -571,7 +570,7 @@ Bar - Sep 01, 2016
 
 
 EOF
-diff -uN "${TEMP}/proj/_blogc_build/poost/bar.html" "${TEMP}/expected-post-bar.html"
+diff -uN "${TEMP}/proj/_build/poost/bar.html" "${TEMP}/expected-post-bar.html"
 
 rm -rf "${TEMP}/proj/_build"
 
@@ -594,24 +593,24 @@ tag2
 EOF
 
 ${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
-grep "_blogc_build/posts\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/atoom/index\\.xml" "${TEMP}/output.txt"
-grep "_blogc_build/atoom/tag1/index\\.xml" "${TEMP}/output.txt"
-grep "_blogc_build/atoom/tag2/index\\.xml" "${TEMP}/output.txt"
-grep "_blogc_build/pagination/1\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/pagination/2\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/pagination/3\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/poost/foo\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/poost/bar\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/poost/baz\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/taag/tag1\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/taag/tag2\\.html" "${TEMP}/output.txt"
+grep "_build/posts\\.html" "${TEMP}/output.txt"
+grep "_build/atoom/index\\.xml" "${TEMP}/output.txt"
+grep "_build/atoom/tag1/index\\.xml" "${TEMP}/output.txt"
+grep "_build/atoom/tag2/index\\.xml" "${TEMP}/output.txt"
+grep "_build/pagination/1\\.html" "${TEMP}/output.txt"
+grep "_build/pagination/2\\.html" "${TEMP}/output.txt"
+grep "_build/pagination/3\\.html" "${TEMP}/output.txt"
+grep "_build/poost/foo\\.html" "${TEMP}/output.txt"
+grep "_build/poost/bar\\.html" "${TEMP}/output.txt"
+grep "_build/poost/baz\\.html" "${TEMP}/output.txt"
+grep "_build/taag/tag1\\.html" "${TEMP}/output.txt"
+grep "_build/taag/tag2\\.html" "${TEMP}/output.txt"
 
 rm "${TEMP}/output.txt"
 
-diff -uN "${TEMP}/proj/_blogc_build/posts.html" "${TEMP}/expected-index.html"
-diff -uN "${TEMP}/proj/_blogc_build/pagination/1.html" "${TEMP}/expected-index.html"
-diff -uN "${TEMP}/proj/_blogc_build/pagination/2.html" "${TEMP}/expected-page-2.html"
+diff -uN "${TEMP}/proj/_build/posts.html" "${TEMP}/expected-index.html"
+diff -uN "${TEMP}/proj/_build/pagination/1.html" "${TEMP}/expected-index.html"
+diff -uN "${TEMP}/proj/_build/pagination/2.html" "${TEMP}/expected-page-2.html"
 
 cat > "${TEMP}/expected-page-3.html" <<EOF
 
@@ -619,9 +618,9 @@ Listing: Baz - Aug 01, 2016
 
 
 EOF
-diff -uN "${TEMP}/proj/_blogc_build/pagination/3.html" "${TEMP}/expected-page-3.html"
+diff -uN "${TEMP}/proj/_build/pagination/3.html" "${TEMP}/expected-page-3.html"
 
-diff -uN "${TEMP}/proj/_blogc_build/atoom/index.xml" "${TEMP}/expected-atom.xml"
+diff -uN "${TEMP}/proj/_build/atoom/index.xml" "${TEMP}/expected-atom.xml"
 
 cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
@@ -653,7 +652,7 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
   
 </feed>
 EOF
-diff -uN "${TEMP}/proj/_blogc_build/atoom/tag1/index.xml" "${TEMP}/expected-atom-tag1.xml"
+diff -uN "${TEMP}/proj/_build/atoom/tag1/index.xml" "${TEMP}/expected-atom-tag1.xml"
 
 cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
@@ -685,7 +684,7 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
   
 </feed>
 EOF
-diff -uN "${TEMP}/proj/_blogc_build/atoom/tag2/index.xml" "${TEMP}/expected-atom-tag2.xml"
+diff -uN "${TEMP}/proj/_build/atoom/tag2/index.xml" "${TEMP}/expected-atom-tag2.xml"
 
 cat > "${TEMP}/expected-post-baz.html" <<EOF
 
@@ -696,9 +695,9 @@ Baz - Aug 01, 2016
 
 
 EOF
-diff -uN "${TEMP}/proj/_blogc_build/poost/foo.html" "${TEMP}/expected-post-foo.html"
-diff -uN "${TEMP}/proj/_blogc_build/poost/bar.html" "${TEMP}/expected-post-bar.html"
-diff -uN "${TEMP}/proj/_blogc_build/poost/baz.html" "${TEMP}/expected-post-baz.html"
+diff -uN "${TEMP}/proj/_build/poost/foo.html" "${TEMP}/expected-post-foo.html"
+diff -uN "${TEMP}/proj/_build/poost/bar.html" "${TEMP}/expected-post-bar.html"
+diff -uN "${TEMP}/proj/_build/poost/baz.html" "${TEMP}/expected-post-baz.html"
 
 cat > "${TEMP}/expected-tag1.html" <<EOF
 
@@ -706,7 +705,7 @@ Listing: tag1 - Baz - Aug 01, 2016
 
 
 EOF
-diff -uN "${TEMP}/proj/_blogc_build/taag/tag1.html" "${TEMP}/expected-tag1.html"
+diff -uN "${TEMP}/proj/_build/taag/tag1.html" "${TEMP}/expected-tag1.html"
 
 cat > "${TEMP}/expected-tag2.html" <<EOF
 
@@ -714,9 +713,9 @@ Listing: tag2 - Baz - Aug 01, 2016
 
 
 EOF
-diff -uN "${TEMP}/proj/_blogc_build/taag/tag2.html" "${TEMP}/expected-tag2.html"
+diff -uN "${TEMP}/proj/_build/taag/tag2.html" "${TEMP}/expected-tag2.html"
 
-rm -rf "${TEMP}/proj/_blogc_build"
+rm -rf "${TEMP}/proj/_build"
 
 
 ### default settings with some posts, pages and tags
@@ -740,38 +739,38 @@ page2
 EOF
 
 ${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
-grep "_blogc_build/posts\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/atoom/index\\.xml" "${TEMP}/output.txt"
-grep "_blogc_build/atoom/tag1/index\\.xml" "${TEMP}/output.txt"
-grep "_blogc_build/atoom/tag2/index\\.xml" "${TEMP}/output.txt"
-grep "_blogc_build/pagination/1\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/pagination/2\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/pagination/3\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/poost/foo\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/poost/bar\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/poost/baz\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/taag/tag1\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/taag/tag2\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/page1\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/page2\\.html" "${TEMP}/output.txt"
+grep "_build/posts\\.html" "${TEMP}/output.txt"
+grep "_build/atoom/index\\.xml" "${TEMP}/output.txt"
+grep "_build/atoom/tag1/index\\.xml" "${TEMP}/output.txt"
+grep "_build/atoom/tag2/index\\.xml" "${TEMP}/output.txt"
+grep "_build/pagination/1\\.html" "${TEMP}/output.txt"
+grep "_build/pagination/2\\.html" "${TEMP}/output.txt"
+grep "_build/pagination/3\\.html" "${TEMP}/output.txt"
+grep "_build/poost/foo\\.html" "${TEMP}/output.txt"
+grep "_build/poost/bar\\.html" "${TEMP}/output.txt"
+grep "_build/poost/baz\\.html" "${TEMP}/output.txt"
+grep "_build/taag/tag1\\.html" "${TEMP}/output.txt"
+grep "_build/taag/tag2\\.html" "${TEMP}/output.txt"
+grep "_build/page1\\.html" "${TEMP}/output.txt"
+grep "_build/page2\\.html" "${TEMP}/output.txt"
 
 rm "${TEMP}/output.txt"
 
-diff -uN "${TEMP}/proj/_blogc_build/posts.html" "${TEMP}/expected-index.html"
-diff -uN "${TEMP}/proj/_blogc_build/pagination/1.html" "${TEMP}/expected-index.html"
-diff -uN "${TEMP}/proj/_blogc_build/pagination/2.html" "${TEMP}/expected-page-2.html"
-diff -uN "${TEMP}/proj/_blogc_build/pagination/3.html" "${TEMP}/expected-page-3.html"
+diff -uN "${TEMP}/proj/_build/posts.html" "${TEMP}/expected-index.html"
+diff -uN "${TEMP}/proj/_build/pagination/1.html" "${TEMP}/expected-index.html"
+diff -uN "${TEMP}/proj/_build/pagination/2.html" "${TEMP}/expected-page-2.html"
+diff -uN "${TEMP}/proj/_build/pagination/3.html" "${TEMP}/expected-page-3.html"
 
-diff -uN "${TEMP}/proj/_blogc_build/atoom/index.xml" "${TEMP}/expected-atom.xml"
-diff -uN "${TEMP}/proj/_blogc_build/atoom/tag1/index.xml" "${TEMP}/expected-atom-tag1.xml"
-diff -uN "${TEMP}/proj/_blogc_build/atoom/tag2/index.xml" "${TEMP}/expected-atom-tag2.xml"
+diff -uN "${TEMP}/proj/_build/atoom/index.xml" "${TEMP}/expected-atom.xml"
+diff -uN "${TEMP}/proj/_build/atoom/tag1/index.xml" "${TEMP}/expected-atom-tag1.xml"
+diff -uN "${TEMP}/proj/_build/atoom/tag2/index.xml" "${TEMP}/expected-atom-tag2.xml"
 
-diff -uN "${TEMP}/proj/_blogc_build/poost/foo.html" "${TEMP}/expected-post-foo.html"
-diff -uN "${TEMP}/proj/_blogc_build/poost/bar.html" "${TEMP}/expected-post-bar.html"
-diff -uN "${TEMP}/proj/_blogc_build/poost/baz.html" "${TEMP}/expected-post-baz.html"
+diff -uN "${TEMP}/proj/_build/poost/foo.html" "${TEMP}/expected-post-foo.html"
+diff -uN "${TEMP}/proj/_build/poost/bar.html" "${TEMP}/expected-post-bar.html"
+diff -uN "${TEMP}/proj/_build/poost/baz.html" "${TEMP}/expected-post-baz.html"
 
-diff -uN "${TEMP}/proj/_blogc_build/taag/tag1.html" "${TEMP}/expected-tag1.html"
-diff -uN "${TEMP}/proj/_blogc_build/taag/tag2.html" "${TEMP}/expected-tag2.html"
+diff -uN "${TEMP}/proj/_build/taag/tag1.html" "${TEMP}/expected-tag1.html"
+diff -uN "${TEMP}/proj/_build/taag/tag2.html" "${TEMP}/expected-tag2.html"
 
 cat > "${TEMP}/expected-page1.html" <<EOF
 
@@ -782,7 +781,7 @@ Page 1
 
 
 EOF
-diff -uN "${TEMP}/proj/_blogc_build/page1.html" "${TEMP}/expected-page1.html"
+diff -uN "${TEMP}/proj/_build/page1.html" "${TEMP}/expected-page1.html"
 
 cat > "${TEMP}/expected-page2.html" <<EOF
 
@@ -793,30 +792,30 @@ Page 2
 
 
 EOF
-diff -uN "${TEMP}/proj/_blogc_build/page2.html" "${TEMP}/expected-page2.html"
+diff -uN "${TEMP}/proj/_build/page2.html" "${TEMP}/expected-page2.html"
 
 
 ### clean rule
 
 ${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" clean 2>&1 | tee "${TEMP}/output.txt"
-grep "_blogc_build/posts\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/atoom/index\\.xml" "${TEMP}/output.txt"
-grep "_blogc_build/atoom/tag1/index\\.xml" "${TEMP}/output.txt"
-grep "_blogc_build/atoom/tag2/index\\.xml" "${TEMP}/output.txt"
-grep "_blogc_build/pagination/1\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/pagination/2\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/pagination/3\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/poost/foo\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/poost/bar\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/poost/baz\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/taag/tag1\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/taag/tag2\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/page1\\.html" "${TEMP}/output.txt"
-grep "_blogc_build/page2\\.html" "${TEMP}/output.txt"
+grep "_build/posts\\.html" "${TEMP}/output.txt"
+grep "_build/atoom/index\\.xml" "${TEMP}/output.txt"
+grep "_build/atoom/tag1/index\\.xml" "${TEMP}/output.txt"
+grep "_build/atoom/tag2/index\\.xml" "${TEMP}/output.txt"
+grep "_build/pagination/1\\.html" "${TEMP}/output.txt"
+grep "_build/pagination/2\\.html" "${TEMP}/output.txt"
+grep "_build/pagination/3\\.html" "${TEMP}/output.txt"
+grep "_build/poost/foo\\.html" "${TEMP}/output.txt"
+grep "_build/poost/bar\\.html" "${TEMP}/output.txt"
+grep "_build/poost/baz\\.html" "${TEMP}/output.txt"
+grep "_build/taag/tag1\\.html" "${TEMP}/output.txt"
+grep "_build/taag/tag2\\.html" "${TEMP}/output.txt"
+grep "_build/page1\\.html" "${TEMP}/output.txt"
+grep "_build/page2\\.html" "${TEMP}/output.txt"
 
 rm "${TEMP}/output.txt"
 
-[[ ! -d "${TEMP}/proj/_blogc_build" ]]
+[[ ! -d "${TEMP}/proj/_build" ]]
 
 export OUTPUT_DIR="${TEMP}/___blogc_build"
 

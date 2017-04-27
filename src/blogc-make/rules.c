@@ -32,12 +32,10 @@ index_outputlist(bm_ctx_t *ctx)
     bc_slist_t *rv = NULL;
     const char *html_ext = bc_trie_lookup(ctx->settings->settings,
         "html_ext");
-    const char *output_dir = bc_trie_lookup(ctx->settings->settings,
-        "output_dir");
     const char *index_prefix = bc_trie_lookup(ctx->settings->settings,
         "index_prefix");
     bool is_index = (index_prefix == NULL) && (html_ext[0] == '/');
-    char *f = bc_strdup_printf("%s%s%s%s", output_dir,
+    char *f = bc_strdup_printf("%s%s%s%s", ctx->short_output_dir,
         is_index ? "" : "/", is_index ? "" : index_prefix,
         html_ext);
     rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
@@ -91,12 +89,11 @@ atom_outputlist(bm_ctx_t *ctx)
         return NULL;
 
     bc_slist_t *rv = NULL;
-    const char *output_dir = bc_trie_lookup(ctx->settings->settings,
-        "output_dir");
     const char *atom_prefix = bc_trie_lookup(ctx->settings->settings,
         "atom_prefix");
     const char *atom_ext = bc_trie_lookup(ctx->settings->settings, "atom_ext");
-    char *f = bc_strdup_printf("%s/%s%s", output_dir, atom_prefix, atom_ext);
+    char *f = bc_strdup_printf("%s/%s%s", ctx->short_output_dir,
+        atom_prefix, atom_ext);
     rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
     free(f);
     return rv;
@@ -148,14 +145,12 @@ atom_tags_outputlist(bm_ctx_t *ctx)
         return NULL;
 
     bc_slist_t *rv = NULL;
-    const char *output_dir = bc_trie_lookup(ctx->settings->settings,
-        "output_dir");
     const char *atom_prefix = bc_trie_lookup(ctx->settings->settings,
         "atom_prefix");
     const char *atom_ext = bc_trie_lookup(ctx->settings->settings, "atom_ext");
     for (size_t i = 0; ctx->settings->tags[i] != NULL; i++) {
-        char *f = bc_strdup_printf("%s/%s/%s%s", output_dir, atom_prefix,
-            ctx->settings->tags[i], atom_ext);
+        char *f = bc_strdup_printf("%s/%s/%s%s", ctx->short_output_dir,
+            atom_prefix, ctx->settings->tags[i], atom_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
         free(f);
     }
@@ -218,8 +213,6 @@ pagination_outputlist(bm_ctx_t *ctx)
         NULL, 10);  // FIXME: improve
     size_t pages = ceilf(((float) num_posts) / posts_per_page);
 
-    const char *output_dir = bc_trie_lookup(ctx->settings->settings,
-        "output_dir");
     const char *pagination_prefix = bc_trie_lookup(ctx->settings->settings,
         "pagination_prefix");
     const char *html_ext = bc_trie_lookup(ctx->settings->settings,
@@ -227,8 +220,8 @@ pagination_outputlist(bm_ctx_t *ctx)
 
     bc_slist_t *rv = NULL;
     for (size_t i = 0; i < pages; i++) {
-        char *f = bc_strdup_printf("%s/%s/%d%s", output_dir, pagination_prefix,
-            i + 1, html_ext);
+        char *f = bc_strdup_printf("%s/%s/%d%s", ctx->short_output_dir,
+            pagination_prefix, i + 1, html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
         free(f);
     }
@@ -281,8 +274,6 @@ posts_outputlist(bm_ctx_t *ctx)
     if (ctx == NULL || ctx->settings->posts == NULL)
         return NULL;
 
-    const char *output_dir = bc_trie_lookup(ctx->settings->settings,
-        "output_dir");
     const char *post_prefix = bc_trie_lookup(ctx->settings->settings,
         "post_prefix");
     const char *html_ext = bc_trie_lookup(ctx->settings->settings,
@@ -290,8 +281,8 @@ posts_outputlist(bm_ctx_t *ctx)
 
     bc_slist_t *rv = NULL;
     for (size_t i = 0; ctx->settings->posts[i] != NULL; i++) {
-        char *f = bc_strdup_printf("%s/%s/%s%s", output_dir, post_prefix,
-            ctx->settings->posts[i], html_ext);
+        char *f = bc_strdup_printf("%s/%s/%s%s", ctx->short_output_dir,
+            post_prefix, ctx->settings->posts[i], html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
         free(f);
     }
@@ -346,14 +337,12 @@ tags_outputlist(bm_ctx_t *ctx)
         return NULL;
 
     bc_slist_t *rv = NULL;
-    const char *output_dir = bc_trie_lookup(ctx->settings->settings,
-        "output_dir");
     const char *tag_prefix = bc_trie_lookup(ctx->settings->settings,
         "tag_prefix");
     const char *html_ext = bc_trie_lookup(ctx->settings->settings, "html_ext");
     for (size_t i = 0; ctx->settings->tags[i] != NULL; i++) {
-        char *f = bc_strdup_printf("%s/%s/%s%s", output_dir, tag_prefix,
-            ctx->settings->tags[i], html_ext);
+        char *f = bc_strdup_printf("%s/%s/%s%s", ctx->short_output_dir,
+            tag_prefix, ctx->settings->tags[i], html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
         free(f);
     }
@@ -411,15 +400,13 @@ pages_outputlist(bm_ctx_t *ctx)
     if (ctx == NULL || ctx->settings->pages == NULL)
         return NULL;
 
-    const char *output_dir = bc_trie_lookup(ctx->settings->settings,
-        "output_dir");
     const char *html_ext = bc_trie_lookup(ctx->settings->settings, "html_ext");
 
     bc_slist_t *rv = NULL;
     for (size_t i = 0; ctx->settings->pages[i] != NULL; i++) {
         bool is_index = (0 == strcmp(ctx->settings->pages[i], "index"))
             && (html_ext[0] == '/');
-        char *f = bc_strdup_printf("%s%s%s%s", output_dir,
+        char *f = bc_strdup_printf("%s%s%s%s", ctx->short_output_dir,
             is_index ? "" : "/", is_index ? "" : ctx->settings->pages[i],
             html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
@@ -475,9 +462,9 @@ copy_outputlist(bm_ctx_t *ctx)
         return NULL;
 
     bc_slist_t *rv = NULL;
-    const char *dir = bc_trie_lookup(ctx->settings->settings, "output_dir");
     for (size_t i = 0; ctx->settings->copy[i] != NULL; i++) {
-        char *f = bc_strdup_printf("%s/%s", dir, ctx->settings->copy[i]);
+        char *f = bc_strdup_printf("%s/%s", ctx->short_output_dir,
+            ctx->settings->copy[i]);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
         free(f);
     }

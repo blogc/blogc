@@ -39,7 +39,6 @@ test_settings(void **state)
 {
     const char *a =
         "[settings]\n"
-        "output_dir = bola\n"
         "content_dir = guda\n"
         "main_template = foo.tmpl\n"
         "\n"
@@ -62,7 +61,6 @@ test_settings_env(void **state)
 {
     const char *a =
         "[settings]\n"
-        "output_dir = bola\n"
         "content_dir = guda\n"
         "main_template = foo.tmpl\n"
         "\n"
@@ -85,7 +83,6 @@ test_settings2(void **state)
 {
     const char *a =
         "[settings]\n"
-        "output_dir = bola\n"
         "content_dir = guda\n"
         "main_template = foo.tmpl\n"
         "\n"
@@ -129,10 +126,9 @@ test_settings2(void **state)
     assert_string_equal(bc_trie_lookup(s->global, "SITE_TITLE"), "Fuuuuuuuuu");
     assert_string_equal(bc_trie_lookup(s->global, "SITE_TAGLINE"), "My cool tagline");
     assert_string_equal(bc_trie_lookup(s->global, "BASE_DOMAIN"), "http://example.com");
-    assert_int_equal(bc_trie_size(s->settings), 14);
+    assert_int_equal(bc_trie_size(s->settings), 13);
     assert_string_equal(bc_trie_lookup(s->settings, "source_ext"), ".txt");
     assert_string_equal(bc_trie_lookup(s->settings, "html_ext"), "/index.html");
-    assert_string_equal(bc_trie_lookup(s->settings, "output_dir"), "bola");
     assert_string_equal(bc_trie_lookup(s->settings, "content_dir"), "guda");
     assert_string_equal(bc_trie_lookup(s->settings, "template_dir"), "templates");
     assert_string_equal(bc_trie_lookup(s->settings, "main_template"), "foo.tmpl");
@@ -174,7 +170,6 @@ test_settings_env2(void **state)
 {
     const char *a =
         "[settings]\n"
-        "output_dir = bola\n"
         "content_dir = guda\n"
         "main_template = foo.tmpl\n"
         "\n"
@@ -218,10 +213,9 @@ test_settings_env2(void **state)
     assert_string_equal(bc_trie_lookup(s->global, "SITE_TITLE"), "Fuuuuuuuuu");
     assert_string_equal(bc_trie_lookup(s->global, "SITE_TAGLINE"), "My cool tagline");
     assert_string_equal(bc_trie_lookup(s->global, "BASE_DOMAIN"), "http://example.com");
-    assert_int_equal(bc_trie_size(s->settings), 14);
+    assert_int_equal(bc_trie_size(s->settings), 13);
     assert_string_equal(bc_trie_lookup(s->settings, "source_ext"), ".txt");
     assert_string_equal(bc_trie_lookup(s->settings, "html_ext"), "/index.html");
-    assert_string_equal(bc_trie_lookup(s->settings, "output_dir"), "bola");
     assert_string_equal(bc_trie_lookup(s->settings, "content_dir"), "guda");
     assert_string_equal(bc_trie_lookup(s->settings, "template_dir"), "templates");
     assert_string_equal(bc_trie_lookup(s->settings, "main_template"), "foo.tmpl");
@@ -263,7 +257,6 @@ test_settings_copy_files(void **state)
 {
     const char *a =
         "[settings]\n"
-        "output_dir = bola\n"
         "content_dir = guda\n"
         "main_template = foo.tmpl\n"
         "\n"
@@ -307,10 +300,9 @@ test_settings_copy_files(void **state)
     assert_string_equal(bc_trie_lookup(s->global, "SITE_TITLE"), "Fuuuuuuuuu");
     assert_string_equal(bc_trie_lookup(s->global, "SITE_TAGLINE"), "My cool tagline");
     assert_string_equal(bc_trie_lookup(s->global, "BASE_DOMAIN"), "http://example.com");
-    assert_int_equal(bc_trie_size(s->settings), 14);
+    assert_int_equal(bc_trie_size(s->settings), 13);
     assert_string_equal(bc_trie_lookup(s->settings, "source_ext"), ".txt");
     assert_string_equal(bc_trie_lookup(s->settings, "html_ext"), "/index.html");
-    assert_string_equal(bc_trie_lookup(s->settings, "output_dir"), "bola");
     assert_string_equal(bc_trie_lookup(s->settings, "content_dir"), "guda");
     assert_string_equal(bc_trie_lookup(s->settings, "template_dir"), "templates");
     assert_string_equal(bc_trie_lookup(s->settings, "main_template"), "foo.tmpl");

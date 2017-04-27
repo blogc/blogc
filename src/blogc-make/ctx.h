@@ -52,6 +52,7 @@ typedef struct {
 
     char *root_dir;
     char *output_dir;
+    char *short_output_dir;
 
     bm_filectx_t *main_template_fctx;
     bm_filectx_t *atom_template_fctx;

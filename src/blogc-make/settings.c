@@ -27,9 +27,6 @@ static const struct default_settings_map {
     {"main_template", "main.tmpl"},
     {"source_ext", ".txt"},
 
-    // output
-    {"output_dir", "_build"},
-
     // pagination
     {"pagination_prefix", "page"},
     {"posts_per_page", "10"},

@@ -130,13 +130,6 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     }
     free(content);
 
-    // fix output_dir, if forced from environment variable
-    const char *output_dir_env = getenv("OUTPUT_DIR");
-    if (output_dir_env != NULL) {
-        bc_trie_insert(settings->settings, "output_dir",
-            bc_strdup(output_dir_env));
-    }
-
     char *atom_template = bm_atom_deploy(settings, err);
     if (*err != NULL) {
         return NULL;
@@ -162,12 +155,15 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     rv->root_dir = realpath(dirname(real_filename), NULL);
     free(real_filename);
 
-    const char *output_dir = bc_trie_lookup(settings->settings, "output_dir");
-    if (output_dir[0] == '/') {
-        rv->output_dir = bc_strdup(output_dir);
+    const char *output_dir = getenv("OUTPUT_DIR");
+    rv->short_output_dir = bc_strdup(output_dir != NULL ? output_dir : "_build");
+
+    if (rv->short_output_dir[0] == '/') {
+        rv->output_dir = bc_strdup(rv->short_output_dir);
     }
     else {
-        rv->output_dir = bc_strdup_printf("%s/%s", rv->root_dir, output_dir);
+        rv->output_dir = bc_strdup_printf("%s/%s", rv->root_dir,
+            rv->short_output_dir);
     }
 
     // can't return null and set error after this!
@@ -272,6 +268,8 @@ bm_ctx_free_internal(bm_ctx_t *ctx)
 
     free(ctx->root_dir);
     ctx->root_dir = NULL;
+    free(ctx->short_output_dir);
+    ctx->short_output_dir = NULL;
     free(ctx->output_dir);
     ctx->output_dir = NULL;
 
