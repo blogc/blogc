@@ -7,10 +7,13 @@
  */
 
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include <libgen.h>
 #include <time.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include "../common/error.h"
 #include "../common/file.h"
 #include "../common/utils.h"
@@ -47,6 +50,48 @@ bm_filectx_new(bm_ctx_t *ctx, const char *filename)
     }
 
     return rv;
+}
+
+
+bc_slist_t*
+bm_filectx_new_r(bc_slist_t *l, bm_ctx_t *ctx, const char *filename)
+{
+    if (ctx == NULL || filename == NULL)
+        return NULL;
+
+    char *f = filename[0] == '/' ? bc_strdup(filename) :
+        bc_strdup_printf("%s/%s", ctx->root_dir, filename);
+
+    struct stat buf;
+    if (0 != stat(f, &buf)) {
+        free(f);
+        return l;
+    }
+
+    if (S_ISDIR(buf.st_mode)) {
+        DIR *dir = opendir(f);
+        if (dir == NULL) {
+            free(f);
+            return l;
+        }
+
+        struct dirent *e;
+        while (NULL != (e = readdir(dir))) {
+            if ((0 == strcmp(e->d_name, ".")) || (0 == strcmp(e->d_name, "..")))
+                continue;
+            char *tmp = bc_strdup_printf("%s/%s", filename, e->d_name);
+            l = bm_filectx_new_r(l, ctx, tmp);
+            free(tmp);
+        }
+
+        closedir(dir);
+        free(f);
+        return l;
+    }
+
+    l = bc_slist_append(l, bm_filectx_new(ctx, filename));
+    free(f);
+    return l;
 }
 
 
@@ -208,8 +253,8 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     rv->copy_fctx = NULL;
     if (settings->copy != NULL) {
         for (size_t i = 0; settings->copy[i] != NULL; i++) {
-            rv->copy_fctx = bc_slist_append(rv->copy_fctx,
-                bm_filectx_new(rv, settings->copy[i]));
+            rv->copy_fctx = bm_filectx_new_r(rv->copy_fctx, rv,
+                settings->copy[i]);
         }
     }
 

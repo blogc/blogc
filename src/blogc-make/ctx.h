@@ -64,6 +64,7 @@ typedef struct {
 } bm_ctx_t;
 
 bm_filectx_t* bm_filectx_new(bm_ctx_t *ctx, const char *filename);
+bc_slist_t* bm_filectx_new_r(bc_slist_t *l, bm_ctx_t *ctx, const char *filename);
 bool bm_filectx_changed(bm_filectx_t *ctx, time_t *tv_sec, long *tv_nsec);
 void bm_filectx_reload(bm_filectx_t *ctx);
 void bm_filectx_free(bm_filectx_t *fctx);

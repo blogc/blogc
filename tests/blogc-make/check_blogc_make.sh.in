@@ -794,6 +794,58 @@ Page 2
 EOF
 diff -uN "${TEMP}/proj/_build/page2.html" "${TEMP}/expected-page2.html"
 
+rm -rf "${TEMP}/proj/_build"
+
+
+### copy rule
+
+mkdir -p "${TEMP}"/proj/{a/b/c,d/e,f}
+echo bola > "${TEMP}/proj/a/b/c/foo"
+echo guda > "${TEMP}/proj/a/b/bar"
+echo chunda > "${TEMP}/proj/a/baz"
+echo lol > "${TEMP}/proj/d/e/fuu"
+echo hehe > "${TEMP}/proj/d/xd"
+echo FFFUUUUUU > "${TEMP}/proj/f/XDDDD"
+
+cat >> "${TEMP}/proj/blogcfile" <<EOF
+[copy]
+a
+d/e/fuu
+d/xd
+f
+EOF
+
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
+grep "_build/posts\\.html" "${TEMP}/output.txt"
+grep "_build/atoom/index\\.xml" "${TEMP}/output.txt"
+grep "_build/atoom/tag1/index\\.xml" "${TEMP}/output.txt"
+grep "_build/atoom/tag2/index\\.xml" "${TEMP}/output.txt"
+grep "_build/pagination/1\\.html" "${TEMP}/output.txt"
+grep "_build/pagination/2\\.html" "${TEMP}/output.txt"
+grep "_build/pagination/3\\.html" "${TEMP}/output.txt"
+grep "_build/poost/foo\\.html" "${TEMP}/output.txt"
+grep "_build/poost/bar\\.html" "${TEMP}/output.txt"
+grep "_build/poost/baz\\.html" "${TEMP}/output.txt"
+grep "_build/taag/tag1\\.html" "${TEMP}/output.txt"
+grep "_build/taag/tag2\\.html" "${TEMP}/output.txt"
+grep "_build/page1\\.html" "${TEMP}/output.txt"
+grep "_build/page2\\.html" "${TEMP}/output.txt"
+grep "_build/a/b/c/foo" "${TEMP}/output.txt"
+grep "_build/a/b/bar" "${TEMP}/output.txt"
+grep "_build/a/baz" "${TEMP}/output.txt"
+grep "_build/d/e/fuu" "${TEMP}/output.txt"
+grep "_build/d/xd" "${TEMP}/output.txt"
+grep "_build/f/XDDDD" "${TEMP}/output.txt"
+
+rm "${TEMP}/output.txt"
+
+test "$(cat "${TEMP}/proj/_build/a/b/c/foo")" = "bola"
+test "$(cat "${TEMP}/proj/_build/a/b/bar")" = "guda"
+test "$(cat "${TEMP}/proj/_build/a/baz")" = "chunda"
+test "$(cat "${TEMP}/proj/_build/d/e/fuu")" = "lol"
+test "$(cat "${TEMP}/proj/_build/d/xd")" = "hehe"
+test "$(cat "${TEMP}/proj/_build/f/XDDDD")" = "FFFUUUUUU"
+
 
 ### clean rule
 
@@ -812,6 +864,12 @@ grep "_build/taag/tag1\\.html" "${TEMP}/output.txt"
 grep "_build/taag/tag2\\.html" "${TEMP}/output.txt"
 grep "_build/page1\\.html" "${TEMP}/output.txt"
 grep "_build/page2\\.html" "${TEMP}/output.txt"
+grep "_build/a/b/c/foo" "${TEMP}/output.txt"
+grep "_build/a/b/bar" "${TEMP}/output.txt"
+grep "_build/a/baz" "${TEMP}/output.txt"
+grep "_build/d/e/fuu" "${TEMP}/output.txt"
+grep "_build/d/xd" "${TEMP}/output.txt"
+grep "_build/f/XDDDD" "${TEMP}/output.txt"
 
 rm "${TEMP}/output.txt"
 
@@ -834,6 +892,12 @@ grep "___blogc_build/taag/tag1\\.html" "${TEMP}/output.txt"
 grep "___blogc_build/taag/tag2\\.html" "${TEMP}/output.txt"
 grep "___blogc_build/page1\\.html" "${TEMP}/output.txt"
 grep "___blogc_build/page2\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/a/b/c/foo" "${TEMP}/output.txt"
+grep "___blogc_build/a/b/bar" "${TEMP}/output.txt"
+grep "___blogc_build/a/baz" "${TEMP}/output.txt"
+grep "___blogc_build/d/e/fuu" "${TEMP}/output.txt"
+grep "___blogc_build/d/xd" "${TEMP}/output.txt"
+grep "___blogc_build/f/XDDDD" "${TEMP}/output.txt"
 
 rm "${TEMP}/output.txt"
 
@@ -852,6 +916,12 @@ grep "___blogc_build/taag/tag1\\.html" "${TEMP}/output.txt"
 grep "___blogc_build/taag/tag2\\.html" "${TEMP}/output.txt"
 grep "___blogc_build/page1\\.html" "${TEMP}/output.txt"
 grep "___blogc_build/page2\\.html" "${TEMP}/output.txt"
+grep "___blogc_build/a/b/c/foo" "${TEMP}/output.txt"
+grep "___blogc_build/a/b/bar" "${TEMP}/output.txt"
+grep "___blogc_build/a/baz" "${TEMP}/output.txt"
+grep "___blogc_build/d/e/fuu" "${TEMP}/output.txt"
+grep "___blogc_build/d/xd" "${TEMP}/output.txt"
+grep "___blogc_build/f/XDDDD" "${TEMP}/output.txt"
 
 rm "${TEMP}/output.txt"
 

@@ -462,9 +462,11 @@ copy_outputlist(bm_ctx_t *ctx)
         return NULL;
 
     bc_slist_t *rv = NULL;
-    for (size_t i = 0; ctx->settings->copy[i] != NULL; i++) {
+    // we iterate over ctx->copy_fctx list instead of ctx->settings->copy,
+    // because bm_ctx_new() expands directories into its files, recursively.
+    for (bc_slist_t *s = ctx->copy_fctx; s != NULL; s = s->next) {
         char *f = bc_strdup_printf("%s/%s", ctx->short_output_dir,
-            ctx->settings->copy[i]);
+            ((bm_filectx_t*) s->data)->short_path);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
         free(f);
     }
