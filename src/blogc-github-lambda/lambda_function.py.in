@@ -75,7 +75,9 @@ def translate_filename(filename):
     p = basename.split('.')
     if len(p) == 2 and p[0] == 'index':
         f[-1] = 'index.html'
-        return '/'.join(f)
+        f = '/'.join(f)
+        if not os.path.exists(f):
+            return f
 
     return filename
 
