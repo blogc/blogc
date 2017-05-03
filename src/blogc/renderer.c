@@ -361,6 +361,9 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
                         }
                     }
                 }
+                else {
+                    valid_else = false;
+                }
                 free(defined);
                 defined = NULL;
                 if_not = false;
