@@ -58,7 +58,7 @@ bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
         return 3;
     }
 
-    int fd_to = open(dest->path, O_WRONLY | O_CREAT, 0666);
+    int fd_to = open(dest->path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
     if (fd_to < 0) {
         fprintf(stderr, "blogc-make: error: failed to open destination file to "
             "copy (%s): %s\n", dest->path, strerror(errno));
