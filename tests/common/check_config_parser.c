@@ -601,6 +601,38 @@ test_config_quoted_values(void **state)
 
 
 static void
+test_config_key_prefix(void **state)
+{
+    const char *a =
+        "[foo]\n"
+        "LAST_FLIGHT = lol\n"
+        "LAST_FLIGHT_SLUG = hehe\n";
+    bc_error_t *err = NULL;
+    bc_config_t *c = bc_config_parse(a, strlen(a), NULL, &err);
+    assert_null(err);
+    assert_non_null(c);
+    assert_non_null(c->root);
+    assert_int_equal(bc_trie_size(c->root), 1);
+    char **s = bc_config_list_sections(c);
+    assert_non_null(s);
+    assert_int_equal(bc_strv_length(s), 1);
+    assert_string_equal(s[0], "foo");
+    assert_null(s[1]);
+    bc_strv_free(s);
+    char **k = bc_config_list_keys(c, "foo");
+    assert_non_null(k);
+    assert_int_equal(bc_strv_length(k), 2);
+    assert_string_equal(k[0], "LAST_FLIGHT");
+    assert_string_equal(k[1], "LAST_FLIGHT_SLUG");
+    assert_null(k[2]);
+    bc_strv_free(k);
+    assert_string_equal(bc_config_get(c, "foo", "LAST_FLIGHT"), "lol");
+    assert_string_equal(bc_config_get(c, "foo", "LAST_FLIGHT_SLUG"), "hehe");
+    bc_config_free(c);
+}
+
+
+static void
 test_config_error_start(void **state)
 {
     const char *a =
@@ -678,6 +710,7 @@ main(void)
         unit_test(test_config_section_multiple_sections),
         unit_test(test_config_section_list),
         unit_test(test_config_quoted_values),
+        unit_test(test_config_key_prefix),
         unit_test(test_config_error_start),
         unit_test(test_config_error_section_with_newline),
         unit_test(test_config_error_key_without_value),

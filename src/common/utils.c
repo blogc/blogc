@@ -615,10 +615,8 @@ bc_trie_foreach_node(bc_trie_node_t *node, bc_string_t *str,
     if (node == NULL || str == NULL || func == NULL)
         return;
 
-    if (node->key == '\0') {
+    if (node->key == '\0')
         func(str->str, node->data, user_data);
-        return;
-    }
 
     if (node->child != NULL) {
         bc_string_t *child = bc_string_dup(str);

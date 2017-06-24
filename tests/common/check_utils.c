@@ -907,8 +907,8 @@ test_trie_size(void **state)
 
 
 static unsigned int counter;
-static char *expected_keys[] = {"chu", "copa", "bola", "bote", "bo", "b", "test"};
-static char *expected_datas[] = {"nda", "bu", "guda", "aba", "haha", "c", "asd"};
+static char *expected_keys[] = {"chu", "copa", "bola", "bote", "bo", "b", "test", "testa"};
+static char *expected_datas[] = {"nda", "bu", "guda", "aba", "haha", "c", "asd", "lol"};
 
 static void
 mock_foreach(const char *key, void *data, void *user_data)
@@ -931,13 +931,58 @@ test_trie_foreach(void **state)
     bc_trie_insert(trie, "copa", bc_strdup("bu"));
     bc_trie_insert(trie, "b", bc_strdup("c"));
     bc_trie_insert(trie, "test", bc_strdup("asd"));
+    bc_trie_insert(trie, "testa", bc_strdup("lol"));
 
     counter = 0;
     bc_trie_foreach(trie, mock_foreach, "foo");
     bc_trie_foreach(NULL, mock_foreach, "foo");
     bc_trie_foreach(trie, NULL, "foo");
     bc_trie_foreach(NULL, NULL, "foo");
-    assert_int_equal(counter, 7);
+    assert_int_equal(counter, 8);
+
+    bc_trie_free(trie);
+}
+
+
+static void
+test_trie_inserted_after_prefix(void **state)
+{
+    bc_trie_t *trie = bc_trie_new(free);
+
+    bc_trie_insert(trie, "bola", bc_strdup("guda"));
+    assert_true(trie->root->key == 'b');
+    assert_null(trie->root->data);
+    assert_true(trie->root->child->key == 'o');
+    assert_null(trie->root->child->data);
+    assert_true(trie->root->child->child->key == 'l');
+    assert_null(trie->root->child->child->data);
+    assert_true(trie->root->child->child->child->key == 'a');
+    assert_null(trie->root->child->child->child->data);
+    assert_true(trie->root->child->child->child->child->key == '\0');
+    assert_string_equal(trie->root->child->child->child->child->data, "guda");
+
+    bc_trie_insert(trie, "bolaoo", bc_strdup("asdf"));
+    assert_true(trie->root->key == 'b');
+    assert_null(trie->root->data);
+    assert_true(trie->root->child->key == 'o');
+    assert_null(trie->root->child->data);
+    assert_true(trie->root->child->child->key == 'l');
+    assert_null(trie->root->child->child->data);
+    assert_true(trie->root->child->child->child->key == 'a');
+    assert_null(trie->root->child->child->child->data);
+    assert_true(trie->root->child->child->child->child->key == '\0');
+    assert_string_equal(trie->root->child->child->child->child->data, "guda");
+    assert_non_null(trie->root->child->child->child->child->next);
+    assert_true(trie->root->child->child->child->child->next->key == 'o');
+    assert_null(trie->root->child->child->child->child->next->data);
+    assert_true(trie->root->child->child->child->child->next->child->key == 'o');
+    assert_null(trie->root->child->child->child->child->next->child->data);
+    assert_true(trie->root->child->child->child->child->next->child->child->key == '\0');
+    assert_string_equal(trie->root->child->child->child->child->next->child->child->data, "asdf");
+
+    assert_int_equal(bc_trie_size(trie), 2);
+    assert_string_equal(bc_trie_lookup(trie, "bola"), "guda");
+    assert_string_equal(bc_trie_lookup(trie, "bolaoo"), "asdf");
 
     bc_trie_free(trie);
 }
@@ -1015,6 +1060,7 @@ main(void)
         unit_test(test_trie_lookup),
         unit_test(test_trie_size),
         unit_test(test_trie_foreach),
+        unit_test(test_trie_inserted_after_prefix),
 
         // shell
         unit_test(test_shell_quote),
