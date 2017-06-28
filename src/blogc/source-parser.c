@@ -111,9 +111,10 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
                     start = current;
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
-                    current, "Configuration value not provided for '%s'.",
-                    key);
+                bc_trie_insert(rv, key, bc_strdup(""));
+                free(key);
+                key = NULL;
+                state = SOURCE_START;
                 break;
 
             case SOURCE_CONFIG_VALUE:

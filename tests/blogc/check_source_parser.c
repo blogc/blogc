@@ -296,16 +296,13 @@ test_source_parse_config_no_key2(void **state)
 static void
 test_source_parse_config_no_value(void **state)
 {
+    // this is a special case, not an error
     const char *a = "BOLA:\r\n";
     bc_error_t *err = NULL;
     bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
-    assert_null(source);
-    assert_non_null(err);
-    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
-    assert_string_equal(err->msg,
-        "Configuration value not provided for 'BOLA'.\n"
-        "Error occurred near line 1, position 6: BOLA:");
-    bc_error_free(err);
+    assert_non_null(source);
+    assert_null(err);
+    assert_string_equal(bc_trie_lookup(source, "BOLA"), "");
     bc_trie_free(source);
 }
 
