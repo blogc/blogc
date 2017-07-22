@@ -326,8 +326,11 @@ bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *variables, bool listing,
         }
         else {
             fprintf(stderr,
-                "blogc-make: error: Failed to execute command, returned "
-                "status code: %d\n", rv);
+                "blogc-make: error: Failed to execute command (%d)", rv);
+            if (err != NULL) {
+                fprintf(stderr, ":\n%s", bc_str_strip(err));
+            }
+            fprintf(stderr, "\n");
         }
     }
 
