@@ -543,6 +543,9 @@ static int
 runserver_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 {
     bm_reloader_t *reloader = bm_reloader_new(ctx, all_exec, outputs, args);
+    if (reloader == NULL) {
+        return 3;
+    }
 
     int rv = bm_exec_blogc_runserver(ctx, bc_trie_lookup(args, "host"),
         bc_trie_lookup(args, "port"), bc_trie_lookup(args, "threads"));
