@@ -31,9 +31,42 @@ EXPAND-ME!
   * `-h`:
     Show help message and exit.
 
-## RULES
+## HELPER RULES
 
-TODO
+  * `all`:
+    Run all build rules. This is the default rule.
+
+  * `clean`:
+    Clean built files and empty directories in output directory.
+
+  * `runserver`:
+    Run `blogc-runserver(1)` pointing to output directory, if available.
+
+## BUILD RULES
+
+  * `index`:
+     Build website index from posts.
+
+  * `atom`:
+     Build main atom feed from posts.
+
+  * `atom_tags`:
+     Build atom feeds for each tag from posts.
+
+  * `pagination`:
+     Build pagination pages from posts.
+
+  * `posts`:
+     Build individual pages for each post.
+
+  * `tags`:
+     Build post listings for each tag from posts.
+
+  * `pages`:
+     Build individual pages for each page.
+
+  * `copy`:
+     Copy static files from source directory to output directory.
 
 ## FILES
 
