@@ -169,6 +169,52 @@ test_source_parse_from_files(void **state)
 
 
 static void
+test_source_parse_from_files_filter_reverse(void **state)
+{
+    will_return(__wrap_bc_file_get_contents, "bola3.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
+        "ASD: 789\n"
+        "DATE: 2003-02-03 04:05:06\n"
+        "--------\n"
+        "bola"));
+    will_return(__wrap_bc_file_get_contents, "bola2.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
+        "ASD: 456\n"
+        "DATE: 2002-02-03 04:05:06\n"
+        "TAGS: bola, chunda\n"
+        "--------\n"
+        "bola"));
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
+        "ASD: 123\n"
+        "DATE: 2001-02-03 04:05:06\n"
+        "TAGS: chunda\n"
+        "--------\n"
+        "bola"));
+    bc_error_t *err = NULL;
+    bc_slist_t *s = NULL;
+    s = bc_slist_append(s, bc_strdup("bola1.txt"));
+    s = bc_slist_append(s, bc_strdup("bola2.txt"));
+    s = bc_slist_append(s, bc_strdup("bola3.txt"));
+    bc_trie_t *c = bc_trie_new(free);
+    bc_trie_insert(c, "FILTER_REVERSE", bc_strdup(""));
+    bc_slist_t *t = blogc_source_parse_from_files(c, s, &err);
+    assert_null(err);
+    assert_non_null(t);
+    assert_int_equal(bc_slist_length(t), 3);  // it is enough, no need to look at the items
+    assert_int_equal(bc_trie_size(c), 5);
+    assert_string_equal(bc_trie_lookup(c, "FILENAME_FIRST"), "bola3");
+    assert_string_equal(bc_trie_lookup(c, "FILENAME_LAST"), "bola1");
+    assert_string_equal(bc_trie_lookup(c, "DATE_FIRST"), "2003-02-03 04:05:06");
+    assert_string_equal(bc_trie_lookup(c, "DATE_LAST"), "2001-02-03 04:05:06");
+    assert_string_equal(bc_trie_lookup(c, "FILTER_REVERSE"), "");
+    bc_trie_free(c);
+    bc_slist_free_full(s, free);
+    bc_slist_free_full(t, (bc_free_func_t) bc_trie_free);
+}
+
+
+static void
 test_source_parse_from_files_filter_by_tag(void **state)
 {
     will_return(__wrap_bc_file_get_contents, "bola1.txt");
@@ -744,6 +790,7 @@ main(void)
         unit_test(test_source_parse_from_file),
         unit_test(test_source_parse_from_file_null),
         unit_test(test_source_parse_from_files),
+        unit_test(test_source_parse_from_files_filter_reverse),
         unit_test(test_source_parse_from_files_filter_by_tag),
         unit_test(test_source_parse_from_files_filter_by_page),
         unit_test(test_source_parse_from_files_filter_by_page2),

@@ -27,6 +27,11 @@ files passed as arguments to it:
     variables. The pagination filters will only act on the files with the
     provided tag, instead of filtering the whole file set.
 
+  * `FILTER_REVERSE`:
+    Any string, if defined, blogc(1) will list files in reverse order. This
+    is always the first filter applied to the files. All the other filters will
+    get the files already in the reverse order, and won't care about this.
+
 ## TEMPLATE VARIABLES
 
 blogc(1) will export some global blogc-template(7) variables, that can be used

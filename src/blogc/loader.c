@@ -103,6 +103,17 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
     if (err == NULL || *err != NULL)
         return NULL;
 
+    bool reverse = bc_trie_lookup(conf, "FILTER_REVERSE");
+    bc_slist_t* sources = NULL;
+    for (bc_slist_t *tmp = l; tmp != NULL; tmp = tmp->next) {
+        if (reverse) {
+            sources = bc_slist_prepend(sources, tmp->data);
+        }
+        else {
+            sources = bc_slist_append(sources, tmp->data);
+        }
+    }
+
     bc_error_t *tmp_err = NULL;
     bc_slist_t *rv = NULL;
     unsigned int with_date = 0;
@@ -135,7 +146,7 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
     unsigned int end = start + per_page;
     unsigned int counter = 0;
 
-    for (bc_slist_t *tmp = l; tmp != NULL; tmp = tmp->next) {
+    for (bc_slist_t *tmp = sources; tmp != NULL; tmp = tmp->next) {
         char *f = tmp->data;
         bc_trie_t *s = blogc_source_parse_from_file(f, &tmp_err);
         if (s == NULL) {
@@ -181,6 +192,8 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
             with_date++;
         rv = bc_slist_append(rv, s);
     }
+
+    bc_slist_free(sources);
 
     if (with_date > 0 && with_date < bc_slist_length(rv)) {
         *err = bc_error_new_printf(BLOGC_ERROR_LOADER,
