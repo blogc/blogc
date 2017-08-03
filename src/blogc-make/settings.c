@@ -37,10 +37,12 @@ static const struct default_settings_map {
     {"index_prefix", NULL},
     {"post_prefix", "post"},
     {"tag_prefix", "tag"},
+    {"html_order", "DESC"},
 
     // atom
     {"atom_prefix", "atom"},
     {"atom_ext", ".xml"},
+    {"atom_order", "DESC"},
 
     // generic
     {"date_format", "%b %d, %Y, %I:%M %p GMT"},
