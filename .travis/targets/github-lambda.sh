@@ -26,8 +26,10 @@ build() {
     pushd build/root/ > /dev/null
     zip "../blogc-github-lambda-${PV}.zip" *
     popd > /dev/null
+
+    install -m 755 build/root/blogc "build/blogc-static-amd64-${PV}"
 }
 
 deploy() {
-    FILES=( build/*.zip )
+    FILES=( build/*.zip build/blogc-static-* )
 }
