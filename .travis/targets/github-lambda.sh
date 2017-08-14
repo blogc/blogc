@@ -28,8 +28,9 @@ build() {
     popd > /dev/null
 
     install -m 755 build/root/blogc "build/blogc-static-amd64-${PV}"
+    xz -z "build/blogc-static-amd64-${PV}"
 }
 
 deploy() {
-    FILES=( build/*.zip build/blogc-static-* )
+    FILES=( build/*.zip build/blogc-static-*.xz )
 }
