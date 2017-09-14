@@ -546,7 +546,7 @@ clean_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         }
     }
 
-    if (!bm_exec_empty_dir(ctx->output_dir, NULL)) {
+    if (!bm_exec_native_is_empty_dir(ctx->output_dir, NULL)) {
         fprintf(stderr, "blogc-make: warning: output directory is not empty!\n");
     }
 

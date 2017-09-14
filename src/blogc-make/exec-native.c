@@ -89,7 +89,7 @@ bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
 
 
 bool
-bm_exec_empty_dir(const char *dir, bc_error_t **err)
+bm_exec_native_is_empty_dir(const char *dir, bc_error_t **err)
 {
     DIR *d = opendir(dir);
     if (d == NULL) {
@@ -149,7 +149,7 @@ bm_exec_native_rm(const char *output_dir, bm_filectx_t *dest, bool verbose)
     bc_error_t *err = NULL;
 
     while ((0 != strcmp(short_dir, ".")) && (0 != strcmp(short_dir, "/"))) {
-        bool empty = bm_exec_empty_dir(dir, &err);
+        bool empty = bm_exec_native_is_empty_dir(dir, &err);
         if (err != NULL) {
             fprintf(stderr, "blogc-make: error: %s\n", err->msg);
             bc_error_free(err);
