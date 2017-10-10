@@ -696,7 +696,7 @@ test_content_parse_code_crlf(void **state)
 static void
 test_content_parse_horizontal_rule(void **state)
 {
-    char *html = blogc_content_parse("bola\nguda\n\n**", NULL, NULL, NULL);
+    char *html = blogc_content_parse("bola\nguda\n\n***", NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\n"
@@ -710,7 +710,7 @@ test_content_parse_horizontal_rule(void **state)
         "guda</p>\n"
         "<hr />\n");
     free(html);
-    html = blogc_content_parse("bola\nguda\n\n--\n", NULL, NULL, NULL);
+    html = blogc_content_parse("bola\nguda\n\n---\n", NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\n"
@@ -727,7 +727,7 @@ test_content_parse_horizontal_rule(void **state)
     html = blogc_content_parse(
         "bola\n"
         "\n"
-        "**\n"
+        "***\n"
         "\n"
         "chunda\n", NULL, NULL, NULL);
     assert_non_null(html);
@@ -754,7 +754,7 @@ test_content_parse_horizontal_rule(void **state)
 static void
 test_content_parse_horizontal_rule_crlf(void **state)
 {
-    char *html = blogc_content_parse("bola\r\nguda\r\n\r\n**", NULL, NULL, NULL);
+    char *html = blogc_content_parse("bola\r\nguda\r\n\r\n***", NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\r\n"
@@ -768,7 +768,7 @@ test_content_parse_horizontal_rule_crlf(void **state)
         "guda</p>\r\n"
         "<hr />\r\n");
     free(html);
-    html = blogc_content_parse("bola\r\nguda\r\n\r\n--\r\n", NULL, NULL, NULL);
+    html = blogc_content_parse("bola\r\nguda\r\n\r\n---\r\n", NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\r\n"
@@ -785,7 +785,7 @@ test_content_parse_horizontal_rule_crlf(void **state)
     html = blogc_content_parse(
         "bola\r\n"
         "\r\n"
-        "**\r\n"
+        "***\r\n"
         "\r\n"
         "chunda\r\n", NULL, NULL, NULL);
     assert_non_null(html);

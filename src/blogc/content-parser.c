@@ -138,7 +138,8 @@ typedef enum {
     CONTENT_CODE,
     CONTENT_CODE_START,
     CONTENT_CODE_END,
-    CONTENT_UNORDERED_LIST_OR_HORIZONTAL_RULE,
+    CONTENT_UNORDERED_LIST_OR_HORIZONTAL_RULE_OR_EMPHASIS,
+    CONTENT_HORIZONTAL_RULE_OR_EMPHASIS,
     CONTENT_HORIZONTAL_RULE,
     CONTENT_UNORDERED_LIST_START,
     CONTENT_UNORDERED_LIST_END,
@@ -758,7 +759,7 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **first_header,
                 }
                 if (c == '*' || c == '+' || c == '-') {
                     start2 = current;
-                    state = CONTENT_UNORDERED_LIST_OR_HORIZONTAL_RULE;
+                    state = CONTENT_UNORDERED_LIST_OR_HORIZONTAL_RULE_OR_EMPHASIS;
                     d = c;
                     break;
                 }
@@ -1001,17 +1002,33 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **first_header,
                 }
                 break;
 
-            case CONTENT_UNORDERED_LIST_OR_HORIZONTAL_RULE:
+            case CONTENT_UNORDERED_LIST_OR_HORIZONTAL_RULE_OR_EMPHASIS:
+                if (current == start+1) {
+                    if (c == d) { // horizontal rule or '**' emphasis
+                        state = CONTENT_HORIZONTAL_RULE_OR_EMPHASIS;
+                        break;
+                    }
+                    else if (c != ' ' && c != '\t' && d == '*') { // is '*' emphasis
+                        state = CONTENT_PARAGRAPH;
+                        break;
+                    }
+                }
+                if (c == ' ' || c == '\t')
+                    break;
+                prefix = bc_strndup(src + start, current - start);
+                state = CONTENT_UNORDERED_LIST_START;
+                break;
+
+            case CONTENT_HORIZONTAL_RULE_OR_EMPHASIS:
+                // 3rd '-' or '*' required for a horizontal rule
                 if (c == d) {
                     state = CONTENT_HORIZONTAL_RULE;
                     if (is_last)
                         continue;
                     break;
                 }
-                if (c == ' ' || c == '\t')
-                    break;
-                prefix = bc_strndup(src + start, current - start);
-                state = CONTENT_UNORDERED_LIST_START;
+                // is '**' emphasis
+                state = CONTENT_PARAGRAPH;
                 break;
 
             case CONTENT_HORIZONTAL_RULE:
