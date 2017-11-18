@@ -9,9 +9,10 @@ blogc-template(7)      blogc-template.7.ronn
 blogc-pagination(7)    blogc-pagination.7.ronn
 
 # external manuals
-make(1)                http://man.cx/make(1)
-chsh(1)                http://man.cx/chsh(1)
-su(1)                  http://man.cx/su(1)
-strcmp(3)              http://man.cx/strcmp(3)
-strftime(3)            http://man.cx/strftime(3)
-git(7)                 http://man.cx/git(7)
+make(1)                https://man.cx/make(1)
+chsh(1)                https://man.cx/chsh(1)
+su(1)                  https://man.cx/su(1)
+strcmp(3)              https://man.cx/strcmp(3)
+strftime(3)            https://man.cx/strftime(3)
+git(1)                 https://man.cx/git(1)
+git-shell(1)           https://man.cx/git-shell(1)

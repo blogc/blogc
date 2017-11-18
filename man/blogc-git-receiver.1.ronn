@@ -12,13 +12,13 @@ When used as a login shell, it will accept git payloads, creating bare repositor
 as needed, and installing a hook, that will take care of rebuilding the website each
 time someone push something to the `master` branch.
 
-The git repository must provide a `Makefile` (or a `GNUMakefile`), that should
-accept the `OUTPUT_DIR` variable, and install built files in the directory pointed
-by this variable.
+The git repository must provide a blogcfile(5) (if blogc-make(1) is installed), or
+a `Makefile` (or a `GNUMakefile`) that should accept the `OUTPUT_DIR` variable, and
+install built files into the directory pointed out by this variable.
 
-`blogc-git-receiver` is part of `blogc` project, but isn't tied to blogc(1). Any
-repository with `Makefile` that builds content and install it to `OUTPUT_DIR`
-should works with `blogc-git-receiver`.
+`blogc-git-receiver` is part of `blogc` project, but isn't tied to blogc(1) or
+blogc-make(1). Any repository with `Makefile` that builds content and install it to
+`OUTPUT_DIR` should work with `blogc-git-receiver`.
 
 ## SETUP
 
@@ -150,7 +150,8 @@ your mirror repository.
 `blogc-git-receiver` will export an environment variable called `BLOGC_GIT_RECEIVER`
 when calling `gmake` to build websites. This variable can be used to enable building
 of content that should only be built when running in production environment, for
-example.
+example. This variable will not be added when using blogc-make(1), whose builds are
+always considered to be "production" (blogc-make(1) is never called with `-D`).
 
 ## BUGS
 
@@ -162,4 +163,4 @@ Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
 
 ## SEE ALSO
 
-blogc(1), git(7), chsh(1), su(1), make(1)
+blogc(1), git(1), git-shell(1), chsh(1), su(1), make(1)
