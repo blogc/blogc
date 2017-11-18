@@ -42,7 +42,12 @@ See blogcfile(5) for details on the file format.
     Clean built files and empty directories in output directory.
 
   * `runserver`:
-    Run `blogc-runserver(1)` pointing to output directory, if available.
+    Run `blogc-runserver(1)` pointing to output directory, if available. This
+    rule accepts some arguments, in the following format:
+
+        runserver:host=127.0.0.1,port=8080,threads=20
+
+    The values in the example are the default values.
 
 ## BUILD RULES
 

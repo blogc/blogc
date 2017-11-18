@@ -648,7 +648,8 @@ const bm_rule_t rules[] = {
     },
     {
         .name = "runserver",
-        .help = "run blogc-runserver pointing to output directory, if available",
+        .help = "run blogc-runserver pointing to output directory, if available\n"
+            "                  arguments: host (127.0.0.1), port (8080) and threads (20)",
         .outputlist_func = NULL,
         .exec_func = runserver_exec,
         .generate_files = false,
