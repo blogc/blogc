@@ -78,6 +78,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files make
 %{_mandir}/man*/blogc-make.*
+%{_mandir}/man*/blogcfile.*
 %{_bindir}/blogc-make
 %license LICENSE
 
