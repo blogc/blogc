@@ -8,9 +8,11 @@ blogc-make(1) -- a simple build tool for blogc
 
 ## DESCRIPTION
 
-**blogc-make** is a simple build tool for blogc websites.
+**blogc-make** is a simple build tool for blogc websites. It reads a blogcfile(5)
+and generates the output files using blogc(1) and some predefined rules, that are
+useful enough for most common use cases.
 
-EXPAND-ME!
+See blogcfile(5) for details on the file format.
 
 ## OPTIONS
 
@@ -97,6 +99,10 @@ when called by `blogc-make`.
 
 Build all files:
 
+    $ blogc-make
+
+or
+
     $ blogc-make all
 
 Clean built files:
@@ -113,4 +119,4 @@ Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
 
 ## SEE ALSO
 
-blogc(1), blogc-runserver(1)
+blogc(1), blogc-runserver(1), blogcfile(5)

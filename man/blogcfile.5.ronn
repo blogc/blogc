@@ -1,0 +1,183 @@
+blogcfile(5) -- blogc-make's configuration file
+===============================================
+
+## DESCRIPTION
+
+**blogcfile** is the configuration file for blogc-make(1), that is a simple
+build tool for blogc(1). It is an INI-style file, with some predefined
+sections, that will provide the data required by blogc-make(1) rules to
+build websites.
+
+**blogcfile** must be valid UTF-8.
+
+## OPTIONS
+
+### Global variables
+
+The `[global]` section contains all the blogc(1) variables that should be
+passed to all blogc(1) calls.
+
+The following variables are required and should be always provided:
+
+  * `AUTHOR_NAME`:
+    The name of the website main author.
+
+  * `AUTHOR_EMAIL`:
+    The email of the website main author.
+
+  * `BASE_DOMAIN`:
+    The base domain of the website.
+
+  * `SITE_TITLE`:
+    The website title.
+
+  * `SITE_TAGLINE`:
+    The website tagline.
+
+### Settings
+
+blogc-make(1) relies on a predefined set of rules to build the websites,
+however these rules can be customized with the following settings, from the
+`[settings]` section:
+
+  * `atom_ext` (default: `.xml`):
+    The extension of the generated Atom feeds.
+
+  * `atom_order` (default: `DESC`):
+    The ordering (`ASC` or `DESC`) of the Atom feeds. Please note that the files
+    are not sorted by date, they are sorted by their order in the `[posts]`
+    section.
+
+  * `atom_posts_per_page` (default: `10`):
+    Number of posts per page in the Atom feeds.
+
+  * `atom_prefix` (default: `atom`):
+    The prefix of the generated Atom feeds. It is relative to the output
+    directory. With the default values of the settings, the main Atom feed will
+    be `atom.xml`, the Atom feed for the `foo` tag will be `atom/foo.xml` and so
+    on.
+
+  * `content_dir` (default: `content`):
+    The directory that stores the source files. This directory is relative
+    to `blogcfile`.
+
+  * `date_format` (default: `%b %d, %Y, %I:%M %p GMT`):
+    The strftime(3) format that should be used when formating dates. Please note
+    that the times are always handled as UTC/GMT.
+
+  * `html_ext` (default: `/index.html`):
+    The extension of the generated HTML files. The default value will result on
+    friendly URL, by creating directories with `index.html` files inside, instead
+    of creating the HTML file directly. The `index` page is a special case:
+    instead of generating something like `/index/index.html`, it will generate
+    `/index.html`, because this is behavior that most users would expect.
+
+  * `html_order` (default: `DESC`):
+    The ordering (`ASC` or `DESC`) of the posts in the listing indexes.
+    Please note that the files are not sorted by date, they are sorted by
+    their order in the `[posts]` section.
+
+  * `index_prefix` (default: unset):
+    The prefix of the index HTML page, that is the listing of blog posts. This
+    option is useful if the user wants to host a page in the root of the website,
+    and move the posts listing index to a subdirectory.
+
+  * `locale` (default: unset):
+    The locale to be used when calling blogc(1). E.g. `en_US.UTF-8`.
+
+  * `main_template` (default: `main.tmpl`):
+    The template file that should be used when building HTML files. This file
+    is relative to `template_dir`.
+
+  * `pagination_prefix` (default: `page`):
+    The prefix of the generated pagination pages. It is relative to the
+    output directory.
+
+  * `post_prefix` (default: `post`):
+    The prefix of the posts file names. It is used for both content and output
+    directories, and is relative to `content_dir` and the output directory.
+
+  * `posts_per_page` (default: `10`):
+    Number of posts per page in the pagination pages.
+
+  * `source_ext` (default: `.txt`):
+    The extension of the source files.
+
+  * `tag_prefix` (default: `tag`):
+    The prefix of the generated tag listing index pages. It is relative to the
+    output directory.
+
+  * `template_dir` (default: `templates`):
+    The directory that stores the template files. This directory is relative
+    to `blogcfile`.
+
+### Posts listing
+
+The `[posts]` section is a listing of the posts that will be included in the
+website. They should be listed without the post prefix and without the extension,
+only the "slugs" should be used. For example, with default settings, if the source
+of the post is `content/post/foo.txt`, the line added to the `[posts]` section
+is `foo`.
+
+All the posts are relative to the `post_prefix` in the root of the website.
+
+### Pages listing
+
+The `[pages]` section is a listing of the pages that will be included in the
+website. They should be listed without the page prefix and without the extension,
+only the "slugs" should be used. For example, with default settings, if the source
+of the page is `content/foo.txt`, the line added to the `[pages]` section is `foo`.
+
+All the pages are relative to the root of the website.
+
+### Tags listing
+
+The `[tags]` section is a listing of the tags that should be listed in the
+website. blogc-make(1) will generate post listing indexes and Atom feeds for
+each tag listed in the section.
+
+### Copy listing
+
+The `[copy]` section is a listing of the files that should be copied to the
+output directory.
+
+All the files are relative to the `blogcfile`, and their directory structure
+will be built inside the output directory.
+
+## EXAMPLE
+
+    [global]
+    AUTHOR_NAME = Author
+    AUTHOR_EMAIL = author@example.org
+    SITE_TITLE = Site Title
+    SITE_TAGLINE = Site Tagline
+    BASE_DOMAIN = http://example.org
+
+    [settings]
+    locale = en_US.utf8
+
+    [posts]
+    post1
+    post2
+
+    [pages]
+    about
+
+    [tags]
+    tag1
+    tag2
+
+    [copy]
+    assets/custom.css
+
+## BUGS
+
+Please report any issues to: <https://github.com/blogc/blogc>
+
+## AUTHOR
+
+Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
+
+## SEE ALSO
+
+blogc(1), blogc-make(1), strftime(3)

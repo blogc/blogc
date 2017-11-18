@@ -3,6 +3,7 @@ blogc(1)               blogc.1.ronn
 blogc-git-receiver(1)  blogc-git-receiver.1.ronn
 blogc-make(1)          blogc-make.1.ronn
 blogc-runserver(1)     blogc-runserver.1.ronn
+blogcfile(5)           blogcfile.5.ronn
 blogc-source(7)        blogc-source.7.ronn
 blogc-template(7)      blogc-template.7.ronn
 blogc-pagination(7)    blogc-pagination.7.ronn
@@ -12,5 +13,5 @@ make(1)                http://man.cx/make(1)
 chsh(1)                http://man.cx/chsh(1)
 su(1)                  http://man.cx/su(1)
 strcmp(3)              http://man.cx/strcmp(3)
-strptime(3)            http://man.cx/strptime(3)
+strftime(3)            http://man.cx/strftime(3)
 git(7)                 http://man.cx/git(7)

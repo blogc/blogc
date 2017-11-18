@@ -45,7 +45,7 @@ You can omit seconds, minutes and hours if you want, they will be filled with
 ``yyyy-mm-dd hh`` and ``yyyy-mm-dd``
 
 The ``DATE_FORMAT`` variable should be passed to blogc(1) as a global
-variable. Its value must be a valid strptime(3) format.
+variable. Its value must be a valid strftime(3) format.
 
 The source parser will also automatically generate a variable called `FILENAME`,
 that stores the name of the source file, without its extension. This is useful
@@ -283,4 +283,4 @@ Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
 
 ## SEE ALSO
 
-blogc(1), blogc-template(7), strptime(3)
+blogc(1), blogc-template(7), strftime(3)

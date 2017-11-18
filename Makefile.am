@@ -293,6 +293,7 @@ EXTRA_DIST += \
 	man/blogc-git-receiver.1.ronn \
 	man/blogc-make.1.ronn \
 	man/blogc-runserver.1.ronn \
+	man/blogcfile.5.ronn \
 	man/blogc-source.7.ronn \
 	man/blogc-template.7.ronn \
 	man/blogc-pagination.7.ronn \
@@ -318,6 +319,7 @@ endif
 if BUILD_MAKE_LIB
 dist_man_MANS += \
 	blogc-make.1 \
+	blogcfile.5
 	$(NULL)
 endif
 
@@ -362,6 +364,14 @@ blogc-runserver.1: man/blogc-runserver.1.ronn
 		--organization "Rafael G. Martins" \
 		--manual "$(PACKAGE_NAME) Manual" \
 		$(top_srcdir)/man/blogc-runserver.1.ronn > blogc-runserver.1
+
+blogcfile.5: man/blogcfile.5.ronn
+	$(AM_V_GEN)$(RONN) \
+		--roff \
+		--pipe \
+		--organization "Rafael G. Martins" \
+		--manual "$(PACKAGE_NAME) Manual" \
+		$(top_srcdir)/man/blogcfile.5.ronn > blogcfile.5
 
 blogc-source.7: man/blogc-source.7.ronn
 	$(AM_V_GEN)$(RONN) \

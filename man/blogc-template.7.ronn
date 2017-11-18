@@ -114,7 +114,7 @@ in the template. If user append `_FORMATTED` to the end of the variable name,
 a formatter will be applied, if available for the variable name:
 
 - Date formatter: if variable name starts with `DATE_`, it is formatted with
-  a strptime(3) format, provided by `DATE_FORMAT` variable. The `DATE_FORMATTED`
+  a strftime(3) format, provided by `DATE_FORMAT` variable. The `DATE_FORMATTED`
   "meta-variable" will return the formatted version of the `DATE` variable.
   If `DATE_FORMAT` is not provided, the original value will be returned.
 
@@ -270,4 +270,4 @@ Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
 
 ## SEE ALSO
 
-blogc(1), blogc-source(7), strcmp(3)
+blogc(1), blogc-source(7), strcmp(3), strftime(3)

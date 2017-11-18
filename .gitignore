@@ -44,7 +44,7 @@ Makefile.in
 !/m4/pkg.m4
 
 # man pages
-/blogc*.[17]
+/blogc*.[157]
 blogc*.html
 
 # binaries

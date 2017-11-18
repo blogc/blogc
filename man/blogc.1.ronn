@@ -86,7 +86,7 @@ files must have valid UTF-8 content.
 
 No environment variables are required by `blogc`, but global timezone will
 be used by locale-dependant datetime input field descriptors (like `%c`), and
-can be overridden using environment variables. See strptime(3).
+can be overridden using environment variables. See strftime(3).
 
 ## EXAMPLES
 
@@ -110,4 +110,4 @@ Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
 
 ## SEE ALSO
 
-blogc-source(7), blogc-template(7), blogc-pagination(7) make(1), strptime(3)
+blogc-source(7), blogc-template(7), blogc-pagination(7) make(1), strftime(3)
