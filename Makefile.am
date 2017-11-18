@@ -286,8 +286,6 @@ endif
 
 ## Build rules: man pages
 
-if BUILD_MANPAGE
-
 EXTRA_DIST += \
 	man/blogc.1.ronn \
 	man/blogc-git-receiver.1.ronn \
@@ -332,6 +330,8 @@ endif
 MAINTAINERCLEANFILES += \
 	$(dist_man_MANS) \
 	$(NULL)
+
+if BUILD_MANPAGE
 
 blogc.1: man/blogc.1.ronn
 	$(AM_V_GEN)$(RONN) \
@@ -397,7 +397,30 @@ blogc-pagination.7: man/blogc-pagination.7.ronn
 		--manual "$(PACKAGE_NAME) Manual" \
 		$(top_srcdir)/man/blogc-pagination.7.ronn > blogc-pagination.7
 
-endif # BUILD_MANPAGE
+else
+
+blogc.1:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
+blogc-git-receiver.1:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
+blogc-make.1:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
+blogc-runserver.1:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
+blogc-source.7:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
+blogc-template.7:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
+blogc-pagination.7:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
+endif
 
 
 ## Build rules: tests
