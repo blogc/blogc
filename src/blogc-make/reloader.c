@@ -26,14 +26,16 @@ bm_reloader_thread(void *arg)
     bm_reloader_t *reloader = arg;
     while (reloader->running) {
         if (!bm_ctx_reload(reloader->ctx)) {
-            fprintf(stderr, "blogc-make: error: failed to reload context. "
-                "reloader disabled!\n");
-            break;
+            fprintf(stderr, "blogc-make: warning: failed to reload context. "
+                "retrying in 5 seconds ...\n\n");
+            sleep(5);
+            continue;
         }
         if (0 != reloader->rule_exec(reloader->ctx, reloader->outputs, reloader->args)) {
-            fprintf(stderr, "blogc-make: error: failed to rebuild website. "
-                "reloader disabled!\n");
-            break;
+            fprintf(stderr, "blogc-make: warning: failed to rebuild website. "
+                "retrying in 5 seconds ...\n\n");
+            sleep(5);
+            continue;
         }
         sleep(1);
     }
