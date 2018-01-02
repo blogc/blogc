@@ -1,4 +1,3 @@
-dist: trusty
 sudo: required
 language: c
 
@@ -10,6 +9,10 @@ addons:
       - libcmocka-dev
       - rpm
       - valgrind
+
+os:
+  - linux
+  - osx
 
 compiler:
   - clang
@@ -35,6 +38,10 @@ matrix:
     - compiler: clang
       env: TARGET=win32
     - compiler: clang
+      env: TARGET=win64
+    - os: osx
+      env: TARGET=win32
+    - os: osx
       env: TARGET=win64
 
 install: gem install ronn
