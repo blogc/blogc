@@ -1,6 +1,6 @@
-dist: trusty
 sudo: required
 language: c
+compiler: gcc
 
 addons:
   apt:
@@ -10,10 +10,6 @@ addons:
       - libcmocka-dev
       - rpm
       - valgrind
-
-compiler:
-  - clang
-  - gcc
 
 env:
   - TARGET=valgrind
@@ -25,23 +21,23 @@ env:
   - TARGET=win64
 
 matrix:
-  exclude:
+  include:
     - compiler: clang
-      env: TARGET=dist-srpm
+      env: TARGET=valgrind
     - compiler: clang
-      env: TARGET=github-lambda
+      env: TARGET=distcheck
     - compiler: clang
-      env: TARGET=make-embedded
-    - compiler: clang
-      env: TARGET=win32
-    - compiler: clang
-      env: TARGET=win64
+      env: TARGET=distcheck
+      os: osx
 
 install: gem install ronn
 
 before_script:
   - git fetch --unshallow
   - ./autogen.sh
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cmocka; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install xz; fi
 
 script:
   - ./.travis/build.sh

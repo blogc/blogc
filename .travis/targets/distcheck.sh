@@ -5,7 +5,6 @@ build() {
         --disable-silent-rules \
         --enable-ronn \
         --enable-tests \
-        --enable-valgrind \
         --enable-git-receiver \
         --enable-make \
         --enable-runserver

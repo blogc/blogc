@@ -144,6 +144,7 @@ AC_ARG_ENABLE([tests], AS_HELP_STRING([--disable-tests],
               [disable unit tests, ignoring presence of cmocka]))
 AS_IF([test "x$enable_tests" != "xno"], [
   PKG_CHECK_MODULES([CMOCKA], [cmocka], [
+    have_cmocka=yes
     AC_MSG_CHECKING([whether the linker supports -wrap])
     save_LDFLAGS="$LDFLAGS"
     LDFLAGS="$LDFLAGS -Wl,-wrap,exit"
@@ -154,13 +155,16 @@ AS_IF([test "x$enable_tests" != "xno"], [
         [exit(1);]
       ])
     ], [
-      have_cmocka=yes
+      have_ld_wrap=yes
     ], [
-      have_cmocka=no
+      have_ld_wrap=no
     ], [
-      have_cmocka=no
+      have_ld_wrap=no
     ])
-    AC_MSG_RESULT([$have_cmocka])
+    AC_MSG_RESULT([$have_ld_wrap])
+    AS_IF([test "x$have_ld_wrap" = "xyes"],, [
+      AC_MSG_WARN([linker does not supports -wrap. tests requiring it will be disabled])
+    ])
     LDFLAGS="$save_LDFLAGS"
   ], [
     have_cmocka=no
@@ -169,9 +173,9 @@ AS_IF([test "x$enable_tests" != "xno"], [
     have_tests=no
     TESTS="disabled"
     AS_IF([test "x$enable_tests" = "xyes"], [
-      AC_MSG_ERROR([tests requested but cmocka was not found or -wrap is not supported by your linker])
+      AC_MSG_ERROR([tests requested but cmocka was not found])
     ], [
-      AC_MSG_WARN([cmocka was not found or -wrap is not supported by your linker, disabling tests])
+      AC_MSG_WARN([cmocka was not found, disabling tests])
     ])
   ])
 
@@ -211,6 +215,7 @@ AS_IF([test "x$enable_tests" != "xno"], [
 ])
 AM_CONDITIONAL([BUILD_TESTS], [test "x$have_tests" = "xyes"])
 AM_CONDITIONAL([USE_CMOCKA], [test "x$have_cmocka" = "xyes"])
+AM_CONDITIONAL([USE_LD_WRAP], [test "x$have_ld_wrap" = "xyes"])
 AM_CONDITIONAL([USE_BGR_DEPS], [test "x$have_bgr_deps" = "xyes"])
 BASH="$ac_cv_path_bash"
 AC_SUBST(BASH)

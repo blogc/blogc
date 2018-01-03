@@ -452,15 +452,19 @@ if USE_CMOCKA
 check_PROGRAMS += \
 	tests/blogc/check_content_parser \
 	tests/blogc/check_datetime_parser \
-	tests/blogc/check_loader \
 	tests/blogc/check_renderer \
 	tests/blogc/check_source_parser \
 	tests/blogc/check_template_parser \
 	tests/common/check_config_parser \
 	tests/common/check_error \
-	tests/common/check_stdin \
 	tests/common/check_utf8 \
 	tests/common/check_utils \
+	$(NULL)
+
+if USE_LD_WRAP
+check_PROGRAMS += \
+	tests/blogc/check_loader \
+	tests/common/check_stdin \
 	$(NULL)
 
 tests_blogc_check_loader_SOURCES = \
@@ -481,6 +485,25 @@ tests_blogc_check_loader_LDADD = \
 	libblogc.la \
 	libblogc_common.la \
 	$(NULL)
+
+tests_common_check_stdin_SOURCES = \
+	tests/common/check_stdin.c \
+	$(NULL)
+
+tests_common_check_stdin_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_common_check_stdin_LDFLAGS = \
+	-no-install \
+	-Wl,--wrap=fgetc \
+	$(NULL)
+
+tests_common_check_stdin_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_common.la \
+	$(NULL)
+endif
 
 tests_blogc_check_content_parser_SOURCES = \
 	tests/blogc/check_content_parser.c \
@@ -606,24 +629,6 @@ tests_common_check_error_LDADD = \
 	libblogc_common.la \
 	$(NULL)
 
-tests_common_check_stdin_SOURCES = \
-	tests/common/check_stdin.c \
-	$(NULL)
-
-tests_common_check_stdin_CFLAGS = \
-	$(CMOCKA_CFLAGS) \
-	$(NULL)
-
-tests_common_check_stdin_LDFLAGS = \
-	-no-install \
-	-Wl,--wrap=fgetc \
-	$(NULL)
-
-tests_common_check_stdin_LDADD = \
-	$(CMOCKA_LIBS) \
-	libblogc_common.la \
-	$(NULL)
-
 tests_common_check_utf8_SOURCES = \
 	tests/common/check_utf8.c \
 	$(NULL)
@@ -659,6 +664,7 @@ tests_common_check_utils_LDADD = \
 	$(NULL)
 
 if BUILD_RUNSERVER
+if USE_LD_WRAP
 check_PROGRAMS += \
 	tests/blogc-runserver/check_httpd_utils \
 	tests/blogc-runserver/check_mime \
@@ -702,30 +708,17 @@ tests_blogc_runserver_check_mime_LDADD = \
 	libblogc_common.la \
 	$(NULL)
 endif
+endif
 
 if BUILD_GIT_RECEIVER
 check_PROGRAMS += \
 	tests/blogc-git-receiver/check_pre_receive_parser \
-	tests/blogc-git-receiver/check_post_receive \
 	tests/blogc-git-receiver/check_shell_command_parser \
 	$(NULL)
 
-tests_blogc_git_receiver_check_pre_receive_parser_SOURCES = \
-	tests/blogc-git-receiver/check_pre_receive_parser.c \
-	$(NULL)
-
-tests_blogc_git_receiver_check_pre_receive_parser_CFLAGS = \
-	$(CMOCKA_CFLAGS) \
-	$(NULL)
-
-tests_blogc_git_receiver_check_pre_receive_parser_LDFLAGS = \
-	-no-install \
-	$(NULL)
-
-tests_blogc_git_receiver_check_pre_receive_parser_LDADD = \
-	$(CMOCKA_LIBS) \
-	libblogc_git_receiver.la \
-	libblogc_common.la \
+if USE_LD_WRAP
+check_PROGRAMS += \
+	tests/blogc-git-receiver/check_post_receive \
 	$(NULL)
 
 tests_blogc_git_receiver_check_post_receive_SOURCES = \
@@ -742,6 +735,25 @@ tests_blogc_git_receiver_check_post_receive_LDFLAGS = \
 	$(NULL)
 
 tests_blogc_git_receiver_check_post_receive_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_git_receiver.la \
+	libblogc_common.la \
+	$(NULL)
+endif
+
+tests_blogc_git_receiver_check_pre_receive_parser_SOURCES = \
+	tests/blogc-git-receiver/check_pre_receive_parser.c \
+	$(NULL)
+
+tests_blogc_git_receiver_check_pre_receive_parser_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_git_receiver_check_pre_receive_parser_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_blogc_git_receiver_check_pre_receive_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_git_receiver.la \
 	libblogc_common.la \
@@ -769,27 +781,13 @@ endif
 if BUILD_MAKE_LIB
 check_PROGRAMS += \
 	tests/blogc-make/check_atom \
-	tests/blogc-make/check_exec \
 	tests/blogc-make/check_rules \
 	tests/blogc-make/check_settings \
 	$(NULL)
 
-tests_blogc_make_check_atom_SOURCES = \
-	tests/blogc-make/check_atom.c \
-	$(NULL)
-
-tests_blogc_make_check_atom_CFLAGS = \
-	$(CMOCKA_CFLAGS) \
-	$(NULL)
-
-tests_blogc_make_check_atom_LDFLAGS = \
-	-no-install \
-	$(NULL)
-
-tests_blogc_make_check_atom_LDADD = \
-	$(CMOCKA_LIBS) \
-	libblogc_make.la \
-	libblogc_common.la \
+if USE_LD_WRAP
+check_PROGRAMS += \
+	tests/blogc-make/check_exec \
 	$(NULL)
 
 tests_blogc_make_check_exec_SOURCES = \
@@ -806,6 +804,25 @@ tests_blogc_make_check_exec_LDFLAGS = \
 	$(NULL)
 
 tests_blogc_make_check_exec_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_make.la \
+	libblogc_common.la \
+	$(NULL)
+endif
+
+tests_blogc_make_check_atom_SOURCES = \
+	tests/blogc-make/check_atom.c \
+	$(NULL)
+
+tests_blogc_make_check_atom_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_make_check_atom_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_blogc_make_check_atom_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_make.la \
 	libblogc_common.la \
