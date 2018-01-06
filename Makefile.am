@@ -24,7 +24,6 @@ EXTRA_DIST = \
 	blogc.spec \
 	LICENSE \
 	README.md \
-	src/blogc-github-lambda/lambda_function.py \
 	$(NULL)
 
 CLEANFILES = \
