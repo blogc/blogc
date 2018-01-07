@@ -6,6 +6,10 @@
  * See the file LICENSE.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
@@ -178,7 +182,9 @@ int
 main(void)
 {
     const UnitTest tests[] = {
+#ifndef MAKE_EMBEDDED
         unit_test(test_find_binary),
+#endif
         unit_test(test_build_blogc_cmd_with_settings),
         unit_test(test_build_blogc_cmd_with_settings_and_dev),
         unit_test(test_build_blogc_cmd_without_settings),

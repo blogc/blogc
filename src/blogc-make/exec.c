@@ -33,8 +33,8 @@ bm_exec_find_binary(const char *argv0, const char *bin, const char *env)
     // for embedded blogc-make, if we are looking for blogc, we just return
     // argv0, because the static binary may not be named `blogc`, and we
     // prefer to use our own `blogc` instead of some other version around.
-    if (0 == strcmp(bin, "blogc")) {
-        return bc_strdup(argv0);
+    if (argv0 != NULL && bin != NULL && (0 == strcmp(bin, "blogc"))) {
+        return bc_shell_quote(argv0);
     }
 #endif
 
