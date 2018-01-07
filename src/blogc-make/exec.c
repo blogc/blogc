@@ -6,6 +6,10 @@
  * See the file LICENSE.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -25,6 +29,15 @@
 char*
 bm_exec_find_binary(const char *argv0, const char *bin, const char *env)
 {
+#ifdef MAKE_EMBEDDED
+    // for embedded blogc-make, if we are looking for blogc, we just return
+    // argv0, because the static binary may not be named `blogc`, and we
+    // prefer to use our own `blogc` instead of some other version around.
+    if (0 == strcmp(bin, "blogc")) {
+        return bc_strdup(argv0);
+    }
+#endif
+
     // first try: env var
     const char *env_bin = getenv(env);
     if (env_bin != NULL) {
