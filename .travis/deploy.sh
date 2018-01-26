@@ -35,13 +35,21 @@ deploy
 TARNAME="$(grep PACKAGE_TARNAME build/config.h | cut -d\" -f2)"
 VERSION="$(grep PACKAGE_VERSION build/config.h | cut -d\" -f2)"
 
+do_sha512() {
+    pushd "$(dirname ${1})" > /dev/null
+    sha512sum "$(basename ${1})"
+    popd > /dev/null
+}
+
 do_curl() {
     curl \
         --silent \
-        --ftp-create-dirs \
-        --upload-file "${1}" \
-        --user "${FTP_USER}:${FTP_PASSWORD}" \
-        "ftp://${FTP_HOST}/public_html/${TARNAME}/${TARNAME}-${VERSION}/$(basename ${1})"
+        --form "project=${TARNAME}" \
+        --form "version=${VERSION}" \
+        --form "file=@${1}" \
+        --form "sha512=$(do_sha512 ${1})" \
+        "${DISTFILES_URL}" \
+        &> /dev/null  # make sure that we don't leak tokens
 }
 
 echo " * Found files:"
@@ -53,18 +61,8 @@ echo
 for f in "${FILES[@]}"; do
     echo " * Processing file: $(basename ${f}):"
 
-    echo -n "   Generating SHA512 checksum ... "
-    pushd "$(dirname ${f})" > /dev/null
-    sha512sum "$(basename ${f})" > "$(basename ${f}).sha512"
-    popd > /dev/null
-    echo "done"
-
     echo -n "   Uploading file ... "
     do_curl "${f}"
-    echo "done"
-
-    echo -n "   Uploading SHA512 checksum ... "
-    do_curl "${f}.sha512"
     echo "done"
 
     echo
