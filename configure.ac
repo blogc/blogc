@@ -109,6 +109,7 @@ AS_IF([test "x$enable_make" = "xyes" -o "x$enable_make_embedded" = "xyes"], [
   AX_PTHREAD([], [
     AC_MSG_ERROR([blogc-make tool requested but pthread is not supported])
   ])
+  have_threads=yes
   have_make_lib=yes
   AS_IF([test "x$enable_make_embedded" = "xyes"], [
     MAKE_="enabled (embedded)"

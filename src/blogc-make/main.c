@@ -50,6 +50,8 @@ print_usage(void)
 }
 
 
+
+#include "../common/thread-pool.h"
 int
 #ifdef MAKE_EMBEDDED
 bm_main(int argc, char **argv)
@@ -58,6 +60,11 @@ main(int argc, char **argv)
 #endif
 {
     setlocale(LC_ALL, "");
+    bc_threadpool_t *tp = bc_threadpool_new(NULL, 20, NULL, NULL);
+    bc_threadpool_append(tp, "bola");
+    bc_threadpool_append(tp, "guda");
+    sleep(10);
+    return 0;
 
     int rv = 0;
     bc_error_t *err = NULL;

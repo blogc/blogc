@@ -8,13 +8,12 @@
 
 #include <errno.h>
 #include <pthread.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include "error.h"
 #include "utils.h"
 #include "thread-pool.h"
-
-pthread_mutex_t jobs_mutex;
 
 typedef struct {
     bc_threadpool_t *pool;
@@ -22,12 +21,29 @@ typedef struct {
     size_t id;
 } thread_info_t;
 
+typedef struct {
+    bc_threadpool_t *pool;
+    void *user_data;
+} job_t;
+
 
 static void*
 worker(void *arg)
 {
     thread_info_t *info = arg;
 
+    printf("aqui\n");
+
+    while (1) {
+        job_t *job = NULL;
+
+        pthread_mutex_lock(&(info->pool->jobs_mutex));
+        info->pool->jobs = bc_slist_pop(info->pool->jobs, (void**) &job);
+        pthread_mutex_unlock(&(info->pool->jobs_mutex));
+
+        if (job != NULL)
+            printf("dentro[%d]: %s\n", info->id, job);
+    }
 
     return NULL;
 }
@@ -42,6 +58,7 @@ bc_threadpool_new(bc_threadpool_func_t func, size_t max_threads,
 
     bc_threadpool_t *rv = bc_malloc(sizeof(bc_threadpool_t));
     rv->jobs = NULL;
+    pthread_mutex_init(&(rv->jobs_mutex), NULL);
     rv->threads = NULL;
     rv->func = func;
     rv->max_threads = max_threads;
@@ -67,4 +84,10 @@ bc_threadpool_new(bc_threadpool_func_t func, size_t max_threads,
 }
 
 
-
+void
+bc_threadpool_append(bc_threadpool_t *pool, void *user_data)
+{
+    pthread_mutex_lock(&(pool->jobs_mutex));
+    pool->jobs = bc_slist_append(pool->jobs, user_data);
+    pthread_mutex_unlock(&(pool->jobs_mutex));
+}

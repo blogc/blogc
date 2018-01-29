@@ -171,6 +171,7 @@ libblogc_common_tp_la_CFLAGS = \
 
 libblogc_common_tp_la_LIBADD = \
 	$(PTHREAD_LIBS) \
+	libblogc_common.la \
 	$(NULL)
 endif
 
@@ -245,6 +246,7 @@ blogc_make_LDADD = \
 	$(PTHREAD_LIBS) \
 	libblogc_make.la \
 	libblogc_common.la \
+	libblogc_common_tp.la \
 	$(NULL)
 endif
 

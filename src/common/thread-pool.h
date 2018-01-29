@@ -9,12 +9,14 @@
 #ifndef _THREAD_POOL_H
 #define _THREAD_POOL_H
 
+#include <pthread.h>
 #include "utils.h"
 
 typedef void (*bc_threadpool_func_t) (void *job, void *user_data);
 
 typedef struct {
     bc_slist_t *jobs;
+    pthread_mutex_t jobs_mutex;
     bc_slist_t *threads;
     size_t max_threads;
     bc_threadpool_func_t func;
@@ -23,5 +25,6 @@ typedef struct {
 
 bc_threadpool_t* bc_threadpool_new(bc_threadpool_func_t func,
     size_t max_threads, void *user_data, bc_error_t **err);
+void bc_threadpool_append(bc_threadpool_t *pool, void *user_data);
 
 #endif /* _THREAD_POOL_H */
