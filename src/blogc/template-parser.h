@@ -18,7 +18,7 @@
  * template parsing. renderer does not need to care about it, for the sake of
  * simplicity.
  *
- * another note: technically this is not an AST, because there are no childs.
+ * another note: technically this is not an AST, because it is not a tree. duh!
  */
 typedef enum {
     BLOGC_TEMPLATE_NODE_IFDEF = 1,
@@ -47,6 +47,8 @@ typedef struct {
 
     // 2 slots to store node data.
     char *data[2];
+
+    bc_slist_t *childs;
 } blogc_template_node_t;
 
 bc_slist_t* blogc_template_parse(const char *src, size_t src_len,
