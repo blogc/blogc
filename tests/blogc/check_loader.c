@@ -75,7 +75,7 @@ test_template_parse_from_file(void **state)
     assert_null(err);
     assert_non_null(l);
     assert_int_equal(bc_slist_length(l), 2);
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
 }
 
 

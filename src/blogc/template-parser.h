@@ -14,40 +14,43 @@
 #include "../common/utils.h"
 
 /*
- * note: whitespace cleaners are NOT added to ast. we fix strings right during
+ * note: whitespace cleaners are NOT added to AST. we fix strings right during
  * template parsing. renderer does not need to care about it, for the sake of
  * simplicity.
+ *
+ * another note: technically this is not an AST, because there are no childs.
  */
 typedef enum {
-    BLOGC_TEMPLATE_IFDEF_STMT = 1,
-    BLOGC_TEMPLATE_IFNDEF_STMT,
-    BLOGC_TEMPLATE_IF_STMT,
-    BLOGC_TEMPLATE_ELSE_STMT,
-    BLOGC_TEMPLATE_ENDIF_STMT,
-    BLOGC_TEMPLATE_FOREACH_STMT,
-    BLOGC_TEMPLATE_ENDFOREACH_STMT,
-    BLOGC_TEMPLATE_BLOCK_STMT,
-    BLOGC_TEMPLATE_ENDBLOCK_STMT,
-    BLOGC_TEMPLATE_VARIABLE_STMT,
-    BLOGC_TEMPLATE_CONTENT_STMT,
-} blogc_template_stmt_type_t;
+    BLOGC_TEMPLATE_NODE_IFDEF = 1,
+    BLOGC_TEMPLATE_NODE_IFNDEF,
+    BLOGC_TEMPLATE_NODE_IF,
+    BLOGC_TEMPLATE_NODE_ELSE,
+    BLOGC_TEMPLATE_NODE_ENDIF,
+    BLOGC_TEMPLATE_NODE_FOREACH,
+    BLOGC_TEMPLATE_NODE_ENDFOREACH,
+    BLOGC_TEMPLATE_NODE_BLOCK,
+    BLOGC_TEMPLATE_NODE_ENDBLOCK,
+    BLOGC_TEMPLATE_NODE_VARIABLE,
+    BLOGC_TEMPLATE_NODE_CONTENT,
+} blogc_template_node_type_t;
 
 typedef enum {
     BLOGC_TEMPLATE_OP_NEQ = 1 << 0,
     BLOGC_TEMPLATE_OP_EQ  = 1 << 1,
     BLOGC_TEMPLATE_OP_LT  = 1 << 2,
     BLOGC_TEMPLATE_OP_GT  = 1 << 3,
-} blogc_template_stmt_operator_t;
+} blogc_template_operator_t;
 
 typedef struct {
-    blogc_template_stmt_type_t type;
-    char *value;
-    char *value2;
-    blogc_template_stmt_operator_t op;
-} blogc_template_stmt_t;
+    blogc_template_node_type_t type;
+    blogc_template_operator_t op;
+
+    // 2 slots to store node data.
+    char *data[2];
+} blogc_template_node_t;
 
 bc_slist_t* blogc_template_parse(const char *src, size_t src_len,
     bc_error_t **err);
-void blogc_template_free_stmts(bc_slist_t *stmts);
+void blogc_template_free_ast(bc_slist_t *ast);
 
 #endif /* _TEMPLATE_PARSER_H */

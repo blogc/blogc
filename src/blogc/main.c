@@ -346,7 +346,7 @@ main(int argc, char **argv)
 cleanup4:
     free(out);
 cleanup3:
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
 cleanup2:
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     bc_error_free(err);

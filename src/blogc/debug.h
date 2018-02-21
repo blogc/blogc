@@ -11,6 +11,6 @@
 
 #include "../common/utils.h"
 
-void blogc_debug_template(bc_slist_t *stmts);
+void blogc_debug_template(bc_slist_t *ast);
 
 #endif /* ___DEBUG_H */

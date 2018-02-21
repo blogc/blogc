@@ -191,53 +191,53 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
 
     bc_slist_t *tmp = tmpl;
     while (tmp != NULL) {
-        blogc_template_stmt_t *stmt = tmp->data;
+        blogc_template_node_t *node = tmp->data;
 
-        switch (stmt->type) {
+        switch (node->type) {
 
-            case BLOGC_TEMPLATE_CONTENT_STMT:
-                if (stmt->value != NULL)
-                    bc_string_append(str, stmt->value);
+            case BLOGC_TEMPLATE_NODE_CONTENT:
+                if (node->data[0] != NULL)
+                    bc_string_append(str, node->data[0]);
                 break;
 
-            case BLOGC_TEMPLATE_BLOCK_STMT:
+            case BLOGC_TEMPLATE_NODE_BLOCK:
                 inside_block = true;
                 if_count = 0;
-                if (0 == strcmp("entry", stmt->value)) {
+                if (0 == strcmp("entry", node->data[0])) {
                     if (listing) {
 
                         // we can just skip anything and walk until the next
                         // 'endblock'
-                        while (stmt->type != BLOGC_TEMPLATE_ENDBLOCK_STMT) {
+                        while (node->type != BLOGC_TEMPLATE_NODE_ENDBLOCK) {
                             tmp = tmp->next;
-                            stmt = tmp->data;
+                            node = tmp->data;
                         }
                         break;
                     }
                     current_source = sources;
                     tmp_source = current_source->data;
                 }
-                else if ((0 == strcmp("listing", stmt->value)) ||
-                         (0 == strcmp("listing_once", stmt->value))) {
+                else if ((0 == strcmp("listing", node->data[0])) ||
+                         (0 == strcmp("listing_once", node->data[0]))) {
                     if (!listing) {
 
                         // we can just skip anything and walk until the next
                         // 'endblock'
-                        while (stmt->type != BLOGC_TEMPLATE_ENDBLOCK_STMT) {
+                        while (node->type != BLOGC_TEMPLATE_NODE_ENDBLOCK) {
                             tmp = tmp->next;
-                            stmt = tmp->data;
+                            node = tmp->data;
                         }
                         break;
                     }
                 }
-                if (0 == strcmp("listing", stmt->value)) {
+                if (0 == strcmp("listing", node->data[0])) {
                     if (sources == NULL) {
 
                         // we can just skip anything and walk until the next
                         // 'endblock'
-                        while (stmt->type != BLOGC_TEMPLATE_ENDBLOCK_STMT) {
+                        while (node->type != BLOGC_TEMPLATE_NODE_ENDBLOCK) {
                             tmp = tmp->next;
-                            stmt = tmp->data;
+                            node = tmp->data;
                         }
                         break;
                     }
@@ -249,9 +249,9 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
                 }
                 break;
 
-            case BLOGC_TEMPLATE_VARIABLE_STMT:
-                if (stmt->value != NULL) {
-                    config_value = blogc_format_variable(stmt->value,
+            case BLOGC_TEMPLATE_NODE_VARIABLE:
+                if (node->data[0] != NULL) {
+                    config_value = blogc_format_variable(node->data[0],
                         config, inside_block ? tmp_source : NULL, foreach_var);
                     if (config_value != NULL) {
                         bc_string_append(str, config_value);
@@ -262,7 +262,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
                 }
                 break;
 
-            case BLOGC_TEMPLATE_ENDBLOCK_STMT:
+            case BLOGC_TEMPLATE_NODE_ENDBLOCK:
                 inside_block = false;
                 if (listing_start != NULL && current_source != NULL) {
                     current_source = current_source->next;
@@ -275,32 +275,32 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
                 }
                 break;
 
-            case BLOGC_TEMPLATE_IFNDEF_STMT:
+            case BLOGC_TEMPLATE_NODE_IFNDEF:
                 if_not = true;
 
-            case BLOGC_TEMPLATE_IF_STMT:
-            case BLOGC_TEMPLATE_IFDEF_STMT:
+            case BLOGC_TEMPLATE_NODE_IF:
+            case BLOGC_TEMPLATE_NODE_IFDEF:
                 if_count = 0;
                 defined = NULL;
-                if (stmt->value != NULL)
-                    defined = blogc_format_variable(stmt->value, config,
+                if (node->data[0] != NULL)
+                    defined = blogc_format_variable(node->data[0], config,
                         inside_block ? tmp_source : NULL, foreach_var);
                 evaluate = false;
-                if (stmt->op != 0) {
+                if (node->op != 0) {
                     // Strings that start with a '"' are actually strings, the
                     // others are meant to be looked up as a second variable
                     // check.
                     char *defined2 = NULL;
-                    if (stmt->value2 != NULL) {
-                        if ((strlen(stmt->value2) >= 2) &&
-                            (stmt->value2[0] == '"') &&
-                            (stmt->value2[strlen(stmt->value2) - 1] == '"'))
+                    if (node->data[1] != NULL) {
+                        if ((strlen(node->data[1]) >= 2) &&
+                            (node->data[1][0] == '"') &&
+                            (node->data[1][strlen(node->data[1]) - 1] == '"'))
                         {
-                            defined2 = bc_strndup(stmt->value2 + 1,
-                                strlen(stmt->value2) - 2);
+                            defined2 = bc_strndup(node->data[1] + 1,
+                                strlen(node->data[1]) - 2);
                         }
                         else {
-                            defined2 = blogc_format_variable(stmt->value2,
+                            defined2 = blogc_format_variable(node->data[1],
                                 config, inside_block ? tmp_source : NULL,
                                 foreach_var);
                         }
@@ -308,13 +308,13 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
 
                     if (defined != NULL && defined2 != NULL) {
                         cmp = strcmp(defined, defined2);
-                        if (cmp != 0 && stmt->op & BLOGC_TEMPLATE_OP_NEQ)
+                        if (cmp != 0 && node->op & BLOGC_TEMPLATE_OP_NEQ)
                             evaluate = true;
-                        else if (cmp == 0 && stmt->op & BLOGC_TEMPLATE_OP_EQ)
+                        else if (cmp == 0 && node->op & BLOGC_TEMPLATE_OP_EQ)
                             evaluate = true;
-                        else if (cmp < 0 && stmt->op & BLOGC_TEMPLATE_OP_LT)
+                        else if (cmp < 0 && node->op & BLOGC_TEMPLATE_OP_LT)
                             evaluate = true;
-                        else if (cmp > 0 && stmt->op & BLOGC_TEMPLATE_OP_GT)
+                        else if (cmp > 0 && node->op & BLOGC_TEMPLATE_OP_GT)
                             evaluate = true;
                     }
 
@@ -333,15 +333,15 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
                     // skip as well.
                     while (1) {
                         tmp = tmp->next;
-                        stmt = tmp->data;
-                        if ((stmt->type == BLOGC_TEMPLATE_IF_STMT) ||
-                            (stmt->type == BLOGC_TEMPLATE_IFDEF_STMT) ||
-                            (stmt->type == BLOGC_TEMPLATE_IFNDEF_STMT))
+                        node = tmp->data;
+                        if ((node->type == BLOGC_TEMPLATE_NODE_IF) ||
+                            (node->type == BLOGC_TEMPLATE_NODE_IFDEF) ||
+                            (node->type == BLOGC_TEMPLATE_NODE_IFNDEF))
                         {
                             if_count++;
                             continue;
                         }
-                        if ((stmt->type == BLOGC_TEMPLATE_ELSE_STMT) &&
+                        if ((node->type == BLOGC_TEMPLATE_NODE_ELSE) &&
                             (if_count == 0))
                         {
                             // this is somewhat complex. only an else statement
@@ -352,7 +352,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
                             valid_else = true;
                             break;
                         }
-                        if (stmt->type == BLOGC_TEMPLATE_ENDIF_STMT) {
+                        if (node->type == BLOGC_TEMPLATE_NODE_ENDIF) {
                             if (if_count > 0) {
                                 if_count--;
                                 continue;
@@ -369,7 +369,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
                 if_not = false;
                 break;
 
-            case BLOGC_TEMPLATE_ELSE_STMT:
+            case BLOGC_TEMPLATE_NODE_ELSE:
                 if_count = 0;
                 if (!valid_else) {
 
@@ -378,17 +378,17 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
                     // skip as well.
                     while (1) {
                         tmp = tmp->next;
-                        stmt = tmp->data;
-                        if ((stmt->type == BLOGC_TEMPLATE_IF_STMT) ||
-                            (stmt->type == BLOGC_TEMPLATE_IFDEF_STMT) ||
-                            (stmt->type == BLOGC_TEMPLATE_IFNDEF_STMT))
+                        node = tmp->data;
+                        if ((node->type == BLOGC_TEMPLATE_NODE_IF) ||
+                            (node->type == BLOGC_TEMPLATE_NODE_IFDEF) ||
+                            (node->type == BLOGC_TEMPLATE_NODE_IFNDEF))
                         {
                             if_count++;
                             continue;
                         }
                         // no need to handle else statements here, because every
                         // if should have an endif.
-                        if (stmt->type == BLOGC_TEMPLATE_ENDIF_STMT) {
+                        if (node->type == BLOGC_TEMPLATE_NODE_ENDIF) {
                             if (if_count > 0) {
                                 if_count--;
                                 continue;
@@ -400,7 +400,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
                 valid_else = false;
                 break;
 
-            case BLOGC_TEMPLATE_ENDIF_STMT:
+            case BLOGC_TEMPLATE_NODE_ENDIF:
                 // any endif statement should invalidate valid_else, to avoid
                 // propagation to outter conditionals.
                 valid_else = false;
@@ -408,10 +408,10 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
                     if_count--;
                 break;
 
-            case BLOGC_TEMPLATE_FOREACH_STMT:
+            case BLOGC_TEMPLATE_NODE_FOREACH:
                 if (foreach_var_start == NULL) {
-                    if (stmt->value != NULL)
-                        foreach_var_start = blogc_split_list_variable(stmt->value,
+                    if (node->data[0] != NULL)
+                        foreach_var_start = blogc_split_list_variable(node->data[0],
                             config, inside_block ? tmp_source : NULL);
 
                     if (foreach_var_start != NULL) {
@@ -422,9 +422,9 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
 
                         // we can just skip anything and walk until the next
                         // 'endforeach'
-                        while (stmt->type != BLOGC_TEMPLATE_ENDFOREACH_STMT) {
+                        while (node->type != BLOGC_TEMPLATE_NODE_ENDFOREACH) {
                             tmp = tmp->next;
-                            stmt = tmp->data;
+                            node = tmp->data;
                         }
                         break;
                     }
@@ -436,7 +436,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
                 }
                 break;
 
-            case BLOGC_TEMPLATE_ENDFOREACH_STMT:
+            case BLOGC_TEMPLATE_NODE_ENDFOREACH:
                 if (foreach_start != NULL && foreach_var != NULL) {
                     foreach_var = foreach_var->next;
                     if (foreach_var != NULL) {

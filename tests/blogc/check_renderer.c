@@ -101,7 +101,7 @@ test_render_entry(void **state)
         "LOL4\n"
         "lol foo haha lol bar haha lol baz haha \n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -150,7 +150,7 @@ test_render_listing(void **state)
         "\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -181,7 +181,7 @@ test_render_listing_empty(void **state)
         "fuuu\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     free(out);
 }
 
@@ -209,7 +209,7 @@ test_render_ifdef(void **state)
         "\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -240,7 +240,7 @@ test_render_ifdef2(void **state)
         "\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -273,7 +273,7 @@ test_render_ifdef3(void **state)
         "\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -309,7 +309,7 @@ test_render_ifdef4(void **state)
         "\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -343,7 +343,7 @@ test_render_ifdef5(void **state)
         "\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -375,7 +375,7 @@ test_render_ifdef6(void **state)
         "lol\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -413,7 +413,7 @@ test_render_ifdef7(void **state)
         "\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -448,7 +448,7 @@ test_render_ifndef(void **state)
         "\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -485,7 +485,7 @@ test_render_if_eq(void **state)
         "\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -522,7 +522,7 @@ test_render_if_neq(void **state)
         "\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -559,7 +559,7 @@ test_render_if_lt(void **state)
         "\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -596,7 +596,7 @@ test_render_if_gt(void **state)
         "\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -637,7 +637,7 @@ test_render_if_lt_eq(void **state)
         "\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -678,7 +678,7 @@ test_render_if_gt_eq(void **state)
         "\n"
         "\n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -702,7 +702,7 @@ test_render_foreach(void **state)
         "\n"
         " foo  bar  baz \n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -727,7 +727,7 @@ test_render_foreach_if(void **state)
         "\n"
         "   bar   \n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -753,7 +753,7 @@ test_render_foreach_if_else(void **state)
         "\n"
         "foo yay baz \n"
         "\n");
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -787,7 +787,7 @@ test_render_outside_block(void **state)
         "\n"
         "lol\n");
     bc_trie_free(c);
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -826,7 +826,7 @@ test_render_prefer_local_variable(void **state)
         "\n"
         "\n");
     bc_trie_free(c);
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -858,7 +858,7 @@ test_render_respect_variable_scope(void **state)
         "asd\n"
         "\n");
     bc_trie_free(c);
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
@@ -889,7 +889,7 @@ test_render_ifcount_bug(void **state)
         "\n"
         "\n");
     bc_trie_free(c);
-    blogc_template_free_stmts(l);
+    blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
     free(out);
 }
