@@ -103,3 +103,5 @@ blogc-*.rpm
 
 /build/
 /root/
+
+/maint/releases/
