@@ -40,7 +40,7 @@ bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
         *tmp = '\0';
         if ((strlen(fname) > 0) &&
             (-1 == mkdir(fname, 0777)) &&
-            (errno != EEXIST))
+            (errno != EEXIST && errno != ENOENT))
         {
             fprintf(stderr, "blogc-make: error: failed to create output "
                 "directory (%s): %s\n", fname, strerror(errno));
