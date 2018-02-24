@@ -52,7 +52,7 @@ index_outputlist(bm_ctx_t *ctx)
     char *f = bc_strdup_printf("%s%s%s%s", ctx->short_output_dir,
         is_index ? "" : "/", is_index ? "" : index_prefix,
         html_ext);
-    rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
+    rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
     free(f);
     return rv;
 }
@@ -109,7 +109,7 @@ atom_outputlist(bm_ctx_t *ctx)
     const char *atom_ext = bc_trie_lookup(ctx->settings->settings, "atom_ext");
     char *f = bc_strdup_printf("%s/%s%s", ctx->short_output_dir,
         atom_prefix, atom_ext);
-    rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
+    rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
     free(f);
     return rv;
 }
@@ -167,7 +167,7 @@ atom_tags_outputlist(bm_ctx_t *ctx)
     for (size_t i = 0; ctx->settings->tags[i] != NULL; i++) {
         char *f = bc_strdup_printf("%s/%s/%s%s", ctx->short_output_dir,
             atom_prefix, ctx->settings->tags[i], atom_ext);
-        rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
+        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
         free(f);
     }
     return rv;
@@ -239,7 +239,7 @@ pagination_outputlist(bm_ctx_t *ctx)
     for (size_t i = 0; i < pages; i++) {
         char *f = bc_strdup_printf("%s/%s/%d%s", ctx->short_output_dir,
             pagination_prefix, i + 1, html_ext);
-        rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
+        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
         free(f);
     }
     return rv;
@@ -301,7 +301,7 @@ posts_outputlist(bm_ctx_t *ctx)
     for (size_t i = 0; ctx->settings->posts[i] != NULL; i++) {
         char *f = bc_strdup_printf("%s/%s/%s%s", ctx->short_output_dir,
             post_prefix, ctx->settings->posts[i], html_ext);
-        rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
+        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
         free(f);
     }
     return rv;
@@ -362,7 +362,7 @@ tags_outputlist(bm_ctx_t *ctx)
     for (size_t i = 0; ctx->settings->tags[i] != NULL; i++) {
         char *f = bc_strdup_printf("%s/%s/%s%s", ctx->short_output_dir,
             tag_prefix, ctx->settings->tags[i], html_ext);
-        rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
+        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
         free(f);
     }
     return rv;
@@ -429,7 +429,7 @@ pages_outputlist(bm_ctx_t *ctx)
         char *f = bc_strdup_printf("%s%s%s%s", ctx->short_output_dir,
             is_index ? "" : "/", is_index ? "" : ctx->settings->pages[i],
             html_ext);
-        rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
+        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
         free(f);
     }
     return rv;
@@ -487,7 +487,7 @@ copy_outputlist(bm_ctx_t *ctx)
     for (bc_slist_t *s = ctx->copy_fctx; s != NULL; s = s->next) {
         char *f = bc_strdup_printf("%s/%s", ctx->short_output_dir,
             ((bm_filectx_t*) s->data)->short_path);
-        rv = bc_slist_append(rv, bm_filectx_new(ctx, f));
+        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
         free(f);
     }
     return rv;

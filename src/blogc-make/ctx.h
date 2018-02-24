@@ -9,6 +9,7 @@
 #ifndef _MAKE_CTX_H
 #define _MAKE_CTX_H
 
+#include <sys/stat.h>
 #include <stdbool.h>
 #include <time.h>
 #include "settings.h"
@@ -63,7 +64,7 @@ typedef struct {
     bc_slist_t *copy_fctx;
 } bm_ctx_t;
 
-bm_filectx_t* bm_filectx_new(bm_ctx_t *ctx, const char *filename);
+bm_filectx_t* bm_filectx_new(bm_ctx_t *ctx, const char *filename, struct stat *st);
 bc_slist_t* bm_filectx_new_r(bc_slist_t *l, bm_ctx_t *ctx, const char *filename);
 bool bm_filectx_changed(bm_filectx_t *ctx, time_t *tv_sec, long *tv_nsec);
 void bm_filectx_reload(bm_filectx_t *ctx);
