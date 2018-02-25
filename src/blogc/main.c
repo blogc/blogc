@@ -101,7 +101,7 @@ blogc_mkdir_recursive(const char *filename)
 #else
             (-1 == mkdir(fname, 0777)) &&
 #endif
-            (errno != EEXIST && errno != ENOENT))
+            (errno != EEXIST))
         {
             fprintf(stderr, "blogc: error: failed to create output "
                 "directory (%s): %s\n", fname, strerror(errno));
