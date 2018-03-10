@@ -190,6 +190,7 @@ test_build_blogc_cmd_with_settings_and_tags(void **state)
     bc_trie_free(variables);
     bc_trie_free(settings->settings);
     bc_trie_free(settings->global);
+    bc_strv_free(settings->tags);
     free(settings);
 }
 
