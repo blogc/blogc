@@ -35,45 +35,109 @@ See blogcfile(5) for details on the file format.
 
 ## HELPER RULES
 
-  * `all`:
-    Run all build rules. This is the default rule.
+### all
 
-  * `clean`:
-    Clean built files and empty directories in output directory.
+Run all build rules. This is the default rule.
 
-  * `runserver`:
-    Run `blogc-runserver(1)` pointing to output directory, if available. This
-    rule accepts some arguments, in the following format:
+### clean
 
-        runserver:host=127.0.0.1,port=8080,threads=20
+Clean built files and empty directories in output directory.
 
-    The values in the example are the default values.
+### runserver
+
+Run `blogc-runserver(1)` pointing to output directory, if available. This
+rule accepts some arguments, in the following format:
+
+    runserver:host=127.0.0.1,port=8080,threads=20
+
+The values in the example are the default values.
 
 ## BUILD RULES
 
-  * `index`:
-     Build website index from posts.
+### index
 
-  * `atom`:
-     Build main atom feed from posts.
+Build website index from posts.
 
-  * `atom_tags`:
-     Build atom feeds for each tag from posts.
+The rule passes the following helper variables to blogc(1):
 
-  * `pagination`:
-     Build pagination pages from posts.
+  * `MAKE_RULE`:
+    `index`
+  * `MAKE_TYPE`:
+    `post`
 
-  * `posts`:
-     Build individual pages for each post.
+### atom
 
-  * `tags`:
-     Build post listings for each tag from posts.
+Build main atom feed from posts.
 
-  * `pages`:
-     Build individual pages for each page.
+The rule passes the following helper variables to blogc(1):
 
-  * `copy`:
-     Copy static files from source directory to output directory.
+  * `MAKE_RULE`:
+    `atom`
+  * `MAKE_TYPE`:
+    `atom`
+
+### atom_tags
+
+Build atom feeds for each tag from posts.
+
+The rule passes the following helper variables to blogc(1):
+
+  * `MAKE_RULE`:
+    `atom_tags`
+  * `MAKE_TYPE`:
+    `atom`
+
+### pagination
+
+Build pagination pages from posts.
+
+The rule passes the following helper variables to blogc(1):
+
+  * `MAKE_RULE`:
+    `pagination`
+  * `MAKE_TYPE`:
+    `post`
+
+### posts
+
+Build individual pages for each post.
+
+The rule passes the following helper variables to blogc(1):
+
+  * `MAKE_RULE`:
+    `posts`
+  * `MAKE_TYPE`:
+    `post`
+  * `MAKE_SLUG`:
+    The slug of the post being built, as provided in blogcfile
+
+### tags
+
+Build post listings for each tag from posts.
+
+The rule passes the following helper variables to blogc(1):
+
+  * `MAKE_RULE`:
+    `tags`
+  * `MAKE_TYPE`:
+    `post`
+
+### pages
+
+Build individual pages for each page.
+
+The rule passes the following helper variables to blogc(1):
+
+  * `MAKE_RULE`:
+    `pages`
+  * `MAKE_TYPE`:
+    `page`
+  * `MAKE_SLUG`:
+    The slug of the page being built, as provided in blogcfile
+
+### copy
+
+Copy static files from source directory to output directory.
 
 ## FILES
 
