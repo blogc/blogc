@@ -177,7 +177,7 @@ test_build_blogc_cmd_with_settings_and_tags(void **state)
     char *rv = bm_exec_build_blogc_cmd("blogc", settings, variables, local, true,
         "main.tmpl", "foo.html", true, true);
     assert_string_equal(rv,
-        "LC_ALL='en_US.utf8' blogc -D TAG_CLOUD='asd foo bar' -D FOO='BAR' "
+        "LC_ALL='en_US.utf8' blogc -D MAKE_TAGS='asd foo bar' -D FOO='BAR' "
         "-D BAR='BAZ' -D LOL='HEHE' -D ASD='QWE' -D MAKE_ENV_DEV=1 "
         "-D MAKE_ENV='dev' -l -t 'main.tmpl' -o 'foo.html' -i");
     free(rv);
@@ -185,14 +185,14 @@ test_build_blogc_cmd_with_settings_and_tags(void **state)
     rv = bm_exec_build_blogc_cmd("blogc", settings, variables, NULL, false, NULL,
         NULL, true, false);
     assert_string_equal(rv,
-        "LC_ALL='en_US.utf8' blogc -D TAG_CLOUD='asd foo bar' -D FOO='BAR' "
+        "LC_ALL='en_US.utf8' blogc -D MAKE_TAGS='asd foo bar' -D FOO='BAR' "
         "-D BAR='BAZ' -D LOL='HEHE' -D MAKE_ENV_DEV=1 -D MAKE_ENV='dev'");
     free(rv);
 
     rv = bm_exec_build_blogc_cmd("blogc", settings, NULL, NULL, false, NULL, NULL,
         true, false);
     assert_string_equal(rv,
-        "LC_ALL='en_US.utf8' blogc -D TAG_CLOUD='asd foo bar' -D FOO='BAR' "
+        "LC_ALL='en_US.utf8' blogc -D MAKE_TAGS='asd foo bar' -D FOO='BAR' "
         "-D BAR='BAZ' -D MAKE_ENV_DEV=1 -D MAKE_ENV='dev'");
     free(rv);
 

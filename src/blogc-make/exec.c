@@ -237,7 +237,7 @@ bm_exec_build_blogc_cmd(const char *blogc_bin, bm_settings_t *settings,
     if (settings != NULL) {
         if (settings->tags != NULL) {
             char *tags = bc_strv_join(settings->tags, " ");
-            bc_string_append_printf(rv, " -D TAG_CLOUD='%s'", tags);
+            bc_string_append_printf(rv, " -D MAKE_TAGS='%s'", tags);
             free(tags);
         }
 

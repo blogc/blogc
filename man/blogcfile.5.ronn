@@ -136,7 +136,7 @@ The `[tags]` section is a listing of the tags that should be listed in the
 website. blogc-make(1) will generate post listing indexes and Atom feeds for
 each tag listed in the section.
 
-The tags will be also provided to blogc as a `TAG_CLOUD` variable, that is a
+The tags will be also provided to blogc as a `MAKE_TAGS` variable, that is a
 space-separated list of the tags, useful to generate tag clouds using the
 `foreach` template iterator. See blogc-template(7).
 
