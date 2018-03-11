@@ -37,6 +37,7 @@
 typedef struct {
     char *path;
     char *short_path;
+    char *slug;
     time_t tv_sec;
     long tv_nsec;
     bool readable;
@@ -64,7 +65,8 @@ typedef struct {
     bc_slist_t *copy_fctx;
 } bm_ctx_t;
 
-bm_filectx_t* bm_filectx_new(bm_ctx_t *ctx, const char *filename, struct stat *st);
+bm_filectx_t* bm_filectx_new(bm_ctx_t *ctx, const char *filename, const char *slug,
+    struct stat *st);
 bc_slist_t* bm_filectx_new_r(bc_slist_t *l, bm_ctx_t *ctx, const char *filename);
 bool bm_filectx_changed(bm_filectx_t *ctx, time_t *tv_sec, long *tv_nsec);
 void bm_filectx_reload(bm_filectx_t *ctx);

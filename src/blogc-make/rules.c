@@ -52,7 +52,7 @@ index_outputlist(bm_ctx_t *ctx)
     char *f = bc_strdup_printf("%s%s%s%s", ctx->short_output_dir,
         is_index ? "" : "/", is_index ? "" : index_prefix,
         html_ext);
-    rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
+    rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
     free(f);
     return rv;
 }
@@ -82,7 +82,7 @@ index_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->main_template_fctx, fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, true, ctx->main_template_fctx,
+            rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->main_template_fctx,
                 fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
@@ -109,7 +109,7 @@ atom_outputlist(bm_ctx_t *ctx)
     const char *atom_ext = bc_trie_lookup(ctx->settings->settings, "atom_ext");
     char *f = bc_strdup_printf("%s/%s%s", ctx->short_output_dir,
         atom_prefix, atom_ext);
-    rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
+    rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
     free(f);
     return rv;
 }
@@ -139,7 +139,7 @@ atom_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL,
                 fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, true, ctx->atom_template_fctx,
+            rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->atom_template_fctx,
                 fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
@@ -167,7 +167,7 @@ atom_tags_outputlist(bm_ctx_t *ctx)
     for (size_t i = 0; ctx->settings->tags[i] != NULL; i++) {
         char *f = bc_strdup_printf("%s/%s/%s%s", ctx->short_output_dir,
             atom_prefix, ctx->settings->tags[i], atom_ext);
-        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
+        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
     return rv;
@@ -203,7 +203,7 @@ atom_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL,
                 fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, true, ctx->atom_template_fctx,
+            rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->atom_template_fctx,
                 fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
@@ -239,7 +239,7 @@ pagination_outputlist(bm_ctx_t *ctx)
     for (size_t i = 0; i < pages; i++) {
         char *f = bc_strdup_printf("%s/%s/%d%s", ctx->short_output_dir,
             pagination_prefix, i + 1, html_ext);
-        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
+        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
     return rv;
@@ -271,7 +271,7 @@ pagination_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->main_template_fctx, fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, true, ctx->main_template_fctx,
+            rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->main_template_fctx,
                 fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
@@ -301,7 +301,7 @@ posts_outputlist(bm_ctx_t *ctx)
     for (size_t i = 0; ctx->settings->posts[i] != NULL; i++) {
         char *f = bc_strdup_printf("%s/%s/%s%s", ctx->short_output_dir,
             post_prefix, ctx->settings->posts[i], html_ext);
-        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
+        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
     return rv;
@@ -328,14 +328,18 @@ posts_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
     for (s = ctx->posts_fctx, o = outputs; s != NULL && o != NULL;
             s = s->next, o = o->next)
     {
+        bm_filectx_t *s_fctx = s->data;
         bm_filectx_t *o_fctx = o->data;
         if (o_fctx == NULL)
             continue;
         if (bm_rule_need_rebuild(s, ctx->settings_fctx,
                 ctx->main_template_fctx, o_fctx, true))
         {
-            rv = bm_exec_blogc(ctx, variables, false, ctx->main_template_fctx,
+            bc_trie_t *local = bc_trie_new(NULL);
+            bc_trie_insert(local, "MAKE_SLUG", s_fctx->slug);  // no need to copy
+            rv = bm_exec_blogc(ctx, variables, local, false, ctx->main_template_fctx,
                 o_fctx, s, true);
+            bc_trie_free(local);
             if (rv != 0)
                 break;
         }
@@ -362,7 +366,7 @@ tags_outputlist(bm_ctx_t *ctx)
     for (size_t i = 0; ctx->settings->tags[i] != NULL; i++) {
         char *f = bc_strdup_printf("%s/%s/%s%s", ctx->short_output_dir,
             tag_prefix, ctx->settings->tags[i], html_ext);
-        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
+        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
     return rv;
@@ -399,7 +403,7 @@ tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->main_template_fctx, fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, true, ctx->main_template_fctx,
+            rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->main_template_fctx,
                 fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
@@ -429,7 +433,7 @@ pages_outputlist(bm_ctx_t *ctx)
         char *f = bc_strdup_printf("%s%s%s%s", ctx->short_output_dir,
             is_index ? "" : "/", is_index ? "" : ctx->settings->pages[i],
             html_ext);
-        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
+        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
     return rv;
@@ -454,14 +458,18 @@ pages_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
     for (s = ctx->pages_fctx, o = outputs; s != NULL && o != NULL;
             s = s->next, o = o->next)
     {
+        bm_filectx_t *s_fctx = s->data;
         bm_filectx_t *o_fctx = o->data;
         if (o_fctx == NULL)
             continue;
         if (bm_rule_need_rebuild(s, ctx->settings_fctx,
                 ctx->main_template_fctx, o_fctx, true))
         {
-            rv = bm_exec_blogc(ctx, variables, false, ctx->main_template_fctx,
+            bc_trie_t *local = bc_trie_new(NULL);
+            bc_trie_insert(local, "MAKE_SLUG", s_fctx->slug); // no need to copy
+            rv = bm_exec_blogc(ctx, variables, local, false, ctx->main_template_fctx,
                 o_fctx, s, true);
+            bc_trie_free(local);
             if (rv != 0)
                 break;
         }
@@ -487,7 +495,7 @@ copy_outputlist(bm_ctx_t *ctx)
     for (bc_slist_t *s = ctx->copy_fctx; s != NULL; s = s->next) {
         char *f = bc_strdup_printf("%s/%s", ctx->short_output_dir,
             ((bm_filectx_t*) s->data)->short_path);
-        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL));
+        rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
     return rv;

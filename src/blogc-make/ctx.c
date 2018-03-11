@@ -24,7 +24,8 @@
 
 
 bm_filectx_t*
-bm_filectx_new(bm_ctx_t *ctx, const char *filename, struct stat *st)
+bm_filectx_new(bm_ctx_t *ctx, const char *filename, const char *slug,
+    struct stat *st)
 {
     if (ctx == NULL || filename == NULL)
         return NULL;
@@ -35,6 +36,7 @@ bm_filectx_new(bm_ctx_t *ctx, const char *filename, struct stat *st)
     bm_filectx_t *rv = bc_malloc(sizeof(bm_filectx_t));
     rv->path = f;
     rv->short_path = bc_strdup(filename);
+    rv->slug = bc_strdup(slug);
 
     if (st == NULL) {
         struct stat buf;
@@ -93,7 +95,7 @@ bm_filectx_new_r(bc_slist_t *l, bm_ctx_t *ctx, const char *filename)
         return l;
     }
 
-    l = bc_slist_append(l, bm_filectx_new(ctx, filename, &buf));
+    l = bc_slist_append(l, bm_filectx_new(ctx, filename, NULL, &buf));
     free(f);
     return l;
 }
@@ -155,6 +157,7 @@ bm_filectx_free(bm_filectx_t *fctx)
         return;
     free(fctx->path);
     free(fctx->short_path);
+    free(fctx->slug);
     free(fctx);
 }
 
@@ -200,7 +203,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     rv->settings = settings;
 
     char *real_filename = realpath(settings_file, NULL);
-    rv->settings_fctx = bm_filectx_new(rv, real_filename, NULL);
+    rv->settings_fctx = bm_filectx_new(rv, real_filename, NULL, NULL);
     rv->root_dir = realpath(dirname(real_filename), NULL);
     free(real_filename);
 
@@ -222,10 +225,10 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
 
     char *main_template = bc_strdup_printf("%s/%s", template_dir,
         bc_trie_lookup(settings->settings, "main_template"));
-    rv->main_template_fctx = bm_filectx_new(rv, main_template, NULL);
+    rv->main_template_fctx = bm_filectx_new(rv, main_template, NULL, NULL);
     free(main_template);
 
-    rv->atom_template_fctx = bm_filectx_new(rv, atom_template, NULL);
+    rv->atom_template_fctx = bm_filectx_new(rv, atom_template, NULL, NULL);
     free(atom_template);
 
     const char *content_dir = bc_trie_lookup(settings->settings, "content_dir");
@@ -238,7 +241,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
             char *f = bc_strdup_printf("%s/%s/%s%s", content_dir, post_prefix,
                 settings->posts[i], source_ext);
             rv->posts_fctx = bc_slist_append(rv->posts_fctx,
-                bm_filectx_new(rv, f, NULL));
+                bm_filectx_new(rv, f, settings->posts[i], NULL));
             free(f);
         }
     }
@@ -249,7 +252,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
             char *f = bc_strdup_printf("%s/%s%s", content_dir,
                 settings->pages[i], source_ext);
             rv->pages_fctx = bc_slist_append(rv->pages_fctx,
-                bm_filectx_new(rv, f, NULL));
+                bm_filectx_new(rv, f, settings->pages[i], NULL));
             free(f);
         }
     }

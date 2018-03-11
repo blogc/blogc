@@ -83,27 +83,30 @@ test_build_blogc_cmd_with_settings(void **state)
     bc_trie_insert(settings->global, "BAR", bc_strdup("BAZ"));
     bc_trie_t *variables = bc_trie_new(free);
     bc_trie_insert(variables, "LOL", bc_strdup("HEHE"));
+    bc_trie_t *local = bc_trie_new(free);
+    bc_trie_insert(local, "ASD", bc_strdup("QWE"));
     settings->tags = NULL;
 
-    char *rv = bm_exec_build_blogc_cmd("blogc", settings, variables, true,
+    char *rv = bm_exec_build_blogc_cmd("blogc", settings, variables, local, true,
         "main.tmpl", "foo.html", false, true);
     assert_string_equal(rv,
-        "LC_ALL='en_US.utf8' blogc -D FOO='BAR' -D BAR='BAZ' -D LOL='HEHE' -l "
-        "-t 'main.tmpl' -o 'foo.html' -i");
+        "LC_ALL='en_US.utf8' blogc -D FOO='BAR' -D BAR='BAZ' -D LOL='HEHE' "
+        "-D ASD='QWE' -l -t 'main.tmpl' -o 'foo.html' -i");
     free(rv);
 
-    rv = bm_exec_build_blogc_cmd("blogc", settings, variables, false, NULL, NULL,
-        false, false);
+    rv = bm_exec_build_blogc_cmd("blogc", settings, variables, NULL, false, NULL,
+        NULL, false, false);
     assert_string_equal(rv,
         "LC_ALL='en_US.utf8' blogc -D FOO='BAR' -D BAR='BAZ' -D LOL='HEHE'");
     free(rv);
 
-    rv = bm_exec_build_blogc_cmd("blogc", settings, NULL, false, NULL, NULL,
+    rv = bm_exec_build_blogc_cmd("blogc", settings, NULL, NULL, false, NULL, NULL,
         false, false);
     assert_string_equal(rv,
         "LC_ALL='en_US.utf8' blogc -D FOO='BAR' -D BAR='BAZ'");
     free(rv);
 
+    bc_trie_free(local);
     bc_trie_free(variables);
     bc_trie_free(settings->settings);
     bc_trie_free(settings->global);
@@ -122,29 +125,33 @@ test_build_blogc_cmd_with_settings_and_dev(void **state)
     bc_trie_insert(settings->global, "BAR", bc_strdup("BAZ"));
     bc_trie_t *variables = bc_trie_new(free);
     bc_trie_insert(variables, "LOL", bc_strdup("HEHE"));
+    bc_trie_t *local = bc_trie_new(free);
+    bc_trie_insert(local, "ASD", bc_strdup("QWE"));
     settings->tags = NULL;
 
-    char *rv = bm_exec_build_blogc_cmd("blogc", settings, variables, true,
+    char *rv = bm_exec_build_blogc_cmd("blogc", settings, variables, local, true,
         "main.tmpl", "foo.html", true, true);
     assert_string_equal(rv,
         "LC_ALL='en_US.utf8' blogc -D FOO='BAR' -D BAR='BAZ' -D LOL='HEHE' "
-        "-D MAKE_ENV_DEV=1 -D MAKE_ENV='dev' -l -t 'main.tmpl' -o 'foo.html' -i");
+        "-D ASD='QWE' -D MAKE_ENV_DEV=1 -D MAKE_ENV='dev' -l -t 'main.tmpl' "
+        "-o 'foo.html' -i");
     free(rv);
 
-    rv = bm_exec_build_blogc_cmd("blogc", settings, variables, false, NULL, NULL,
-        true, false);
+    rv = bm_exec_build_blogc_cmd("blogc", settings, variables, NULL, false, NULL,
+        NULL, true, false);
     assert_string_equal(rv,
         "LC_ALL='en_US.utf8' blogc -D FOO='BAR' -D BAR='BAZ' -D LOL='HEHE' "
         "-D MAKE_ENV_DEV=1 -D MAKE_ENV='dev'");
     free(rv);
 
-    rv = bm_exec_build_blogc_cmd("blogc", settings, NULL, false, NULL, NULL,
+    rv = bm_exec_build_blogc_cmd("blogc", settings, NULL, NULL, false, NULL, NULL,
         true, false);
     assert_string_equal(rv,
         "LC_ALL='en_US.utf8' blogc -D FOO='BAR' -D BAR='BAZ' "
         "-D MAKE_ENV_DEV=1 -D MAKE_ENV='dev'");
     free(rv);
 
+    bc_trie_free(local);
     bc_trie_free(variables);
     bc_trie_free(settings->settings);
     bc_trie_free(settings->global);
@@ -163,30 +170,33 @@ test_build_blogc_cmd_with_settings_and_tags(void **state)
     bc_trie_insert(settings->global, "BAR", bc_strdup("BAZ"));
     bc_trie_t *variables = bc_trie_new(free);
     bc_trie_insert(variables, "LOL", bc_strdup("HEHE"));
+    bc_trie_t *local = bc_trie_new(free);
+    bc_trie_insert(local, "ASD", bc_strdup("QWE"));
     settings->tags = bc_str_split("asd foo bar", ' ', 0);
 
-    char *rv = bm_exec_build_blogc_cmd("blogc", settings, variables, true,
+    char *rv = bm_exec_build_blogc_cmd("blogc", settings, variables, local, true,
         "main.tmpl", "foo.html", true, true);
     assert_string_equal(rv,
         "LC_ALL='en_US.utf8' blogc -D TAG_CLOUD='asd foo bar' -D FOO='BAR' "
-        "-D BAR='BAZ' -D LOL='HEHE' -D MAKE_ENV_DEV=1 -D MAKE_ENV='dev' -l -t "
-        "'main.tmpl' -o 'foo.html' -i");
+        "-D BAR='BAZ' -D LOL='HEHE' -D ASD='QWE' -D MAKE_ENV_DEV=1 "
+        "-D MAKE_ENV='dev' -l -t 'main.tmpl' -o 'foo.html' -i");
     free(rv);
 
-    rv = bm_exec_build_blogc_cmd("blogc", settings, variables, false, NULL, NULL,
-        true, false);
+    rv = bm_exec_build_blogc_cmd("blogc", settings, variables, NULL, false, NULL,
+        NULL, true, false);
     assert_string_equal(rv,
         "LC_ALL='en_US.utf8' blogc -D TAG_CLOUD='asd foo bar' -D FOO='BAR' "
         "-D BAR='BAZ' -D LOL='HEHE' -D MAKE_ENV_DEV=1 -D MAKE_ENV='dev'");
     free(rv);
 
-    rv = bm_exec_build_blogc_cmd("blogc", settings, NULL, false, NULL, NULL,
+    rv = bm_exec_build_blogc_cmd("blogc", settings, NULL, NULL, false, NULL, NULL,
         true, false);
     assert_string_equal(rv,
         "LC_ALL='en_US.utf8' blogc -D TAG_CLOUD='asd foo bar' -D FOO='BAR' "
         "-D BAR='BAZ' -D MAKE_ENV_DEV=1 -D MAKE_ENV='dev'");
     free(rv);
 
+    bc_trie_free(local);
     bc_trie_free(variables);
     bc_trie_free(settings->settings);
     bc_trie_free(settings->global);
@@ -200,25 +210,28 @@ test_build_blogc_cmd_without_settings(void **state)
 {
     bc_trie_t *variables = bc_trie_new(free);
     bc_trie_insert(variables, "LOL", bc_strdup("HEHE"));
+    bc_trie_t *local = bc_trie_new(free);
+    bc_trie_insert(local, "ASD", bc_strdup("QWE"));
 
-    char *rv = bm_exec_build_blogc_cmd("blogc", NULL, variables, true,
+    char *rv = bm_exec_build_blogc_cmd("blogc", NULL, variables, local, true,
         "main.tmpl", "foo.html", false, true);
     assert_string_equal(rv,
-        "blogc -D LOL='HEHE' -l -t 'main.tmpl' -o 'foo.html' -i");
+        "blogc -D LOL='HEHE' -D ASD='QWE' -l -t 'main.tmpl' -o 'foo.html' -i");
     free(rv);
 
-    rv = bm_exec_build_blogc_cmd("blogc", NULL, variables, false, NULL, NULL,
-        false, false);
+    rv = bm_exec_build_blogc_cmd("blogc", NULL, variables, NULL, false, NULL,
+        NULL, false, false);
     assert_string_equal(rv,
         "blogc -D LOL='HEHE'");
     free(rv);
 
-    rv = bm_exec_build_blogc_cmd("blogc", NULL, NULL, false, NULL, NULL,
+    rv = bm_exec_build_blogc_cmd("blogc", NULL, NULL, NULL, false, NULL, NULL,
         false, false);
     assert_string_equal(rv,
         "blogc");
     free(rv);
 
+    bc_trie_free(local);
     bc_trie_free(variables);
 }
 
