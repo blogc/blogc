@@ -49,7 +49,7 @@ bm_filectx_new(bm_ctx_t *ctx, const char *filename, struct stat *st)
         st = &buf;
     }
 
-    // if st isn't NULL the file exists for sure
+    // if it isn't NULL the file exists for sure
     rv->tv_sec = st->st_mtim_tv_sec;
     rv->tv_nsec = st->st_mtim_tv_nsec;
     rv->readable = true;
