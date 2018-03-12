@@ -277,6 +277,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
     struct addrinfo *rp;
     int server_socket = 0;
 
+    int ai_family = 0;
     char *final_host = NULL;
     u_int16_t final_port = 0;
 
@@ -307,6 +308,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
             continue;
         }
         if (0 == bind(server_socket, rp->ai_addr, rp->ai_addrlen)) {
+            ai_family = rp->ai_family;
             break;
         }
         else {
@@ -329,7 +331,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
     }
 
     fprintf(stderr, " * Running on http://");
-    if (rp->ai_family == AF_INET6)
+    if (ai_family == AF_INET6)
         fprintf(stderr, "[%s]", final_host);
     else
         fprintf(stderr, "%s", final_host);
@@ -349,7 +351,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
         socklen_t addrlen;
         struct sockaddr *client_addr = NULL;
 
-        if (rp->ai_family == AF_INET6) {
+        if (ai_family == AF_INET6) {
             addrlen = sizeof(addr6);
             client_addr = (struct sockaddr*) &addr6;
         }
@@ -368,7 +370,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
         request_data_t *arg = malloc(sizeof(request_data_t));
         arg->thread_id = current_thread;
         arg->socket = client_socket;
-        arg->ip = br_httpd_get_ip(rp->ai_family, client_addr);
+        arg->ip = br_httpd_get_ip(ai_family, client_addr);
         arg->docroot = docroot;
 
         if (threads[current_thread].initialized) {
