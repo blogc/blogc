@@ -1,7 +1,7 @@
 build() {
     pushd build > /dev/null
     ../configure \
-        CFLAGS="-Wall -g -O0" \
+        CFLAGS="-Wall -g -O0 -std=c99" \
         --enable-silent-rules \
         --enable-ronn \
         --enable-tests \
