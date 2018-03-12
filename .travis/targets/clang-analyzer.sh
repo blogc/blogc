@@ -1,8 +1,6 @@
 build() {
     pushd build > /dev/null
-    # the CC argument below is a hack :(
     ../configure \
-        CC=gcc \
         CFLAGS="-Wall -g -O0" \
         --enable-silent-rules \
         --enable-ronn \
