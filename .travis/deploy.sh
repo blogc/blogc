@@ -25,12 +25,12 @@ else
     exit 1
 fi
 
-if [[ "x$(type -t deploy)" != "xfunction" ]] || [[ "x$(type -t deploy_condition)" != "xfunction" ]]; then
+if [[ "x$(type -t deploy)" != "xfunction" ]] || [[ "x$(type -t deploy_cond)" != "xfunction" ]]; then
     echo "Nothing to deploy. skipping ..."
     exit 1
 fi
 
-if ! deploy_condition; then
+if ! deploy_cond; then
     echo "Deploy disabled. skipping ..."
     exit 1
 fi
