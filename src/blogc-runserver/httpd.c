@@ -374,6 +374,8 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
         if (threads[current_thread].initialized) {
             if (pthread_join(threads[current_thread].thread, NULL) != 0) {
                 fprintf(stderr, "Failed to join thread\n");
+                free(arg->ip);
+                free(arg);
                 rv = 3;
                 goto cleanup;
             }
