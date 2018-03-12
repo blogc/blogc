@@ -270,20 +270,20 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
 
 
 bool
-bm_ctx_reload(bm_ctx_t *ctx)
+bm_ctx_reload(bm_ctx_t **ctx)
 {
-    if (ctx == NULL || ctx->settings_fctx == NULL)
+    if (*ctx == NULL || (*ctx)->settings_fctx == NULL)
         return false;
 
-    if (bm_filectx_changed(ctx->settings_fctx, NULL, NULL)) {
+    if (bm_filectx_changed((*ctx)->settings_fctx, NULL, NULL)) {
         // reload everything! we could just reload settings_fctx, as this
         // would force rebuilding everything, but we need to know new/deleted
         // files
 
         // needs to dup path, because it may be freed when reloading.
-        char *tmp = bc_strdup(ctx->settings_fctx->path);
+        char *tmp = bc_strdup((*ctx)->settings_fctx->path);
         bc_error_t *err = NULL;
-        ctx = bm_ctx_new(ctx, tmp, NULL, &err);
+        *ctx = bm_ctx_new(*ctx, tmp, NULL, &err);
         free(tmp);
         if (err != NULL) {
             bc_error_print(err, "blogc-make");
@@ -293,16 +293,16 @@ bm_ctx_reload(bm_ctx_t *ctx)
         return true;
     }
 
-    bm_filectx_reload(ctx->main_template_fctx);
-    bm_filectx_reload(ctx->atom_template_fctx);
+    bm_filectx_reload((*ctx)->main_template_fctx);
+    bm_filectx_reload((*ctx)->atom_template_fctx);
 
-    for (bc_slist_t *tmp = ctx->posts_fctx; tmp != NULL; tmp = tmp->next)
+    for (bc_slist_t *tmp = (*ctx)->posts_fctx; tmp != NULL; tmp = tmp->next)
         bm_filectx_reload((bm_filectx_t*) tmp->data);
 
-    for (bc_slist_t *tmp = ctx->pages_fctx; tmp != NULL; tmp = tmp->next)
+    for (bc_slist_t *tmp = (*ctx)->pages_fctx; tmp != NULL; tmp = tmp->next)
         bm_filectx_reload((bm_filectx_t*) tmp->data);
 
-    for (bc_slist_t *tmp = ctx->copy_fctx; tmp != NULL; tmp = tmp->next)
+    for (bc_slist_t *tmp = (*ctx)->copy_fctx; tmp != NULL; tmp = tmp->next)
         bm_filectx_reload((bm_filectx_t*) tmp->data);
 
     return true;
