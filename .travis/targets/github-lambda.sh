@@ -31,6 +31,10 @@ build() {
     xz -z "build/blogc-static-amd64-${PV}"
 }
 
+deploy_cond() {
+    [[ "x${CC}" = "xgcc" ]]
+}
+
 deploy() {
     FILES=( build/*.zip build/blogc-static-*.xz )
 }

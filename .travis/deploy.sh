@@ -12,11 +12,6 @@ if [[ "x${TRAVIS_BRANCH}" != "xmaster" ]] && [[ "x${TRAVIS_TAG}" != xv* ]]; then
     exit 0
 fi
 
-if [[ "x${CC}" != "xgcc" ]] || [[ "x${TARGET}" = "xvalgrind" ]] || [[ "x${TARGET}" = "xmake-embedded" ]]; then
-    echo "Invalid target for deploy. skipping ..."
-    exit 0
-fi
-
 if [[ ! -d build ]]; then
     echo "Build directory not found."
     exit 1
@@ -27,6 +22,16 @@ if [[ -n "${TARGET}" ]] && [[ -e ".travis/targets/${TARGET}.sh" ]]; then
     source ".travis/targets/${TARGET}.sh"
 else
     echo "Target not defined or invalid!"
+    exit 1
+fi
+
+if [[ "x$(type -t deploy)" != "xfunction" ]] || [[ "x$(type -t deploy_condition)" != "xfunction" ]]; then
+    echo "Nothing to deploy. skipping ..."
+    exit 1
+fi
+
+if ! deploy_condition; then
+    echo "Deploy disabled. skipping ..."
     exit 1
 fi
 
@@ -67,3 +72,9 @@ for f in "${FILES[@]}"; do
 
     echo
 done
+
+# this is a hack to allow failed tests to upload files.
+# the target must write status code to build/.test_result, instead of exiting directly
+if [[ -f build/.test_result ]]; then
+    exit $(cat build/.test_result)
+fi

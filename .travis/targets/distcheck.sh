@@ -13,6 +13,10 @@ build() {
     make -C build distcheck
 }
 
+deploy_cond() {
+    [[ "x${CC}" = "xgcc" ]]
+}
+
 deploy() {
     FILES=( build/*.{*.tar.{gz,bz2,xz},zip} )
 }

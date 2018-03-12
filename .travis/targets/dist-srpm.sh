@@ -14,6 +14,10 @@ build() {
     make -C build dist-srpm
 }
 
+deploy_cond() {
+    [[ "x${CC}" = "xgcc" ]]
+}
+
 deploy() {
     FILES=( build/*.src.rpm )
 }

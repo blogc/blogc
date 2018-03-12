@@ -30,6 +30,10 @@ build() {
     zip "build/${DEST_DIR}.zip" "${DEST_DIR}"/*
 }
 
+deploy_cond() {
+    [[ "x${CC}" = "xgcc" ]]
+}
+
 deploy() {
     FILES=( build/*.zip )
 }
