@@ -27,6 +27,8 @@ matrix:
     - compiler: clang
       env: TARGET=distcheck
     - compiler: clang
+      env: TARGET=clang-analyzer
+    - compiler: clang
       env: TARGET=distcheck
       os: osx
 
