@@ -339,7 +339,6 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
         "\n"
         "WARNING!!! This is a development server, DO NOT RUN IT IN PRODUCTION!\n"
         "\n", max_threads);
-    free(final_host);
 
     size_t current_thread = 0;
 
