@@ -10,6 +10,7 @@
 #define _MAKE_RELOADER_H
 
 #include <stdbool.h>
+#include "../common/utils.h"
 #include "ctx.h"
 #include "rules.h"
 
