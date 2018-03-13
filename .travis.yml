@@ -40,5 +40,4 @@ before_script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install xz; fi
 
 script:
-  - ./.travis/build.sh
-  - ./.travis/deploy.sh
+  - ./.travis/test-run.sh

@@ -1,40 +1,32 @@
 build() {
-    pushd build > /dev/null
-    ../configure \
-        CFLAGS="-Wall -g -O0" \
-        --enable-ronn \
-        --disable-silent-rules \
+    default_configure \
+        CFLAGS="-Wall -g -O2" \
         --disable-tests \
-        --disable-valgrind \
         --disable-git-receiver \
-        --enable-make-embedded \
-        --disable-runserver
-    popd > /dev/null
+        --disable-runserver \
+        --enable-make-embedded
 
-    make -C build LDFLAGS="-all-static" blogc
+    make LDFLAGS="-all-static" blogc
 
-    rm -rf build/root
-    mkdir -p build/root
+    rm -rf root
+    mkdir -p root
 
-    PV="$(grep PACKAGE_VERSION build/config.h | cut -d\" -f2)"
+    PV="$(grep PACKAGE_VERSION config.h | cut -d\" -f2)"
 
-    install -m 755 build/blogc build/root/blogc
-    install -m 644 build/src/blogc-github-lambda/lambda_function.py build/root/lambda_function.py
-    install -m 644 LICENSE build/root/LICENSE
-    strip build/root/blogc
+    install -m 755 blogc root/blogc
+    install -m 644 src/blogc-github-lambda/lambda_function.py root/lambda_function.py
+    install -m 644 ../LICENSE root/LICENSE
+    strip root/blogc
 
-    pushd build/root/ > /dev/null
+    pushd root > /dev/null
     zip "../blogc-github-lambda-${PV}.zip" *
     popd > /dev/null
 
-    install -m 755 build/root/blogc "build/blogc-static-amd64-${PV}"
-    xz -z "build/blogc-static-amd64-${PV}"
-}
-
-deploy_cond() {
-    [[ "x${CC}" = "xgcc" ]]
+    install -m 755 root/blogc "blogc-static-amd64-${PV}"
+    xz -z "blogc-static-amd64-${PV}"
 }
 
 deploy() {
-    FILES=( build/*.zip build/blogc-static-*.xz )
+    FILES=( *.zip blogc-static-*.xz )
+    [[ ${RV} -eq 0 ]] && [[ "x${CC}" = "xgcc" ]]
 }

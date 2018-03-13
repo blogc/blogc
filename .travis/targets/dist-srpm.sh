@@ -1,23 +1,9 @@
 build() {
-    pushd build > /dev/null
-    ../configure \
-        CFLAGS="-Wall -g -O0" \
-        --disable-silent-rules \
-        --enable-ronn \
-        --enable-tests \
-        --enable-valgrind \
-        --enable-git-receiver \
-        --enable-make \
-        --enable-runserver
-    popd > /dev/null
-
-    make -C build dist-srpm
-}
-
-deploy_cond() {
-    [[ "x${CC}" = "xgcc" ]]
+    default_configure
+    make dist-srpm
 }
 
 deploy() {
-    FILES=( build/*.src.rpm )
+    FILES=( *.src.rpm )
+    [[ ${RV} -eq 0 ]] && [[ "x${CC}" = "xgcc" ]]
 }

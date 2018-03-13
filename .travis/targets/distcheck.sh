@@ -1,22 +1,9 @@
 build() {
-    pushd build > /dev/null
-    ../configure \
-        CFLAGS="-Wall -g -O0" \
-        --disable-silent-rules \
-        --enable-ronn \
-        --enable-tests \
-        --enable-git-receiver \
-        --enable-make \
-        --enable-runserver
-    popd > /dev/null
-
-    make -C build distcheck
-}
-
-deploy_cond() {
-    [[ "x${CC}" = "xgcc" ]]
+    default_configure
+    make distcheck
 }
 
 deploy() {
-    FILES=( build/*.{*.tar.{gz,bz2,xz},zip} )
+    FILES=( *.{*.tar.{gz,bz2,xz},zip} )
+    [[ ${RV} -eq 0 ]] && [[ "x${CC}" = "xgcc" ]]
 }
