@@ -36,3 +36,7 @@ deploy() {
     FILES=( *.tar.xz )
     [[ ${RV} -ne 0 ]] && [[ "x${CC}" = "xclang" ]]
 }
+
+extract() {
+    grep .
+}

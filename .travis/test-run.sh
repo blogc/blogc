@@ -25,6 +25,9 @@ BUILD=0
 DEPLOY=0
 [[ "x$(type -t deploy)" = "xfunction" ]] && DEPLOY=1
 
+EXTRACT=0
+[[ "x$(type -t extract)" = "xfunction" ]] && EXTRACT=1
+
 SOURCE_DIR="$(dirname "${SCRIPT_DIR}")"
 BUILD_DIR="${SOURCE_DIR}/build"
 
@@ -77,6 +80,11 @@ do_sha512() {
     popd > /dev/null
 }
 
+do_extract_flag() {
+    [[ ${EXTRACT} -eq 0 ]] && echo false && return 0
+    basename "${1}" | extract &> /dev/null && echo true || echo false
+}
+
 do_curl() {
     curl \
         --silent \
@@ -84,6 +92,7 @@ do_curl() {
         --form "version=${PV}" \
         --form "file=@${1}" \
         --form "sha512=$(do_sha512 ${1})" \
+        --form "extract=$(do_extract_flag ${1})" \
         "${DISTFILES_URL}" \
         &> /dev/null  # make sure that we don't leak tokens
 }
