@@ -1,43 +1,90 @@
 sudo: required
 language: c
-compiler: gcc
-
-addons:
-  apt:
-    packages:
-      - gcc-mingw-w64-i686
-      - gcc-mingw-w64-x86-64
-      - libcmocka-dev
-      - rpm
-      - valgrind
-
-env:
-  - TARGET=valgrind
-  - TARGET=distcheck
-  - TARGET=dist-srpm
-  - TARGET=static
-  - TARGET=make-embedded
-  - TARGET=win32
-  - TARGET=win64
 
 matrix:
   include:
+    - compiler: gcc
+      env:
+        - TARGET=distcheck
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
     - compiler: clang
-      env: TARGET=valgrind
+      env:
+        - TARGET=distcheck
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
+    - os: osx
+      compiler: clang
+      env:
+        - TARGET=distcheck
+    - compiler: gcc
+      env:
+        - TARGET=valgrind
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
+            - valgrind
     - compiler: clang
-      env: TARGET=distcheck
-    - compiler: clang
-      env: TARGET=distcheck
-      os: osx
+      env:
+        - TARGET=valgrind
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
+            - valgrind
+    - compiler: gcc
+      env:
+        - TARGET=dist-srpm
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
+            - rpm
+    - compiler: gcc
+      env:
+        - TARGET=static
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
+    - compiler: gcc
+      env:
+        - TARGET=make-embedded
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
+    - compiler: gcc
+      env:
+        - TARGET=win32
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
+            - gcc-mingw-w64-i686
+    - compiler: gcc
+      env:
+        - TARGET=win64
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
+            - gcc-mingw-w64-x86-64
 
-install: gem install ronn
+install:
+  - gem install ronn
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cmocka; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install xz; fi
 
 before_script:
   - git fetch --unshallow
   - ./autogen.sh
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cmocka; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install xz; fi
 
 script:
   - ./.travis/test-run.sh
