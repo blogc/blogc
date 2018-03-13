@@ -50,10 +50,7 @@ RV=0
 
 if [[ ${BUILD} -eq 1 ]]; then
     pushd "${BUILD_DIR}" > /dev/null
-    set +e
-    build
-    RV=$?
-    set -e
+    build || RV=1
     popd > /dev/null
 fi
 
