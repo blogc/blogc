@@ -41,6 +41,14 @@ matrix:
             - realpath
             - libcmocka-dev
             - valgrind
+    - compiler: clang
+      env:
+        - TARGET=clang-analyzer
+      addons:
+        apt:
+          packages:
+            - realpath
+            - libcmocka-dev
     - compiler: gcc
       env:
         - TARGET=dist-srpm
