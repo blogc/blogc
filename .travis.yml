@@ -88,7 +88,6 @@ matrix:
 install:
   - gem install ronn
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install coreutils; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cmocka; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install xz; fi
 
