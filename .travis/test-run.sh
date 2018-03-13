@@ -2,7 +2,12 @@
 
 set -e
 
-SCRIPT_DIR="$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")"
+REALPATH=grealpath
+if ! command -v grealpath >/dev/null 2>&1; then
+    REALPATH=realpath
+fi
+
+SCRIPT_DIR="$(dirname "$("${REALPATH}" "${BASH_SOURCE[0]}")")"
 TARGET_SCRIPT="${SCRIPT_DIR}/targets/${TARGET}.sh"
 
 if [[ -n "${TARGET}" ]] && [[ -e "${TARGET_SCRIPT}" ]]; then

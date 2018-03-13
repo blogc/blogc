@@ -9,6 +9,7 @@ matrix:
       addons:
         apt:
           packages:
+            - realpath
             - libcmocka-dev
     - compiler: clang
       env:
@@ -16,6 +17,7 @@ matrix:
       addons:
         apt:
           packages:
+            - realpath
             - libcmocka-dev
     - os: osx
       compiler: clang
@@ -27,6 +29,7 @@ matrix:
       addons:
         apt:
           packages:
+            - realpath
             - libcmocka-dev
             - valgrind
     - compiler: clang
@@ -35,6 +38,7 @@ matrix:
       addons:
         apt:
           packages:
+            - realpath
             - libcmocka-dev
             - valgrind
     - compiler: gcc
@@ -43,6 +47,7 @@ matrix:
       addons:
         apt:
           packages:
+            - realpath
             - libcmocka-dev
             - rpm
     - compiler: gcc
@@ -51,6 +56,7 @@ matrix:
       addons:
         apt:
           packages:
+            - realpath
             - libcmocka-dev
     - compiler: gcc
       env:
@@ -58,6 +64,7 @@ matrix:
       addons:
         apt:
           packages:
+            - realpath
             - libcmocka-dev
     - compiler: gcc
       env:
@@ -65,6 +72,7 @@ matrix:
       addons:
         apt:
           packages:
+            - realpath
             - libcmocka-dev
             - gcc-mingw-w64-i686
     - compiler: gcc
@@ -73,12 +81,14 @@ matrix:
       addons:
         apt:
           packages:
+            - realpath
             - libcmocka-dev
             - gcc-mingw-w64-x86-64
 
 install:
   - gem install ronn
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install coreutils; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cmocka; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install xz; fi
 
