@@ -25,7 +25,7 @@ bm_reloader_thread(void *arg)
 {
     bm_reloader_t *reloader = arg;
     while (reloader->running) {
-        if (!bm_ctx_reload(&(reloader->ctx))) {
+        if (!bm_ctx_reload(reloader->ctx)) {
             fprintf(stderr, "blogc-make: warning: failed to reload context. "
                 "retrying in 5 seconds ...\n\n");
             sleep(5);

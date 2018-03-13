@@ -73,7 +73,7 @@ void bm_filectx_reload(bm_filectx_t *ctx);
 void bm_filectx_free(bm_filectx_t *fctx);
 bm_ctx_t* bm_ctx_new(bm_ctx_t *base, const char *settings_file,
     const char *argv0, bc_error_t **err);
-bool bm_ctx_reload(bm_ctx_t **ctx);
+bool bm_ctx_reload(bm_ctx_t *ctx);
 void bm_ctx_free_internal(bm_ctx_t *ctx);
 void bm_ctx_free(bm_ctx_t *ctx);
 
