@@ -107,3 +107,5 @@ for f in "${FILES[@]}"; do
 
     echo
 done
+
+exit ${RV}
