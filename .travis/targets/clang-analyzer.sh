@@ -1,6 +1,7 @@
 build() {
     default_configure \
-        --enable-silent-rules
+        --enable-silent-rules \
+        --disable-tests
 
     local pn="$(grep PACKAGE_TARNAME config.h | cut -d\" -f2)"
     local pv="$(grep PACKAGE_VERSION config.h | cut -d\" -f2)"
