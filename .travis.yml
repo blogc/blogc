@@ -15,7 +15,7 @@ env:
   - TARGET=valgrind
   - TARGET=distcheck
   - TARGET=dist-srpm
-  - TARGET=github-lambda
+  - TARGET=static
   - TARGET=make-embedded
   - TARGET=win32
   - TARGET=win64
