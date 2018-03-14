@@ -12,7 +12,6 @@ build() {
         --use-cc="${CC}" \
         -o reports \
         make
-    #src/blogc/libblogc_la-debug.lo
     local rv=$?
     set -e
 
