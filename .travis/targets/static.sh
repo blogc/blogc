@@ -11,7 +11,7 @@ build() {
     rm -rf root
     mkdir -p root
 
-    PV="$(grep PACKAGE_VERSION config.h | cut -d\" -f2)"
+    local pv="$(grep PACKAGE_VERSION config.h | cut -d\" -f2)"
 
     install -m 755 blogc root/blogc
     install -m 644 src/blogc-github-lambda/lambda_function.py root/lambda_function.py
@@ -19,11 +19,11 @@ build() {
     strip root/blogc
 
     pushd root > /dev/null
-    zip "../blogc-github-lambda-${PV}.zip" *
+    zip "../blogc-github-lambda-${pv}.zip" *
     popd > /dev/null
 
-    install -m 755 root/blogc "blogc-static-amd64-${PV}"
-    xz -z "blogc-static-amd64-${PV}"
+    install -m 755 root/blogc "blogc-static-amd64-${pv}"
+    xz -z "blogc-static-amd64-${pv}"
 }
 
 deploy() {

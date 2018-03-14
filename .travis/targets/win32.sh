@@ -10,18 +10,18 @@ build() {
         --disable-runserver
     make blogc.exe
 
-    PN="$(grep PACKAGE_TARNAME config.h | cut -d\" -f2)"
-    PV="$(grep PACKAGE_VERSION config.h | cut -d\" -f2)"
-    DEST_DIR="${PN}-${PV}-${TARGET}"
+    local pn="$(grep PACKAGE_TARNAME config.h | cut -d\" -f2)"
+    local pv="$(grep PACKAGE_VERSION config.h | cut -d\" -f2)"
+    local dest_dir="${pn}-${pv}-${TARGET}"
 
-    rm -rf "${DEST_DIR}"
-    mkdir -p "${DEST_DIR}"
+    rm -rf "${dest_dir}"
+    mkdir -p "${dest_dir}"
 
-    cp .libs/blogc.exe "${DEST_DIR}/"
-    cp ../LICENSE "${DEST_DIR}/"
-    cp ../README.md "${DEST_DIR}/"
+    cp .libs/blogc.exe "${dest_dir}/"
+    cp ../LICENSE "${dest_dir}/"
+    cp ../README.md "${dest_dir}/"
 
-    zip "${DEST_DIR}.zip" "${DEST_DIR}"/*
+    zip "${dest_dir}.zip" "${dest_dir}"/*
 }
 
 deploy() {
