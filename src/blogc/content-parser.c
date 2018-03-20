@@ -688,7 +688,7 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **first_header,
     size_t eend = 0;
     size_t real_end = 0;
 
-    unsigned int header_level = 0;
+    size_t header_level = 0;
     char *prefix = NULL;
     size_t prefix_len = 0;
     char *tmp = NULL;

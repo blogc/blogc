@@ -69,7 +69,7 @@ blogc_convert_datetime(const char *orig, const char *format,
     int tmp = 0;
     int diff = '0';
 
-    for (unsigned int i = 0; orig[i] != '\0'; i++) {
+    for (size_t i = 0; orig[i] != '\0'; i++) {
         char c = orig[i];
 
         switch (state) {

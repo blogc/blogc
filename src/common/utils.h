@@ -47,7 +47,7 @@ bool bc_str_ends_with(const char *str, const char *suffix);
 char* bc_str_lstrip(char *str);
 char* bc_str_rstrip(char *str);
 char* bc_str_strip(char *str);
-char** bc_str_split(const char *str, char c, unsigned int max_pieces);
+char** bc_str_split(const char *str, char c, size_t max_pieces);
 char* bc_str_replace(const char *str, const char search, const char *replace);
 char* bc_str_find(const char *str, char c);
 void bc_strv_free(char **strv);

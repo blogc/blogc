@@ -149,7 +149,7 @@ blogc_split_list_variable(const char *name, bc_trie_t *global, bc_trie_t *local)
     bc_slist_t *rv = NULL;
 
     char **tmp = bc_str_split(value, ' ', 0);
-    for (unsigned int i = 0; tmp[i] != NULL; i++) {
+    for (size_t i = 0; tmp[i] != NULL; i++) {
         if (tmp[i][0] != '\0')  // ignore empty strings
             rv = bc_slist_append(rv, tmp[i]);
         else
@@ -176,7 +176,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
     char *config_value = NULL;
     char *defined = NULL;
 
-    unsigned int if_count = 0;
+    size_t if_count = 0;
 
     bc_slist_t *foreach_var = NULL;
     bc_slist_t *foreach_var_start = NULL;

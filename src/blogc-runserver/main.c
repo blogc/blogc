@@ -70,9 +70,9 @@ main(int argc, char **argv)
     char *tmp_port = getenv("BLOGC_RUNSERVER_DEFAULT_PORT");
     char *default_port = bc_strdup(tmp_port != NULL ? tmp_port : "8080");
 
-    unsigned int args = 0;
+    size_t args = 0;
 
-    for (unsigned int i = 1; i < argc; i++) {
+    for (size_t i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
             switch (argv[i][1]) {
                 case 'h':

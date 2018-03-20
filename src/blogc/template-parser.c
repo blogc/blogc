@@ -57,8 +57,8 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
 
     blogc_template_operator_t tmp_op = 0;
 
-    unsigned int if_count = 0;
-    unsigned int block_if_count = 0;
+    size_t if_count = 0;
+    size_t block_if_count = 0;
     bool else_open = false;
     bool foreach_open = false;
     bool block_foreach_open = false;

@@ -21,13 +21,13 @@
 #include "pre-receive.h"
 
 
-static unsigned int
+static size_t
 cpu_count(void)
 {
 #ifdef _SC_NPROCESSORS_ONLN
     long num = sysconf(_SC_NPROCESSORS_ONLN);
     if (num >= 1)
-        return (unsigned int) num;
+        return (size_t) num;
 #endif
     return 1;
 }

@@ -116,7 +116,7 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
 
     bc_error_t *tmp_err = NULL;
     bc_slist_t *rv = NULL;
-    unsigned int with_date = 0;
+    size_t with_date = 0;
 
     const char *filter_tag = bc_trie_lookup(conf, "FILTER_TAG");
     const char *filter_page = bc_trie_lookup(conf, "FILTER_PAGE");
@@ -142,9 +142,9 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
         per_page = 0;
 
     // poor man's pagination
-    unsigned int start = (page - 1) * per_page;
-    unsigned int end = start + per_page;
-    unsigned int counter = 0;
+    size_t start = (page - 1) * per_page;
+    size_t end = start + per_page;
+    size_t counter = 0;
 
     for (bc_slist_t *tmp = sources; tmp != NULL; tmp = tmp->next) {
         char *f = tmp->data;
@@ -168,7 +168,7 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
             }
             char **tags = bc_str_split(tags_str, ' ', 0);
             bool found = false;
-            for (unsigned int i = 0; tags[i] != NULL; i++) {
+            for (size_t i = 0; tags[i] != NULL; i++) {
                 if (tags[i][0] == '\0')
                     continue;
                 if (0 == strcmp(tags[i], filter_tag))
@@ -226,7 +226,7 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
     }
 
     if (filter_page != NULL) {
-        unsigned int last_page = ceilf(((float) counter) / per_page);
+        size_t last_page = ceilf(((float) counter) / per_page);
         bc_trie_insert(conf, "CURRENT_PAGE", bc_strdup_printf("%ld", page));
         if (page > 1)
             bc_trie_insert(conf, "PREVIOUS_PAGE", bc_strdup_printf("%ld", page - 1));

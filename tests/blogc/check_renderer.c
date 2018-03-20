@@ -21,7 +21,7 @@
 
 
 static bc_slist_t*
-create_sources(unsigned int count)
+create_sources(size_t count)
 {
     const char *s[] = {
         "BOLA: asd\n"
@@ -46,7 +46,7 @@ create_sources(unsigned int count)
     assert_false(count > 3);
     bc_error_t *err = NULL;
     bc_slist_t *l = NULL;
-    for (unsigned int i = 0; i < count; i++) {
+    for (size_t i = 0; i < count; i++) {
         l = bc_slist_append(l, blogc_source_parse(s[i], strlen(s[i]), &err));
         assert_null(err);
     }

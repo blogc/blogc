@@ -90,7 +90,7 @@ const char*
 br_get_extension(const char *filename)
 {
     const char *ext = NULL;
-    unsigned int i;
+    size_t i;
     for (i = strlen(filename); i > 0; i--) {
         if (filename[i] == '.') {
             ext = filename + i + 1;

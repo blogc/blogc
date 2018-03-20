@@ -165,7 +165,7 @@ main(int argc, char **argv)
     bc_trie_t *config = bc_trie_new(free);
     bc_trie_insert(config, "BLOGC_VERSION", bc_strdup(PACKAGE_VERSION));
 
-    for (unsigned int i = 1; i < argc; i++) {
+    for (size_t i = 1; i < argc; i++) {
         tmp = NULL;
         if (argv[i][0] == '-') {
             switch (argv[i][1]) {
@@ -221,7 +221,7 @@ main(int argc, char **argv)
                             rv = 3;
                             goto cleanup;
                         }
-                        for (unsigned int j = 0; pieces[0][j] != '\0'; j++) {
+                        for (size_t j = 0; pieces[0][j] != '\0'; j++) {
                             if (!((pieces[0][j] >= 'A' && pieces[0][j] <= 'Z') ||
                                 pieces[0][j] == '_'))
                             {

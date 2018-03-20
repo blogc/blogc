@@ -68,7 +68,7 @@ main(int argc, char **argv)
     char *blogcfile = NULL;
     bm_ctx_t *ctx = NULL;
 
-    for (unsigned int i = 1; i < argc; i++) {
+    for (size_t i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
             switch (argv[i][1]) {
                 case 'h':
