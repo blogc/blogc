@@ -138,8 +138,8 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
     if (*ptr != '\0' && *endptr != '\0')
         fprintf(stderr, "warning: invalid value for 'FILTER_PER_PAGE' variable: "
             "%s. using %ld instead\n", ptr, per_page);
-    if (per_page <= 0)
-        per_page = 10;
+    if (per_page < 0)
+        per_page = 0;
 
     // poor man's pagination
     unsigned int start = (page - 1) * per_page;

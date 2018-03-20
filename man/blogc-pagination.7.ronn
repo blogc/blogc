@@ -12,13 +12,15 @@ blogc(1) in the command line, no sorting is done.
 blogc(1) accepts some variables as `-D` options, that are used to filter the
 files passed as arguments to it:
 
-  * `FILTER_PER_PAGE`:
-    Integer, limits the maximum number of files to be listed.
-
   * `FILTER_PAGE`:
     Integer, current page. If calling blogc(1) with 10 files,
-    `FILTER_PER_PAGE`=4 and `FILTER_PAGE`=3, it will return just the 2 last
+    `FILTER_PER_PAGE=4` and `FILTER_PAGE=3`, it will return just the 2 last
     files, skipping the first 2 pages with 4 files each one.
+
+  * `FILTER_PER_PAGE`:
+    Integer, limits the maximum number of files to be listed. If negative or
+    `0`, no posts are included. Have no effect if `FILTER_PAGE` is not
+    defined.
 
   * `FILTER_TAG`:
     String, if defined, blogc(1) will only list files that declare a `TAGS`
