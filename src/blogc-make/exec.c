@@ -307,6 +307,10 @@ bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *global_variables, bc_trie_t *local_varia
 
     int rv = bm_exec_command(cmd, input->str, &out, &err, &error);
 
+    if (err != NULL) {
+        fprintf(stderr, "%s", err);
+    }
+
     if (error != NULL) {
         bc_error_print(error, "blogc-make");
         free(cmd);
@@ -336,13 +340,6 @@ bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *global_variables, bc_trie_t *local_varia
                     "%s\n"
                     "----------------------------->8-----------------------------\n",
                     bc_str_strip(out));
-            }
-            if (err != NULL) {
-                fprintf(stderr, "\nSTDERR:\n"
-                    "----------------------------->8-----------------------------\n"
-                    "%s\n"
-                    "----------------------------->8-----------------------------\n",
-                    bc_str_strip(err));
             }
         }
         else {
