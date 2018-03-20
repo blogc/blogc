@@ -228,6 +228,9 @@ pagination_outputlist(bm_ctx_t *ctx)
     long posts_per_page = strtol(
         bc_trie_lookup(ctx->settings->settings, "posts_per_page"),
         NULL, 10);  // FIXME: improve
+    if (posts_per_page <= 0)
+        return NULL;
+
     size_t pages = ceilf(((float) num_posts) / posts_per_page);
 
     const char *pagination_prefix = bc_trie_lookup(ctx->settings->settings,
