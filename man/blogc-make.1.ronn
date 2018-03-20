@@ -89,8 +89,8 @@ The rule passes the following helper variables to blogc(1):
 
 ### pagination
 
-Build pagination pages from posts. This rule will be disabled if
-`posts_per_page` is negative or `0` in blogcfile(5).
+Build pagination pages from posts. This rule is disabled if `posts_per_page`
+value in blogcfile(5) is negative or `0`.
 
 The rule passes the following helper variables to blogc(1):
 

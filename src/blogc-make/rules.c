@@ -35,6 +35,23 @@ posts_ordering(bm_ctx_t *ctx, bc_trie_t *variables, const char *variable)
 }
 
 
+static void
+posts_pagination(bm_ctx_t *ctx, bc_trie_t *variables, const char *variable)
+{
+    if (ctx == NULL || ctx->settings == NULL || ctx->settings->settings == NULL)
+        return;  // something is wrong, let's not add any variable
+
+    long posts_per_page = strtol(
+        bc_trie_lookup(ctx->settings->settings, "posts_per_page"),
+        NULL, 10);  // FIXME: improve
+    if (posts_per_page >= 0) {
+        bc_trie_insert(variables, "FILTER_PAGE", bc_strdup("1"));
+        bc_trie_insert(variables, "FILTER_PER_PAGE",
+            bc_strdup(bc_trie_lookup(ctx->settings->settings, "posts_per_page")));
+    }
+}
+
+
 // INDEX RULE
 
 static bc_slist_t*
@@ -66,9 +83,7 @@ index_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
     int rv = 0;
 
     bc_trie_t *variables = bc_trie_new(free);
-    bc_trie_insert(variables, "FILTER_PER_PAGE",
-        bc_strdup(bc_trie_lookup(ctx->settings->settings, "posts_per_page")));
-    bc_trie_insert(variables, "FILTER_PAGE", bc_strdup("1"));
+    posts_pagination(ctx, variables, "posts_per_page");
     posts_ordering(ctx, variables, "html_order");
     bc_trie_insert(variables, "DATE_FORMAT",
         bc_strdup(bc_trie_lookup(ctx->settings->settings, "date_format")));
@@ -123,10 +138,7 @@ atom_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
     int rv = 0;
 
     bc_trie_t *variables = bc_trie_new(free);
-    bc_trie_insert(variables, "FILTER_PER_PAGE",
-        bc_strdup(bc_trie_lookup(ctx->settings->settings,
-        "atom_posts_per_page")));
-    bc_trie_insert(variables, "FILTER_PAGE", bc_strdup("1"));
+    posts_pagination(ctx, variables, "atom_posts_per_page");
     posts_ordering(ctx, variables, "atom_order");
     bc_trie_insert(variables, "DATE_FORMAT", bc_strdup("%Y-%m-%dT%H:%M:%SZ"));
     bc_trie_insert(variables, "MAKE_RULE", bc_strdup("atom"));
@@ -183,10 +195,7 @@ atom_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
     size_t i = 0;
 
     bc_trie_t *variables = bc_trie_new(free);
-    bc_trie_insert(variables, "FILTER_PER_PAGE",
-        bc_strdup(bc_trie_lookup(ctx->settings->settings,
-        "atom_posts_per_page")));
-    bc_trie_insert(variables, "FILTER_PAGE", bc_strdup("1"));
+    posts_pagination(ctx, variables, "atom_posts_per_page");
     posts_ordering(ctx, variables, "atom_order");
     bc_trie_insert(variables, "DATE_FORMAT", bc_strdup("%Y-%m-%dT%H:%M:%SZ"));
     bc_trie_insert(variables, "MAKE_RULE", bc_strdup("atom_tags"));
@@ -258,6 +267,8 @@ pagination_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
     size_t page = 1;
 
     bc_trie_t *variables = bc_trie_new(free);
+    // not using posts_pagination because we set FILTER_PAGE anyway, and the
+    // first value inserted in that function would be useless
     bc_trie_insert(variables, "FILTER_PER_PAGE",
         bc_strdup(bc_trie_lookup(ctx->settings->settings, "posts_per_page")));
     posts_ordering(ctx, variables, "html_order");
@@ -385,10 +396,7 @@ tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
     size_t i = 0;
 
     bc_trie_t *variables = bc_trie_new(free);
-    bc_trie_insert(variables, "FILTER_PER_PAGE",
-        bc_strdup(bc_trie_lookup(ctx->settings->settings,
-        "atom_posts_per_page")));
-    bc_trie_insert(variables, "FILTER_PAGE", bc_strdup("1"));
+    posts_pagination(ctx, variables, "atom_posts_per_page");
     posts_ordering(ctx, variables, "html_order");
     bc_trie_insert(variables, "DATE_FORMAT",
         bc_strdup(bc_trie_lookup(ctx->settings->settings, "date_format")));
