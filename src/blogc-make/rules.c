@@ -42,12 +42,12 @@ posts_pagination(bm_ctx_t *ctx, bc_trie_t *variables, const char *variable)
         return;  // something is wrong, let's not add any variable
 
     long posts_per_page = strtol(
-        bc_trie_lookup(ctx->settings->settings, "posts_per_page"),
+        bc_trie_lookup(ctx->settings->settings, variable),
         NULL, 10);  // FIXME: improve
     if (posts_per_page >= 0) {
         bc_trie_insert(variables, "FILTER_PAGE", bc_strdup("1"));
         bc_trie_insert(variables, "FILTER_PER_PAGE",
-            bc_strdup(bc_trie_lookup(ctx->settings->settings, "posts_per_page")));
+            bc_strdup(bc_trie_lookup(ctx->settings->settings, variable)));
     }
 }
 
