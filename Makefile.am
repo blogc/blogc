@@ -285,6 +285,9 @@ endif
 
 ## Build rules: man pages
 
+# README: all the prebuilt manpages that are hidden behind --enable-*
+# options should be added here, otherwise they may be not included
+# in the distfiles.
 EXTRA_DIST += \
 	man/blogc.1.ronn \
 	man/blogc-git-receiver.1.ronn \
@@ -298,6 +301,7 @@ EXTRA_DIST += \
 	blogc-git-receiver.1 \
 	blogc-make.1 \
 	blogc-runserver.1 \
+	blogcfile.5 \
 	$(NULL)
 
 dist_man_MANS = \
