@@ -15,8 +15,8 @@
 #include <dirent.h>
 #include <time.h>
 #include <libgen.h>
-#include "../common/utils.h"
-#include "../common/stdin.h"
+#include <squareball.h>
+
 #include "pre-receive-parser.h"
 #include "pre-receive.h"
 
@@ -56,7 +56,7 @@ rmdir_recursive(const char *dir)
     while (NULL != (e = readdir(d))) {
         if ((0 == strcmp(e->d_name, ".")) || (0 == strcmp(e->d_name, "..")))
             continue;
-        char *f = bc_strdup_printf("%s/%s", dir, e->d_name);
+        char *f = sb_strdup_printf("%s/%s", dir, e->d_name);
         if (0 != stat(f, &buf)) {
             fprintf(stderr, "error: failed to stat directory entry (%s): %s\n",
                 e->d_name, strerror(errno));
@@ -102,7 +102,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
         return 3;
     }
 
-    char *repo_dir = bc_strdup(dirname(real_hooks_dir));
+    char *repo_dir = sb_strdup(dirname(real_hooks_dir));
     free(real_hooks_dir);
     if (0 != chdir(repo_dir)) {
         fprintf(stderr, "error: failed to change to repository root\n");
@@ -111,7 +111,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
     }
 
     if (NULL == getenv("GIT_DIR")) {
-        char *htdocs_sym = bc_strdup_printf("%s/htdocs", repo_dir);
+        char *htdocs_sym = sb_strdup_printf("%s/htdocs", repo_dir);
         if (0 != access(htdocs_sym, R_OK)) {
             fprintf(stderr, "error: no previous build found. nothing to "
                 "rebuild.\n");
@@ -127,20 +127,20 @@ bgr_pre_receive_hook(int argc, char *argv[])
             rv = 3;
             goto cleanup;
         }
-        char **pieces = bc_str_split(basename(build_dir), '-', 2);
+        char **pieces = sb_str_split(basename(build_dir), '-', 2);
         free(build_dir);
-        if (bc_strv_length(pieces) != 2) {
+        if (sb_strv_length(pieces) != 2) {
             fprintf(stderr, "error: failed to parse the hash of last built "
                 "commit.\n");
-            bc_strv_free(pieces);
+            sb_strv_free(pieces);
             rv = 3;
             goto cleanup;
         }
-        master = bc_strdup(pieces[0]);
-        bc_strv_free(pieces);
+        master = sb_strdup(pieces[0]);
+        sb_strv_free(pieces);
     }
     else {
-        char *input = bc_stdin_read();
+        char *input = sb_stdin_get_contents();
         master = bgr_pre_receive_parse(input);
         free(input);
     }
@@ -158,7 +158,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
     }
     tmpdir = dir;
 
-    char *git_archive_cmd = bc_strdup_printf(
+    char *git_archive_cmd = sb_strdup_printf(
         "git archive \"%s\" | tar -x -C \"%s\" -f -", master, tmpdir);
     if (0 != system(git_archive_cmd)) {
         fprintf(stderr, "error: failed to extract git content to temporary "
@@ -184,11 +184,11 @@ bgr_pre_receive_hook(int argc, char *argv[])
     }
 
     unsigned long epoch = time(NULL);
-    output_dir = bc_strdup_printf("%s/builds/%s-%lu", home, master, epoch);
+    output_dir = sb_strdup_printf("%s/builds/%s-%lu", home, master, epoch);
 
     if (0 == access(output_dir, F_OK)) {
         char *tmp = output_dir;
-        output_dir = bc_strdup_printf("%s-", tmp);
+        output_dir = sb_strdup_printf("%s-", tmp);
         free(tmp);
     }
 
@@ -202,7 +202,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
             rv = 3;
             goto cleanup;
         }
-        build_cmd = bc_strdup_printf("OUTPUT_DIR=\"%s\" blogc-make -V all",
+        build_cmd = sb_strdup_printf("OUTPUT_DIR=\"%s\" blogc-make -V all",
             output_dir);
     }
     else if ((0 == access("Makefile", F_OK)) || (0 == access("GNUMakefile", F_OK))) {
@@ -224,7 +224,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
             rv = 3;
             goto cleanup;
         }
-        build_cmd = bc_strdup_printf(
+        build_cmd = sb_strdup_printf(
             "%s -j%d OUTPUT_DIR=\"%s\" BLOGC_GIT_RECEIVER=1", make_impl,
             cpu_count(), output_dir);
     }

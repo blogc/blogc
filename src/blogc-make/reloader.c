@@ -11,7 +11,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "ctx.h"
 #include "rules.h"
 #include "reloader.h"
@@ -47,7 +48,7 @@ bm_reloader_thread(void *arg)
 
 bm_reloader_t*
 bm_reloader_new(bm_ctx_t *ctx, bm_rule_exec_func_t rule_exec,
-    bc_slist_t *outputs, bc_trie_t *args)
+    sb_slist_t *outputs, sb_trie_t *args)
 {
     // first rule_exec call is syncronous, to do a 'sanity check'
     if (0 != rule_exec(ctx, outputs, args))
@@ -70,7 +71,7 @@ bm_reloader_new(bm_ctx_t *ctx, bm_rule_exec_func_t rule_exec,
         return NULL;
     }
 
-    bm_reloader_t *rv = bc_malloc(sizeof(bm_reloader_t));
+    bm_reloader_t *rv = sb_malloc(sizeof(bm_reloader_t));
     rv->ctx = ctx;
     rv->rule_exec = rule_exec;
     rv->outputs = outputs;

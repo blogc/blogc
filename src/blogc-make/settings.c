@@ -9,10 +9,9 @@
 #include <libgen.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include "../common/config-parser.h"
-#include "../common/error.h"
-#include "../common/file.h"
-#include "../common/utils.h"
+#include <squareball.h>
+
+#include "error.h"
 #include "settings.h"
 
 
@@ -73,7 +72,7 @@ static const char* list_sections[] = {
 
 
 bm_settings_t*
-bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
+bm_settings_parse(const char *content, size_t content_len, sb_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -81,15 +80,15 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
     if (content == NULL)
         return NULL;
 
-    bc_config_t *config = bc_config_parse(content, content_len, list_sections,
+    sb_config_t *config = sb_config_parse(content, content_len, list_sections,
         err);
     if (config == NULL || (err != NULL && *err != NULL))
         return NULL;
 
-    bm_settings_t *rv = bc_malloc(sizeof(bm_settings_t));
+    bm_settings_t *rv = sb_malloc(sizeof(bm_settings_t));
     rv->root_dir = NULL;
-    rv->global = bc_trie_new(free);
-    rv->settings = bc_trie_new(free);
+    rv->global = sb_trie_new(free);
+    rv->settings = sb_trie_new(free);
     rv->posts = NULL;
     rv->pages = NULL;
     rv->copy = NULL;
@@ -99,12 +98,12 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
     // even if I never released a version with it, but some people is using
     // it already.
     const char *section = NULL;
-    char **global = bc_config_list_keys(config, "global");
+    char **global = sb_config_list_keys(config, "global");
     if (global != NULL) {
         section = "global";
     }
     else {
-        global = bc_config_list_keys(config, "environment");
+        global = sb_config_list_keys(config, "environment");
         if (global != NULL) {
             section = "environment";
         }
@@ -117,24 +116,24 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
         for (size_t i = 0; global[i] != NULL; i++) {
             for (size_t j = 0; global[i][j] != '\0'; j++) {
                 if (!((global[i][j] >= 'A' && global[i][j] <= 'Z') || global[i][j] == '_')) {
-                    *err = bc_error_new_printf(BLOGC_MAKE_ERROR_SETTINGS,
+                    *err = sb_error_new_printf(BLOGC_MAKE_ERROR_SETTINGS,
                         "Invalid [%s] key: %s", section, global[i]);
-                    bc_strv_free(global);
+                    sb_strv_free(global);
                     bm_settings_free(rv);
                     rv = NULL;
                     goto cleanup;
                 }
             }
-            bc_trie_insert(rv->global, global[i],
-                bc_strdup(bc_config_get(config, section, global[i])));
+            sb_trie_insert(rv->global, global[i],
+                sb_strdup(sb_config_get(config, section, global[i])));
         }
     }
-    bc_strv_free(global);
+    sb_strv_free(global);
 
     for (size_t i = 0; required_global[i] != NULL; i++) {
-        const char *value = bc_trie_lookup(rv->global, required_global[i]);
+        const char *value = sb_trie_lookup(rv->global, required_global[i]);
         if (value == NULL || value[0] == '\0') {
-            *err = bc_error_new_printf(BLOGC_MAKE_ERROR_SETTINGS,
+            *err = sb_error_new_printf(BLOGC_MAKE_ERROR_SETTINGS,
                 "[%s] key required but not found or empty: %s", section,
                 required_global[i]);
             bm_settings_free(rv);
@@ -144,46 +143,46 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
     }
 
     for (size_t i = 0; default_settings[i].key != NULL; i++) {
-        const char *value = bc_config_get_with_default(
+        const char *value = sb_config_get_with_default(
             config, "settings", default_settings[i].key,
             default_settings[i].default_value);
         if (value != NULL) {
-            bc_trie_insert(rv->settings, default_settings[i].key,
-                bc_strdup(value));
+            sb_trie_insert(rv->settings, default_settings[i].key,
+                sb_strdup(value));
         }
     }
 
-    rv->posts = bc_config_get_list(config, "posts");
-    rv->pages = bc_config_get_list(config, "pages");
-    rv->tags = bc_config_get_list(config, "tags");
+    rv->posts = sb_config_get_list(config, "posts");
+    rv->pages = sb_config_get_list(config, "pages");
+    rv->tags = sb_config_get_list(config, "tags");
 
     // this is for backward compatibility too.
-    rv->copy = bc_config_get_list(config, "copy");
+    rv->copy = sb_config_get_list(config, "copy");
     if (rv->copy == NULL)
-        rv->copy = bc_config_get_list(config, "copy_files");
+        rv->copy = sb_config_get_list(config, "copy_files");
 
 cleanup:
 
-    bc_config_free(config);
+    sb_config_free(config);
 
     return rv;
 }
 
 
 bm_settings_t*
-bm_settings_parse_file(const char *filename, bc_error_t **err)
+bm_settings_parse_file(const char *filename, sb_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
 
     size_t content_len;
-    char *content = bc_file_get_contents(filename, true, &content_len, err);
+    char *content = sb_file_get_contents_utf8(filename, &content_len, err);
     if (*err != NULL)
         return NULL;
 
     bm_settings_t *rv = bm_settings_parse(content, content_len, err);
     char *real_filename = realpath(filename, NULL);
-    rv->root_dir = bc_strdup(dirname(real_filename));
+    rv->root_dir = sb_strdup(dirname(real_filename));
     free(real_filename);
     free(content);
     return rv;
@@ -196,11 +195,11 @@ bm_settings_free(bm_settings_t *settings)
     if (settings == NULL)
         return;
     free(settings->root_dir);
-    bc_trie_free(settings->global);
-    bc_trie_free(settings->settings);
-    bc_strv_free(settings->posts);
-    bc_strv_free(settings->pages);
-    bc_strv_free(settings->copy);
-    bc_strv_free(settings->tags);
+    sb_trie_free(settings->global);
+    sb_trie_free(settings->settings);
+    sb_strv_free(settings->posts);
+    sb_strv_free(settings->pages);
+    sb_strv_free(settings->copy);
+    sb_strv_free(settings->tags);
     free(settings);
 }

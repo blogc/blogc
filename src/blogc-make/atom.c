@@ -10,8 +10,9 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-#include "../common/error.h"
-#include "../common/utils.h"
+#include <squareball.h>
+
+#include "error.h"
 #include "settings.h"
 #include "atom.h"
 
@@ -49,7 +50,7 @@ static const char atom_template[] =
 
 
 char*
-bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
+bm_atom_deploy(bm_settings_t *settings, sb_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -58,20 +59,20 @@ bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
     char fname[] = "/tmp/blogc-make_XXXXXX";
     int fd;
     if (-1 == (fd = mkstemp(fname))) {
-        *err = bc_error_new_printf(BLOGC_MAKE_ERROR_ATOM,
+        *err = sb_error_new_printf(BLOGC_MAKE_ERROR_ATOM,
             "Failed to create temporary atom template: %s", strerror(errno));
         return NULL;
     }
 
-    const char *atom_prefix = bc_trie_lookup(settings->settings, "atom_prefix");
-    const char *atom_ext = bc_trie_lookup(settings->settings, "atom_ext");
-    const char *post_prefix = bc_trie_lookup(settings->settings, "post_prefix");
+    const char *atom_prefix = sb_trie_lookup(settings->settings, "atom_prefix");
+    const char *atom_ext = sb_trie_lookup(settings->settings, "atom_ext");
+    const char *post_prefix = sb_trie_lookup(settings->settings, "post_prefix");
 
-    char *content = bc_strdup_printf(atom_template, atom_prefix, atom_ext,
+    char *content = sb_strdup_printf(atom_template, atom_prefix, atom_ext,
         atom_prefix, atom_ext, post_prefix, post_prefix);
 
     if (-1 == write(fd, content, strlen(content))) {
-        *err = bc_error_new_printf(BLOGC_MAKE_ERROR_ATOM,
+        *err = sb_error_new_printf(BLOGC_MAKE_ERROR_ATOM,
             "Failed to write to temporary atom template: %s", strerror(errno));
         free(content);
         close(fd);
@@ -82,7 +83,7 @@ bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
     free(content);
     close(fd);
 
-    return bc_strdup(fname);
+    return sb_strdup(fname);
 }
 
 

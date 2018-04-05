@@ -224,6 +224,8 @@ AC_CHECK_HEADERS([sys/stat.h time.h])
 
 LT_LIB_M
 
+SQUAREBALL_INIT([>=0.3.0])
+
 AC_CONFIG_FILES([
   Makefile
   blogc.spec

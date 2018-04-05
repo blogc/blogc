@@ -9,9 +9,9 @@
 #ifndef _POST_RECEIVE_H
 #define _POST_RECEIVE_H
 
-#include "../common/config-parser.h"
+#include <squareball.h>
 
-char* bgr_post_receive_get_config_section(bc_config_t *config,
+char* bgr_post_receive_get_config_section(sb_config_t *config,
     const char *repo_path, const char *home);
 int bgr_post_receive_hook(int argc, char *argv[]);
 

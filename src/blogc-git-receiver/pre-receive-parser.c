@@ -8,7 +8,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "pre-receive-parser.h"
 
 typedef enum {
@@ -67,7 +68,7 @@ bgr_pre_receive_parse(const char *input)
                 if ((current - start == 17) &&
                     (0 == strncmp("refs/heads/master", input + start, 17)))
                 {
-                    return bc_strndup(input + start_new, start - 1 - start_new);
+                    return sb_strndup(input + start_new, start - 1 - start_new);
                 }
                 break;
         }

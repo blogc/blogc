@@ -10,15 +10,15 @@
 #define _RENDERER_H
 
 #include <stdbool.h>
-#include "../common/utils.h"
+#include <squareball.h>
 
-const char* blogc_get_variable(const char *name, bc_trie_t *global, bc_trie_t *local);
-char* blogc_format_date(const char *date, bc_trie_t *global, bc_trie_t *local);
-char* blogc_format_variable(const char *name, bc_trie_t *global, bc_trie_t *local,
-    bc_slist_t *foreach_var);
-bc_slist_t* blogc_split_list_variable(const char *name, bc_trie_t *global,
-    bc_trie_t *local);
-char* blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config,
+const char* blogc_get_variable(const char *name, sb_trie_t *global, sb_trie_t *local);
+char* blogc_format_date(const char *date, sb_trie_t *global, sb_trie_t *local);
+char* blogc_format_variable(const char *name, sb_trie_t *global, sb_trie_t *local,
+    sb_slist_t *foreach_var);
+sb_slist_t* blogc_split_list_variable(const char *name, sb_trie_t *global,
+    sb_trie_t *local);
+char* blogc_render(sb_slist_t *tmpl, sb_slist_t *sources, sb_trie_t *config,
     bool listing);
 
 #endif /* _RENDERER_H */

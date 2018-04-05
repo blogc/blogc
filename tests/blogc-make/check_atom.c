@@ -13,31 +13,29 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <squareball.h>
 
 #include "../../src/blogc-make/atom.h"
 #include "../../src/blogc-make/settings.h"
-#include "../../src/common/file.h"
-#include "../../src/common/error.h"
-#include "../../src/common/utils.h"
 
 
 static void
 test_atom_file(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "atom_prefix", bc_strdup("atom"));
-    bc_trie_insert(settings->settings, "atom_ext", bc_strdup(".xml"));
-    bc_trie_insert(settings->settings, "post_prefix", bc_strdup("post"));
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "atom_prefix", sb_strdup("atom"));
+    sb_trie_insert(settings->settings, "atom_ext", sb_strdup(".xml"));
+    sb_trie_insert(settings->settings, "post_prefix", sb_strdup("post"));
 
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     char *rv = bm_atom_deploy(settings, &err);
 
     assert_non_null(rv);
     assert_null(err);
 
     size_t cmp_len;
-    char *cmp = bc_file_get_contents(rv, true, &cmp_len, &err);
+    char *cmp = sb_file_get_contents_utf8(rv, &cmp_len, &err);
 
     assert_non_null(cmp);
     assert_null(err);
@@ -77,7 +75,7 @@ test_atom_file(void **state)
     free(cmp);
     bm_atom_destroy(rv);
     free(rv);
-    bc_trie_free(settings->settings);
+    sb_trie_free(settings->settings);
     free(settings);
 }
 
@@ -85,20 +83,20 @@ test_atom_file(void **state)
 static void
 test_atom_dir(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "atom_prefix", bc_strdup("atom"));
-    bc_trie_insert(settings->settings, "atom_ext", bc_strdup("/index.xml"));
-    bc_trie_insert(settings->settings, "post_prefix", bc_strdup("post"));
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "atom_prefix", sb_strdup("atom"));
+    sb_trie_insert(settings->settings, "atom_ext", sb_strdup("/index.xml"));
+    sb_trie_insert(settings->settings, "post_prefix", sb_strdup("post"));
 
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     char *rv = bm_atom_deploy(settings, &err);
 
     assert_non_null(rv);
     assert_null(err);
 
     size_t cmp_len;
-    char *cmp = bc_file_get_contents(rv, true, &cmp_len, &err);
+    char *cmp = sb_file_get_contents_utf8(rv, &cmp_len, &err);
 
     assert_non_null(cmp);
     assert_null(err);
@@ -138,7 +136,7 @@ test_atom_dir(void **state)
     free(cmp);
     bm_atom_destroy(rv);
     free(rv);
-    bc_trie_free(settings->settings);
+    sb_trie_free(settings->settings);
     free(settings);
 }
 

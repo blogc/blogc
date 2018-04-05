@@ -12,34 +12,31 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "../common/utils.h"
-#include "../common/config-parser.h"
-#include "../common/error.h"
-#include "../common/file.h"
+#include <squareball.h>
 
 
 char*
-bgr_post_receive_get_config_section(bc_config_t *config, const char *repo_path,
+bgr_post_receive_get_config_section(sb_config_t *config, const char *repo_path,
     const char *home)
 {
     char *rv = NULL;
-    char** sections = bc_config_list_sections(config);
+    char** sections = sb_config_list_sections(config);
     for (size_t i = 0; sections[i] != NULL; i++) {
-        if (bc_str_starts_with(sections[i], "repo:")) {
-            char *tmp_repo = bc_strdup_printf("%s/repos/%s", home, sections[i] + 5);
+        if (sb_str_starts_with(sections[i], "repo:")) {
+            char *tmp_repo = sb_strdup_printf("%s/repos/%s", home, sections[i] + 5);
             char *real_tmp_repo = realpath(tmp_repo, NULL);  // maybe not needed
             free(tmp_repo);
             if (real_tmp_repo == NULL)
                 continue;
             if (0 == strcmp(real_tmp_repo, repo_path)) {
-                rv = bc_strdup(sections[i]);
+                rv = sb_strdup(sections[i]);
                 free(real_tmp_repo);
                 break;
             }
             free(real_tmp_repo);
         }
     }
-    bc_strv_free(sections);
+    sb_strv_free(sections);
     return rv;
 }
 
@@ -57,7 +54,7 @@ bgr_post_receive_hook(int argc, char *argv[])
         return 3;
     }
 
-    char *repo_path = bc_strdup(dirname(real_hooks_dir));
+    char *repo_path = sb_strdup(dirname(real_hooks_dir));
     free(real_hooks_dir);
     if (0 != chdir(repo_path)) {
         fprintf(stderr, "error: failed to change to repository root\n");
@@ -72,7 +69,7 @@ bgr_post_receive_hook(int argc, char *argv[])
     if ((0 == system("git config --local remote.mirror.pushurl > /dev/null")) ||
         (0 == system("git config --local remote.mirror.url > /dev/null")))
     {
-        mirror = bc_strdup("mirror");
+        mirror = sb_strdup("mirror");
         goto push;
     }
 
@@ -83,7 +80,7 @@ bgr_post_receive_hook(int argc, char *argv[])
         goto cleanup;
     }
 
-    char *config_file = bc_strdup_printf("%s/blogc-git-receiver.ini", home);
+    char *config_file = sb_strdup_printf("%s/blogc-git-receiver.ini", home);
     if ((0 != access(config_file, F_OK))) {
         fprintf(stderr, "warning: repository mirroring disabled\n");
         free(config_file);
@@ -91,23 +88,23 @@ bgr_post_receive_hook(int argc, char *argv[])
     }
 
     size_t len;
-    bc_error_t *err = NULL;
-    char* config_content = bc_file_get_contents(config_file, true, &len, &err);
+    sb_error_t *err = NULL;
+    char* config_content = sb_file_get_contents_utf8(config_file, &len, &err);
     if (err != NULL) {
         fprintf(stderr, "warning: failed to read configuration file (%s), "
             "mirroring disabled: %s\n", config_file, err->msg);
-        bc_error_free(err);
+        sb_error_free(err);
         free(config_file);
         free(config_content);
         goto cleanup;
     }
 
-    bc_config_t *config = bc_config_parse(config_content, len, NULL, &err);
+    sb_config_t *config = sb_config_parse(config_content, len, NULL, &err);
     free(config_content);
     if (err != NULL) {
         fprintf(stderr, "warning: failed to parse configuration file (%s), "
             "mirroring disabled: %s\n", config_file, err->msg);
-        bc_error_free(err);
+        sb_error_free(err);
         free(config_file);
         goto cleanup;
     }
@@ -117,13 +114,13 @@ bgr_post_receive_hook(int argc, char *argv[])
         home);
     if (config_section == NULL) {
         fprintf(stderr, "warning: repository mirroring disabled\n");
-        bc_config_free(config);
+        sb_config_free(config);
         goto cleanup;
     }
 
-    mirror = bc_strdup(bc_config_get(config, config_section, "mirror"));
+    mirror = sb_strdup(sb_config_get(config, config_section, "mirror"));
     free(config_section);
-    bc_config_free(config);
+    sb_config_free(config);
 
     if (mirror == NULL) {
         fprintf(stderr, "warning: repository mirroring disabled\n");
@@ -133,7 +130,7 @@ bgr_post_receive_hook(int argc, char *argv[])
 push:
 
     {
-        char *git_cmd = bc_strdup_printf("git push --mirror %s", mirror);
+        char *git_cmd = sb_strdup_printf("git push --mirror %s", mirror);
         if (0 != system(git_cmd))
             fprintf(stderr, "warning: failed push to git mirror\n");
         free(git_cmd);

@@ -9,10 +9,11 @@
 #ifndef _MAKE_ATOM_H
 #define _MAKE_ATOM_H
 
-#include "../common/error.h"
+#include <squareball.h>
+
 #include "settings.h"
 
-char* bm_atom_deploy(bm_settings_t *settings, bc_error_t **err);
+char* bm_atom_deploy(bm_settings_t *settings, sb_error_t **err);
 void bm_atom_destroy(const char *fname);
 
 #endif /* _MAKE_ATOM_H */

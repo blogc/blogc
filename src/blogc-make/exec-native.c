@@ -16,11 +16,12 @@
 #include <unistd.h>
 #include <libgen.h>
 #include <errno.h>
-#include "../common/error.h"
-#include "../common/file.h"
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "exec-native.h"
 #include "ctx.h"
+
+#define BM_FILE_CHUNK_SIZE 1024
 
 
 int
@@ -32,7 +33,7 @@ bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
         printf("  COPY     %s\n", dest->short_path);
     fflush(stdout);
 
-    char *fname = bc_strdup(dest->path);
+    char *fname = sb_strdup(dest->path);
     for (char *tmp = fname; *tmp != '\0'; tmp++) {
         if (*tmp != '/' && *tmp != '\\')
             continue;
@@ -67,8 +68,8 @@ bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
     }
 
     ssize_t nread;
-    char buffer[BC_FILE_CHUNK_SIZE];
-    while (0 < (nread = read(fd_from, buffer, BC_FILE_CHUNK_SIZE))) {
+    char buffer[BM_FILE_CHUNK_SIZE];
+    while (0 < (nread = read(fd_from, buffer, BM_FILE_CHUNK_SIZE))) {
         char *out_ptr = buffer;
         do {
             ssize_t nwritten = write(fd_to, out_ptr, nread);
@@ -89,7 +90,7 @@ bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
 
 
 bool
-bm_exec_native_is_empty_dir(const char *dir, bc_error_t **err)
+bm_exec_native_is_empty_dir(const char *dir, sb_error_t **err)
 {
     DIR *d = opendir(dir);
     if (d == NULL) {
@@ -97,7 +98,7 @@ bm_exec_native_is_empty_dir(const char *dir, bc_error_t **err)
             return true;
         }
         if (err != NULL) {
-            *err = bc_error_new_printf(0, "failed to open directory (%s): %s\n",
+            *err = sb_error_new_printf(0, "failed to open directory (%s): %s\n",
                 dir, strerror(errno));
         }
         return true;
@@ -114,7 +115,7 @@ bm_exec_native_is_empty_dir(const char *dir, bc_error_t **err)
 
     if (0 != closedir(d)) {
         if (err != NULL) {
-            *err = bc_error_new_printf(0, "failed to close directory (%s): %s\n",
+            *err = sb_error_new_printf(0, "failed to close directory (%s): %s\n",
                 dir, strerror(errno));
         }
         return true;
@@ -143,16 +144,16 @@ bm_exec_native_rm(const char *output_dir, bm_filectx_t *dest, bool verbose)
 
     // blame freebsd's libc for all of those memory allocations around dirname
     // calls!
-    char *short_dir = bc_strdup(dirname(dest->short_path));
-    char *dir = bc_strdup(dirname(dest->path));
+    char *short_dir = sb_strdup(dirname(dest->short_path));
+    char *dir = sb_strdup(dirname(dest->path));
 
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
 
     while ((0 != strcmp(short_dir, ".")) && (0 != strcmp(short_dir, "/"))) {
         bool empty = bm_exec_native_is_empty_dir(dir, &err);
         if (err != NULL) {
             fprintf(stderr, "blogc-make: error: %s\n", err->msg);
-            bc_error_free(err);
+            sb_error_free(err);
             rv = 3;
             break;
         }
@@ -175,10 +176,10 @@ bm_exec_native_rm(const char *output_dir, bm_filectx_t *dest, bool verbose)
         }
 
         char *tmp = short_dir;
-        short_dir = bc_strdup(dirname(short_dir));
+        short_dir = sb_strdup(dirname(short_dir));
         free(tmp);
         tmp = dir;
-        dir = bc_strdup(dirname(dir));
+        dir = sb_strdup(dirname(dir));
         free(tmp);
     }
 

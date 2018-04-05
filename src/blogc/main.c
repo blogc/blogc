@@ -21,14 +21,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <squareball.h>
 
 #include "debug.h"
+#include "error.h"
 #include "template-parser.h"
 #include "loader.h"
 #include "renderer.h"
-#include "../common/error.h"
-#include "../common/utf8.h"
-#include "../common/utils.h"
 
 #ifdef MAKE_EMBEDDED
 extern int bm_main(int argc, char **argv);
@@ -88,7 +87,7 @@ blogc_print_usage(void)
 static void
 blogc_mkdir_recursive(const char *filename)
 {
-    char *fname = bc_strdup(filename);
+    char *fname = sb_strdup(filename);
     for (char *tmp = fname; *tmp != '\0'; tmp++) {
         if (*tmp != '/' && *tmp != '\\')
             continue;
@@ -120,8 +119,8 @@ blogc_mkdir_recursive(const char *filename)
 }
 
 
-static bc_slist_t*
-blogc_read_stdin_to_list(bc_slist_t *l)
+static sb_slist_t*
+blogc_read_stdin_to_list(sb_slist_t *l)
 {
     char buffer[4096];
     while (NULL != fgets(buffer, 4096, stdin)) {
@@ -136,7 +135,7 @@ blogc_read_stdin_to_list(bc_slist_t *l)
             buffer[len - 1] = '\0';
         if (strlen(buffer) == 0)
             continue;
-        l = bc_slist_append(l, bc_strdup(buffer));
+        l = sb_slist_append(l, sb_strdup(buffer));
     }
     return l;
 }
@@ -161,9 +160,9 @@ main(int argc, char **argv)
     char *tmp = NULL;
     char **pieces = NULL;
 
-    bc_slist_t *sources = NULL;
-    bc_trie_t *config = bc_trie_new(free);
-    bc_trie_insert(config, "BLOGC_VERSION", bc_strdup(PACKAGE_VERSION));
+    sb_slist_t *sources = NULL;
+    sb_trie_t *config = sb_trie_new(free);
+    sb_trie_insert(config, "BLOGC_VERSION", sb_strdup(PACKAGE_VERSION));
 
     for (size_t i = 1; i < argc; i++) {
         tmp = NULL;
@@ -186,21 +185,21 @@ main(int argc, char **argv)
                     break;
                 case 't':
                     if (argv[i][2] != '\0')
-                        template = bc_strdup(argv[i] + 2);
+                        template = sb_strdup(argv[i] + 2);
                     else if (i + 1 < argc)
-                        template = bc_strdup(argv[++i]);
+                        template = sb_strdup(argv[++i]);
                     break;
                 case 'o':
                     if (argv[i][2] != '\0')
-                        output = bc_strdup(argv[i] + 2);
+                        output = sb_strdup(argv[i] + 2);
                     else if (i + 1 < argc)
-                        output = bc_strdup(argv[++i]);
+                        output = sb_strdup(argv[++i]);
                     break;
                 case 'p':
                     if (argv[i][2] != '\0')
-                        print = bc_strdup(argv[i] + 2);
+                        print = sb_strdup(argv[i] + 2);
                     else if (i + 1 < argc)
-                        print = bc_strdup(argv[++i]);
+                        print = sb_strdup(argv[++i]);
                     break;
                 case 'D':
                     if (argv[i][2] != '\0')
@@ -208,16 +207,16 @@ main(int argc, char **argv)
                     else if (i + 1 < argc)
                         tmp = argv[++i];
                     if (tmp != NULL) {
-                        if (!bc_utf8_validate((uint8_t*) tmp, strlen(tmp))) {
+                        if (!sb_utf8_validate((uint8_t*) tmp, strlen(tmp))) {
                             fprintf(stderr, "blogc: error: invalid value for "
                                 "-D (must be valid UTF-8 string): %s\n", tmp);
                             goto cleanup;
                         }
-                        pieces = bc_str_split(tmp, '=', 2);
-                        if (bc_strv_length(pieces) != 2) {
+                        pieces = sb_str_split(tmp, '=', 2);
+                        if (sb_strv_length(pieces) != 2) {
                             fprintf(stderr, "blogc: error: invalid value for "
                                 "-D (must have an '='): %s\n", tmp);
-                            bc_strv_free(pieces);
+                            sb_strv_free(pieces);
                             rv = 3;
                             goto cleanup;
                         }
@@ -228,13 +227,13 @@ main(int argc, char **argv)
                                 fprintf(stderr, "blogc: error: invalid value "
                                     "for -D (configuration key must be uppercase "
                                     "with '_'): %s\n", pieces[0]);
-                                bc_strv_free(pieces);
+                                sb_strv_free(pieces);
                                 rv = 3;
                                 goto cleanup;
                             }
                         }
-                        bc_trie_insert(config, pieces[0], bc_strdup(pieces[1]));
-                        bc_strv_free(pieces);
+                        sb_trie_insert(config, pieces[0], sb_strdup(pieces[1]));
+                        sb_strv_free(pieces);
                         pieces = NULL;
                     }
                     break;
@@ -252,7 +251,7 @@ main(int argc, char **argv)
             }
         }
         else {
-            sources = bc_slist_append(sources, bc_strdup(argv[i]));
+            sources = sb_slist_append(sources, sb_strdup(argv[i]));
         }
 
 #ifdef MAKE_EMBEDDED
@@ -267,14 +266,14 @@ main(int argc, char **argv)
     if (input_stdin)
         sources = blogc_read_stdin_to_list(sources);
 
-    if (!listing && bc_slist_length(sources) == 0) {
+    if (!listing && sb_slist_length(sources) == 0) {
         blogc_print_usage();
         fprintf(stderr, "blogc: error: one source file is required\n");
         rv = 3;
         goto cleanup;
     }
 
-    if (!listing && bc_slist_length(sources) > 1) {
+    if (!listing && sb_slist_length(sources) > 1) {
         blogc_print_usage();
         fprintf(stderr, "blogc: error: only one source file should be provided, "
             "if running without '-l'\n");
@@ -282,17 +281,17 @@ main(int argc, char **argv)
         goto cleanup;
     }
 
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
 
-    bc_slist_t *s = blogc_source_parse_from_files(config, sources, &err);
+    sb_slist_t *s = blogc_source_parse_from_files(config, sources, &err);
     if (err != NULL) {
-        bc_error_print(err, "blogc");
+        blogc_error_print(err);
         rv = 3;
         goto cleanup2;
     }
 
     if (print != NULL) {
-        const char *val = bc_trie_lookup(config, print);
+        const char *val = sb_trie_lookup(config, print);
         if (val == NULL) {
             fprintf(stderr, "blogc: error: configuration variable not found: %s\n",
                 print);
@@ -311,9 +310,9 @@ main(int argc, char **argv)
         goto cleanup2;
     }
 
-    bc_slist_t* l = blogc_template_parse_from_file(template, &err);
+    sb_slist_t* l = blogc_template_parse_from_file(template, &err);
     if (err != NULL) {
-        bc_error_print(err, "blogc");
+        blogc_error_print(err);
         rv = 3;
         goto cleanup3;
     }
@@ -348,13 +347,13 @@ cleanup4:
 cleanup3:
     blogc_template_free_ast(l);
 cleanup2:
-    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
-    bc_error_free(err);
+    sb_slist_free_full(s, (sb_free_func_t) sb_trie_free);
+    sb_error_free(err);
 cleanup:
-    bc_trie_free(config);
+    sb_trie_free(config);
     free(template);
     free(output);
     free(print);
-    bc_slist_free_full(sources, free);
+    sb_slist_free_full(sources, free);
     return rv;
 }

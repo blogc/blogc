@@ -8,11 +8,11 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <squareball.h>
 
 #include "content-parser.h"
+#include "error.h"
 #include "source-parser.h"
-#include "../common/error.h"
-#include "../common/utils.h"
 
 
 typedef enum {
@@ -26,8 +26,8 @@ typedef enum {
 } blogc_source_parser_state_t;
 
 
-bc_trie_t*
-blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
+sb_trie_t*
+blogc_source_parse(const char *src, size_t src_len, sb_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -39,7 +39,7 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
     char *key = NULL;
     char *tmp = NULL;
     char *content = NULL;
-    bc_trie_t *rv = bc_trie_new(free);
+    sb_trie_t *rv = sb_trie_new(free);
 
     blogc_source_parser_state_t state = SOURCE_START;
 
@@ -60,7 +60,7 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
                     state = SOURCE_SEPARATOR;
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = sb_error_new_printf_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current,
                     "Can't find a configuration key or the content separator.");
                 break;
@@ -69,7 +69,7 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
                 if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
                     break;
                 if (c == ':') {
-                    key = bc_strndup(src + start, current - start);
+                    key = sb_strndup(src + start, current - start);
                     if (((current - start == 8) &&
                          (0 == strncmp("FILENAME", src + start, 8))) ||
                         ((current - start == 7) &&
@@ -93,7 +93,7 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
                         ((current - start == 13) &&
                          (0 == strncmp("BLOGC_VERSION", src + start, 13))))
                     {
-                        *err = bc_error_new_printf(BLOGC_ERROR_SOURCE_PARSER,
+                        *err = sb_error_new_printf(BLOGC_ERROR_SOURCE_PARSER,
                             "'%s' variable is forbidden in source files. It will "
                             "be set for you by the compiler.", key);
                         break;
@@ -101,7 +101,7 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
                     state = SOURCE_CONFIG_VALUE_START;
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = sb_error_new_printf_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current, "Invalid configuration key.");
                 break;
 
@@ -111,7 +111,7 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
                     start = current;
                     break;
                 }
-                bc_trie_insert(rv, key, bc_strdup(""));
+                sb_trie_insert(rv, key, sb_strdup(""));
                 free(key);
                 key = NULL;
                 state = SOURCE_START;
@@ -119,8 +119,8 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
 
             case SOURCE_CONFIG_VALUE:
                 if (c == '\n' || c == '\r') {
-                    tmp = bc_strndup(src + start, current - start);
-                    bc_trie_insert(rv, key, bc_strdup(bc_str_strip(tmp)));
+                    tmp = sb_strndup(src + start, current - start);
+                    sb_trie_insert(rv, key, sb_strdup(sb_str_strip(tmp)));
                     free(tmp);
                     free(key);
                     key = NULL;
@@ -135,7 +135,7 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
                     state = SOURCE_CONTENT_START;
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = sb_error_new_printf_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current,
                     "Invalid content separator. Must be more than one '-' characters.");
                 break;
@@ -149,18 +149,18 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
 
             case SOURCE_CONTENT:
                 if (current == (src_len - 1)) {
-                    tmp = bc_strndup(src + start, src_len - start);
-                    bc_trie_insert(rv, "RAW_CONTENT", tmp);
+                    tmp = sb_strndup(src + start, src_len - start);
+                    sb_trie_insert(rv, "RAW_CONTENT", tmp);
                     char *first_header = NULL;
                     char *description = NULL;
                     content = blogc_content_parse(tmp, &end_excerpt,
                         &first_header, &description);
                     if (first_header != NULL) {
                         // do not override source-provided first_header.
-                        if (NULL == bc_trie_lookup(rv, "FIRST_HEADER")) {
+                        if (NULL == sb_trie_lookup(rv, "FIRST_HEADER")) {
                             // no need to free, because we are transfering memory
                             // ownership to the trie.
-                            bc_trie_insert(rv, "FIRST_HEADER", first_header);
+                            sb_trie_insert(rv, "FIRST_HEADER", first_header);
                         }
                         else {
                             free(first_header);
@@ -168,18 +168,18 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
                     }
                     if (description != NULL) {
                         // do not override source-provided description.
-                        if (NULL == bc_trie_lookup(rv, "DESCRIPTION")) {
+                        if (NULL == sb_trie_lookup(rv, "DESCRIPTION")) {
                             // no need to free, because we are transfering memory
                             // ownership to the trie.
-                            bc_trie_insert(rv, "DESCRIPTION", description);
+                            sb_trie_insert(rv, "DESCRIPTION", description);
                         }
                         else {
                             free(description);
                         }
                     }
-                    bc_trie_insert(rv, "CONTENT", content);
-                    bc_trie_insert(rv, "EXCERPT", end_excerpt == 0 ?
-                        bc_strdup(content) : bc_strndup(content, end_excerpt));
+                    sb_trie_insert(rv, "CONTENT", content);
+                    sb_trie_insert(rv, "EXCERPT", end_excerpt == 0 ?
+                        sb_strdup(content) : sb_strndup(content, end_excerpt));
                 }
                 break;
         }
@@ -190,28 +190,28 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
         current++;
     }
 
-    if (*err == NULL && bc_trie_size(rv) == 0) {
+    if (*err == NULL && sb_trie_size(rv) == 0) {
 
         // ok, nothing found in the config trie, but no error set either.
         // let's try to be nice with the users and provide some reasonable
         // output. :)
         switch (state) {
             case SOURCE_START:
-                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = sb_error_new_printf_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current, "Your source file is empty.");
                 break;
             case SOURCE_CONFIG_KEY:
-                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = sb_error_new_printf_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current, "Your last configuration key is missing ':' and "
                     "the value");
                 break;
             case SOURCE_CONFIG_VALUE_START:
-                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = sb_error_new_printf_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current, "Configuration value not provided for '%s'.",
                     key);
                 break;
             case SOURCE_CONFIG_VALUE:
-                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                *err = sb_error_new_printf_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
                     current, "No line ending after the configuration value for "
                     "'%s'.", key);
                 break;
@@ -224,7 +224,7 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
 
     if (*err != NULL) {
         free(key);
-        bc_trie_free(rv);
+        sb_trie_free(rv);
         return NULL;
     }
 

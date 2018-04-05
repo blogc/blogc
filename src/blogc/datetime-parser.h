@@ -9,9 +9,9 @@
 #ifndef _DATETIME_H
 #define _DATETIME_H
 
-#include "../common/error.h"
+#include <squareball.h>
 
 char* blogc_convert_datetime(const char *orig, const char *format,
-    bc_error_t **err);
+    sb_error_t **err);
 
 #endif /* _DATETIME_H */

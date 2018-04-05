@@ -13,7 +13,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/stat.h>
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "shell-command-parser.h"
 #include "shell.h"
 
@@ -50,15 +51,15 @@ bgr_shell(int argc, char *argv[])
         goto cleanup;
     }
 
-    repo = bc_strdup_printf("%s/repos/%s", home, tmp_repo);
-    quoted_repo = bc_shell_quote(repo);
+    repo = sb_strdup_printf("%s/repos/%s", home, tmp_repo);
+    quoted_repo = sb_shell_quote(repo);
     free(tmp_repo);
 
     if (0 == strncmp(argv[2], "git-upload-", 11))  // no need to check len here
         goto git_exec;
 
     if (0 != access(repo, F_OK)) {
-        char *git_init_cmd = bc_strdup_printf(
+        char *git_init_cmd = sb_strdup_printf(
             "git init --bare %s > /dev/null", quoted_repo);
         if (0 != system(git_init_cmd)) {
             fprintf(stderr, "error: failed to create git repository: %s\n",
@@ -136,9 +137,9 @@ git_exec:
         goto cleanup;
     }
 
-    // static allocation instead of bc_strdup_printf to avoid leaks
+    // static allocation instead of sb_strdup_printf to avoid leaks
     char buffer[4096];
-    char *command = bc_strdup(argv[2]);
+    char *command = sb_strdup(argv[2]);
     char *p;
     for (p = command; *p != ' ' && *p != '\0'; p++);
     if (*p == ' ')

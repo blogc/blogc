@@ -13,24 +13,24 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <squareball.h>
 
+#include "../../src/blogc-make/error.h"
 #include "../../src/blogc-make/settings.h"
-#include "../../src/common/error.h"
-#include "../../src/common/utils.h"
 
 
 static void
 test_settings_empty(void **state)
 {
     const char *a = "";
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     bm_settings_t *s = bm_settings_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(s);
-    assert_int_equal(err->type, BLOGC_MAKE_ERROR_SETTINGS);
+    assert_int_equal(err->code, BLOGC_MAKE_ERROR_SETTINGS);
     assert_string_equal(err->msg,
         "[global] key required but not found or empty: AUTHOR_NAME");
-    bc_error_free(err);
+    sb_error_free(err);
 }
 
 
@@ -45,14 +45,14 @@ test_settings(void **state)
         "[global]\n"
         "BOLA = asd\n"
         "GUDA = qwe\n";
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     bm_settings_t *s = bm_settings_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(s);
-    assert_int_equal(err->type, BLOGC_MAKE_ERROR_SETTINGS);
+    assert_int_equal(err->code, BLOGC_MAKE_ERROR_SETTINGS);
     assert_string_equal(err->msg,
         "[global] key required but not found or empty: AUTHOR_NAME");
-    bc_error_free(err);
+    sb_error_free(err);
 }
 
 
@@ -67,14 +67,14 @@ test_settings_env(void **state)
         "[environment]\n"
         "BOLA = asd\n"
         "GUDA = qwe\n";
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     bm_settings_t *s = bm_settings_parse(a, strlen(a), &err);
     assert_non_null(err);
     assert_null(s);
-    assert_int_equal(err->type, BLOGC_MAKE_ERROR_SETTINGS);
+    assert_int_equal(err->code, BLOGC_MAKE_ERROR_SETTINGS);
     assert_string_equal(err->msg,
         "[environment] key required but not found or empty: AUTHOR_NAME");
-    bc_error_free(err);
+    sb_error_free(err);
 }
 
 
@@ -113,36 +113,36 @@ test_settings2(void **state)
         "jjjj\n"
         "kkkk\n"
         "llll\n";
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     bm_settings_t *s = bm_settings_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(s);
     assert_null(s->root_dir);
-    assert_int_equal(bc_trie_size(s->global), 7);
-    assert_string_equal(bc_trie_lookup(s->global, "BOLA"), "asd");
-    assert_string_equal(bc_trie_lookup(s->global, "GUDA"), "qwe");
-    assert_string_equal(bc_trie_lookup(s->global, "AUTHOR_NAME"), "chunda");
-    assert_string_equal(bc_trie_lookup(s->global, "AUTHOR_EMAIL"), "chunda@example.com");
-    assert_string_equal(bc_trie_lookup(s->global, "SITE_TITLE"), "Fuuuuuuuuu");
-    assert_string_equal(bc_trie_lookup(s->global, "SITE_TAGLINE"), "My cool tagline");
-    assert_string_equal(bc_trie_lookup(s->global, "BASE_DOMAIN"), "http://example.com");
-    assert_int_equal(bc_trie_size(s->settings), 15);
-    assert_string_equal(bc_trie_lookup(s->settings, "source_ext"), ".txt");
-    assert_string_equal(bc_trie_lookup(s->settings, "html_ext"), "/index.html");
-    assert_string_equal(bc_trie_lookup(s->settings, "content_dir"), "guda");
-    assert_string_equal(bc_trie_lookup(s->settings, "template_dir"), "templates");
-    assert_string_equal(bc_trie_lookup(s->settings, "main_template"), "foo.tmpl");
-    assert_string_equal(bc_trie_lookup(s->settings, "date_format"),
+    assert_int_equal(sb_trie_size(s->global), 7);
+    assert_string_equal(sb_trie_lookup(s->global, "BOLA"), "asd");
+    assert_string_equal(sb_trie_lookup(s->global, "GUDA"), "qwe");
+    assert_string_equal(sb_trie_lookup(s->global, "AUTHOR_NAME"), "chunda");
+    assert_string_equal(sb_trie_lookup(s->global, "AUTHOR_EMAIL"), "chunda@example.com");
+    assert_string_equal(sb_trie_lookup(s->global, "SITE_TITLE"), "Fuuuuuuuuu");
+    assert_string_equal(sb_trie_lookup(s->global, "SITE_TAGLINE"), "My cool tagline");
+    assert_string_equal(sb_trie_lookup(s->global, "BASE_DOMAIN"), "http://example.com");
+    assert_int_equal(sb_trie_size(s->settings), 15);
+    assert_string_equal(sb_trie_lookup(s->settings, "source_ext"), ".txt");
+    assert_string_equal(sb_trie_lookup(s->settings, "html_ext"), "/index.html");
+    assert_string_equal(sb_trie_lookup(s->settings, "content_dir"), "guda");
+    assert_string_equal(sb_trie_lookup(s->settings, "template_dir"), "templates");
+    assert_string_equal(sb_trie_lookup(s->settings, "main_template"), "foo.tmpl");
+    assert_string_equal(sb_trie_lookup(s->settings, "date_format"),
         "%b %d, %Y, %I:%M %p GMT");
-    assert_string_equal(bc_trie_lookup(s->settings, "posts_per_page"), "10");
-    assert_string_equal(bc_trie_lookup(s->settings, "atom_prefix"), "atom");
-    assert_string_equal(bc_trie_lookup(s->settings, "atom_ext"), ".xml");
-    assert_string_equal(bc_trie_lookup(s->settings, "atom_posts_per_page"), "10");
-    assert_string_equal(bc_trie_lookup(s->settings, "pagination_prefix"), "page");
-    assert_string_equal(bc_trie_lookup(s->settings, "post_prefix"), "post");
-    assert_string_equal(bc_trie_lookup(s->settings, "tag_prefix"), "tag");
-    assert_string_equal(bc_trie_lookup(s->settings, "html_order"), "DESC");
-    assert_string_equal(bc_trie_lookup(s->settings, "atom_order"), "DESC");
+    assert_string_equal(sb_trie_lookup(s->settings, "posts_per_page"), "10");
+    assert_string_equal(sb_trie_lookup(s->settings, "atom_prefix"), "atom");
+    assert_string_equal(sb_trie_lookup(s->settings, "atom_ext"), ".xml");
+    assert_string_equal(sb_trie_lookup(s->settings, "atom_posts_per_page"), "10");
+    assert_string_equal(sb_trie_lookup(s->settings, "pagination_prefix"), "page");
+    assert_string_equal(sb_trie_lookup(s->settings, "post_prefix"), "post");
+    assert_string_equal(sb_trie_lookup(s->settings, "tag_prefix"), "tag");
+    assert_string_equal(sb_trie_lookup(s->settings, "html_order"), "DESC");
+    assert_string_equal(sb_trie_lookup(s->settings, "atom_order"), "DESC");
     assert_non_null(s->posts);
     assert_string_equal(s->posts[0], "aaaa");
     assert_string_equal(s->posts[1], "bbbb");
@@ -202,36 +202,36 @@ test_settings_env2(void **state)
         "jjjj\n"
         "kkkk\n"
         "llll\n";
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     bm_settings_t *s = bm_settings_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(s);
     assert_null(s->root_dir);
-    assert_int_equal(bc_trie_size(s->global), 7);
-    assert_string_equal(bc_trie_lookup(s->global, "BOLA"), "asd");
-    assert_string_equal(bc_trie_lookup(s->global, "GUDA"), "qwe");
-    assert_string_equal(bc_trie_lookup(s->global, "AUTHOR_NAME"), "chunda");
-    assert_string_equal(bc_trie_lookup(s->global, "AUTHOR_EMAIL"), "chunda@example.com");
-    assert_string_equal(bc_trie_lookup(s->global, "SITE_TITLE"), "Fuuuuuuuuu");
-    assert_string_equal(bc_trie_lookup(s->global, "SITE_TAGLINE"), "My cool tagline");
-    assert_string_equal(bc_trie_lookup(s->global, "BASE_DOMAIN"), "http://example.com");
-    assert_int_equal(bc_trie_size(s->settings), 15);
-    assert_string_equal(bc_trie_lookup(s->settings, "source_ext"), ".txt");
-    assert_string_equal(bc_trie_lookup(s->settings, "html_ext"), "/index.html");
-    assert_string_equal(bc_trie_lookup(s->settings, "content_dir"), "guda");
-    assert_string_equal(bc_trie_lookup(s->settings, "template_dir"), "templates");
-    assert_string_equal(bc_trie_lookup(s->settings, "main_template"), "foo.tmpl");
-    assert_string_equal(bc_trie_lookup(s->settings, "date_format"),
+    assert_int_equal(sb_trie_size(s->global), 7);
+    assert_string_equal(sb_trie_lookup(s->global, "BOLA"), "asd");
+    assert_string_equal(sb_trie_lookup(s->global, "GUDA"), "qwe");
+    assert_string_equal(sb_trie_lookup(s->global, "AUTHOR_NAME"), "chunda");
+    assert_string_equal(sb_trie_lookup(s->global, "AUTHOR_EMAIL"), "chunda@example.com");
+    assert_string_equal(sb_trie_lookup(s->global, "SITE_TITLE"), "Fuuuuuuuuu");
+    assert_string_equal(sb_trie_lookup(s->global, "SITE_TAGLINE"), "My cool tagline");
+    assert_string_equal(sb_trie_lookup(s->global, "BASE_DOMAIN"), "http://example.com");
+    assert_int_equal(sb_trie_size(s->settings), 15);
+    assert_string_equal(sb_trie_lookup(s->settings, "source_ext"), ".txt");
+    assert_string_equal(sb_trie_lookup(s->settings, "html_ext"), "/index.html");
+    assert_string_equal(sb_trie_lookup(s->settings, "content_dir"), "guda");
+    assert_string_equal(sb_trie_lookup(s->settings, "template_dir"), "templates");
+    assert_string_equal(sb_trie_lookup(s->settings, "main_template"), "foo.tmpl");
+    assert_string_equal(sb_trie_lookup(s->settings, "date_format"),
         "%b %d, %Y, %I:%M %p GMT");
-    assert_string_equal(bc_trie_lookup(s->settings, "posts_per_page"), "10");
-    assert_string_equal(bc_trie_lookup(s->settings, "atom_prefix"), "atom");
-    assert_string_equal(bc_trie_lookup(s->settings, "atom_ext"), ".xml");
-    assert_string_equal(bc_trie_lookup(s->settings, "atom_posts_per_page"), "10");
-    assert_string_equal(bc_trie_lookup(s->settings, "pagination_prefix"), "page");
-    assert_string_equal(bc_trie_lookup(s->settings, "post_prefix"), "post");
-    assert_string_equal(bc_trie_lookup(s->settings, "tag_prefix"), "tag");
-    assert_string_equal(bc_trie_lookup(s->settings, "html_order"), "DESC");
-    assert_string_equal(bc_trie_lookup(s->settings, "atom_order"), "DESC");
+    assert_string_equal(sb_trie_lookup(s->settings, "posts_per_page"), "10");
+    assert_string_equal(sb_trie_lookup(s->settings, "atom_prefix"), "atom");
+    assert_string_equal(sb_trie_lookup(s->settings, "atom_ext"), ".xml");
+    assert_string_equal(sb_trie_lookup(s->settings, "atom_posts_per_page"), "10");
+    assert_string_equal(sb_trie_lookup(s->settings, "pagination_prefix"), "page");
+    assert_string_equal(sb_trie_lookup(s->settings, "post_prefix"), "post");
+    assert_string_equal(sb_trie_lookup(s->settings, "tag_prefix"), "tag");
+    assert_string_equal(sb_trie_lookup(s->settings, "html_order"), "DESC");
+    assert_string_equal(sb_trie_lookup(s->settings, "atom_order"), "DESC");
     assert_non_null(s->posts);
     assert_string_equal(s->posts[0], "aaaa");
     assert_string_equal(s->posts[1], "bbbb");
@@ -291,36 +291,36 @@ test_settings_copy_files(void **state)
         "jjjj\n"
         "kkkk\n"
         "llll\n";
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     bm_settings_t *s = bm_settings_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(s);
     assert_null(s->root_dir);
-    assert_int_equal(bc_trie_size(s->global), 7);
-    assert_string_equal(bc_trie_lookup(s->global, "BOLA"), "asd");
-    assert_string_equal(bc_trie_lookup(s->global, "GUDA"), "qwe");
-    assert_string_equal(bc_trie_lookup(s->global, "AUTHOR_NAME"), "chunda");
-    assert_string_equal(bc_trie_lookup(s->global, "AUTHOR_EMAIL"), "chunda@example.com");
-    assert_string_equal(bc_trie_lookup(s->global, "SITE_TITLE"), "Fuuuuuuuuu");
-    assert_string_equal(bc_trie_lookup(s->global, "SITE_TAGLINE"), "My cool tagline");
-    assert_string_equal(bc_trie_lookup(s->global, "BASE_DOMAIN"), "http://example.com");
-    assert_int_equal(bc_trie_size(s->settings), 15);
-    assert_string_equal(bc_trie_lookup(s->settings, "source_ext"), ".txt");
-    assert_string_equal(bc_trie_lookup(s->settings, "html_ext"), "/index.html");
-    assert_string_equal(bc_trie_lookup(s->settings, "content_dir"), "guda");
-    assert_string_equal(bc_trie_lookup(s->settings, "template_dir"), "templates");
-    assert_string_equal(bc_trie_lookup(s->settings, "main_template"), "foo.tmpl");
-    assert_string_equal(bc_trie_lookup(s->settings, "date_format"),
+    assert_int_equal(sb_trie_size(s->global), 7);
+    assert_string_equal(sb_trie_lookup(s->global, "BOLA"), "asd");
+    assert_string_equal(sb_trie_lookup(s->global, "GUDA"), "qwe");
+    assert_string_equal(sb_trie_lookup(s->global, "AUTHOR_NAME"), "chunda");
+    assert_string_equal(sb_trie_lookup(s->global, "AUTHOR_EMAIL"), "chunda@example.com");
+    assert_string_equal(sb_trie_lookup(s->global, "SITE_TITLE"), "Fuuuuuuuuu");
+    assert_string_equal(sb_trie_lookup(s->global, "SITE_TAGLINE"), "My cool tagline");
+    assert_string_equal(sb_trie_lookup(s->global, "BASE_DOMAIN"), "http://example.com");
+    assert_int_equal(sb_trie_size(s->settings), 15);
+    assert_string_equal(sb_trie_lookup(s->settings, "source_ext"), ".txt");
+    assert_string_equal(sb_trie_lookup(s->settings, "html_ext"), "/index.html");
+    assert_string_equal(sb_trie_lookup(s->settings, "content_dir"), "guda");
+    assert_string_equal(sb_trie_lookup(s->settings, "template_dir"), "templates");
+    assert_string_equal(sb_trie_lookup(s->settings, "main_template"), "foo.tmpl");
+    assert_string_equal(sb_trie_lookup(s->settings, "date_format"),
         "%b %d, %Y, %I:%M %p GMT");
-    assert_string_equal(bc_trie_lookup(s->settings, "posts_per_page"), "10");
-    assert_string_equal(bc_trie_lookup(s->settings, "atom_prefix"), "atom");
-    assert_string_equal(bc_trie_lookup(s->settings, "atom_ext"), ".xml");
-    assert_string_equal(bc_trie_lookup(s->settings, "atom_posts_per_page"), "10");
-    assert_string_equal(bc_trie_lookup(s->settings, "pagination_prefix"), "page");
-    assert_string_equal(bc_trie_lookup(s->settings, "post_prefix"), "post");
-    assert_string_equal(bc_trie_lookup(s->settings, "tag_prefix"), "tag");
-    assert_string_equal(bc_trie_lookup(s->settings, "html_order"), "DESC");
-    assert_string_equal(bc_trie_lookup(s->settings, "atom_order"), "DESC");
+    assert_string_equal(sb_trie_lookup(s->settings, "posts_per_page"), "10");
+    assert_string_equal(sb_trie_lookup(s->settings, "atom_prefix"), "atom");
+    assert_string_equal(sb_trie_lookup(s->settings, "atom_ext"), ".xml");
+    assert_string_equal(sb_trie_lookup(s->settings, "atom_posts_per_page"), "10");
+    assert_string_equal(sb_trie_lookup(s->settings, "pagination_prefix"), "page");
+    assert_string_equal(sb_trie_lookup(s->settings, "post_prefix"), "post");
+    assert_string_equal(sb_trie_lookup(s->settings, "tag_prefix"), "tag");
+    assert_string_equal(sb_trie_lookup(s->settings, "html_order"), "DESC");
+    assert_string_equal(sb_trie_lookup(s->settings, "atom_order"), "DESC");
     assert_non_null(s->posts);
     assert_string_equal(s->posts[0], "aaaa");
     assert_string_equal(s->posts[1], "bbbb");

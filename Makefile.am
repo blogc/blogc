@@ -1,5 +1,9 @@
 ## Autotools settings
 
+if INTERNAL_SQUAREBALL
+SUBDIRS = squareball
+endif
+
 ACLOCAL_AMFLAGS = -I m4
 
 AM_DISTCHECK_CONFIGURE_FLAGS = \
@@ -9,8 +13,9 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-ronn \
 	--enable-runserver \
 	--enable-tests \
-	--disable-silent-rules \
+	--enable-silent-rules \
 	--disable-valgrind \
+	--with-squareball=internal \
 	$(NULL)
 
 
@@ -42,6 +47,7 @@ noinst_HEADERS = \
 	src/blogc/content-parser.h \
 	src/blogc/datetime-parser.h \
 	src/blogc/debug.h \
+	src/blogc/error.h \
 	src/blogc/loader.h \
 	src/blogc/renderer.h \
 	src/blogc/source-parser.h \
@@ -53,6 +59,7 @@ noinst_HEADERS = \
 	src/blogc-git-receiver/shell-command-parser.h \
 	src/blogc-make/atom.h \
 	src/blogc-make/ctx.h \
+	src/blogc-make/error.h \
 	src/blogc-make/exec.h \
 	src/blogc-make/exec-native.h \
 	src/blogc-make/reloader.h \
@@ -61,17 +68,10 @@ noinst_HEADERS = \
 	src/blogc-runserver/httpd.h \
 	src/blogc-runserver/httpd-utils.h \
 	src/blogc-runserver/mime.h \
-	src/common/config-parser.h \
-	src/common/error.h \
-	src/common/file.h \
-	src/common/stdin.h \
-	src/common/utf8.h \
-	src/common/utils.h \
 	$(NULL)
 
 noinst_LTLIBRARIES = \
 	libblogc.la \
-	libblogc_common.la \
 	$(NULL)
 
 noinst_PROGRAMS = \
@@ -122,6 +122,7 @@ libblogc_la_SOURCES = \
 	src/blogc/content-parser.c \
 	src/blogc/datetime-parser.c \
 	src/blogc/debug.c \
+	src/blogc/error.c \
 	src/blogc/loader.c \
 	src/blogc/renderer.c \
 	src/blogc/source-parser.c \
@@ -130,25 +131,12 @@ libblogc_la_SOURCES = \
 
 libblogc_la_CFLAGS = \
 	$(AM_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 libblogc_la_LIBADD = \
 	$(LIBM) \
-	libblogc_common.la \
-	$(NULL)
-
-
-libblogc_common_la_SOURCES = \
-	src/common/config-parser.c \
-	src/common/error.c \
-	src/common/file.c \
-	src/common/stdin.c \
-	src/common/utf8.c \
-	src/common/utils.c \
-	$(NULL)
-
-libblogc_common_la_CFLAGS = \
-	$(AM_CFLAGS) \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 
@@ -158,11 +146,12 @@ blogc_SOURCES = \
 
 blogc_CFLAGS = \
 	$(AM_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 blogc_LDADD = \
 	libblogc.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 if BUILD_MAKE_EMBEDDED
@@ -183,11 +172,12 @@ blogc_git_receiver_SOURCES = \
 
 blogc_git_receiver_CFLAGS = \
 	$(AM_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 blogc_git_receiver_LDADD = \
 	libblogc_git_receiver.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 libblogc_git_receiver_la_SOURCES = \
@@ -200,10 +190,11 @@ libblogc_git_receiver_la_SOURCES = \
 
 libblogc_git_receiver_la_CFLAGS = \
 	$(AM_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 libblogc_git_receiver_la_LIBADD = \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 endif
 
@@ -216,12 +207,13 @@ blogc_make_SOURCES = \
 blogc_make_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(PTHREAD_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 blogc_make_LDADD = \
 	$(PTHREAD_LIBS) \
 	libblogc_make.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 endif
 
@@ -229,6 +221,7 @@ if BUILD_MAKE_LIB
 libblogc_make_la_SOURCES = \
 	src/blogc-make/atom.c \
 	src/blogc-make/ctx.c \
+	src/blogc-make/error.c \
 	src/blogc-make/exec.c \
 	src/blogc-make/exec-native.c \
 	src/blogc-make/reloader.c \
@@ -239,12 +232,13 @@ libblogc_make_la_SOURCES = \
 libblogc_make_la_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(PTHREAD_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 libblogc_make_la_LIBADD = \
 	$(LIBM) \
 	$(PTHREAD_LIBS) \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 endif
 
@@ -257,12 +251,13 @@ blogc_runserver_SOURCES = \
 blogc_runserver_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(PTHREAD_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 blogc_runserver_LDADD = \
 	$(PTHREAD_LIBS) \
 	libblogc_runserver.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 libblogc_runserver_la_SOURCES = \
@@ -274,11 +269,12 @@ libblogc_runserver_la_SOURCES = \
 libblogc_runserver_la_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(PTHREAD_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 libblogc_runserver_la_LIBADD = \
 	$(PTHREAD_LIBS) \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 endif
 
@@ -458,16 +454,11 @@ check_PROGRAMS += \
 	tests/blogc/check_renderer \
 	tests/blogc/check_source_parser \
 	tests/blogc/check_template_parser \
-	tests/common/check_config_parser \
-	tests/common/check_error \
-	tests/common/check_utf8 \
-	tests/common/check_utils \
 	$(NULL)
 
 if USE_LD_WRAP
 check_PROGRAMS += \
 	tests/blogc/check_loader \
-	tests/common/check_stdin \
 	$(NULL)
 
 tests_blogc_check_loader_SOURCES = \
@@ -476,35 +467,18 @@ tests_blogc_check_loader_SOURCES = \
 
 tests_blogc_check_loader_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_check_loader_LDFLAGS = \
 	-no-install \
-	-Wl,--wrap=bc_file_get_contents \
+	-Wl,--wrap=sb_file_get_contents_utf8 \
 	$(NULL)
 
 tests_blogc_check_loader_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
-	libblogc_common.la \
-	$(NULL)
-
-tests_common_check_stdin_SOURCES = \
-	tests/common/check_stdin.c \
-	$(NULL)
-
-tests_common_check_stdin_CFLAGS = \
-	$(CMOCKA_CFLAGS) \
-	$(NULL)
-
-tests_common_check_stdin_LDFLAGS = \
-	-no-install \
-	-Wl,--wrap=fgetc \
-	$(NULL)
-
-tests_common_check_stdin_LDADD = \
-	$(CMOCKA_LIBS) \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 endif
 
@@ -514,6 +488,7 @@ tests_blogc_check_content_parser_SOURCES = \
 
 tests_blogc_check_content_parser_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_check_content_parser_LDFLAGS = \
@@ -523,7 +498,7 @@ tests_blogc_check_content_parser_LDFLAGS = \
 tests_blogc_check_content_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 tests_blogc_check_datetime_parser_SOURCES = \
@@ -532,6 +507,7 @@ tests_blogc_check_datetime_parser_SOURCES = \
 
 tests_blogc_check_datetime_parser_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_check_datetime_parser_LDFLAGS = \
@@ -541,7 +517,7 @@ tests_blogc_check_datetime_parser_LDFLAGS = \
 tests_blogc_check_datetime_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 tests_blogc_check_renderer_SOURCES = \
@@ -550,6 +526,7 @@ tests_blogc_check_renderer_SOURCES = \
 
 tests_blogc_check_renderer_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_check_renderer_LDFLAGS = \
@@ -559,7 +536,7 @@ tests_blogc_check_renderer_LDFLAGS = \
 tests_blogc_check_renderer_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 tests_blogc_check_source_parser_SOURCES = \
@@ -568,6 +545,7 @@ tests_blogc_check_source_parser_SOURCES = \
 
 tests_blogc_check_source_parser_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_check_source_parser_LDFLAGS = \
@@ -577,7 +555,7 @@ tests_blogc_check_source_parser_LDFLAGS = \
 tests_blogc_check_source_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 tests_blogc_check_template_parser_SOURCES = \
@@ -586,6 +564,7 @@ tests_blogc_check_template_parser_SOURCES = \
 
 tests_blogc_check_template_parser_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_check_template_parser_LDFLAGS = \
@@ -595,75 +574,7 @@ tests_blogc_check_template_parser_LDFLAGS = \
 tests_blogc_check_template_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
-	libblogc_common.la \
-	$(NULL)
-
-tests_common_check_config_parser_SOURCES = \
-	tests/common/check_config_parser.c \
-	$(NULL)
-
-tests_common_check_config_parser_CFLAGS = \
-	$(CMOCKA_CFLAGS) \
-	$(NULL)
-
-tests_common_check_config_parser_LDFLAGS = \
-	-no-install \
-	$(NULL)
-
-tests_common_check_config_parser_LDADD = \
-	$(CMOCKA_LIBS) \
-	libblogc_common.la \
-	$(NULL)
-
-tests_common_check_error_SOURCES = \
-	tests/common/check_error.c \
-	$(NULL)
-
-tests_common_check_error_CFLAGS = \
-	$(CMOCKA_CFLAGS) \
-	$(NULL)
-
-tests_common_check_error_LDFLAGS = \
-	-no-install \
-	$(NULL)
-
-tests_common_check_error_LDADD = \
-	$(CMOCKA_LIBS) \
-	libblogc_common.la \
-	$(NULL)
-
-tests_common_check_utf8_SOURCES = \
-	tests/common/check_utf8.c \
-	$(NULL)
-
-tests_common_check_utf8_CFLAGS = \
-	$(CMOCKA_CFLAGS) \
-	$(NULL)
-
-tests_common_check_utf8_LDFLAGS = \
-	-no-install \
-	$(NULL)
-
-tests_common_check_utf8_LDADD = \
-	$(CMOCKA_LIBS) \
-	libblogc_common.la \
-	$(NULL)
-
-tests_common_check_utils_SOURCES = \
-	tests/common/check_utils.c \
-	$(NULL)
-
-tests_common_check_utils_CFLAGS = \
-	$(CMOCKA_CFLAGS) \
-	$(NULL)
-
-tests_common_check_utils_LDFLAGS = \
-	-no-install \
-	$(NULL)
-
-tests_common_check_utils_LDADD = \
-	$(CMOCKA_LIBS) \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 if BUILD_RUNSERVER
@@ -679,6 +590,7 @@ tests_blogc_runserver_check_httpd_utils_SOURCES = \
 
 tests_blogc_runserver_check_httpd_utils_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_runserver_check_httpd_utils_LDFLAGS = \
@@ -689,7 +601,7 @@ tests_blogc_runserver_check_httpd_utils_LDFLAGS = \
 tests_blogc_runserver_check_httpd_utils_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_runserver.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 tests_blogc_runserver_check_mime_SOURCES = \
@@ -698,6 +610,7 @@ tests_blogc_runserver_check_mime_SOURCES = \
 
 tests_blogc_runserver_check_mime_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_runserver_check_mime_LDFLAGS = \
@@ -708,7 +621,7 @@ tests_blogc_runserver_check_mime_LDFLAGS = \
 tests_blogc_runserver_check_mime_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_runserver.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 endif
 endif
@@ -730,6 +643,7 @@ tests_blogc_git_receiver_check_post_receive_SOURCES = \
 
 tests_blogc_git_receiver_check_post_receive_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_git_receiver_check_post_receive_LDFLAGS = \
@@ -740,7 +654,7 @@ tests_blogc_git_receiver_check_post_receive_LDFLAGS = \
 tests_blogc_git_receiver_check_post_receive_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_git_receiver.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 endif
 
@@ -750,6 +664,7 @@ tests_blogc_git_receiver_check_pre_receive_parser_SOURCES = \
 
 tests_blogc_git_receiver_check_pre_receive_parser_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_git_receiver_check_pre_receive_parser_LDFLAGS = \
@@ -759,7 +674,7 @@ tests_blogc_git_receiver_check_pre_receive_parser_LDFLAGS = \
 tests_blogc_git_receiver_check_pre_receive_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_git_receiver.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 tests_blogc_git_receiver_check_shell_command_parser_SOURCES = \
@@ -768,6 +683,7 @@ tests_blogc_git_receiver_check_shell_command_parser_SOURCES = \
 
 tests_blogc_git_receiver_check_shell_command_parser_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_git_receiver_check_shell_command_parser_LDFLAGS = \
@@ -777,7 +693,7 @@ tests_blogc_git_receiver_check_shell_command_parser_LDFLAGS = \
 tests_blogc_git_receiver_check_shell_command_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_git_receiver.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 endif
 
@@ -799,6 +715,7 @@ tests_blogc_make_check_exec_SOURCES = \
 
 tests_blogc_make_check_exec_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_make_check_exec_LDFLAGS = \
@@ -809,7 +726,7 @@ tests_blogc_make_check_exec_LDFLAGS = \
 tests_blogc_make_check_exec_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_make.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 endif
 
@@ -819,6 +736,7 @@ tests_blogc_make_check_atom_SOURCES = \
 
 tests_blogc_make_check_atom_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_make_check_atom_LDFLAGS = \
@@ -828,7 +746,7 @@ tests_blogc_make_check_atom_LDFLAGS = \
 tests_blogc_make_check_atom_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_make.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 tests_blogc_make_check_rules_SOURCES = \
@@ -837,6 +755,7 @@ tests_blogc_make_check_rules_SOURCES = \
 
 tests_blogc_make_check_rules_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_make_check_rules_LDFLAGS = \
@@ -846,7 +765,7 @@ tests_blogc_make_check_rules_LDFLAGS = \
 tests_blogc_make_check_rules_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_make.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 
 tests_blogc_make_check_settings_SOURCES = \
@@ -855,6 +774,7 @@ tests_blogc_make_check_settings_SOURCES = \
 
 tests_blogc_make_check_settings_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
+	$(SQUAREBALL_CFLAGS) \
 	$(NULL)
 
 tests_blogc_make_check_settings_LDFLAGS = \
@@ -864,7 +784,7 @@ tests_blogc_make_check_settings_LDFLAGS = \
 tests_blogc_make_check_settings_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_make.la \
-	libblogc_common.la \
+	$(SQUAREBALL_LIBS) \
 	$(NULL)
 endif
 

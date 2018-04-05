@@ -9,8 +9,8 @@
 #ifndef ___DEBUG_H
 #define ___DEBUG_H
 
-#include "../common/utils.h"
+#include <squareball.h>
 
-void blogc_debug_template(bc_slist_t *ast);
+void blogc_debug_template(sb_slist_t *ast);
 
 #endif /* ___DEBUG_H */
