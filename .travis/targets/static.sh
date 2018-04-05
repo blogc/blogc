@@ -6,7 +6,7 @@ build() {
         --disable-runserver \
         --enable-make-embedded
 
-    make LDFLAGS="-all-static" blogc
+    make LDFLAGS="-all-static"
 
     rm -rf root
     mkdir -p root

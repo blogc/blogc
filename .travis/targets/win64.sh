@@ -8,7 +8,7 @@ build() {
         --disable-git-receiver \
         --disable-make \
         --disable-runserver
-    make blogc.exe
+    make
 
     local pn="$(grep PACKAGE_TARNAME config.h | cut -d\" -f2)"
     local pv="$(grep PACKAGE_VERSION config.h | cut -d\" -f2)"
