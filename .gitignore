@@ -42,6 +42,7 @@ Makefile.in
 /m4/*.m4
 !/m4/ax_pthread.m4
 !/m4/pkg.m4
+!/m4/squareball.m4
 
 # man pages
 /blogc*.[157]
