@@ -32,10 +32,10 @@ Makefile.in
 /stamp-h1
 .dirstamp
 /build-aux/*
+!/build-aux/build-*.sh
+!/build-aux/check-make-embedded.sh
+!/build-aux/clang-analyzer.sh
 !/build-aux/git-version-gen
-!/build-aux/travis-build.sh
-!/build-aux/travis-build-github-lambda.sh
-!/build-aux/travis-deploy.sh
 !/build-aux/valgrind.sh
 
 # installed .m4 files

@@ -1,97 +1,53 @@
 sudo: required
 language: c
 
+addons:
+  apt:
+    packages:
+      - gcc-mingw-w64-i686
+      - gcc-mingw-w64-x86-64
+      - libcmocka-dev
+      - rpm
+      - valgrind
+
 matrix:
   include:
     - compiler: gcc
       env:
         - TARGET=distcheck
-      addons:
-        apt:
-          packages:
-            - realpath
-            - libcmocka-dev
     - compiler: clang
       env:
         - TARGET=distcheck
-      addons:
-        apt:
-          packages:
-            - realpath
-            - libcmocka-dev
+        - DISABLE_PUBLISHER=1
     - os: osx
       compiler: clang
       env:
         - TARGET=distcheck
+        - DISABLE_PUBLISHER=1
     - compiler: gcc
       env:
         - TARGET=valgrind
-      addons:
-        apt:
-          packages:
-            - realpath
-            - libcmocka-dev
-            - valgrind
     - compiler: clang
       env:
         - TARGET=valgrind
-      addons:
-        apt:
-          packages:
-            - realpath
-            - libcmocka-dev
-            - valgrind
     - compiler: clang
       env:
         - TARGET=clang-analyzer
-      addons:
-        apt:
-          packages:
-            - realpath
-            - libcmocka-dev
     - compiler: gcc
       env:
         - TARGET=dist-srpm
-      addons:
-        apt:
-          packages:
-            - realpath
-            - libcmocka-dev
-            - rpm
     - compiler: gcc
       env:
         - TARGET=static
-      addons:
-        apt:
-          packages:
-            - realpath
-            - libcmocka-dev
     - compiler: gcc
       env:
-        - TARGET=make-embedded
-      addons:
-        apt:
-          packages:
-            - realpath
-            - libcmocka-dev
+        - TARGET=check-make-embedded
     - compiler: gcc
       env:
         - TARGET=win32
-      addons:
-        apt:
-          packages:
-            - realpath
-            - libcmocka-dev
-            - gcc-mingw-w64-i686
     - compiler: gcc
       env:
         - TARGET=win64
-      addons:
-        apt:
-          packages:
-            - realpath
-            - libcmocka-dev
-            - gcc-mingw-w64-x86-64
 
 install:
   - gem install ronn
@@ -99,9 +55,4 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cmocka; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install xz; fi
 
-before_script:
-  - git fetch --unshallow
-  - ./autogen.sh
-
-script:
-  - ./.travis/test-run.sh
+script: curl -sSf https://yatr.rgm.io/run.sh | bash
