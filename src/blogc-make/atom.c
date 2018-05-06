@@ -73,13 +73,13 @@ bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
     if (-1 == write(fd, content, strlen(content))) {
         *err = bc_error_new_printf(BLOGC_MAKE_ERROR_ATOM,
             "Failed to write to temporary atom template: %s", strerror(errno));
-        free(content);
+        //free(content);
         close(fd);
         unlink(fname);
         return NULL;
     }
 
-    free(content);
+    //free(content);
     close(fd);
 
     return bc_strdup(fname);
