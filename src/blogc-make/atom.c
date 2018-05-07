@@ -54,9 +54,6 @@ bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
     if (err == NULL || *err != NULL)
         return NULL;
 
-    // FIXME: remove this line, intentional for temporary testing
-    void *foo = bc_malloc(10);
-
     // this is not really portable
     char fname[] = "/tmp/blogc-make_XXXXXX";
     int fd;
