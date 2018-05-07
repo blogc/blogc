@@ -25,6 +25,13 @@ matrix:
         - DISABLE_PUBLISHER=1
     - compiler: gcc
       env:
+        - TARGET=check-make-embedded
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
+    - compiler: gcc
+      env:
         - TARGET=valgrind
       addons:
         apt:
@@ -52,13 +59,6 @@ matrix:
     - compiler: gcc
       env:
         - TARGET=static
-    - compiler: gcc
-      env:
-        - TARGET=check-make-embedded
-      addons:
-        apt:
-          packages:
-            - libcmocka-dev
     - compiler: gcc
       env:
         - TARGET=win32
