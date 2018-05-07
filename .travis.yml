@@ -1,24 +1,23 @@
 sudo: required
 language: c
 
-addons:
-  apt:
-    packages:
-      - gcc-mingw-w64-i686
-      - gcc-mingw-w64-x86-64
-      - libcmocka-dev
-      - rpm
-      - valgrind
-
 matrix:
   include:
     - compiler: gcc
       env:
         - TARGET=distcheck
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
     - compiler: clang
       env:
         - TARGET=distcheck
         - DISABLE_PUBLISHER=1
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
     - os: osx
       compiler: clang
       env:
@@ -27,27 +26,53 @@ matrix:
     - compiler: gcc
       env:
         - TARGET=valgrind
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
+            - valgrind
     - compiler: clang
       env:
         - TARGET=valgrind
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
+            - valgrind
     - compiler: clang
       env:
         - TARGET=clang-analyzer
     - compiler: gcc
       env:
         - TARGET=dist-srpm
+      addons:
+        apt:
+          packages:
+            - rpm
     - compiler: gcc
       env:
         - TARGET=static
     - compiler: gcc
       env:
         - TARGET=check-make-embedded
+      addons:
+        apt:
+          packages:
+            - libcmocka-dev
     - compiler: gcc
       env:
         - TARGET=win32
+      addons:
+        apt:
+          packages:
+            - gcc-mingw-w64-i686
     - compiler: gcc
       env:
         - TARGET=win64
+      addons:
+        apt:
+          packages:
+            - gcc-mingw-w64-x86-64
 
 install:
   - gem install ronn
