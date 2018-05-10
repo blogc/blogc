@@ -2,17 +2,15 @@
 
 set -ex
 
-PN="$(grep PACKAGE_TARNAME config.h | cut -d\" -f2)"
-PV="$(grep PACKAGE_VERSION config.h | cut -d\" -f2)"
-DEST_DIR="${PN}-${TARGET}-${PV}"
+DESTDIR="${PN}-${TARGET}-${PV}"
 
 ${MAKE_CMD:-make} blogc.exe
 
-rm -rf "${DEST_DIR}"
-mkdir -p "${DEST_DIR}"
+rm -rf "${DESTDIR}"
+mkdir -p "${DESTDIR}"
 
-cp .libs/blogc.exe "${DEST_DIR}/"
-cp ../LICENSE "${DEST_DIR}/"
-cp ../README.md "${DEST_DIR}/"
+cp .libs/blogc.exe "${DESTDIR}/"
+cp ../LICENSE "${DESTDIR}/"
+cp ../README.md "${DESTDIR}/"
 
-zip "${DEST_DIR}.zip" "${DEST_DIR}"/*
+zip "${DESTDIR}.zip" "${DESTDIR}"/*

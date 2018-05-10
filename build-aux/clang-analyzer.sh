@@ -2,15 +2,13 @@
 
 set -ex
 
-PN="$(grep PACKAGE_TARNAME config.h | cut -d\" -f2)"
-PV="$(grep PACKAGE_VERSION config.h | cut -d\" -f2)"
 P="${PN}-clang-analyzer-${PV}"
 
 set +e
 scan-build \
     --use-cc="${CC:-clang}" \
     -o reports \
-    ${MAKE_CMD:-make}
+    make
 RV=$?
 set -e
 

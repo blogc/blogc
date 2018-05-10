@@ -2,8 +2,6 @@
 
 set -ex
 
-PV="$(grep PACKAGE_VERSION config.h | cut -d\" -f2)"
-
 ${MAKE_CMD:-make} LDFLAGS="-all-static" blogc
 
 rm -rf root
