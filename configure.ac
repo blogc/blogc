@@ -88,7 +88,7 @@ GIT_RECEIVER="disabled"
 AC_ARG_ENABLE([git-receiver], AS_HELP_STRING([--enable-git-receiver],
               [build blogc-git-receiver tool]))
 AS_IF([test "x$enable_git_receiver" = "xyes"], [
-  AC_CHECK_HEADERS([sys/types.h sys/stat.h sys/wait.h time.h libgen.h unistd.h errno.h dirent.h], [
+  AC_CHECK_HEADERS([sys/types.h sys/stat.h time.h libgen.h unistd.h errno.h dirent.h], [
     GIT_RECEIVER="enabled"
     have_git_receiver=yes
   ], [
@@ -220,7 +220,7 @@ AM_CONDITIONAL([USE_BGR_DEPS], [test "x$have_bgr_deps" = "xyes"])
 BASH="$ac_cv_path_bash"
 AC_SUBST(BASH)
 
-AC_CHECK_HEADERS([sys/stat.h time.h])
+AC_CHECK_HEADERS([sys/stat.h sys/wait.h time.h])
 
 LT_LIB_M
 
