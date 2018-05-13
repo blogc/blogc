@@ -16,6 +16,7 @@
 #include "ctx.h"
 #include "exec.h"
 #include "exec-native.h"
+#include "httpd.h"
 #include "reloader.h"
 #include "settings.h"
 #include "rules.h"
@@ -581,16 +582,16 @@ static int all_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args);
 static int
 runserver_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 {
-    bm_reloader_t *reloader = bm_reloader_new(ctx, all_exec, outputs, args);
-    if (reloader == NULL) {
-        return 3;
-    }
+    return bm_httpd_run(&ctx, all_exec, outputs, args);
+}
 
-    int rv = bm_exec_blogc_runserver(ctx, bc_trie_lookup(args, "host"),
-        bc_trie_lookup(args, "port"), bc_trie_lookup(args, "threads"));
 
-    bm_reloader_stop(reloader);
-    return rv;
+// WATCH RULE
+
+static int
+watch_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
+{
+    return bm_reloader_run(&ctx, all_exec, outputs, args);
 }
 
 
@@ -667,10 +668,18 @@ const bm_rule_t rules[] = {
     },
     {
         .name = "runserver",
-        .help = "run blogc-runserver pointing to output directory, if available\n"
+        .help = "run blogc-runserver pointing to output directory, if available,\n"
+            "                  rebuilding as needed\n"
             "                  arguments: host (127.0.0.1), port (8080) and threads (20)",
         .outputlist_func = NULL,
         .exec_func = runserver_exec,
+        .generate_files = false,
+    },
+    {
+        .name = "watch",
+        .help = "watch for changes in the source files, rebuilding as needed",
+        .outputlist_func = NULL,
+        .exec_func = watch_exec,
         .generate_files = false,
     },
     {NULL, NULL, NULL, NULL, false},

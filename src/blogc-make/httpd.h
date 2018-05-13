@@ -6,15 +6,14 @@
  * See the file LICENSE.
  */
 
-#ifndef _MAKE_RELOADER_H
-#define _MAKE_RELOADER_H
+#ifndef _MAKE_HTTPD_H
+#define _MAKE_HTTPD_H
 
 #include "../common/utils.h"
 #include "ctx.h"
 #include "rules.h"
 
-int bm_reloader_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec,
-    bc_slist_t *outputs, bc_trie_t *args);
-void bm_reloader_stop(int signum);
+int bm_httpd_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec, bc_slist_t *outputs,
+    bc_trie_t *args);
 
-#endif /* _MAKE_RELOADER_H */
+#endif /* _MAKE_HTTPD_H */

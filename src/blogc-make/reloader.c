@@ -6,11 +6,14 @@
  * See the file LICENSE.
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <errno.h>
 #include "../common/utils.h"
 #include "ctx.h"
 #include "rules.h"
@@ -19,19 +22,52 @@
 // we are not going to unit-test these functions, then printing errors
 // directly is not a big issue
 
+static pthread_mutex_t mutex_running = PTHREAD_MUTEX_INITIALIZER;
+static bool running = false;
+static int handler_signum = 0;
+static void (*handler_func)(int) = NULL;
 
-static void*
-bm_reloader_thread(void *arg)
+
+int
+bm_reloader_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec,
+    bc_slist_t *outputs, bc_trie_t *args)
 {
-    bm_reloader_t *reloader = arg;
-    while (reloader->running) {
-        if (!bm_ctx_reload(&(reloader->ctx))) {
+    // install ^C handler
+    struct sigaction current_action;
+    if (sigaction(SIGINT, NULL, &current_action) < 0) {
+        fprintf(stderr, "blogc-make: failed to run reloader: %s\n", strerror(errno));
+        return 3;
+    }
+    if (current_action.sa_handler != bm_reloader_stop) {  // not installed yet
+        // backup current handler
+        pthread_mutex_lock(&mutex_running);
+        handler_func = current_action.sa_handler;
+        pthread_mutex_unlock(&mutex_running);
+
+        // set new handler
+        struct sigaction new_action;
+        new_action.sa_handler = bm_reloader_stop;
+        sigemptyset(&new_action.sa_mask);
+        new_action.sa_flags = 0;
+        if (sigaction(SIGINT, &new_action, NULL) < 0) {
+            fprintf(stderr, "blogc-make: failed to run reloader: %s\n",
+                strerror(errno));
+            return 3;
+        }
+    }
+
+    pthread_mutex_lock(&mutex_running);
+    running = true;
+    pthread_mutex_unlock(&mutex_running);
+
+    while (running) {
+        if (!bm_ctx_reload(ctx)) {
             fprintf(stderr, "blogc-make: warning: failed to reload context. "
                 "retrying in 5 seconds ...\n\n");
             sleep(5);
             continue;
         }
-        if (0 != reloader->rule_exec(reloader->ctx, reloader->outputs, reloader->args)) {
+        if (0 != rule_exec(*ctx, outputs, args)) {
             fprintf(stderr, "blogc-make: warning: failed to rebuild website. "
                 "retrying in 5 seconds ...\n\n");
             sleep(5);
@@ -40,59 +76,38 @@ bm_reloader_thread(void *arg)
         sleep(1);
     }
 
-    free(reloader);
-    return NULL;
-}
+    if (handler_signum > 0 && handler_signum <= SIGRTMAX)
+        return 128 + handler_signum;
 
-
-bm_reloader_t*
-bm_reloader_new(bm_ctx_t *ctx, bm_rule_exec_func_t rule_exec,
-    bc_slist_t *outputs, bc_trie_t *args)
-{
-    // first rule_exec call is syncronous, to do a 'sanity check'
-    if (0 != rule_exec(ctx, outputs, args))
-        return NULL;
-
-    int err;
-
-    pthread_attr_t attr;
-    if (0 != (err = pthread_attr_init(&attr))) {
-        fprintf(stderr, "blogc-make: error: failed to initialize reloader "
-            "thread attributes: %s\n", strerror(err));
-        return NULL;
-    }
-
-    // we run the thread detached, because we don't want to wait it to join
-    // before exiting. the OS can clean it properly
-    if (0 != (err = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED))) {
-        fprintf(stderr, "blogc-make: error: failed to mark reloader thread as "
-            "detached: %s\n", strerror(err));
-        return NULL;
-    }
-
-    bm_reloader_t *rv = bc_malloc(sizeof(bm_reloader_t));
-    rv->ctx = ctx;
-    rv->rule_exec = rule_exec;
-    rv->outputs = outputs;
-    rv->args = args;
-    rv->running = true;
-
-    pthread_t thread;
-    if (0 != (err = pthread_create(&thread, &attr, bm_reloader_thread, rv))) {
-        fprintf(stderr, "blogc-make: error: failed to create reloader "
-            "thread: %s\n", strerror(err));
-        free(rv);
-        return NULL;
-    }
-
-    return rv;
+    return handler_signum;
 }
 
 
 void
-bm_reloader_stop(bm_reloader_t *reloader)
+bm_reloader_stop(int signum)
 {
-    if (reloader == NULL)
-        return;
-    reloader->running = false;
+    pthread_mutex_lock(&mutex_running);
+
+    handler_signum = signum > 128 ? signum - 128 : signum;
+    running = false;
+
+    // reraise if SIGINT
+    if (handler_signum == SIGINT) {
+
+        // reinstall old ^C handler
+        struct sigaction new_action;
+        new_action.sa_handler = handler_func;
+        sigemptyset(&new_action.sa_mask);
+        new_action.sa_flags = 0;
+        sigaction(SIGINT, &new_action, NULL);
+
+        // run it
+        raise(SIGINT);
+
+        // SIGINT will usually kill the process, but in the case that the
+        // `handler_func` prevents it, our custom handler will be reinstalled
+        // by `bm_reloader_run`.
+    }
+
+    pthread_mutex_unlock(&mutex_running);
 }
