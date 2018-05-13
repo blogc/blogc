@@ -15,6 +15,6 @@
 
 int bm_reloader_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec,
     bc_slist_t *outputs, bc_trie_t *args);
-void bm_reloader_stop(int signum);
+void bm_reloader_stop(int status_code);
 
 #endif /* _MAKE_RELOADER_H */

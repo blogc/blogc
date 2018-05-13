@@ -32,8 +32,14 @@
 
 static pthread_mutex_t mutex_running = PTHREAD_MUTEX_INITIALIZER;
 static bool running = false;
-static int handler_signum = 0;
+static int reloader_status_code = 0;
 static void (*handler_func)(int) = NULL;
+
+static void
+sig_handler(int signum)
+{
+    bm_reloader_stop(signum + 128);
+}
 
 
 int
@@ -46,7 +52,7 @@ bm_reloader_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec,
         fprintf(stderr, "blogc-make: failed to run reloader: %s\n", strerror(errno));
         return 3;
     }
-    if (current_action.sa_handler != bm_reloader_stop) {  // not installed yet
+    if (current_action.sa_handler != sig_handler) {  // not installed yet
         // backup current handler
         pthread_mutex_lock(&mutex_running);
         handler_func = current_action.sa_handler;
@@ -54,7 +60,7 @@ bm_reloader_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec,
 
         // set new handler
         struct sigaction new_action;
-        new_action.sa_handler = bm_reloader_stop;
+        new_action.sa_handler = sig_handler;
         sigemptyset(&new_action.sa_mask);
         new_action.sa_flags = 0;
         if (sigaction(SIGINT, &new_action, NULL) < 0) {
@@ -84,23 +90,20 @@ bm_reloader_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec,
         sleep(1);
     }
 
-    if (handler_signum > 0 && handler_signum <= SIGRTMAX)
-        return 128 + handler_signum;
-
-    return handler_signum;
+    return reloader_status_code;
 }
 
 
 void
-bm_reloader_stop(int signum)
+bm_reloader_stop(int status_code)
 {
     pthread_mutex_lock(&mutex_running);
 
-    handler_signum = signum > 128 ? signum - 128 : signum;
     running = false;
+    reloader_status_code = status_code;
 
     // reraise if SIGINT
-    if (handler_signum == SIGINT) {
+    if (status_code == SIGINT + 128) {
 
         // reinstall old ^C handler
         struct sigaction new_action;
