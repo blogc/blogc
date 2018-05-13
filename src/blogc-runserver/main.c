@@ -45,17 +45,14 @@ print_usage(void)
 }
 
 
-void sigint_handler(int sig) {
-    printf("\n");
-    exit(0);
-}
-
-
 int
 main(int argc, char **argv)
 {
-    signal(SIGPIPE, SIG_IGN);
-    //signal(SIGINT, sigint_handler);
+    struct sigaction new_action;
+    new_action.sa_handler = SIG_IGN;
+    sigemptyset(&new_action.sa_mask);
+    new_action.sa_flags = 0;
+    sigaction(SIGPIPE, &new_action, NULL);
 
     int rv = 0;
     char *host = NULL;
