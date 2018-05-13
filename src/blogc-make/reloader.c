@@ -19,6 +19,14 @@
 #include "rules.h"
 #include "reloader.h"
 
+// hack for osx
+#ifndef SIGRTMAX
+#ifdef NSIG
+#define SIGRTMAX NSIG
+#endif
+#endif
+
+
 // we are not going to unit-test these functions, then printing errors
 // directly is not a big issue
 
