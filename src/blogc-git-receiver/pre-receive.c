@@ -15,6 +15,7 @@
 #include <dirent.h>
 #include <time.h>
 #include <libgen.h>
+#include "../common/compat.h"
 #include "../common/utils.h"
 #include "../common/stdin.h"
 #include "pre-receive-parser.h"
@@ -197,7 +198,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
     char *build_cmd = NULL;
     if (0 == access("blogcfile", F_OK)) {
         int status_bmake = system("blogc-make -v 2> /dev/null > /dev/null");
-        if (127 == WEXITSTATUS(status_bmake)) {
+        if (127 == bc_compat_status_code(status_bmake)) {
             fprintf(stderr, "error: failed to find blogc-make binary\n");
             rv = 3;
             goto cleanup;
@@ -209,12 +210,12 @@ bgr_pre_receive_hook(int argc, char *argv[])
         const char *make_impl = NULL;
 
         int status_gmake = system("gmake -f /dev/null 2> /dev/null > /dev/null");
-        if (127 != WEXITSTATUS(status_gmake)) {
+        if (127 != bc_compat_status_code(status_gmake)) {
             make_impl = "gmake";
         }
         else {
             int status_make = system("make -f /dev/null 2> /dev/null > /dev/null");
-            if (127 != WEXITSTATUS(status_make)) {
+            if (127 != bc_compat_status_code(status_make)) {
                 make_impl = "make";
             }
         }

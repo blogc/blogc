@@ -61,6 +61,7 @@ noinst_HEADERS = \
 	src/blogc-runserver/httpd.h \
 	src/blogc-runserver/httpd-utils.h \
 	src/blogc-runserver/mime.h \
+	src/common/compat.h \
 	src/common/config-parser.h \
 	src/common/error.h \
 	src/common/file.h \
@@ -139,6 +140,7 @@ libblogc_la_LIBADD = \
 
 
 libblogc_common_la_SOURCES = \
+	src/common/compat.c \
 	src/common/config-parser.c \
 	src/common/error.c \
 	src/common/file.c \

@@ -55,7 +55,7 @@ int
 main(int argc, char **argv)
 {
     signal(SIGPIPE, SIG_IGN);
-    signal(SIGINT, sigint_handler);
+    //signal(SIGINT, sigint_handler);
 
     int rv = 0;
     char *host = NULL;

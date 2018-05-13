@@ -18,6 +18,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <libgen.h>
+#include "../common/compat.h"
 #include "../common/error.h"
 #include "../common/file.h"
 #include "../common/utils.h"
@@ -202,7 +203,7 @@ bm_exec_command(const char *cmd, const char *input, char **output,
     int status;
     waitpid(pid, &status, 0);
 
-    return WEXITSTATUS(status);
+    return bc_compat_status_code(status);
 }
 
 
@@ -402,7 +403,7 @@ bm_exec_blogc_runserver(bm_ctx_t *ctx, const char *host, const char *port,
 
     // we don't need pipes to run blogc-runserver, because it is "interactive"
     int status = system(cmd->str);
-    int rv = WEXITSTATUS(status);
+    int rv = bc_compat_status_code(status);
     bc_string_free(cmd, true);
 
     if (rv != 0 && rv != 130) {
