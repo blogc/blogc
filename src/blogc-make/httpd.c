@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <unistd.h>
 #include "../common/utils.h"
 #include "ctx.h"
 #include "exec.h"
@@ -47,6 +48,17 @@ int
 bm_httpd_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec, bc_slist_t *outputs,
     bc_trie_t *args)
 {
+    // this is here to avoid that the httpd starts running in the middle of the
+    // first build, as the reloader and the httpd are started in parallel.
+    // we run the task synchronously for the first time, and start the httpd
+    // thread afterwards.
+    bool wait_before_reloader = false;
+    if (0 != rule_exec(*ctx, outputs, args)) {
+        fprintf(stderr, "blogc-make: warning: failed to rebuild website. "
+            "retrying in 5 seconds ...\n\n");
+        wait_before_reloader = true;
+    }
+
     int err;
 
     pthread_attr_t attr;
@@ -77,5 +89,8 @@ bm_httpd_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec, bc_slist_t *outputs,
     }
 
     // run the reloader
+    if (wait_before_reloader) {
+        sleep(5);
+    }
     return bm_reloader_run(ctx, rule_exec, outputs, args);
 }
