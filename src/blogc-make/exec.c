@@ -308,10 +308,6 @@ bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *global_variables, bc_trie_t *local_varia
 
     int rv = bm_exec_command(cmd, input->str, &out, &err, &error);
 
-    if (err != NULL) {
-        fprintf(stderr, "%s", err);
-    }
-
     if (error != NULL) {
         bc_error_print(error, "blogc-make");
         free(cmd);
@@ -322,35 +318,36 @@ bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *global_variables, bc_trie_t *local_varia
         return 3;
     }
 
-    if (rv != 0) {
-        if (ctx->verbose) {
-            fprintf(stderr,
-                "blogc-make: error: Failed to execute command.\n"
-                "\n"
-                "STATUS CODE: %d\n", rv);
-            if (input->len > 0) {
-                fprintf(stderr, "\nSTDIN:\n"
-                    "----------------------------->8-----------------------------\n"
-                    "%s\n"
-                    "----------------------------->8-----------------------------\n",
-                    bc_str_strip(input->str));
-            }
-            if (out != NULL) {
-                fprintf(stderr, "\nSTDOUT:\n"
-                    "----------------------------->8-----------------------------\n"
-                    "%s\n"
-                    "----------------------------->8-----------------------------\n",
-                    bc_str_strip(out));
-            }
+    if (rv != 0 && ctx->verbose) {
+        fprintf(stderr,
+            "blogc-make: error: Failed to execute command.\n"
+            "\n"
+            "STATUS CODE: %d\n", rv);
+        if (input->len > 0) {
+            fprintf(stderr, "\nSTDIN:\n"
+                "----------------------------->8-----------------------------\n"
+                "%s\n"
+                "----------------------------->8-----------------------------\n",
+                bc_str_strip(input->str));
         }
-        else {
-            fprintf(stderr,
-                "blogc-make: error: Failed to execute command (%d)", rv);
-            if (err != NULL) {
-                fprintf(stderr, ":\n%s", bc_str_strip(err));
-            }
-            fprintf(stderr, "\n");
+        if (out != NULL) {
+            fprintf(stderr, "\nSTDOUT:\n"
+                "----------------------------->8-----------------------------\n"
+                "%s\n"
+                "----------------------------->8-----------------------------\n",
+                bc_str_strip(out));
         }
+        if (err != NULL) {
+            fprintf(stderr, "\nSTDERR:\n"
+                "----------------------------->8-----------------------------\n"
+                "%s\n"
+                "----------------------------->8-----------------------------\n",
+                bc_str_strip(err));
+        }
+        fprintf(stderr, "\n");
+    }
+    else if (err != NULL) {
+        fprintf(stderr, "%s\n", err);
     }
 
     bc_string_free(input, true);
