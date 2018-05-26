@@ -63,6 +63,13 @@ else
     grep "agent=" "${TEMP}/output.txt" &> /dev/null
 fi
 
+echo 0000 | SSH_ORIGINAL_COMMAND="git-upload-pack 'lol.git'" call_bgr 2>&1 > "${TEMP}/output.txt"
+if [[ -n "${VALGRIND}" ]]; then
+    grep "git-shell -c \"git-upload-pack '.*repos/lol.git'\"" "${TEMP}/output.txt" &> /dev/null
+else
+    grep "agent=" "${TEMP}/output.txt" &> /dev/null
+fi
+
 echo 0000 | call_bgr -c "git-upload-archive 'lol.git'" 2>&1 > "${TEMP}/output.txt" || true
 if [[ -n "${VALGRIND}" ]]; then
     grep "git-shell -c \"git-upload-archive '.*repos/lol.git'\"" "${TEMP}/output.txt" &> /dev/null
