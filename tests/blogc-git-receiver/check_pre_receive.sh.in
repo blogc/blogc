@@ -199,7 +199,7 @@ EOF
 0000000000000000000000000000000000000000 $(git rev-parse HEAD) refs/heads/master
 EOF
 
-    SHELL="${SELF}" HOME="${TEMP}" PATH="@abs_top_builddir@:${PATH}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt" || true
+    SHELL="${SELF}" BLOGC_GIT_RECEIVER_BASEDIR="${TEMP}" PATH="@abs_top_builddir@:${PATH}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt" || true
     grep "blogc-make: error: settings: " "${TEMP}/output.txt" &> /dev/null
 fi
 

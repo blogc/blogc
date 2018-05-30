@@ -76,7 +76,10 @@ bgr_post_receive_hook(int argc, char *argv[])
         goto push;
     }
 
-    char *home = getenv("HOME");
+    char *home = getenv("BLOGC_GIT_RECEIVER_BASEDIR");
+    if (home == NULL) {
+        home = getenv("HOME");
+    }
     if (home == NULL) {
         fprintf(stderr, "warning: failed to find user home path, "
             "mirroring disabled\n");

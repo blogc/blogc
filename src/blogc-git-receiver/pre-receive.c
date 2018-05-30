@@ -177,7 +177,10 @@ bgr_pre_receive_hook(int argc, char *argv[])
         goto cleanup;
     }
 
-    char *home = getenv("HOME");
+    char *home = getenv("BLOGC_GIT_RECEIVER_BASEDIR");
+    if (home == NULL) {
+        home = getenv("HOME");
+    }
     if (home == NULL) {
         fprintf(stderr, "error: failed to find user home path\n");
         rv = 3;

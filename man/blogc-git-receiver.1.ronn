@@ -145,13 +145,24 @@ mirror, you can run its `post-receive` hook manually in the server:
 WARNING: If you push manually and your server's repository is empty, you'll clean
 your mirror repository.
 
-## ENVIRONMENT VARIABLES
+## ENVIRONMENT
 
-`blogc-git-receiver` will export an environment variable called `BLOGC_GIT_RECEIVER`
-when calling `gmake` to build websites. This variable can be used to enable building
-of content that should only be built when running in production environment, for
-example. This variable will not be added when using blogc-make(1), whose builds are
-always considered to be "production" (blogc-make(1) is never called with `-D`).
+The following variable can be set in the SSH Server (usually in `~/.ssh/environment`)
+to change `blogc-git-receiver` behaviour:
+
+  * `BLOGC_GIT_RECEIVER_BASEDIR`:
+    Path to a directory that should be used by `blogc-git-receiver` instead of the
+    user's home directory. Useful for shared hosting environments that only provide
+    one shell user.
+
+The following variable is exported by `blogc-git-receiver` when building websites
+with make(1):
+
+  * `BLOGC_GIT_RECEIVER=1`:
+    This variable can be used to enable building of content that should only be
+    built when running in production environment, for example. This variable will
+    not be exported when using blogc-make(1), whose builds are always considered to
+    be "production" (blogc-make(1) is never called with `-D`).
 
 ## BUGS
 
