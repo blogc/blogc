@@ -63,8 +63,8 @@ blogc*.html
 /tests/blogc/check_template_parser
 /tests/blogc-git-receiver/check_pre_receive_parser
 /tests/blogc-git-receiver/check_pre_receive.sh
-/tests/blogc-git-receiver/check_post_receive
 /tests/blogc-git-receiver/check_post_receive.sh
+/tests/blogc-git-receiver/check_settings
 /tests/blogc-git-receiver/check_shell_command_parser
 /tests/blogc-git-receiver/check_shell.sh
 /tests/blogc-make/check_atom

@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include "../common/utils.h"
+#include "settings.h"
 #include "shell-command-parser.h"
 #include "shell.h"
 
@@ -34,13 +35,10 @@ bgr_shell(int argc, char *argv[])
         goto cleanup;
     }
 
-    // get home path
-    char *home = getenv("BLOGC_GIT_RECEIVER_BASEDIR");
-    if (home == NULL) {
-        home = getenv("HOME");
-    }
-    if (home == NULL) {
-        fprintf(stderr, "error: failed to find user home path\n");
+    // get base dir path
+    const char *bd = bgr_settings_get_basedir();
+    if (bd == NULL) {
+        fprintf(stderr, "error: failed to find base directory path\n");
         rv = 3;
         goto cleanup;
     }
@@ -53,7 +51,7 @@ bgr_shell(int argc, char *argv[])
         goto cleanup;
     }
 
-    repo = bc_strdup_printf("%s/repos/%s", home, tmp_repo);
+    repo = bc_strdup_printf("%s/repos/%s", bd, tmp_repo);
     quoted_repo = bc_shell_quote(repo);
     free(tmp_repo);
 
@@ -132,9 +130,8 @@ bgr_shell(int argc, char *argv[])
 
 git_exec:
 
-    if (0 != chdir(home)) {
-        fprintf(stderr, "error: failed to chdir (%s): %s\n", home,
-            strerror(errno));
+    if (0 != chdir(bd)) {
+        fprintf(stderr, "error: failed to chdir (%s): %s\n", bd, strerror(errno));
         rv = 3;
         goto cleanup;
     }

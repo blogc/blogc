@@ -18,6 +18,7 @@
 #include "../common/compat.h"
 #include "../common/utils.h"
 #include "../common/stdin.h"
+#include "settings.h"
 #include "pre-receive-parser.h"
 #include "pre-receive.h"
 
@@ -177,18 +178,15 @@ bgr_pre_receive_hook(int argc, char *argv[])
         goto cleanup;
     }
 
-    char *home = getenv("BLOGC_GIT_RECEIVER_BASEDIR");
-    if (home == NULL) {
-        home = getenv("HOME");
-    }
-    if (home == NULL) {
-        fprintf(stderr, "error: failed to find user home path\n");
+    const char *bd = bgr_settings_get_basedir();
+    if (bd == NULL) {
+        fprintf(stderr, "error: failed to find user base directory path\n");
         rv = 3;
         goto cleanup;
     }
 
     unsigned long epoch = time(NULL);
-    output_dir = bc_strdup_printf("%s/builds/%s-%lu", home, master, epoch);
+    output_dir = bc_strdup_printf("%s/builds/%s-%lu", bd, master, epoch);
 
     if (0 == access(output_dir, F_OK)) {
         char *tmp = output_dir;

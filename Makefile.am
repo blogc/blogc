@@ -49,6 +49,7 @@ noinst_HEADERS = \
 	src/blogc-git-receiver/post-receive.h \
 	src/blogc-git-receiver/pre-receive.h \
 	src/blogc-git-receiver/pre-receive-parser.h \
+	src/blogc-git-receiver/settings.h \
 	src/blogc-git-receiver/shell.h \
 	src/blogc-git-receiver/shell-command-parser.h \
 	src/blogc-make/atom.h \
@@ -197,6 +198,7 @@ libblogc_git_receiver_la_SOURCES = \
 	src/blogc-git-receiver/post-receive.c \
 	src/blogc-git-receiver/pre-receive.c \
 	src/blogc-git-receiver/pre-receive-parser.c \
+	src/blogc-git-receiver/settings.c \
 	src/blogc-git-receiver/shell.c \
 	src/blogc-git-receiver/shell-command-parser.c \
 	$(NULL)
@@ -725,23 +727,23 @@ check_PROGRAMS += \
 
 if USE_LD_WRAP
 check_PROGRAMS += \
-	tests/blogc-git-receiver/check_post_receive \
+	tests/blogc-git-receiver/check_settings \
 	$(NULL)
 
-tests_blogc_git_receiver_check_post_receive_SOURCES = \
-	tests/blogc-git-receiver/check_post_receive.c \
+tests_blogc_git_receiver_check_settings_SOURCES = \
+	tests/blogc-git-receiver/check_settings.c \
 	$(NULL)
 
-tests_blogc_git_receiver_check_post_receive_CFLAGS = \
+tests_blogc_git_receiver_check_settings_CFLAGS = \
 	$(CMOCKA_CFLAGS) \
 	$(NULL)
 
-tests_blogc_git_receiver_check_post_receive_LDFLAGS = \
+tests_blogc_git_receiver_check_settings_LDFLAGS = \
 	-no-install \
 	-Wl,--wrap=realpath \
 	$(NULL)
 
-tests_blogc_git_receiver_check_post_receive_LDADD = \
+tests_blogc_git_receiver_check_settings_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_git_receiver.la \
 	libblogc_common.la \

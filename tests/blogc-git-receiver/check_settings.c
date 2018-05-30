@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include "../../src/common/config-parser.h"
 #include "../../src/common/utils.h"
-#include "../../src/blogc-git-receiver/post-receive.h"
+#include "../../src/blogc-git-receiver/settings.h"
 
 
 char*
@@ -29,14 +29,15 @@ __wrap_realpath(const char *path, char *resolved_path)
 
 
 static void
-test_post_receive_get_config_section(void **state)
+test_settings_get_section(void **state)
 {
     bc_error_t *err = NULL;
 
+    setenv("HOME", "/home/blogc", 1);
+
     bc_config_t *config = bc_config_parse("", 0, NULL, &err);
     assert_null(err);
-    assert_null(bgr_post_receive_get_config_section(config,
-        "/home/blogc/repos/foo.git", "/home/blogc"));
+    assert_null(bgr_settings_get_section(config, "/home/blogc/repos/foo.git"));
     bc_config_free(config);
 
     will_return(__wrap_realpath, NULL);
@@ -53,14 +54,14 @@ test_post_receive_get_config_section(void **state)
         "\n";
     config = bc_config_parse(conf, strlen(conf), NULL, &err);
     assert_null(err);
-    char *s = bgr_post_receive_get_config_section(config,
-        "/home/blogc/repos/bar.git", "/home/blogc");
+    char *s = bgr_settings_get_section(config, "/home/blogc/repos/bar.git");
     assert_string_equal(s, "repo:bar.git");
     free(s);
     bc_config_free(config);
 
+    setenv("BLOGC_GIT_RECEIVER_BASEDIR", "/home/bola", 1);
     will_return(__wrap_realpath, NULL);
-    will_return(__wrap_realpath, "/home/blogc/repos/asd/bar.git");
+    will_return(__wrap_realpath, "/home/bola/repos/asd/bar.git");
     conf =
         "[repo:asd/foo.git]\n"
         "mirror = foo\n"
@@ -73,8 +74,7 @@ test_post_receive_get_config_section(void **state)
         "\n";
     config = bc_config_parse(conf, strlen(conf), NULL, &err);
     assert_null(err);
-    s = bgr_post_receive_get_config_section(config,
-        "/home/blogc/repos/asd/bar.git", "/home/blogc");
+    s = bgr_settings_get_section(config, "/home/bola/repos/asd/bar.git");
     assert_string_equal(s, "repo:asd/bar.git");
     free(s);
     bc_config_free(config);
@@ -85,7 +85,7 @@ int
 main(void)
 {
     const UnitTest tests[] = {
-        unit_test(test_post_receive_get_config_section),
+        unit_test(test_settings_get_section),
     };
     return run_tests(tests);
 }
