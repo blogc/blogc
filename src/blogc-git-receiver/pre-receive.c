@@ -199,15 +199,16 @@ default_sym:
         goto cleanup;
     }
 
-    const char *bd = bgr_settings_get_basedir();
-    if (bd == NULL) {
-        fprintf(stderr, "error: failed to find user base directory path\n");
+    char *buildsd = bgr_settings_get_builds_dir();
+    if (buildsd == NULL) {
+        fprintf(stderr, "error: failed to find builds directory path\n");
         rv = 3;
         goto cleanup;
     }
 
     unsigned long epoch = time(NULL);
-    output_dir = bc_strdup_printf("%s/builds/%s-%lu", bd, master, epoch);
+    output_dir = bc_strdup_printf("%s/%s-%lu", buildsd, master, epoch);
+    free(buildsd);
 
     if (0 == access(output_dir, F_OK)) {
         char *tmp = output_dir;

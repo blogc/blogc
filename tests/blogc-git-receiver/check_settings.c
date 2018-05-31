@@ -59,7 +59,7 @@ test_settings_get_section(void **state)
     free(s);
     bc_config_free(config);
 
-    setenv("BLOGC_GIT_RECEIVER_BASEDIR", "/home/bola", 1);
+    setenv("BLOGC_GIT_RECEIVER_BASE_DIR", "/home/bola", 1);
     will_return(__wrap_realpath, NULL);
     will_return(__wrap_realpath, "/home/bola/repos/asd/bar.git");
     conf =

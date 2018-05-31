@@ -36,7 +36,7 @@ bgr_shell(int argc, char *argv[])
     }
 
     // get base dir path
-    const char *bd = bgr_settings_get_basedir();
+    const char *bd = bgr_settings_get_base_dir();
     if (bd == NULL) {
         fprintf(stderr, "error: failed to find base directory path\n");
         rv = 3;

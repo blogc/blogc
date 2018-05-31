@@ -110,7 +110,7 @@ mirror = ${TEMP}/repos/bar6.git
 mirror = lol
 EOF
 git init --bare "${TEMP}/repos/bar6.git" &> /dev/null
-BLOGC_GIT_RECEIVER_BASEDIR="${TEMP}" ${TESTS_ENVIRONMENT} ./repos/foo.git/hooks/post-receive 2>&1 | tee "${TEMP}/output.txt"
+BLOGC_GIT_RECEIVER_BASE_DIR="${TEMP}" ${TESTS_ENVIRONMENT} ./repos/foo.git/hooks/post-receive 2>&1 | tee "${TEMP}/output.txt"
 grep "[new branch] *master" "${TEMP}/output.txt" &> /dev/null
 
 rm "${TEMP}/output.txt"

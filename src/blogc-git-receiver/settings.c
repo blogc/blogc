@@ -20,9 +20,9 @@
 
 
 const char*
-bgr_settings_get_basedir(void)
+bgr_settings_get_base_dir(void)
 {
-    char *rv = getenv("BLOGC_GIT_RECEIVER_BASEDIR");
+    char *rv = getenv("BLOGC_GIT_RECEIVER_BASE_DIR");
     if (rv != NULL) {
         return rv;
     }
@@ -31,9 +31,20 @@ bgr_settings_get_basedir(void)
 
 
 char*
+bgr_settings_get_builds_dir(void)
+{
+    char *rv = getenv("BLOGC_GIT_RECEIVER_BUILDS_DIR");
+    if (rv != NULL) {
+        return bc_strdup(rv);
+    }
+    return bc_strdup_printf("%s/builds", bgr_settings_get_base_dir());
+}
+
+
+char*
 bgr_settings_get_section(bc_config_t *config, const char *repo_path)
 {
-    const char *bd = bgr_settings_get_basedir();
+    const char *bd = bgr_settings_get_base_dir();
     if (bd == NULL) {
         return NULL;
     }
@@ -62,7 +73,7 @@ bgr_settings_get_section(bc_config_t *config, const char *repo_path)
 bc_config_t*
 bgr_settings_parse(void)
 {
-    const char *bd = bgr_settings_get_basedir();
+    const char *bd = bgr_settings_get_base_dir();
     if (bd == NULL) {
         return NULL;
     }

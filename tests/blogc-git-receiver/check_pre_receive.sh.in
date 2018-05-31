@@ -100,7 +100,7 @@ symlink = ${TEMP}/chunda
 symlink = ${TEMP}/guda
 EOF
 
-SHELL="${SELF}" HOME="${TEMP}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
+SHELL="${SELF}" HOME="${TEMP}" GIT_DIR=. BLOGC_GIT_RECEIVER_BUILDS_DIR="${TEMP}/foooo" ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
 grep "echo lol" "${TEMP}/output.txt" &> /dev/null
 
 [[ -h "${TEMP}/chunda" ]]
@@ -108,6 +108,7 @@ grep "echo lol" "${TEMP}/output.txt" &> /dev/null
 
 DEST="$(readlink "${TEMP}/chunda")"
 [[ -e "${DEST}" ]]
+[[ "${DEST}" == "${TEMP}/foooo/"* ]]
 
 cd "${TEMP}"
 git init --bare "${TEMP}/repos/foo2a.git" &> /dev/null
@@ -278,7 +279,7 @@ EOF
 0000000000000000000000000000000000000000 $(git rev-parse HEAD) refs/heads/master
 EOF
 
-    SHELL="${SELF}" BLOGC_GIT_RECEIVER_BASEDIR="${TEMP}" PATH="@abs_top_builddir@:${PATH}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt" || true
+    SHELL="${SELF}" BLOGC_GIT_RECEIVER_BASE_DIR="${TEMP}" PATH="@abs_top_builddir@:${PATH}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt" || true
     grep "blogc-make: error: settings: " "${TEMP}/output.txt" &> /dev/null
 fi
 
