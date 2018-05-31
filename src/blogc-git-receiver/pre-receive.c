@@ -96,6 +96,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
     char *master = NULL;
     char *output_dir = NULL;
     char *tmpdir = NULL;
+    char *sym = NULL;
 
     char *hooks_dir = dirname(argv[0]);  // this was validated by main()
     char *real_hooks_dir = realpath(hooks_dir, NULL);
@@ -112,17 +113,37 @@ bgr_pre_receive_hook(int argc, char *argv[])
         goto cleanup;
     }
 
+    bc_config_t *config = bgr_settings_parse();
+    if (config == NULL) {
+        goto default_sym;
+    }
+
+    char *section = bgr_settings_get_section(config, repo_dir);
+    if (section == NULL) {
+        bc_config_free(config);
+        goto default_sym;
+    }
+
+    const char *sym_tmp = bc_config_get(config, section, "symlink");
+    sym = bc_str_starts_with(sym_tmp, "/") ? bc_strdup(sym_tmp) :
+            bc_strdup_printf("%s/%s", repo_dir, sym_tmp);
+    free(section);
+    bc_config_free(config);
+
+default_sym:
+
+    if (sym == NULL) {
+        sym = bc_strdup_printf("%s/htdocs", repo_dir);
+    }
+
     if (NULL == getenv("GIT_DIR")) {
-        char *htdocs_sym = bc_strdup_printf("%s/htdocs", repo_dir);
-        if (0 != access(htdocs_sym, R_OK)) {
+        if (0 != access(sym, R_OK)) {
             fprintf(stderr, "error: no previous build found. nothing to "
                 "rebuild.\n");
-            free(htdocs_sym);
             rv = 3;
             goto cleanup;
         }
-        char *build_dir = realpath(htdocs_sym, NULL);
-        free(htdocs_sym);
+        char *build_dir = realpath(sym, NULL);
         if (build_dir == NULL) {
             fprintf(stderr, "error: failed to get the hash of last built "
                 "commit.\n");
@@ -246,26 +267,18 @@ bgr_pre_receive_hook(int argc, char *argv[])
     }
     free(build_cmd);
 
-    if (0 != chdir(repo_dir)) {
-        fprintf(stderr, "error: failed to chdir (%s): %s\n", repo_dir,
+    char *htdocs_sym = realpath(sym, NULL);
+    if ((htdocs_sym != NULL) && (0 != unlink(sym))) {
+        fprintf(stderr, "error: failed to remove symlink (%s): %s\n", sym,
             strerror(errno));
-        rmdir_recursive(output_dir);
-        rv = 3;
-        goto cleanup;
-    }
-
-    char *htdocs_sym = realpath("htdocs", NULL);
-    if ((htdocs_sym != NULL) && (0 != unlink("htdocs"))) {
-        fprintf(stderr, "error: failed to remove symlink (%s/htdocs): %s\n",
-            repo_dir, strerror(errno));
         rmdir_recursive(output_dir);
         rv = 3;
         goto cleanup2;
     }
 
-    if (0 != symlink(output_dir, "htdocs")) {
-        fprintf(stderr, "error: failed to create symlink (%s/htdocs): %s\n",
-            repo_dir, strerror(errno));
+    if (0 != symlink(output_dir, sym)) {
+        fprintf(stderr, "error: failed to create symlink (%s): %s\n", sym,
+            strerror(errno));
         rmdir_recursive(output_dir);
         rv = 3;
         goto cleanup2;
@@ -278,6 +291,7 @@ cleanup2:
     free(htdocs_sym);
 
 cleanup:
+    free(sym);
     free(master);
     free(output_dir);
     rmdir_recursive(tmpdir);

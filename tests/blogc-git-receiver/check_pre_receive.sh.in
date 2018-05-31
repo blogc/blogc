@@ -93,13 +93,92 @@ cat > "${TEMP}/payload.txt" <<EOF
 0000000000000000000000000000000000000000 0000000000000000000000000000000000000000 refs/heads/bar
 EOF
 
+cat > "${TEMP}/blogc-git-receiver.ini" <<EOF
+[repo:foo2.git]
+symlink = ${TEMP}/chunda
+[repo:foo2a.git]
+symlink = ${TEMP}/guda
+EOF
+
 SHELL="${SELF}" HOME="${TEMP}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
 grep "echo lol" "${TEMP}/output.txt" &> /dev/null
 
-[[ -h htdocs ]]
-[[ "$(cat htdocs/foo.txt)" == "lol" ]]
+[[ -h "${TEMP}/chunda" ]]
+[[ "$(cat "${TEMP}/chunda/foo.txt")" == "lol" ]]
 
-DEST="$(readlink htdocs)"
+DEST="$(readlink "${TEMP}/chunda")"
+[[ -e "${DEST}" ]]
+
+cd "${TEMP}"
+git init --bare "${TEMP}/repos/foo2a.git" &> /dev/null
+ln -s "${SELF}" "${TEMP}/repos/foo2a.git/hooks/pre-receive"
+
+cat > "${TEMP}/tmp.txt" <<EOF
+blob
+mark :1
+data 64
+all:
+	mkdir -p \$(OUTPUT_DIR)
+	echo lol > \$(OUTPUT_DIR)/foo.txt
+
+
+commit refs/heads/master
+mark :2
+author Rafael G. Martins <rafael@rafaelmartins.eng.br> 1476142917 +0200
+committer Rafael G. Martins <rafael@rafaelmartins.eng.br> 1476142917 +0200
+data 12
+testing2...
+M 100644 :1 Makefile
+
+EOF
+
+cd "${TEMP}/repos/foo2a.git"
+ln -s "${DEST}" "${TEMP}/guda"
+git fast-import < "${TEMP}/tmp.txt" &> /dev/null
+
+cat > "${TEMP}/payload.txt" <<EOF
+0000000000000000000000000000000000000000 0000000000000000000000000000000000000000 refs/heads/foo
+0000000000000000000000000000000000000000 $(git rev-parse HEAD) refs/heads/master
+0000000000000000000000000000000000000000 0000000000000000000000000000000000000000 refs/heads/bar
+EOF
+
+SHELL="${SELF}" HOME="${TEMP}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
+grep "echo lol" "${TEMP}/output.txt" &> /dev/null
+
+[[ -h "${TEMP}/guda" ]]
+[[ "$(cat "${TEMP}/guda/foo.txt")" == "lol" ]]
+[[ "${DEST}" != "$(readlink "${TEMP}/guda")" ]]
+[[ ! -e "${DEST}" ]]
+
+DEST="$(readlink "${TEMP}/guda")"
+HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./hooks/pre-receive 2>&1 | tee "${TEMP}/output.txt"
+
+[[ -h "${TEMP}/guda" ]]
+[[ "$(cat "${TEMP}/guda/foo.txt")" == "lol" ]]
+[[ "${DEST}" != "$(readlink "${TEMP}/guda")" ]]
+[[ ! -e "${DEST}" ]]
+
+cd ..
+
+DEST="$(readlink "${TEMP}/guda")"
+HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./foo2a.git/hooks/pre-receive 2>&1 | tee "${TEMP}/output.txt"
+
+[[ -h "${TEMP}/guda" ]]
+[[ "$(cat "${TEMP}/guda/foo.txt")" == "lol" ]]
+[[ "${DEST}" != "$(readlink "${TEMP}/guda")" ]]
+[[ ! -e "${DEST}" ]]
+
+cd ..
+
+DEST="$(readlink "${TEMP}/guda")"
+HOME="${TEMP}" ${TESTS_ENVIRONMENT} ./repos/foo2a.git/hooks/pre-receive 2>&1 | tee "${TEMP}/output.txt"
+
+[[ -h "${TEMP}/guda" ]]
+[[ "$(cat "${TEMP}/guda/foo.txt")" == "lol" ]]
+[[ "${DEST}" != "$(readlink "${TEMP}/guda")" ]]
+[[ ! -e "${DEST}" ]]
+
+DEST="$(readlink "${TEMP}/guda")"
 [[ -e "${DEST}" ]]
 
 cd "${TEMP}"
