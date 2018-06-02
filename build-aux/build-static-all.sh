@@ -2,7 +2,7 @@
 
 set -ex
 
-DESTDIR="${PN}-${TARGET}-${PV}"
+DESTDIR="${PN}-${TARGET}-amd64-${PV}"
 
 ${MAKE_CMD:-make} LDFLAGS="-all-static"
 ${MAKE_CMD:-make} DESTDIR="${PWD}/root/${DESTDIR}" install
