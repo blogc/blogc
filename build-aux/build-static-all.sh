@@ -9,5 +9,5 @@ ${MAKE_CMD:-make} DESTDIR="${PWD}/root/${DESTDIR}" install
 install -m 644 ../LICENSE "root/${DESTDIR}/LICENSE"
 
 pushd root > /dev/null
-tar -cvJf "../${DESTDIR}.tar.xz" .
+tar -cvJf "../${DESTDIR}.tar.xz" "${DESTDIR}"
 popd > /dev/null
