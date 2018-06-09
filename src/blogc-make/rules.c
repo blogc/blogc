@@ -397,7 +397,7 @@ tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
     size_t i = 0;
 
     bc_trie_t *variables = bc_trie_new(free);
-    posts_pagination(ctx, variables, "atom_posts_per_page");
+    posts_pagination(ctx, variables, "posts_per_page");
     posts_ordering(ctx, variables, "html_order");
     bc_trie_insert(variables, "DATE_FORMAT",
         bc_strdup(bc_trie_lookup(ctx->settings->settings, "date_format")));
