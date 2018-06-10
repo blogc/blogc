@@ -178,6 +178,7 @@ BASE_DOMAIN = http://example.org
 
 [settings]
 posts_per_page = -1
+atom_posts_per_page = -1
 
 [posts]
 post01
@@ -389,6 +390,20 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
       <email>author@example.com</email>
     </author>
     <content type="html"><![CDATA[<p>This is Post 02.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="text">Post 01</title>
+    <id>/post/post01/</id>
+    <updated>2016-09-01T00:00:00Z</updated>
+    <published>2016-09-01T00:00:00Z</published>
+    <link href="http://example.org/post/post01/" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is Post 01.</p>
 ]]></content>
   </entry>
   
