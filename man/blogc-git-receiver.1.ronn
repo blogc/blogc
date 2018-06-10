@@ -158,7 +158,7 @@ to change `blogc-git-receiver` behaviour:
     Path to the directory that should be used to store the blogc builds. Defaults
     to `$BLOGC_GIT_RECEIVER_BASE_DIR/builds`. This directory must be readable by
     your webserver. This variable is useful to keep your git repositories unreadable,
-    while letting your webserver access the built files`1. In this case, users need to
+    while letting your webserver access the built files. In this case, users need to
     also define custom symlinks for every repository in
     `$BLOGC_GIT_RECEIVER_BASE_DIR/blogc-git-receiver.ini`, because the default
     `htdocs` symlink inside the git repositories won't be acessible by the webserver.
