@@ -194,6 +194,7 @@ post11
 EOF
 
 ${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
+grep "_build/index\\.html" "${TEMP}/output.txt"
 grep "_build/atom\\.xml" "${TEMP}/output.txt"
 grep "_build/post/post01/index\\.html" "${TEMP}/output.txt"
 grep "_build/post/post02/index\\.html" "${TEMP}/output.txt"
@@ -208,6 +209,34 @@ grep "_build/post/post10/index\\.html" "${TEMP}/output.txt"
 grep "_build/post/post11/index\\.html" "${TEMP}/output.txt"
 
 rm "${TEMP}/output.txt"
+
+cat > "${TEMP}/expected-index.html" <<EOF
+
+Listing: Post 11 - Sep 11, 2016, 12:00 AM GMT
+
+Listing: Post 10 - Sep 10, 2016, 12:00 AM GMT
+
+Listing: Post 09 - Sep 09, 2016, 12:00 AM GMT
+
+Listing: Post 08 - Sep 08, 2016, 12:00 AM GMT
+
+Listing: Post 07 - Sep 07, 2016, 12:00 AM GMT
+
+Listing: Post 06 - Sep 06, 2016, 12:00 AM GMT
+
+Listing: Post 05 - Sep 05, 2016, 12:00 AM GMT
+
+Listing: Post 04 - Sep 04, 2016, 12:00 AM GMT
+
+Listing: Post 03 - Sep 03, 2016, 12:00 AM GMT
+
+Listing: Post 02 - Sep 02, 2016, 12:00 AM GMT
+
+Listing: Post 01 - Sep 01, 2016, 12:00 AM GMT
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/index.html" "${TEMP}/expected-index.html"
 
 cat > "${TEMP}/expected-atom.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
@@ -421,6 +450,7 @@ EOF
 
 ${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
 grep "_build/index\\.html" "${TEMP}/output.txt"
+grep "_build/atom\\.xml" "${TEMP}/output.txt"
 grep "_build/post/post01/index\\.html" "${TEMP}/output.txt"
 grep "_build/post/post02/index\\.html" "${TEMP}/output.txt"
 grep "_build/post/post03/index\\.html" "${TEMP}/output.txt"
@@ -460,6 +490,24 @@ Listing: Post 02 - Sep 02, 2016, 12:00 AM GMT
 
 EOF
 diff -uN "${TEMP}/proj/_build/index.html" "${TEMP}/expected-index.html"
+
+cat > "${TEMP}/expected-atom.xml" <<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">Lol's Website</title>
+  <id>/atom.xml</id>
+  <updated></updated>
+  <link href="http://example.org/" />
+  <link href="http://example.org/atom.xml" rel="self" />
+  <author>
+    <name>Lol</name>
+    <email>author@example.com</email>
+  </author>
+  <subtitle type="text">WAT?!</subtitle>
+  
+</feed>
+EOF
+diff -uN "${TEMP}/proj/_build/atom.xml" "${TEMP}/expected-atom.xml"
 
 cat > "${TEMP}/expected-post-post01.html" <<EOF
 
