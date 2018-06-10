@@ -50,7 +50,7 @@ however these rules can be customized with the following settings, from the
 
   * `atom_posts_per_page` (default: `10`):
     Number of posts per page in the Atom feeds. If negative, all the posts are
-    included. If `0`, no posts are include.
+    included. If `0`, no Atom feeds are generated.
 
   * `atom_prefix` (default: `atom`):
     The prefix of the generated Atom feeds. It is relative to the output
@@ -100,8 +100,8 @@ however these rules can be customized with the following settings, from the
 
   * `posts_per_page` (default: `10`):
     Number of posts per page in the pagination pages. If negative, all the posts
-    are included. If `0`, no posts are included. Also, if negative or `0`, the
-    `pagination` build rule is disabled.
+    are included. If `0`, no post listing pages are generated. Also, if negative or
+    `0`, the `pagination` build rule is disabled.
 
   * `source_ext` (default: `.txt`):
     The extension of the source files.

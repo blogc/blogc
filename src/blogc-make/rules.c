@@ -53,12 +53,28 @@ posts_pagination(bm_ctx_t *ctx, bc_trie_t *variables, const char *variable)
 }
 
 
+static bool
+posts_pagination_enabled(bm_ctx_t *ctx, const  char *variable)
+{
+    if (ctx == NULL || ctx->settings == NULL || ctx->settings->settings == NULL)
+        return false;
+
+    long posts_per_page = strtol(
+        bc_trie_lookup(ctx->settings->settings, variable),
+        NULL, 10);  // FIXME: improve
+    return posts_per_page != 0;
+}
+
+
 // INDEX RULE
 
 static bc_slist_t*
 index_outputlist(bm_ctx_t *ctx)
 {
     if (ctx == NULL || ctx->settings->posts == NULL)
+        return NULL;
+
+    if (!posts_pagination_enabled(ctx, "posts_per_page"))
         return NULL;
 
     bc_slist_t *rv = NULL;
@@ -119,6 +135,9 @@ atom_outputlist(bm_ctx_t *ctx)
     if (ctx == NULL || ctx->settings->posts == NULL)
         return NULL;
 
+    if (!posts_pagination_enabled(ctx, "atom_posts_per_page"))
+        return NULL;
+
     bc_slist_t *rv = NULL;
     const char *atom_prefix = bc_trie_lookup(ctx->settings->settings,
         "atom_prefix");
@@ -171,6 +190,9 @@ static bc_slist_t*
 atom_tags_outputlist(bm_ctx_t *ctx)
 {
     if (ctx == NULL || ctx->settings->posts == NULL || ctx->settings->tags == NULL)
+        return NULL;
+
+    if (!posts_pagination_enabled(ctx, "atom_posts_per_page"))
         return NULL;
 
     bc_slist_t *rv = NULL;
@@ -234,13 +256,15 @@ pagination_outputlist(bm_ctx_t *ctx)
     if (ctx == NULL || ctx->settings->posts == NULL)
         return NULL;
 
-    long num_posts = bc_slist_length(ctx->posts_fctx);
+    // not using posts_pagination_enabled() here because we need to calculate
+    // posts per page here anyway, and the condition is different.
     long posts_per_page = strtol(
         bc_trie_lookup(ctx->settings->settings, "posts_per_page"),
         NULL, 10);  // FIXME: improve
     if (posts_per_page <= 0)
         return NULL;
 
+    long num_posts = bc_slist_length(ctx->posts_fctx);
     size_t pages = ceilf(((float) num_posts) / posts_per_page);
 
     const char *pagination_prefix = bc_trie_lookup(ctx->settings->settings,
@@ -372,6 +396,9 @@ static bc_slist_t*
 tags_outputlist(bm_ctx_t *ctx)
 {
     if (ctx == NULL || ctx->settings->posts == NULL || ctx->settings->tags == NULL)
+        return NULL;
+
+    if (!posts_pagination_enabled(ctx, "posts_per_page"))
         return NULL;
 
     bc_slist_t *rv = NULL;
