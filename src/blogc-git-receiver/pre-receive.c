@@ -126,6 +126,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
 
     const char *sym_tmp = bc_config_get(config, section, "symlink");
     if (sym_tmp == NULL) {
+        free(section);
         bc_config_free(config);
         goto default_sym;
     }
