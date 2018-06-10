@@ -29,7 +29,12 @@ blogc-git-receiver(1):
 
 Now add ssh keys to `/home/blogc/.ssh/authorized_keys`. Every key in
 `authorized_keys` will be allowed to push to the git repositories, and even
-create new ones.
+create new ones. It is also possible to add `blogc-git-receiver` as a command in
+the `authorized_keys` file for each key, but this setup is slightly more tricky,
+as you may leak shell access to an user by mystake, if you forget to add the command
+to a key that should not have shell access. Only use this method if you don't have
+another option (e.g. in shared hosting environments that only provide one shell
+account), or if you know exactly what you are doing.
 
 Also, make sure to install all the dependencies required by the websites,
 including a web server. `blogc-git-receiver` can't handle web server virtual hosts.
@@ -43,7 +48,16 @@ To deploy a website (e.g. blogc example repository):
 
 This will deploy the example to the server, creating a symlink to the built content
 in `/home/blogc/repos/blogs/blogc-example.git/htdocs`. This symlink should be used
-as the document root for the web server virtual host.
+as the document root for the web server virtual host. If this symlink can't be
+readed by your webserver for some reason, you can create it in some other directory
+by adding the full symlink path to the ~/blogc-git-receiver.ini configuration file:
+
+    $ $EDITOR ~/blogc-git-receiver.ini
+    [repo:blogs/blogc-example.git]
+    symlink=/path/to/my/symlink
+
+Do not duplicate the section if it already exists, just append the symlink path to
+it.
 
 ### Rebuild last successful build
 
@@ -97,13 +111,13 @@ in the server, or creating a configuration file (~/blogc-git-receiver.ini), that
 a simple INI-style file where each repository is represented by a section and the
 value of the `mirror` variable is the URL that should be used to push.
 
-To create the configuration file (recommended):
+Edit configuration file (recommended, do not duplicate the section if it already
+exists, just append the mirror to it):
 
     # su -s /bin/sh - blogc
-    $ cat > ~/blogc-git-receiver.ini <<EOF
+    $ $EDITOR ~/blogc-git-receiver.ini
     [repo:myblog.git]
     mirror=$YOUR_GIT_MIRROR_URL
-    EOF
 
 Or to add the `mirror` remote:
 
