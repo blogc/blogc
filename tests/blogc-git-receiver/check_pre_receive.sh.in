@@ -94,10 +94,28 @@ cat > "${TEMP}/payload.txt" <<EOF
 EOF
 
 cat > "${TEMP}/blogc-git-receiver.ini" <<EOF
-[repo:foo2.git]
-symlink = ${TEMP}/chunda
 [repo:foo2a.git]
 symlink = ${TEMP}/guda
+EOF
+
+SHELL="${SELF}" HOME="${TEMP}" GIT_DIR=. BLOGC_GIT_RECEIVER_BUILDS_DIR="${TEMP}/foooo" ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
+grep "echo lol" "${TEMP}/output.txt" &> /dev/null
+
+[[ -h htdocs ]]
+[[ "$(cat htdocs/foo.txt)" == "lol" ]]
+
+cat >> "${TEMP}/blogc-git-receiver.ini" <<EOF
+[repo:foo2.git]
+EOF
+
+SHELL="${SELF}" HOME="${TEMP}" GIT_DIR=. BLOGC_GIT_RECEIVER_BUILDS_DIR="${TEMP}/foooo" ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
+grep "echo lol" "${TEMP}/output.txt" &> /dev/null
+
+[[ -h htdocs ]]
+[[ "$(cat htdocs/foo.txt)" == "lol" ]]
+
+cat >> "${TEMP}/blogc-git-receiver.ini" <<EOF
+symlink = ${TEMP}/chunda
 EOF
 
 SHELL="${SELF}" HOME="${TEMP}" GIT_DIR=. BLOGC_GIT_RECEIVER_BUILDS_DIR="${TEMP}/foooo" ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"

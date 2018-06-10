@@ -125,6 +125,11 @@ bgr_pre_receive_hook(int argc, char *argv[])
     }
 
     const char *sym_tmp = bc_config_get(config, section, "symlink");
+    if (sym_tmp == NULL) {
+        bc_config_free(config);
+        goto default_sym;
+    }
+
     sym = bc_str_starts_with(sym_tmp, "/") ? bc_strdup(sym_tmp) :
             bc_strdup_printf("%s/%s", repo_dir, sym_tmp);
     free(section);
