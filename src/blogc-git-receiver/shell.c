@@ -19,6 +19,17 @@
 #include "shell.h"
 
 
+static bool
+lexists(const char *pathname)
+{
+    struct stat b;
+    int tmp_errno = errno;
+    bool rv = lstat(pathname, &b) == 0;
+    errno = tmp_errno;
+    return rv;
+}
+
+
 int
 bgr_shell(int argc, char *argv[])
 {
@@ -96,7 +107,7 @@ bgr_shell(int argc, char *argv[])
         goto cleanup;
     }
 
-    if (0 == access("pre-receive", F_OK)) {
+    if (lexists("pre-receive")) {
         if (0 != unlink("pre-receive")) {
             fprintf(stderr, "error: failed to remove old symlink "
                 "(%s/hooks/pre-receive): %s\n", repo, strerror(errno));
@@ -112,7 +123,7 @@ bgr_shell(int argc, char *argv[])
         goto cleanup;
     }
 
-    if (0 == access("post-receive", F_OK)) {
+    if (lexists("post-receive")) {
         if (0 != unlink("post-receive")) {
             fprintf(stderr, "error: failed to remove old symlink "
                 "(%s/hooks/post-receive): %s\n", repo, strerror(errno));

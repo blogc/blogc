@@ -36,6 +36,21 @@ fi
 [[ -h "${TEMP}/repos/lol.git/hooks/post-receive" ]]
 [[ "$(readlink "${TEMP}/repos/lol.git/hooks/post-receive")" == "${SELF}" ]]
 
+rm "${TEMP}/repos/lol.git/hooks/pre-receive"
+ln -s /lolheheasdxd "${TEMP}/repos/lol.git/hooks/pre-receive"
+
+echo 0000 | call_bgr -c "git-receive-pack 'lol.git'" 2>&1 > "${TEMP}/output.txt"
+if [[ -n "${VALGRIND}" ]]; then
+    grep "git-shell -c \"git-receive-pack '.*repos/lol.git'\"" "${TEMP}/output.txt" &> /dev/null
+else
+    grep "agent=" "${TEMP}/output.txt" &> /dev/null
+fi
+[[ -d "${TEMP}/repos/lol.git" ]]
+[[ -h "${TEMP}/repos/lol.git/hooks/pre-receive" ]]
+[[ "$(readlink "${TEMP}/repos/lol.git/hooks/pre-receive")" == "${SELF}" ]]
+[[ -h "${TEMP}/repos/lol.git/hooks/post-receive" ]]
+[[ "$(readlink "${TEMP}/repos/lol.git/hooks/post-receive")" == "${SELF}" ]]
+
 cat > "${TEMP}/tmp.txt" <<EOF
 blob
 mark :1
