@@ -2,8 +2,6 @@
 
 set -ex
 
-export LC_ALL=
-
 ${MAKE_CMD:-make} LDFLAGS="-all-static" blogc
 
 rm -rf root
