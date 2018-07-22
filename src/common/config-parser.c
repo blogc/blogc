@@ -174,6 +174,13 @@ bc_config_parse(const char *src, size_t src_len, const char *list_sections[],
                 if (c == '=') {
                     key = bc_strndup(src + start, current - start);
                     state = CONFIG_SECTION_VALUE_START;
+                    if (is_last) {
+                        bc_trie_insert(section->data, bc_str_strip(key),
+                            bc_strdup(""));
+                        free(key);
+                        key = NULL;
+                        break;
+                    }
                     if (value == NULL)
                         value = bc_string_new();
                     break;
@@ -196,6 +203,10 @@ bc_config_parse(const char *src, size_t src_len, const char *list_sections[],
                 if (c == '"') {
                     state = CONFIG_SECTION_VALUE_QUOTE;
                     break;
+                }
+                if (c == '\r' || c == '\n' || is_last) {
+                    state = CONFIG_SECTION_VALUE;
+                    continue;
                 }
                 bc_string_append_c(value, c);
                 state = CONFIG_SECTION_VALUE;
