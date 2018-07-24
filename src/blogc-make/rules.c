@@ -19,6 +19,7 @@
 #include "httpd.h"
 #include "reloader.h"
 #include "settings.h"
+#include "utils.h"
 #include "rules.h"
 
 
@@ -82,9 +83,8 @@ index_outputlist(bm_ctx_t *ctx)
         "html_ext");
     const char *index_prefix = bc_trie_lookup(ctx->settings->settings,
         "index_prefix");
-    const char *slash = index_prefix[0] == '\0' && html_ext[0] == '/' ? "" : "/";
-    char *f = bc_strdup_printf("%s%s%s%s", ctx->short_output_dir, slash,
-        index_prefix, html_ext);
+    char *f = bm_generate_filename(ctx->short_output_dir, index_prefix, NULL,
+        html_ext);
     rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
     free(f);
     return rv;
@@ -140,10 +140,9 @@ atom_outputlist(bm_ctx_t *ctx)
     bc_slist_t *rv = NULL;
     const char *atom_prefix = bc_trie_lookup(ctx->settings->settings,
         "atom_prefix");
-    const char *slash = atom_prefix[0] == '\0' ? "" : "/";
     const char *atom_ext = bc_trie_lookup(ctx->settings->settings, "atom_ext");
-    char *f = bc_strdup_printf("%s%s%s%s", ctx->short_output_dir, slash,
-        atom_prefix, atom_ext);
+    char *f = bm_generate_filename(ctx->short_output_dir, atom_prefix, NULL,
+        atom_ext);
     rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
     free(f);
     return rv;
@@ -199,10 +198,9 @@ atom_tags_outputlist(bm_ctx_t *ctx)
     const char *atom_prefix = bc_trie_lookup(ctx->settings->settings,
         "atom_prefix");
     const char *atom_ext = bc_trie_lookup(ctx->settings->settings, "atom_ext");
-    const char *slash = atom_prefix[0] == '\0' ? "" : "/";
     for (size_t i = 0; ctx->settings->tags[i] != NULL; i++) {
-        char *f = bc_strdup_printf("%s%s%s/%s%s", ctx->short_output_dir, slash,
-            atom_prefix, ctx->settings->tags[i], atom_ext);
+        char *f = bm_generate_filename(ctx->short_output_dir, atom_prefix,
+            ctx->settings->tags[i], atom_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
@@ -272,13 +270,14 @@ pagination_outputlist(bm_ctx_t *ctx)
         "pagination_prefix");
     const char *html_ext = bc_trie_lookup(ctx->settings->settings,
         "html_ext");
-    const char *slash = pagination_prefix[0] == '\0' ? "" : "/";
 
     bc_slist_t *rv = NULL;
     for (size_t i = 0; i < pages; i++) {
-        char *f = bc_strdup_printf("%s%s%s/%d%s", ctx->short_output_dir, slash,
-            pagination_prefix, i + 1, html_ext);
+        char *j = bc_strdup_printf("%d", i + 1);
+        char *f = bm_generate_filename(ctx->short_output_dir, pagination_prefix,
+            j, html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
+        free(j);
         free(f);
     }
     return rv;
@@ -337,12 +336,11 @@ posts_outputlist(bm_ctx_t *ctx)
         "post_prefix");
     const char *html_ext = bc_trie_lookup(ctx->settings->settings,
         "html_ext");
-    const char *slash = post_prefix[0] == '\0' ? "" : "/";
 
     bc_slist_t *rv = NULL;
     for (size_t i = 0; ctx->settings->posts[i] != NULL; i++) {
-        char *f = bc_strdup_printf("%s%s%s/%s%s", ctx->short_output_dir, slash,
-            post_prefix, ctx->settings->posts[i], html_ext);
+        char *f = bm_generate_filename(ctx->short_output_dir, post_prefix,
+            ctx->settings->posts[i], html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
@@ -404,14 +402,14 @@ tags_outputlist(bm_ctx_t *ctx)
     if (!posts_pagination_enabled(ctx, "posts_per_page"))
         return NULL;
 
-    bc_slist_t *rv = NULL;
     const char *tag_prefix = bc_trie_lookup(ctx->settings->settings,
         "tag_prefix");
     const char *html_ext = bc_trie_lookup(ctx->settings->settings, "html_ext");
-    const char *slash = tag_prefix[0] == '\0' ? "" : "/";
+
+    bc_slist_t *rv = NULL;
     for (size_t i = 0; ctx->settings->tags[i] != NULL; i++) {
-        char *f = bc_strdup_printf("%s%s%s/%s%s", ctx->short_output_dir, slash,
-            tag_prefix, ctx->settings->tags[i], html_ext);
+        char *f = bm_generate_filename(ctx->short_output_dir, tag_prefix,
+            ctx->settings->tags[i], html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
@@ -471,11 +469,8 @@ pages_outputlist(bm_ctx_t *ctx)
 
     bc_slist_t *rv = NULL;
     for (size_t i = 0; ctx->settings->pages[i] != NULL; i++) {
-        bool is_index = (0 == strcmp(ctx->settings->pages[i], "index"))
-            && (html_ext[0] == '/');
-        char *f = bc_strdup_printf("%s%s%s%s", ctx->short_output_dir,
-            is_index ? "" : "/", is_index ? "" : ctx->settings->pages[i],
-            html_ext);
+        char *f = bm_generate_filename(ctx->short_output_dir, NULL,
+            ctx->settings->pages[i], html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }

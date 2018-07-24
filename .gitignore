@@ -72,6 +72,7 @@ blogc*.html
 /tests/blogc-make/check_exec
 /tests/blogc-make/check_rules
 /tests/blogc-make/check_settings
+/tests/blogc-make/check_utils
 /tests/blogc-runserver/check_httpd_utils
 /tests/blogc-runserver/check_mime
 /tests/common/check_config_parser

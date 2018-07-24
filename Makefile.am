@@ -60,6 +60,7 @@ noinst_HEADERS = \
 	src/blogc-make/reloader.h \
 	src/blogc-make/rules.h \
 	src/blogc-make/settings.h \
+	src/blogc-make/utils.h \
 	src/blogc-runserver/httpd.h \
 	src/blogc-runserver/httpd-utils.h \
 	src/blogc-runserver/mime.h \
@@ -240,6 +241,7 @@ libblogc_make_la_SOURCES = \
 	src/blogc-make/reloader.c \
 	src/blogc-make/rules.c \
 	src/blogc-make/settings.c \
+	src/blogc-make/utils.c \
 	$(NULL)
 
 libblogc_make_la_CFLAGS = \
@@ -792,6 +794,7 @@ check_PROGRAMS += \
 	tests/blogc-make/check_atom \
 	tests/blogc-make/check_rules \
 	tests/blogc-make/check_settings \
+	tests/blogc-make/check_utils \
 	$(NULL)
 
 if USE_LD_WRAP
@@ -868,6 +871,24 @@ tests_blogc_make_check_settings_LDFLAGS = \
 	$(NULL)
 
 tests_blogc_make_check_settings_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_make.la \
+	libblogc_common.la \
+	$(NULL)
+
+tests_blogc_make_check_utils_SOURCES = \
+	tests/blogc-make/check_utils.c \
+	$(NULL)
+
+tests_blogc_make_check_utils_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_make_check_utils_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_blogc_make_check_utils_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_make.la \
 	libblogc_common.la \
