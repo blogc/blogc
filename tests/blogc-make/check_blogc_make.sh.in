@@ -111,10 +111,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Bar</title>
-    <id>/post/bar/</id>
+    <id>/post/bar/index.html</id>
     <updated>2016-09-01T00:00:00Z</updated>
     <published>2016-09-01T00:00:00Z</published>
-    <link href="http://example.org/post/bar/" />
+    <link href="http://example.org/post/bar/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -125,10 +125,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Foo</title>
-    <id>/post/foo/</id>
+    <id>/post/foo/index.html</id>
     <updated>2016-10-01T00:00:00Z</updated>
     <published>2016-10-01T00:00:00Z</published>
-    <link href="http://example.org/post/foo/" />
+    <link href="http://example.org/post/foo/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -255,10 +255,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 11</title>
-    <id>/post/post11/</id>
+    <id>/post/post11/index.html</id>
     <updated>2016-09-11T00:00:00Z</updated>
     <published>2016-09-11T00:00:00Z</published>
-    <link href="http://example.org/post/post11/" />
+    <link href="http://example.org/post/post11/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -269,10 +269,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 10</title>
-    <id>/post/post10/</id>
+    <id>/post/post10/index.html</id>
     <updated>2016-09-10T00:00:00Z</updated>
     <published>2016-09-10T00:00:00Z</published>
-    <link href="http://example.org/post/post10/" />
+    <link href="http://example.org/post/post10/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -283,10 +283,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 09</title>
-    <id>/post/post09/</id>
+    <id>/post/post09/index.html</id>
     <updated>2016-09-09T00:00:00Z</updated>
     <published>2016-09-09T00:00:00Z</published>
-    <link href="http://example.org/post/post09/" />
+    <link href="http://example.org/post/post09/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -297,10 +297,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 08</title>
-    <id>/post/post08/</id>
+    <id>/post/post08/index.html</id>
     <updated>2016-09-08T00:00:00Z</updated>
     <published>2016-09-08T00:00:00Z</published>
-    <link href="http://example.org/post/post08/" />
+    <link href="http://example.org/post/post08/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -311,10 +311,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 07</title>
-    <id>/post/post07/</id>
+    <id>/post/post07/index.html</id>
     <updated>2016-09-07T00:00:00Z</updated>
     <published>2016-09-07T00:00:00Z</published>
-    <link href="http://example.org/post/post07/" />
+    <link href="http://example.org/post/post07/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -325,10 +325,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 06</title>
-    <id>/post/post06/</id>
+    <id>/post/post06/index.html</id>
     <updated>2016-09-06T00:00:00Z</updated>
     <published>2016-09-06T00:00:00Z</published>
-    <link href="http://example.org/post/post06/" />
+    <link href="http://example.org/post/post06/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -339,10 +339,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 05</title>
-    <id>/post/post05/</id>
+    <id>/post/post05/index.html</id>
     <updated>2016-09-05T00:00:00Z</updated>
     <published>2016-09-05T00:00:00Z</published>
-    <link href="http://example.org/post/post05/" />
+    <link href="http://example.org/post/post05/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -353,10 +353,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 04</title>
-    <id>/post/post04/</id>
+    <id>/post/post04/index.html</id>
     <updated>2016-09-04T00:00:00Z</updated>
     <published>2016-09-04T00:00:00Z</published>
-    <link href="http://example.org/post/post04/" />
+    <link href="http://example.org/post/post04/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -367,10 +367,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 03</title>
-    <id>/post/post03/</id>
+    <id>/post/post03/index.html</id>
     <updated>2016-09-03T00:00:00Z</updated>
     <published>2016-09-03T00:00:00Z</published>
-    <link href="http://example.org/post/post03/" />
+    <link href="http://example.org/post/post03/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -381,10 +381,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 02</title>
-    <id>/post/post02/</id>
+    <id>/post/post02/index.html</id>
     <updated>2016-09-02T00:00:00Z</updated>
     <published>2016-09-02T00:00:00Z</published>
-    <link href="http://example.org/post/post02/" />
+    <link href="http://example.org/post/post02/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -395,10 +395,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 01</title>
-    <id>/post/post01/</id>
+    <id>/post/post01/index.html</id>
     <updated>2016-09-01T00:00:00Z</updated>
     <published>2016-09-01T00:00:00Z</published>
-    <link href="http://example.org/post/post01/" />
+    <link href="http://example.org/post/post01/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -559,10 +559,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Foo</title>
-    <id>/post/foo/</id>
+    <id>/post/foo/index.html</id>
     <updated>2016-10-01T00:00:00Z</updated>
     <published>2016-10-01T00:00:00Z</published>
-    <link href="http://example.org/post/foo/" />
+    <link href="http://example.org/post/foo/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -573,10 +573,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Bar</title>
-    <id>/post/bar/</id>
+    <id>/post/bar/index.html</id>
     <updated>2016-09-01T00:00:00Z</updated>
     <published>2016-09-01T00:00:00Z</published>
-    <link href="http://example.org/post/bar/" />
+    <link href="http://example.org/post/bar/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -674,10 +674,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Foo</title>
-    <id>/post/foo/</id>
+    <id>/post/foo/index.html</id>
     <updated>2016-10-01T00:00:00Z</updated>
     <published>2016-10-01T00:00:00Z</published>
-    <link href="http://example.org/post/foo/" />
+    <link href="http://example.org/post/foo/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -688,10 +688,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Bar</title>
-    <id>/post/bar/</id>
+    <id>/post/bar/index.html</id>
     <updated>2016-09-01T00:00:00Z</updated>
     <published>2016-09-01T00:00:00Z</published>
-    <link href="http://example.org/post/bar/" />
+    <link href="http://example.org/post/bar/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -702,10 +702,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Baz</title>
-    <id>/post/baz/</id>
+    <id>/post/baz/index.html</id>
     <updated>2016-08-01T00:00:00Z</updated>
     <published>2016-08-01T00:00:00Z</published>
-    <link href="http://example.org/post/baz/" />
+    <link href="http://example.org/post/baz/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -734,10 +734,10 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
   
   <entry>
     <title type="text">Baz</title>
-    <id>/post/baz/</id>
+    <id>/post/baz/index.html</id>
     <updated>2016-08-01T00:00:00Z</updated>
     <published>2016-08-01T00:00:00Z</published>
-    <link href="http://example.org/post/baz/" />
+    <link href="http://example.org/post/baz/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -766,10 +766,10 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
   
   <entry>
     <title type="text">Baz</title>
-    <id>/post/baz/</id>
+    <id>/post/baz/index.html</id>
     <updated>2016-08-01T00:00:00Z</updated>
     <published>2016-08-01T00:00:00Z</published>
-    <link href="http://example.org/post/baz/" />
+    <link href="http://example.org/post/baz/index.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -993,10 +993,10 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Foo</title>
-    <id>/poost/foo/</id>
+    <id>/poost/foo.html</id>
     <updated>2016-10-01T00:00:00Z</updated>
     <published>2016-10-01T00:00:00Z</published>
-    <link href="http://example.org/poost/foo/" />
+    <link href="http://example.org/poost/foo.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -1034,7 +1034,7 @@ diff -uN "${TEMP}/proj/_build/poost/bar.html" "${TEMP}/expected-post-bar.html"
 rm -rf "${TEMP}/proj/_build"
 
 
-### default settings with some posts and tags
+### custom settings with some posts and tags
 
 cat > "${TEMP}/proj/contents/poost/baz.blogc" <<EOF
 TITLE: Baz
@@ -1097,10 +1097,10 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
   
   <entry>
     <title type="text">Baz</title>
-    <id>/poost/baz/</id>
+    <id>/poost/baz.html</id>
     <updated>2016-08-01T00:00:00Z</updated>
     <published>2016-08-01T00:00:00Z</published>
-    <link href="http://example.org/poost/baz/" />
+    <link href="http://example.org/poost/baz.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -1129,10 +1129,10 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
   
   <entry>
     <title type="text">Baz</title>
-    <id>/poost/baz/</id>
+    <id>/poost/baz.html</id>
     <updated>2016-08-01T00:00:00Z</updated>
     <published>2016-08-01T00:00:00Z</published>
-    <link href="http://example.org/poost/baz/" />
+    <link href="http://example.org/poost/baz.html" />
     <author>
       <name>Lol</name>
       <email>author@example.com</email>
@@ -1177,7 +1177,7 @@ diff -uN "${TEMP}/proj/_build/taag/tag2.html" "${TEMP}/expected-tag2.html"
 rm -rf "${TEMP}/proj/_build"
 
 
-### default settings with some posts, pages and tags
+### custom settings with some posts, pages and tags
 
 cat > "${TEMP}/proj/contents/page1.blogc" <<EOF
 TITLE: Page 1
@@ -1387,3 +1387,433 @@ rm "${TEMP}/output.txt"
 [[ ! -d "${OUTPUT_DIR}" ]]
 
 unset OUTPUT_DIR
+
+rm -rf "${TEMP}/proj"
+
+###############################################################################
+
+### empty prefixes with some posts
+
+mkdir -p "${TEMP}/proj/"{contents,temp}
+
+cat > "${TEMP}/proj/contents/foo.blogc" <<EOF
+TITLE: Foo
+DATE: 2016-10-01
+----------------
+This is foo.
+EOF
+
+cat > "${TEMP}/proj/contents/bar.blogc" <<EOF
+TITLE: Bar
+DATE: 2016-09-01
+----------------
+This is bar.
+EOF
+
+cat > "${TEMP}/proj/temp/main.html" <<EOF
+{% block listing %}
+Listing: {% ifdef FILTER_TAG %}{{ FILTER_TAG }} - {% endif %}{{ TITLE }} - {{ DATE_FORMATTED }}
+{% endblock %}
+{% block entry %}
+{{ TITLE }}{% if MAKE_TYPE == "post" %} - {{ DATE_FORMATTED }}{% endif %}
+
+{{ CONTENT }}
+{% endblock %}
+EOF
+
+cat > "${TEMP}/proj/blogcfile" <<EOF
+[settings]
+content_dir = contents
+template_dir = temp
+main_template = main.html
+source_ext = .blogc
+pagination_prefix = 
+posts_per_page = 1
+atom_posts_per_page = 1
+html_ext = /index.html
+index_prefix =
+post_prefix =
+tag_prefix =
+atom_prefix =
+atom_ext = .xml
+date_format = %b %d, %Y
+locale = en_US.utf8
+html_order = ASC
+atom_order = ASC
+
+[global]
+AUTHOR_NAME = Lol
+AUTHOR_EMAIL = author@example.com
+SITE_TITLE = Lol's Website
+SITE_TAGLINE = WAT?!
+BASE_DOMAIN = http://example.org
+
+[posts]
+foo
+bar
+EOF
+
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
+grep "_build/index\\.html" "${TEMP}/output.txt"
+grep "_build/index\\.xml" "${TEMP}/output.txt"
+grep "_build/1/index\\.html" "${TEMP}/output.txt"
+grep "_build/2/index\\.html" "${TEMP}/output.txt"
+grep "_build/foo/index\\.html" "${TEMP}/output.txt"
+grep "_build/bar/index\\.html" "${TEMP}/output.txt"
+
+rm "${TEMP}/output.txt"
+
+cat > "${TEMP}/expected-index.html" <<EOF
+
+Listing: Foo - Oct 01, 2016
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/index.html" "${TEMP}/expected-index.html"
+diff -uN "${TEMP}/proj/_build/1/index.html" "${TEMP}/expected-index.html"
+
+cat > "${TEMP}/expected-page-2.html" <<EOF
+
+Listing: Bar - Sep 01, 2016
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/2/index.html" "${TEMP}/expected-page-2.html"
+
+cat > "${TEMP}/expected-atom.xml" <<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">Lol's Website</title>
+  <id>/index.xml</id>
+  <updated>2016-10-01T00:00:00Z</updated>
+  <link href="http://example.org/" />
+  <link href="http://example.org/index.xml" rel="self" />
+  <author>
+    <name>Lol</name>
+    <email>author@example.com</email>
+  </author>
+  <subtitle type="text">WAT?!</subtitle>
+  
+  <entry>
+    <title type="text">Foo</title>
+    <id>/foo/index.html</id>
+    <updated>2016-10-01T00:00:00Z</updated>
+    <published>2016-10-01T00:00:00Z</published>
+    <link href="http://example.org/foo/index.html" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is foo.</p>
+]]></content>
+  </entry>
+  
+</feed>
+EOF
+diff -uN "${TEMP}/proj/_build/index.xml" "${TEMP}/expected-atom.xml"
+
+cat > "${TEMP}/expected-post-foo.html" <<EOF
+
+
+Foo - Oct 01, 2016
+
+<p>This is foo.</p>
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/foo/index.html" "${TEMP}/expected-post-foo.html"
+
+cat > "${TEMP}/expected-post-bar.html" <<EOF
+
+
+Bar - Sep 01, 2016
+
+<p>This is bar.</p>
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/bar/index.html" "${TEMP}/expected-post-bar.html"
+
+rm -rf "${TEMP}/proj/_build"
+
+
+### empty prefixes with some posts and tags, and different exts
+
+cat > "${TEMP}/proj/contents/baz.blogc" <<EOF
+TITLE: Baz
+DATE: 2016-08-01
+TAGS: tag1 tag2
+----------------
+This is baz.
+EOF
+
+cat > "${TEMP}/proj/blogcfile" <<EOF
+[settings]
+content_dir = contents
+template_dir = temp
+main_template = main.html
+source_ext = .blogc
+pagination_prefix = 
+posts_per_page = 1
+atom_posts_per_page = 1
+html_ext = .html
+index_prefix =
+post_prefix =
+tag_prefix =
+atom_prefix =
+atom_ext = /index.xml
+date_format = %b %d, %Y
+locale = en_US.utf8
+html_order = ASC
+atom_order = ASC
+
+[global]
+AUTHOR_NAME = Lol
+AUTHOR_EMAIL = author@example.com
+SITE_TITLE = Lol's Website
+SITE_TAGLINE = WAT?!
+BASE_DOMAIN = http://example.org
+
+[posts]
+foo
+bar
+baz
+
+[tags]
+tag1
+tag2
+EOF
+
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
+grep "_build/index\\.html" "${TEMP}/output.txt"
+grep "_build/index\\.xml" "${TEMP}/output.txt"
+grep "_build/tag1/index\\.xml" "${TEMP}/output.txt"
+grep "_build/tag2/index\\.xml" "${TEMP}/output.txt"
+grep "_build/1\\.html" "${TEMP}/output.txt"
+grep "_build/2\\.html" "${TEMP}/output.txt"
+grep "_build/3\\.html" "${TEMP}/output.txt"
+grep "_build/foo\\.html" "${TEMP}/output.txt"
+grep "_build/bar\\.html" "${TEMP}/output.txt"
+grep "_build/baz\\.html" "${TEMP}/output.txt"
+grep "_build/tag1\\.html" "${TEMP}/output.txt"
+grep "_build/tag2\\.html" "${TEMP}/output.txt"
+
+rm "${TEMP}/output.txt"
+
+diff -uN "${TEMP}/proj/_build/index.html" "${TEMP}/expected-index.html"
+diff -uN "${TEMP}/proj/_build/1.html" "${TEMP}/expected-index.html"
+diff -uN "${TEMP}/proj/_build/2.html" "${TEMP}/expected-page-2.html"
+
+cat > "${TEMP}/expected-page-3.html" <<EOF
+
+Listing: Baz - Aug 01, 2016
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/3.html" "${TEMP}/expected-page-3.html"
+
+cat > "${TEMP}/expected-atom.xml" <<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">Lol's Website</title>
+  <id>/index.xml</id>
+  <updated>2016-10-01T00:00:00Z</updated>
+  <link href="http://example.org/" />
+  <link href="http://example.org/index.xml" rel="self" />
+  <author>
+    <name>Lol</name>
+    <email>author@example.com</email>
+  </author>
+  <subtitle type="text">WAT?!</subtitle>
+  
+  <entry>
+    <title type="text">Foo</title>
+    <id>/foo.html</id>
+    <updated>2016-10-01T00:00:00Z</updated>
+    <published>2016-10-01T00:00:00Z</published>
+    <link href="http://example.org/foo.html" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is foo.</p>
+]]></content>
+  </entry>
+  
+</feed>
+EOF
+diff -uN "${TEMP}/proj/_build/index.xml" "${TEMP}/expected-atom.xml"
+
+cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">Lol's Website - tag1</title>
+  <id>/tag1/index.xml</id>
+  <updated>2016-08-01T00:00:00Z</updated>
+  <link href="http://example.org/" />
+  <link href="http://example.org/tag1/index.xml" rel="self" />
+  <author>
+    <name>Lol</name>
+    <email>author@example.com</email>
+  </author>
+  <subtitle type="text">WAT?!</subtitle>
+  
+  <entry>
+    <title type="text">Baz</title>
+    <id>/baz.html</id>
+    <updated>2016-08-01T00:00:00Z</updated>
+    <published>2016-08-01T00:00:00Z</published>
+    <link href="http://example.org/baz.html" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is baz.</p>
+]]></content>
+  </entry>
+  
+</feed>
+EOF
+diff -uN "${TEMP}/proj/_build/tag1/index.xml" "${TEMP}/expected-atom-tag1.xml"
+
+cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">Lol's Website - tag2</title>
+  <id>/tag2/index.xml</id>
+  <updated>2016-08-01T00:00:00Z</updated>
+  <link href="http://example.org/" />
+  <link href="http://example.org/tag2/index.xml" rel="self" />
+  <author>
+    <name>Lol</name>
+    <email>author@example.com</email>
+  </author>
+  <subtitle type="text">WAT?!</subtitle>
+  
+  <entry>
+    <title type="text">Baz</title>
+    <id>/baz.html</id>
+    <updated>2016-08-01T00:00:00Z</updated>
+    <published>2016-08-01T00:00:00Z</published>
+    <link href="http://example.org/baz.html" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is baz.</p>
+]]></content>
+  </entry>
+  
+</feed>
+EOF
+diff -uN "${TEMP}/proj/_build/tag2/index.xml" "${TEMP}/expected-atom-tag2.xml"
+
+cat > "${TEMP}/expected-post-baz.html" <<EOF
+
+
+Baz - Aug 01, 2016
+
+<p>This is baz.</p>
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/foo.html" "${TEMP}/expected-post-foo.html"
+diff -uN "${TEMP}/proj/_build/bar.html" "${TEMP}/expected-post-bar.html"
+diff -uN "${TEMP}/proj/_build/baz.html" "${TEMP}/expected-post-baz.html"
+
+cat > "${TEMP}/expected-tag1.html" <<EOF
+
+Listing: tag1 - Baz - Aug 01, 2016
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/tag1.html" "${TEMP}/expected-tag1.html"
+
+cat > "${TEMP}/expected-tag2.html" <<EOF
+
+Listing: tag2 - Baz - Aug 01, 2016
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/tag2.html" "${TEMP}/expected-tag2.html"
+
+rm -rf "${TEMP}/proj/_build"
+
+
+### custom settings with some posts, pages and tags
+
+cat > "${TEMP}/proj/contents/page1.blogc" <<EOF
+TITLE: Page 1
+-------------
+This is page 1.
+EOF
+
+cat > "${TEMP}/proj/contents/page2.blogc" <<EOF
+TITLE: Page 2
+-------------
+This is page 2.
+EOF
+
+cat >> "${TEMP}/proj/blogcfile" <<EOF
+[pages]
+page1
+page2
+EOF
+
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
+grep "_build/index\\.html" "${TEMP}/output.txt"
+grep "_build/index\\.xml" "${TEMP}/output.txt"
+grep "_build/tag1/index\\.xml" "${TEMP}/output.txt"
+grep "_build/tag2/index\\.xml" "${TEMP}/output.txt"
+grep "_build/1\\.html" "${TEMP}/output.txt"
+grep "_build/2\\.html" "${TEMP}/output.txt"
+grep "_build/3\\.html" "${TEMP}/output.txt"
+grep "_build/foo\\.html" "${TEMP}/output.txt"
+grep "_build/bar\\.html" "${TEMP}/output.txt"
+grep "_build/baz\\.html" "${TEMP}/output.txt"
+grep "_build/tag1\\.html" "${TEMP}/output.txt"
+grep "_build/tag2\\.html" "${TEMP}/output.txt"
+grep "_build/page1\\.html" "${TEMP}/output.txt"
+grep "_build/page2\\.html" "${TEMP}/output.txt"
+
+rm "${TEMP}/output.txt"
+
+diff -uN "${TEMP}/proj/_build/index.html" "${TEMP}/expected-index.html"
+diff -uN "${TEMP}/proj/_build/1.html" "${TEMP}/expected-index.html"
+diff -uN "${TEMP}/proj/_build/2.html" "${TEMP}/expected-page-2.html"
+diff -uN "${TEMP}/proj/_build/3.html" "${TEMP}/expected-page-3.html"
+
+diff -uN "${TEMP}/proj/_build/index.xml" "${TEMP}/expected-atom.xml"
+diff -uN "${TEMP}/proj/_build/tag1/index.xml" "${TEMP}/expected-atom-tag1.xml"
+diff -uN "${TEMP}/proj/_build/tag2/index.xml" "${TEMP}/expected-atom-tag2.xml"
+
+diff -uN "${TEMP}/proj/_build/foo.html" "${TEMP}/expected-post-foo.html"
+diff -uN "${TEMP}/proj/_build/bar.html" "${TEMP}/expected-post-bar.html"
+diff -uN "${TEMP}/proj/_build/baz.html" "${TEMP}/expected-post-baz.html"
+
+diff -uN "${TEMP}/proj/_build/tag1.html" "${TEMP}/expected-tag1.html"
+diff -uN "${TEMP}/proj/_build/tag2.html" "${TEMP}/expected-tag2.html"
+
+cat > "${TEMP}/expected-page1.html" <<EOF
+
+
+Page 1
+
+<p>This is page 1.</p>
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/page1.html" "${TEMP}/expected-page1.html"
+
+cat > "${TEMP}/expected-page2.html" <<EOF
+
+
+Page 2
+
+<p>This is page 2.</p>
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/page2.html" "${TEMP}/expected-page2.html"
+
+rm -rf "${TEMP}/proj/_build"

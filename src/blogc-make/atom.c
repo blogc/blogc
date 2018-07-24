@@ -13,6 +13,7 @@
 #include "../common/error.h"
 #include "../common/utils.h"
 #include "settings.h"
+#include "utils.h"
 #include "atom.h"
 
 static const char atom_template[] =
@@ -20,12 +21,10 @@ static const char atom_template[] =
     "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n"
     "  <title type=\"text\">{{ SITE_TITLE }}{%% ifdef FILTER_TAG %%} - "
         "{{ FILTER_TAG }}{%% endif %%}</title>\n"
-    "  <id>{{ BASE_URL }}%s%s{%% ifdef FILTER_TAG %%}/{{ FILTER_TAG }}"
-        "{%% endif %%}%s</id>\n"
+    "  <id>{{ BASE_URL }}%s</id>\n"
     "  <updated>{{ DATE_FIRST_FORMATTED }}</updated>\n"
     "  <link href=\"{{ BASE_DOMAIN }}{{ BASE_URL }}/\" />\n"
-    "  <link href=\"{{ BASE_DOMAIN }}{{ BASE_URL }}%s%s{%% ifdef FILTER_TAG %%}"
-        "/{{ FILTER_TAG }}{%% endif %%}%s\" rel=\"self\" />\n"
+    "  <link href=\"{{ BASE_DOMAIN }}{{ BASE_URL }}%s\" rel=\"self\" />\n"
     "  <author>\n"
     "    <name>{{ AUTHOR_NAME }}</name>\n"
     "    <email>{{ AUTHOR_EMAIL }}</email>\n"
@@ -34,10 +33,10 @@ static const char atom_template[] =
     "  {%% block listing %%}\n"
     "  <entry>\n"
     "    <title type=\"text\">{{ TITLE }}</title>\n"
-    "    <id>{{ BASE_URL }}%s%s/{{ FILENAME }}/</id>\n"
+    "    <id>{{ BASE_URL }}%s</id>\n"
     "    <updated>{{ DATE_FORMATTED }}</updated>\n"
     "    <published>{{ DATE_FORMATTED }}</published>\n"
-    "    <link href=\"{{ BASE_DOMAIN }}{{ BASE_URL }}%s%s/{{ FILENAME }}/\" />\n"
+    "    <link href=\"{{ BASE_DOMAIN }}{{ BASE_URL }}%s\" />\n"
     "    <author>\n"
     "      <name>{{ AUTHOR_NAME }}</name>\n"
     "      <email>{{ AUTHOR_EMAIL }}</email>\n"
@@ -66,12 +65,30 @@ bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
     const char *atom_prefix = bc_trie_lookup(settings->settings, "atom_prefix");
     const char *atom_ext = bc_trie_lookup(settings->settings, "atom_ext");
     const char *post_prefix = bc_trie_lookup(settings->settings, "post_prefix");
-    const char *atom_slash = atom_prefix[0] == '\0' ? "" : "/";
-    const char *post_slash = post_prefix[0] == '\0' ? "" : "/";
+    const char *post_ext = bc_trie_lookup(settings->settings, "html_ext");
 
-    char *content = bc_strdup_printf(atom_template, atom_slash, atom_prefix,
-        atom_ext, atom_slash, atom_prefix, atom_ext, post_slash, post_prefix,
-        post_slash, post_prefix);
+    bc_string_t *atom_url = bc_string_new();
+
+    if (atom_prefix[0] != '\0')
+        bc_string_append_c(atom_url, '/');
+
+    bc_string_append(atom_url, atom_prefix);
+    bc_string_append(atom_url, "{% ifdef FILTER_TAG %}/{{ FILTER_TAG }}");
+
+    if (atom_prefix[0] == '\0' && atom_ext[0] != '/')
+        bc_string_append(atom_url, "{% else %}/index");
+
+    bc_string_append(atom_url, "{% endif %}");
+    bc_string_append(atom_url, atom_ext);
+
+    char *post_url = bm_generate_filename(NULL, post_prefix, "{{ FILENAME }}",
+        post_ext);
+
+    char *content = bc_strdup_printf(atom_template, atom_url->str, atom_url->str,
+        post_url, post_url);
+
+    bc_string_free(atom_url, true);
+    free(post_url);
 
     if (-1 == write(fd, content, strlen(content))) {
         *err = bc_error_new_printf(BLOGC_MAKE_ERROR_ATOM,
