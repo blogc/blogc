@@ -34,7 +34,7 @@ static const struct default_settings_map {
 
     // html
     {"html_ext", "/index.html"},
-    {"index_prefix", NULL},
+    {"index_prefix", ""},
     {"post_prefix", "post"},
     {"tag_prefix", "tag"},
     {"html_order", "DESC"},
