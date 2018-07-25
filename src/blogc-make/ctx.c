@@ -234,7 +234,6 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     const char *content_dir = bm_ctx_settings_lookup(rv, "content_dir");
     const char *post_prefix = bm_ctx_settings_lookup(rv, "post_prefix");
     const char *source_ext = bm_ctx_settings_lookup(rv, "source_ext");
-    const char *slash = post_prefix[0] == '\0' ? "" : "/";
 
     rv->posts_fctx = NULL;
     if (settings->posts != NULL) {
