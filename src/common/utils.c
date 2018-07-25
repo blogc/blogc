@@ -9,6 +9,7 @@
 #define BC_STRING_CHUNK_SIZE 128
 
 #include <string.h>
+#include <strings.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -299,6 +300,31 @@ bc_str_find(const char *str, char c)
         }
     }
     return NULL;
+}
+
+
+bool
+bc_str_to_bool(const char *str)
+{
+    if (str == NULL)
+        return false;
+
+    if (0 == strcmp(str, "1"))
+        return true;
+
+    if (0 == strcasecmp(str, "y"))
+        return true;
+
+    if (0 == strcasecmp(str, "yes"))
+        return true;
+
+    if (0 == strcasecmp(str, "true"))
+        return true;
+
+    if (0 == strcasecmp(str, "on"))
+        return true;
+
+    return false;
 }
 
 

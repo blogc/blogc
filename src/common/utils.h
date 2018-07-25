@@ -50,6 +50,7 @@ char* bc_str_strip(char *str);
 char** bc_str_split(const char *str, char c, size_t max_pieces);
 char* bc_str_replace(const char *str, const char search, const char *replace);
 char* bc_str_find(const char *str, char c);
+bool bc_str_to_bool(const char *str);
 void bc_strv_free(char **strv);
 char* bc_strv_join(char **strv, const char *separator);
 size_t bc_strv_length(char **strv);

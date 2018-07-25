@@ -268,6 +268,31 @@ test_str_find(void **state)
 
 
 static void
+test_str_to_bool(void **state)
+{
+    assert_false(bc_str_to_bool(NULL));
+    assert_true(bc_str_to_bool("1"));
+    assert_true(bc_str_to_bool("y"));
+    assert_true(bc_str_to_bool("Y"));
+    assert_true(bc_str_to_bool("yes"));
+    assert_true(bc_str_to_bool("YES"));
+    assert_true(bc_str_to_bool("true"));
+    assert_true(bc_str_to_bool("TRUE"));
+    assert_true(bc_str_to_bool("on"));
+    assert_true(bc_str_to_bool("ON"));
+    assert_false(bc_str_to_bool("0"));
+    assert_false(bc_str_to_bool("n"));
+    assert_false(bc_str_to_bool("N"));
+    assert_false(bc_str_to_bool("no"));
+    assert_false(bc_str_to_bool("NO"));
+    assert_false(bc_str_to_bool("false"));
+    assert_false(bc_str_to_bool("FALSE"));
+    assert_false(bc_str_to_bool("off"));
+    assert_false(bc_str_to_bool("OFF"));
+}
+
+
+static void
 test_strv_join(void **state)
 {
     char *pieces[] = {"guda","bola", "chunda", NULL};
@@ -1039,6 +1064,7 @@ main(void)
         unit_test(test_str_split),
         unit_test(test_str_replace),
         unit_test(test_str_find),
+        unit_test(test_str_to_bool),
         unit_test(test_strv_join),
         unit_test(test_strv_length),
 
