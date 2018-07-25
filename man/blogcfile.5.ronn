@@ -58,6 +58,12 @@ however these rules can be customized with the following settings, from the
     be `atom.xml`, the Atom feed for the `foo` tag will be `atom/foo.xml` and so
     on.
 
+  * `atom_legacy_entry_id` (default: `false`):
+    Before `0.13.11` blogc-make was generating "broken" entry IDs in the atom feeds.
+    This behavior was fixed in version `0.13.11` and current users that don't want
+    to have their old posts re-shared due to the change of IDs should set this to
+    `true`, to keep using the old format.
+
   * `content_dir` (default: `content`):
     The directory that stores the source files. This directory is relative
     to `blogcfile`.

@@ -84,11 +84,21 @@ bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
     char *post_url = bm_generate_filename(NULL, post_prefix, "{{ FILENAME }}",
         post_ext);
 
+    char *entry_id = NULL;
+    if (bc_str_to_bool(bc_trie_lookup(settings->settings, "atom_legacy_entry_id"))) {
+        entry_id = bc_strdup_printf("%s%s/{{ FILENAME }}/",
+            post_prefix[0] == '\0' ? "" : "/", post_prefix);
+    }
+    else {
+        entry_id = bc_strdup(post_url);
+    }
+
     char *content = bc_strdup_printf(atom_template, atom_url->str, atom_url->str,
-        post_url, post_url);
+        entry_id, post_url);
 
     bc_string_free(atom_url, true);
     free(post_url);
+    free(entry_id);
 
     if (-1 == write(fd, content, strlen(content))) {
         *err = bc_error_new_printf(BLOGC_MAKE_ERROR_ATOM,

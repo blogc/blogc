@@ -43,6 +43,7 @@ static const struct default_settings_map {
     {"atom_prefix", "atom"},
     {"atom_ext", ".xml"},
     {"atom_order", "DESC"},
+    {"atom_legacy_entry_id", NULL},
 
     // generic
     {"date_format", "%b %d, %Y, %I:%M %p GMT"},
