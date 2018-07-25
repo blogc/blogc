@@ -20,6 +20,7 @@
 #include "atom.h"
 #include "settings.h"
 #include "exec.h"
+#include "utils.h"
 #include "ctx.h"
 
 
@@ -238,8 +239,8 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     rv->posts_fctx = NULL;
     if (settings->posts != NULL) {
         for (size_t i = 0; settings->posts[i] != NULL; i++) {
-            char *f = bc_strdup_printf("%s%s%s/%s%s", content_dir, slash,
-                post_prefix, settings->posts[i], source_ext);
+            char *f = bm_generate_filename(content_dir, post_prefix,
+                settings->posts[i], source_ext);
             rv->posts_fctx = bc_slist_append(rv->posts_fctx,
                 bm_filectx_new(rv, f, settings->posts[i], NULL));
             free(f);
@@ -249,8 +250,8 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     rv->pages_fctx = NULL;
     if (settings->pages != NULL) {
         for (size_t i = 0; settings->pages[i] != NULL; i++) {
-            char *f = bc_strdup_printf("%s/%s%s", content_dir,
-                settings->pages[i], source_ext);
+            char *f = bm_generate_filename(content_dir, NULL, settings->pages[i],
+                source_ext);
             rv->pages_fctx = bc_slist_append(rv->pages_fctx,
                 bm_filectx_new(rv, f, settings->pages[i], NULL));
             free(f);
