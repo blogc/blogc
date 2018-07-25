@@ -220,20 +220,19 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
 
     // can't return null and set error after this!
 
-    const char *template_dir = bc_trie_lookup(settings->settings,
-        "template_dir");
+    const char *template_dir = bm_ctx_settings_lookup(rv, "template_dir");
 
     char *main_template = bc_strdup_printf("%s/%s", template_dir,
-        bc_trie_lookup(settings->settings, "main_template"));
+        bm_ctx_settings_lookup(rv, "main_template"));
     rv->main_template_fctx = bm_filectx_new(rv, main_template, NULL, NULL);
     free(main_template);
 
     rv->atom_template_fctx = bm_filectx_new(rv, atom_template, NULL, NULL);
     free(atom_template);
 
-    const char *content_dir = bc_trie_lookup(settings->settings, "content_dir");
-    const char *post_prefix = bc_trie_lookup(settings->settings, "post_prefix");
-    const char *source_ext = bc_trie_lookup(settings->settings, "source_ext");
+    const char *content_dir = bm_ctx_settings_lookup(rv, "content_dir");
+    const char *post_prefix = bm_ctx_settings_lookup(rv, "post_prefix");
+    const char *source_ext = bm_ctx_settings_lookup(rv, "source_ext");
     const char *slash = post_prefix[0] == '\0' ? "" : "/";
 
     rv->posts_fctx = NULL;
@@ -353,4 +352,21 @@ bm_ctx_free(bm_ctx_t *ctx)
     free(ctx->blogc);
     free(ctx->blogc_runserver);
     free(ctx);
+}
+
+
+const char*
+bm_ctx_settings_lookup(bm_ctx_t *ctx, const char *key)
+{
+    if (ctx == NULL || ctx->settings == NULL || ctx->settings->settings == NULL)
+        return NULL;
+    return bc_trie_lookup(ctx->settings->settings, key);
+}
+
+
+const char*
+bm_ctx_settings_lookup_str(bm_ctx_t *ctx, const char *key)
+{
+    const char *rv = bm_ctx_settings_lookup(ctx, key);
+    return rv == NULL ? "" : rv;
 }

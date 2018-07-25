@@ -26,10 +26,10 @@
 static void
 posts_ordering(bm_ctx_t *ctx, bc_trie_t *variables, const char *variable)
 {
-    if (ctx == NULL || ctx->settings == NULL || ctx->settings->settings == NULL)
+    if (ctx == NULL)
         return;  // something is wrong, let's not add any variable
 
-    const char *value = bc_trie_lookup(ctx->settings->settings, variable);
+    const char *value = bm_ctx_settings_lookup_str(ctx, variable);
     if (value != NULL && ((0 == strcmp(value, "ASC")) || (0 == strcmp(value, "asc"))))
         return;  // user explicitly asked for ASC
 
@@ -40,16 +40,14 @@ posts_ordering(bm_ctx_t *ctx, bc_trie_t *variables, const char *variable)
 static void
 posts_pagination(bm_ctx_t *ctx, bc_trie_t *variables, const char *variable)
 {
-    if (ctx == NULL || ctx->settings == NULL || ctx->settings->settings == NULL)
+    if (ctx == NULL)
         return;  // something is wrong, let's not add any variable
 
-    long posts_per_page = strtol(
-        bc_trie_lookup(ctx->settings->settings, variable),
-        NULL, 10);  // FIXME: improve
+    long posts_per_page = strtol(bm_ctx_settings_lookup_str(ctx, variable), NULL, 10);
     if (posts_per_page >= 0) {
         bc_trie_insert(variables, "FILTER_PAGE", bc_strdup("1"));
         bc_trie_insert(variables, "FILTER_PER_PAGE",
-            bc_strdup(bc_trie_lookup(ctx->settings->settings, variable)));
+            bc_strdup(bm_ctx_settings_lookup(ctx, variable)));
     }
 }
 
@@ -57,12 +55,10 @@ posts_pagination(bm_ctx_t *ctx, bc_trie_t *variables, const char *variable)
 static bool
 posts_pagination_enabled(bm_ctx_t *ctx, const  char *variable)
 {
-    if (ctx == NULL || ctx->settings == NULL || ctx->settings->settings == NULL)
+    if (ctx == NULL)
         return false;
 
-    long posts_per_page = strtol(
-        bc_trie_lookup(ctx->settings->settings, variable),
-        NULL, 10);  // FIXME: improve
+    long posts_per_page = strtol(bm_ctx_settings_lookup_str(ctx, variable), NULL, 10);
     return posts_per_page != 0;
 }
 
@@ -79,14 +75,15 @@ index_outputlist(bm_ctx_t *ctx)
         return NULL;
 
     bc_slist_t *rv = NULL;
-    const char *html_ext = bc_trie_lookup(ctx->settings->settings,
-        "html_ext");
-    const char *index_prefix = bc_trie_lookup(ctx->settings->settings,
-        "index_prefix");
+
+    const char *index_prefix = bm_ctx_settings_lookup(ctx, "index_prefix");
+    const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
+
     char *f = bm_generate_filename(ctx->short_output_dir, index_prefix, NULL,
         html_ext);
     rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
     free(f);
+
     return rv;
 }
 
@@ -102,7 +99,7 @@ index_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
     posts_pagination(ctx, variables, "posts_per_page");
     posts_ordering(ctx, variables, "html_order");
     bc_trie_insert(variables, "DATE_FORMAT",
-        bc_strdup(bc_trie_lookup(ctx->settings->settings, "date_format")));
+        bc_strdup(bm_ctx_settings_lookup_str(ctx, "date_format")));
     bc_trie_insert(variables, "MAKE_RULE", bc_strdup("index"));
     bc_trie_insert(variables, "MAKE_TYPE", bc_strdup("post"));
 
@@ -138,13 +135,15 @@ atom_outputlist(bm_ctx_t *ctx)
         return NULL;
 
     bc_slist_t *rv = NULL;
-    const char *atom_prefix = bc_trie_lookup(ctx->settings->settings,
-        "atom_prefix");
-    const char *atom_ext = bc_trie_lookup(ctx->settings->settings, "atom_ext");
+
+    const char *atom_prefix = bm_ctx_settings_lookup(ctx, "atom_prefix");
+    const char *atom_ext = bm_ctx_settings_lookup(ctx, "atom_ext");
+
     char *f = bm_generate_filename(ctx->short_output_dir, atom_prefix, NULL,
         atom_ext);
     rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
     free(f);
+
     return rv;
 }
 
@@ -195,15 +194,17 @@ atom_tags_outputlist(bm_ctx_t *ctx)
         return NULL;
 
     bc_slist_t *rv = NULL;
-    const char *atom_prefix = bc_trie_lookup(ctx->settings->settings,
-        "atom_prefix");
-    const char *atom_ext = bc_trie_lookup(ctx->settings->settings, "atom_ext");
+
+    const char *atom_prefix = bm_ctx_settings_lookup(ctx, "atom_prefix");
+    const char *atom_ext = bm_ctx_settings_lookup(ctx, "atom_ext");
+
     for (size_t i = 0; ctx->settings->tags[i] != NULL; i++) {
         char *f = bm_generate_filename(ctx->short_output_dir, atom_prefix,
             ctx->settings->tags[i], atom_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
+
     return rv;
 }
 
@@ -257,21 +258,19 @@ pagination_outputlist(bm_ctx_t *ctx)
 
     // not using posts_pagination_enabled() here because we need to calculate
     // posts per page here anyway, and the condition is different.
-    long posts_per_page = strtol(
-        bc_trie_lookup(ctx->settings->settings, "posts_per_page"),
-        NULL, 10);  // FIXME: improve
+    long posts_per_page = strtol(bm_ctx_settings_lookup_str(ctx, "posts_per_page"),
+        NULL, 10);
     if (posts_per_page <= 0)
         return NULL;
+
+    bc_slist_t *rv = NULL;
 
     long num_posts = bc_slist_length(ctx->posts_fctx);
     size_t pages = ceilf(((float) num_posts) / posts_per_page);
 
-    const char *pagination_prefix = bc_trie_lookup(ctx->settings->settings,
-        "pagination_prefix");
-    const char *html_ext = bc_trie_lookup(ctx->settings->settings,
-        "html_ext");
+    const char *pagination_prefix = bm_ctx_settings_lookup(ctx, "pagination_prefix");
+    const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
 
-    bc_slist_t *rv = NULL;
     for (size_t i = 0; i < pages; i++) {
         char *j = bc_strdup_printf("%d", i + 1);
         char *f = bm_generate_filename(ctx->short_output_dir, pagination_prefix,
@@ -280,6 +279,7 @@ pagination_outputlist(bm_ctx_t *ctx)
         free(j);
         free(f);
     }
+
     return rv;
 }
 
@@ -296,10 +296,10 @@ pagination_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
     // not using posts_pagination because we set FILTER_PAGE anyway, and the
     // first value inserted in that function would be useless
     bc_trie_insert(variables, "FILTER_PER_PAGE",
-        bc_strdup(bc_trie_lookup(ctx->settings->settings, "posts_per_page")));
+        bc_strdup(bm_ctx_settings_lookup_str(ctx, "posts_per_page")));
     posts_ordering(ctx, variables, "html_order");
     bc_trie_insert(variables, "DATE_FORMAT",
-        bc_strdup(bc_trie_lookup(ctx->settings->settings, "date_format")));
+        bc_strdup(bm_ctx_settings_lookup_str(ctx, "date_format")));
     bc_trie_insert(variables, "MAKE_RULE", bc_strdup("pagination"));
     bc_trie_insert(variables, "MAKE_TYPE", bc_strdup("post"));
 
@@ -332,18 +332,18 @@ posts_outputlist(bm_ctx_t *ctx)
     if (ctx == NULL || ctx->settings->posts == NULL)
         return NULL;
 
-    const char *post_prefix = bc_trie_lookup(ctx->settings->settings,
-        "post_prefix");
-    const char *html_ext = bc_trie_lookup(ctx->settings->settings,
-        "html_ext");
-
     bc_slist_t *rv = NULL;
+
+    const char *post_prefix = bm_ctx_settings_lookup(ctx, "post_prefix");
+    const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
+
     for (size_t i = 0; ctx->settings->posts[i] != NULL; i++) {
         char *f = bm_generate_filename(ctx->short_output_dir, post_prefix,
             ctx->settings->posts[i], html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
+
     return rv;
 }
 
@@ -358,7 +358,7 @@ posts_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
     bc_trie_t *variables = bc_trie_new(free);
     bc_trie_insert(variables, "IS_POST", bc_strdup("1"));
     bc_trie_insert(variables, "DATE_FORMAT",
-        bc_strdup(bc_trie_lookup(ctx->settings->settings, "date_format")));
+        bc_strdup(bm_ctx_settings_lookup(ctx, "date_format")));
     posts_ordering(ctx, variables, "html_order");
     bc_trie_insert(variables, "MAKE_RULE", bc_strdup("posts"));
     bc_trie_insert(variables, "MAKE_TYPE", bc_strdup("post"));
@@ -402,17 +402,18 @@ tags_outputlist(bm_ctx_t *ctx)
     if (!posts_pagination_enabled(ctx, "posts_per_page"))
         return NULL;
 
-    const char *tag_prefix = bc_trie_lookup(ctx->settings->settings,
-        "tag_prefix");
-    const char *html_ext = bc_trie_lookup(ctx->settings->settings, "html_ext");
-
     bc_slist_t *rv = NULL;
+
+    const char *tag_prefix = bm_ctx_settings_lookup(ctx, "tag_prefix");
+    const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
+
     for (size_t i = 0; ctx->settings->tags[i] != NULL; i++) {
         char *f = bm_generate_filename(ctx->short_output_dir, tag_prefix,
             ctx->settings->tags[i], html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
+
     return rv;
 }
 
@@ -429,7 +430,7 @@ tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
     posts_pagination(ctx, variables, "posts_per_page");
     posts_ordering(ctx, variables, "html_order");
     bc_trie_insert(variables, "DATE_FORMAT",
-        bc_strdup(bc_trie_lookup(ctx->settings->settings, "date_format")));
+        bc_strdup(bm_ctx_settings_lookup_str(ctx, "date_format")));
     bc_trie_insert(variables, "MAKE_RULE", bc_strdup("tags"));
     bc_trie_insert(variables, "MAKE_TYPE", bc_strdup("post"));
 
@@ -465,15 +466,17 @@ pages_outputlist(bm_ctx_t *ctx)
     if (ctx == NULL || ctx->settings->pages == NULL)
         return NULL;
 
-    const char *html_ext = bc_trie_lookup(ctx->settings->settings, "html_ext");
-
     bc_slist_t *rv = NULL;
+
+    const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
+
     for (size_t i = 0; ctx->settings->pages[i] != NULL; i++) {
         char *f = bm_generate_filename(ctx->short_output_dir, NULL,
             ctx->settings->pages[i], html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
+
     return rv;
 }
 
@@ -487,7 +490,7 @@ pages_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 
     bc_trie_t *variables = bc_trie_new(free);
     bc_trie_insert(variables, "DATE_FORMAT",
-        bc_strdup(bc_trie_lookup(ctx->settings->settings, "date_format")));
+        bc_strdup(bm_ctx_settings_lookup(ctx, "date_format")));
     bc_trie_insert(variables, "MAKE_RULE", bc_strdup("pages"));
     bc_trie_insert(variables, "MAKE_TYPE", bc_strdup("page"));
 
@@ -528,6 +531,7 @@ copy_outputlist(bm_ctx_t *ctx)
         return NULL;
 
     bc_slist_t *rv = NULL;
+
     // we iterate over ctx->copy_fctx list instead of ctx->settings->copy,
     // because bm_ctx_new() expands directories into its files, recursively.
     for (bc_slist_t *s = ctx->copy_fctx; s != NULL; s = s->next) {
@@ -536,6 +540,7 @@ copy_outputlist(bm_ctx_t *ctx)
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
+
     return rv;
 }
 
@@ -727,6 +732,7 @@ all_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
             return rv;
         }
     }
+
     return 0;
 }
 
@@ -757,6 +763,7 @@ bm_rule_parse_args(const char *sep)
         bc_trie_free(rv);
         return NULL;
     }
+
     return rv;
 }
 
@@ -893,6 +900,7 @@ bm_rule_list_built_files(bm_ctx_t *ctx)
         }
         bc_slist_free(o);
     }
+
     return rv;
 }
 

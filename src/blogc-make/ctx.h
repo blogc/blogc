@@ -76,5 +76,7 @@ bm_ctx_t* bm_ctx_new(bm_ctx_t *base, const char *settings_file,
 bool bm_ctx_reload(bm_ctx_t **ctx);
 void bm_ctx_free_internal(bm_ctx_t *ctx);
 void bm_ctx_free(bm_ctx_t *ctx);
+const char* bm_ctx_settings_lookup(bm_ctx_t *ctx, const char *key);
+const char* bm_ctx_settings_lookup_str(bm_ctx_t *ctx, const char *key);
 
 #endif /* _MAKE_CTX_H */

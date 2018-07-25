@@ -50,7 +50,7 @@ static const char atom_template[] =
 char*
 bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
 {
-    if (err == NULL || *err != NULL)
+    if (settings == NULL || err == NULL || *err != NULL)
         return NULL;
 
     // this is not really portable
