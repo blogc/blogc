@@ -177,15 +177,29 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
         return NULL;
 
     bm_settings_t *settings = bm_settings_parse(content, content_len, err);
-    if (*err != NULL) {
+    if (settings == NULL || *err != NULL) {
         free(content);
         return NULL;
     }
     free(content);
 
-    char *atom_template = bm_atom_deploy(settings, err);
-    if (*err != NULL) {
-        return NULL;
+    const char *template_dir = bc_trie_lookup(settings->settings, "template_dir");
+    if (template_dir == NULL)
+        template_dir = "";
+
+    char *atom_template = NULL;
+    bool atom_template_tmp = false;
+    const char *atom_template_conf = bc_trie_lookup(settings->settings,
+        "atom_template");
+    if (atom_template_conf != NULL) {
+        atom_template = bc_strdup_printf("%s/%s", template_dir, atom_template_conf);
+    }
+    else {
+        atom_template = bm_atom_deploy(settings, err);
+        atom_template_tmp = true;
+        if (*err != NULL) {
+            return NULL;
+        }
     }
 
     bm_ctx_t *rv = NULL;
@@ -221,13 +235,12 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
 
     // can't return null and set error after this!
 
-    const char *template_dir = bm_ctx_settings_lookup(rv, "template_dir");
-
     char *main_template = bc_strdup_printf("%s/%s", template_dir,
         bm_ctx_settings_lookup(rv, "main_template"));
     rv->main_template_fctx = bm_filectx_new(rv, main_template, NULL, NULL);
     free(main_template);
 
+    rv->atom_template_tmp = atom_template_tmp;
     rv->atom_template_fctx = bm_filectx_new(rv, atom_template, NULL, NULL);
     free(atom_template);
 
@@ -325,7 +338,9 @@ bm_ctx_free_internal(bm_ctx_t *ctx)
     free(ctx->output_dir);
     ctx->output_dir = NULL;
 
-    bm_atom_destroy(ctx->atom_template_fctx->path);
+    if (ctx->atom_template_tmp)
+        bm_atom_destroy(ctx->atom_template_fctx->path);
+    ctx->atom_template_tmp = false;
 
     bm_filectx_free(ctx->main_template_fctx);
     ctx->main_template_fctx = NULL;

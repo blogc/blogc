@@ -24,6 +24,7 @@ static const struct default_settings_map {
     // source
     {"content_dir", "content"},
     {"template_dir", "templates"},
+    {"atom_template", NULL},  // default: atom.c
     {"main_template", "main.tmpl"},
     {"source_ext", ".txt"},
 

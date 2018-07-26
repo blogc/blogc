@@ -49,6 +49,7 @@ typedef struct {
 
     bool dev;
     bool verbose;
+    bool atom_template_tmp;
 
     bm_settings_t *settings;
 

@@ -436,6 +436,257 @@ diff -uN "${TEMP}/proj/_build/post/post11/index.html" "${TEMP}/expected-post-pos
 rm -rf "${TEMP}/proj/_build"
 
 
+### default settings with some posts, custom atom template
+
+cat > "${TEMP}/proj/blogcfile" <<EOF
+[global]
+AUTHOR_NAME = Lol
+AUTHOR_EMAIL = author@example.com
+SITE_TITLE = Lol's Website
+SITE_TAGLINE = WAT?!
+BASE_DOMAIN = http://example.org
+
+[settings]
+posts_per_page = -1
+atom_posts_per_page = -1
+atom_template = atom.tmpl
+
+[posts]
+post01
+post02
+post03
+post04
+post05
+post06
+post07
+post08
+post09
+post10
+post11
+EOF
+
+cat > "${TEMP}/proj/templates/atom.tmpl" <<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">{{ SITE_TITLE }}{% ifdef FILTER_TAG %} - {{ FILTER_TAG }}{% endif %}</title>
+  <id>{{ BASE_URL }}/atom/{% ifdef FILTER_TAG %}{{ FILTER_TAG }}/{% endif %}</id>
+  <updated>{{ DATE_FIRST_FORMATTED }}</updated>
+  <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/" />
+  <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/atom/{% ifdef FILTER_TAG %}{{ FILTER_TAG }}/{% endif %}" rel="self" />
+  <author>
+    <name>{{ AUTHOR_NAME }}</name>
+    <email>{{ AUTHOR_EMAIL }}</email>
+  </author>
+  <subtitle type="text">{{ SITE_TAGLINE }}</subtitle>
+  {% block listing %}
+  <entry>
+    <title type="text">{{ TITLE }}</title>
+    <id>{{ BASE_URL }}/post/{{ FILENAME }}/</id>
+    <updated>{{ DATE_FORMATTED }}</updated>
+    <published>{{ DATE_FORMATTED }}</published>
+    <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/post/{{ FILENAME }}/" />
+    <author>
+      <name>{{ AUTHOR_NAME }}</name>
+      <email>{{ AUTHOR_EMAIL }}</email>
+    </author>
+    <content type="html"><![CDATA[{{ CONTENT }}]]></content>
+  </entry>
+  {% endblock %}
+</feed>
+EOF
+
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
+grep "_build/index\\.html" "${TEMP}/output.txt"
+grep "_build/atom\\.xml" "${TEMP}/output.txt"
+grep "_build/post/post01/index\\.html" "${TEMP}/output.txt"
+grep "_build/post/post02/index\\.html" "${TEMP}/output.txt"
+grep "_build/post/post03/index\\.html" "${TEMP}/output.txt"
+grep "_build/post/post04/index\\.html" "${TEMP}/output.txt"
+grep "_build/post/post05/index\\.html" "${TEMP}/output.txt"
+grep "_build/post/post06/index\\.html" "${TEMP}/output.txt"
+grep "_build/post/post07/index\\.html" "${TEMP}/output.txt"
+grep "_build/post/post08/index\\.html" "${TEMP}/output.txt"
+grep "_build/post/post09/index\\.html" "${TEMP}/output.txt"
+grep "_build/post/post10/index\\.html" "${TEMP}/output.txt"
+grep "_build/post/post11/index\\.html" "${TEMP}/output.txt"
+
+rm "${TEMP}/output.txt"
+
+cat > "${TEMP}/expected-atom.xml" <<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">Lol's Website</title>
+  <id>/atom/</id>
+  <updated>2016-09-11T00:00:00Z</updated>
+  <link href="http://example.org/" />
+  <link href="http://example.org/atom/" rel="self" />
+  <author>
+    <name>Lol</name>
+    <email>author@example.com</email>
+  </author>
+  <subtitle type="text">WAT?!</subtitle>
+  
+  <entry>
+    <title type="text">Post 11</title>
+    <id>/post/post11/</id>
+    <updated>2016-09-11T00:00:00Z</updated>
+    <published>2016-09-11T00:00:00Z</published>
+    <link href="http://example.org/post/post11/" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is Post 11.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="text">Post 10</title>
+    <id>/post/post10/</id>
+    <updated>2016-09-10T00:00:00Z</updated>
+    <published>2016-09-10T00:00:00Z</published>
+    <link href="http://example.org/post/post10/" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is Post 10.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="text">Post 09</title>
+    <id>/post/post09/</id>
+    <updated>2016-09-09T00:00:00Z</updated>
+    <published>2016-09-09T00:00:00Z</published>
+    <link href="http://example.org/post/post09/" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is Post 09.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="text">Post 08</title>
+    <id>/post/post08/</id>
+    <updated>2016-09-08T00:00:00Z</updated>
+    <published>2016-09-08T00:00:00Z</published>
+    <link href="http://example.org/post/post08/" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is Post 08.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="text">Post 07</title>
+    <id>/post/post07/</id>
+    <updated>2016-09-07T00:00:00Z</updated>
+    <published>2016-09-07T00:00:00Z</published>
+    <link href="http://example.org/post/post07/" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is Post 07.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="text">Post 06</title>
+    <id>/post/post06/</id>
+    <updated>2016-09-06T00:00:00Z</updated>
+    <published>2016-09-06T00:00:00Z</published>
+    <link href="http://example.org/post/post06/" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is Post 06.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="text">Post 05</title>
+    <id>/post/post05/</id>
+    <updated>2016-09-05T00:00:00Z</updated>
+    <published>2016-09-05T00:00:00Z</published>
+    <link href="http://example.org/post/post05/" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is Post 05.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="text">Post 04</title>
+    <id>/post/post04/</id>
+    <updated>2016-09-04T00:00:00Z</updated>
+    <published>2016-09-04T00:00:00Z</published>
+    <link href="http://example.org/post/post04/" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is Post 04.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="text">Post 03</title>
+    <id>/post/post03/</id>
+    <updated>2016-09-03T00:00:00Z</updated>
+    <published>2016-09-03T00:00:00Z</published>
+    <link href="http://example.org/post/post03/" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is Post 03.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="text">Post 02</title>
+    <id>/post/post02/</id>
+    <updated>2016-09-02T00:00:00Z</updated>
+    <published>2016-09-02T00:00:00Z</published>
+    <link href="http://example.org/post/post02/" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is Post 02.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="text">Post 01</title>
+    <id>/post/post01/</id>
+    <updated>2016-09-01T00:00:00Z</updated>
+    <published>2016-09-01T00:00:00Z</published>
+    <link href="http://example.org/post/post01/" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is Post 01.</p>
+]]></content>
+  </entry>
+  
+</feed>
+EOF
+diff -uN "${TEMP}/proj/_build/atom.xml" "${TEMP}/expected-atom.xml"
+
+rm -rf "${TEMP}/proj/_build"
+
+
 ### default settings with some posts, atom posts per page 0
 
 cat > "${TEMP}/proj/blogcfile" <<EOF
