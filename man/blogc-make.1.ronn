@@ -64,7 +64,7 @@ Rebuilds are done by running `blogc-make all` internally.
 
 Dump default Atom feed template based on current blogcfile(5) settings.
 
-The template is dumped to the standard output, and can be used as a base
+The template is dumped to the standard output, and can be used as base
 for customized Atom feed templates.
 
 ## BUILD RULES
