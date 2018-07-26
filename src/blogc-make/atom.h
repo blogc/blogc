@@ -12,6 +12,7 @@
 #include "../common/error.h"
 #include "settings.h"
 
+char* bm_atom_generate(bm_settings_t *settings);
 char* bm_atom_deploy(bm_settings_t *settings, bc_error_t **err);
 void bm_atom_destroy(const char *fname);
 

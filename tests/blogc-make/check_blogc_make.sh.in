@@ -1639,7 +1639,45 @@ rm "${TEMP}/output.txt"
 
 unset OUTPUT_DIR
 
+
+### atom_dump rule
+
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" atom_dump | tee "${TEMP}/atom.xml"
+
+cat > "${TEMP}/expected-atom-dump.xml" <<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">{{ SITE_TITLE }}{% ifdef FILTER_TAG %} - {{ FILTER_TAG }}{% endif %}</title>
+  <id>{{ BASE_URL }}/atoom{% ifdef FILTER_TAG %}/{{ FILTER_TAG }}{% endif %}/index.xml</id>
+  <updated>{{ DATE_FIRST_FORMATTED }}</updated>
+  <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/" />
+  <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/atoom{% ifdef FILTER_TAG %}/{{ FILTER_TAG }}{% endif %}/index.xml" rel="self" />
+  <author>
+    <name>{{ AUTHOR_NAME }}</name>
+    <email>{{ AUTHOR_EMAIL }}</email>
+  </author>
+  <subtitle type="text">{{ SITE_TAGLINE }}</subtitle>
+  {% block listing %}
+  <entry>
+    <title type="text">{{ TITLE }}</title>
+    <id>{{ BASE_URL }}/poost/{{ FILENAME }}.html</id>
+    <updated>{{ DATE_FORMATTED }}</updated>
+    <published>{{ DATE_FORMATTED }}</published>
+    <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/poost/{{ FILENAME }}.html" />
+    <author>
+      <name>{{ AUTHOR_NAME }}</name>
+      <email>{{ AUTHOR_EMAIL }}</email>
+    </author>
+    <content type="html"><![CDATA[{{ CONTENT }}]]></content>
+  </entry>
+  {% endblock %}
+</feed>
+EOF
+diff -uN "${TEMP}/atom.xml" "${TEMP}/expected-atom-dump.xml"
+
+rm "${TEMP}/atom.xml"
 rm -rf "${TEMP}/proj"
+
 
 ###############################################################################
 

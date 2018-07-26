@@ -48,19 +48,10 @@ static const char atom_template[] =
 
 
 char*
-bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
+bm_atom_generate(bm_settings_t *settings)
 {
-    if (settings == NULL || err == NULL || *err != NULL)
+    if (settings == NULL)
         return NULL;
-
-    // this is not really portable
-    char fname[] = "/tmp/blogc-make_XXXXXX";
-    int fd;
-    if (-1 == (fd = mkstemp(fname))) {
-        *err = bc_error_new_printf(BLOGC_MAKE_ERROR_ATOM,
-            "Failed to create temporary atom template: %s", strerror(errno));
-        return NULL;
-    }
 
     const char *atom_prefix = bc_trie_lookup(settings->settings, "atom_prefix");
     const char *atom_ext = bc_trie_lookup(settings->settings, "atom_ext");
@@ -93,12 +84,38 @@ bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
         entry_id = bc_strdup(post_url);
     }
 
-    char *content = bc_strdup_printf(atom_template, atom_url->str, atom_url->str,
+    char *rv = bc_strdup_printf(atom_template, atom_url->str, atom_url->str,
         entry_id, post_url);
 
     bc_string_free(atom_url, true);
     free(post_url);
     free(entry_id);
+
+    return rv;
+}
+
+
+char*
+bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
+{
+    if (settings == NULL || err == NULL || *err != NULL)
+        return NULL;
+
+    // this is not really portable
+    char fname[] = "/tmp/blogc-make_XXXXXX";
+    int fd;
+    if (-1 == (fd = mkstemp(fname))) {
+        *err = bc_error_new_printf(BLOGC_MAKE_ERROR_ATOM,
+            "Failed to create temporary atom template: %s", strerror(errno));
+        return NULL;
+    }
+
+    char *content = bm_atom_generate(settings);
+    if (content == NULL) {
+        close(fd);
+        unlink(fname);
+        return NULL;
+    }
 
     if (-1 == write(fd, content, strlen(content))) {
         *err = bc_error_new_printf(BLOGC_MAKE_ERROR_ATOM,

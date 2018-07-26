@@ -60,6 +60,13 @@ Watch for changes in the source files, rebuilding as needed.
 
 Rebuilds are done by running `blogc-make all` internally.
 
+### atom_dump
+
+Dump default Atom feed template based on current blogcfile(5) settings.
+
+The template is dumped to the standard output, and can be used as a base
+for customized Atom feed templates.
+
 ## BUILD RULES
 
 ### index

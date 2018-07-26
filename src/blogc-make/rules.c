@@ -13,6 +13,7 @@
 #include <time.h>
 #include <math.h>
 #include "../common/utils.h"
+#include "atom.h"
 #include "ctx.h"
 #include "exec.h"
 #include "exec-native.h"
@@ -626,6 +627,20 @@ watch_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 }
 
 
+// ATOM DUMP RULE
+
+static int
+atom_dump_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
+{
+    char *content = bm_atom_generate(ctx->settings);
+    if (content == NULL)
+        return 3;
+    printf("%s", content);
+    free(content);
+    return 0;
+}
+
+
 const bm_rule_t rules[] = {
     {
         .name = "all",
@@ -711,6 +726,13 @@ const bm_rule_t rules[] = {
         .help = "watch for changes in the source files, rebuilding as needed",
         .outputlist_func = NULL,
         .exec_func = watch_exec,
+        .generate_files = false,
+    },
+    {
+        .name = "atom_dump",
+        .help = "dump default Atom feed template based on current settings",
+        .outputlist_func = NULL,
+        .exec_func = atom_dump_exec,
         .generate_files = false,
     },
     {NULL, NULL, NULL, NULL, false},
