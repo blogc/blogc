@@ -95,7 +95,7 @@ bgr_settings_parse(void)
         return NULL;
     }
 
-    bc_config_t *config = bc_config_parse(config_content, len, NULL, &err);
+    bc_config_t *config = bc_config_parse(config_content, len, NULL, NULL, &err);
     free(config_content);
     if (err != NULL) {
         fprintf(stderr, "warning: failed to parse configuration file (%s): %s\n",

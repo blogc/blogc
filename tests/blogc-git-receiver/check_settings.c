@@ -35,7 +35,7 @@ test_settings_get_section(void **state)
 
     setenv("HOME", "/home/blogc", 1);
 
-    bc_config_t *config = bc_config_parse("", 0, NULL, &err);
+    bc_config_t *config = bc_config_parse("", 0, NULL, NULL, &err);
     assert_null(err);
     assert_null(bgr_settings_get_section(config, "/home/blogc/repos/foo.git"));
     bc_config_free(config);
@@ -52,7 +52,7 @@ test_settings_get_section(void **state)
         "[repo:baz.git]\n"
         "mirror = baz\n"
         "\n";
-    config = bc_config_parse(conf, strlen(conf), NULL, &err);
+    config = bc_config_parse(conf, strlen(conf), NULL, NULL, &err);
     assert_null(err);
     char *s = bgr_settings_get_section(config, "/home/blogc/repos/bar.git");
     assert_string_equal(s, "repo:bar.git");
@@ -72,7 +72,7 @@ test_settings_get_section(void **state)
         "[repo:asd/baz.git]\n"
         "mirror = baz\n"
         "\n";
-    config = bc_config_parse(conf, strlen(conf), NULL, &err);
+    config = bc_config_parse(conf, strlen(conf), NULL, NULL, &err);
     assert_null(err);
     s = bgr_settings_get_section(config, "/home/bola/repos/asd/bar.git");
     assert_string_equal(s, "repo:asd/bar.git");

@@ -60,7 +60,7 @@ free_section(bc_configparser_section_t *section)
 
 bc_config_t*
 bc_config_parse(const char *src, size_t src_len, const char *list_sections[],
-    bc_error_t **err)
+    const char *list_sections_prefix[], bc_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -145,6 +145,14 @@ bc_config_parse(const char *src, size_t src_len, const char *list_sections[],
                     if (list_sections != NULL) {
                         for (size_t i = 0; list_sections[i] != NULL; i++) {
                             if (0 == strcmp(section_name, list_sections[i])) {
+                                section->type = CONFIG_SECTION_TYPE_LIST;
+                                break;
+                            }
+                        }
+                    }
+                    if (list_sections_prefix != NULL) {
+                        for (size_t i = 0; list_sections_prefix[i] != NULL; i++) {
+                            if (bc_str_starts_with(section_name, list_sections_prefix[i])) {
                                 section->type = CONFIG_SECTION_TYPE_LIST;
                                 break;
                             }

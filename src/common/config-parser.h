@@ -18,7 +18,8 @@ typedef struct {
 } bc_config_t;
 
 bc_config_t* bc_config_parse(const char *src, size_t src_len,
-    const char *list_sections[], bc_error_t **err);
+    const char *list_sections[], const char *list_sections_prefix[],
+    bc_error_t **err);
 char** bc_config_list_sections(bc_config_t *config);
 char** bc_config_list_keys(bc_config_t *config, const char *section);
 const char* bc_config_get(bc_config_t *config, const char *section,

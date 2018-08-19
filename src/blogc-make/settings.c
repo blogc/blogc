@@ -86,7 +86,7 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
         return NULL;
 
     bc_config_t *config = bc_config_parse(content, content_len, list_sections,
-        err);
+        NULL, err);
     if (config == NULL || (err != NULL && *err != NULL))
         return NULL;
 
