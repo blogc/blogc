@@ -16,7 +16,7 @@ blogc(1) -- a blog compiler
 
 ## DESCRIPTION
 
-**blogc** converts source files and templates into blog/website resources. It
+**blogc** compiles source files and templates into blog/website resources. It
 gets one (or more) source files and a template, and generates an output file,
 based on the template and the content read from the source file(s). It was
 designed to be used with make(1).
