@@ -12,7 +12,7 @@ BuildRequires: git, tar, make
 %endif
 
 %description
-blogc(1) is a blog compiler. It converts source files and templates into
+blogc(1) is a blog compiler. It compiles source files and templates into
 blog/website resources.
 
 %if ! 0%{?el6}
