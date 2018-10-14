@@ -10,10 +10,7 @@
 from __future__ import print_function
 
 from contextlib import closing
-try:
-    from io import StringIO
-except ImportError:
-    from StringIO import StringIO
+from io import BytesIO
 
 import base64
 import boto3
@@ -26,10 +23,7 @@ import shutil
 import subprocess
 import tarfile
 import traceback
-try:
-    import urllib.request as urllib2
-except ImportError:
-    import urllib2
+import urllib.request
 
 BLOGC_VERSION = '@PACKAGE_VERSION@'
 
@@ -39,29 +33,36 @@ os.environ['PATH'] = '%s:%s' % (cwd, os.environ.get('PATH', ''))
 s3 = boto3.resource('s3')
 
 GITHUB_AUTH = os.environ.get('GITHUB_AUTH')
-if GITHUB_AUTH is not None and ':' not in GITHUB_AUTH:
-    GITHUB_AUTH = boto3.client('kms').decrypt(
-        CiphertextBlob=base64.b64decode(GITHUB_AUTH))['Plaintext']
-
 GITHUB_SECRET = os.environ.get('GITHUB_SECRET')
-if GITHUB_SECRET is not None:
-    GITHUB_SECRET = boto3.client('kms').decrypt(
-        CiphertextBlob=base64.b64decode(GITHUB_SECRET))['Plaintext']
+
+if os.environ.get("ENABLE_KMS"):
+    kms = boto3.client('kms')
+
+    if GITHUB_AUTH is not None:
+        GITHUB_AUTH = kms.decrypt(
+            CiphertextBlob=base64.b64decode(GITHUB_AUTH))['Plaintext']
+
+    if GITHUB_SECRET is not None:
+        GITHUB_SECRET = kms.decrypt(
+            CiphertextBlob=base64.b64decode(GITHUB_SECRET))['Plaintext']
+else:
+    GITHUB_AUTH = GITHUB_AUTH.encode('utf-8')
+    GITHUB_SECRET = GITHUB_SECRET.encode('utf-8')
 
 
 def get_tarball(repo_name):
     tarball_url = 'https://api.github.com/repos/%s/tarball/master' % repo_name
-    request = urllib2.Request(tarball_url)
+    request = urllib.request.Request(tarball_url)
 
     if GITHUB_AUTH is not None:
         auth = base64.b64encode(GITHUB_AUTH)
-        request.add_header("Authorization", "Basic %s" % auth)
+        request.add_header("Authorization", "Basic %s" % auth.decode('utf-8'))
 
-    with closing(urllib2(request)) as fp:
+    with closing(urllib.request.urlopen(request)) as fp:
         tarball = fp.read()
 
     rootdir = None
-    with closing(StringIO(tarball)) as fp:
+    with closing(BytesIO(tarball)) as fp:
         with tarfile.open(fileobj=fp, mode='r:gz') as tar:
             for f in tar.getnames():
                 if '/' not in f:
@@ -233,7 +234,7 @@ def api_gateway_handler(event):
         if len(pieces) != 2 or pieces[0] != 'sha1':
             return api_gateway_response(400, 'INVALID_SIGNATURE')
 
-        digest = hmac.new(GITHUB_SECRET, body, hashlib.sha1)
+        digest = hmac.new(GITHUB_SECRET, body.encode('utf-8'), hashlib.sha1)
 
         if not hmac.compare_digest(digest.hexdigest(), pieces[1]):
             return api_gateway_response(400, 'BAD_SIGNATURE')
