@@ -239,4 +239,4 @@ def lambda_handler(event, context):
             if 'Sns' in record:
                 blogc_handler(record['Sns']['Message'])
     elif 'body' in event:  # api-gateway
-        return api_gateway_handler(event['body'])
+        return api_gateway_handler(event)
