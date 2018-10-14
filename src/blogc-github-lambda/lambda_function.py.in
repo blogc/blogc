@@ -12,6 +12,7 @@ from StringIO import StringIO
 
 import base64
 import boto3
+import hmac
 import hashlib
 import json
 import mimetypes
@@ -32,6 +33,11 @@ GITHUB_AUTH = os.environ.get('GITHUB_AUTH')
 if GITHUB_AUTH is not None and ':' not in GITHUB_AUTH:
     GITHUB_AUTH = boto3.client('kms').decrypt(
         CiphertextBlob=base64.b64decode(GITHUB_AUTH))['Plaintext']
+
+GITHUB_SECRET = os.environ.get('GITHUB_SECRET')
+if GITHUB_SECRET is not None:
+    GITHUB_SECRET = boto3.client('kms').decrypt(
+        CiphertextBlob=base64.b64decode(GITHUB_SECRET))['Plaintext']
 
 
 def get_tarball(repo_name):
@@ -192,10 +198,45 @@ def blogc_handler(message):
         print "Commit not for master branch, skipping: %s" % payload['ref']
 
 
+def api_gateway_response(code, message):
+    return {
+        'statusCode': code,
+        'body': json.dumps({'message': message}),
+    }
+
+
+def api_gateway_handler(event):
+    headers = event.get('headers')
+    if headers is None:
+        return api_gateway_response(400, 'NO_HEADERS')
+
+    if headers.get('X-GitHub-Event') != 'push':
+        return api_gateway_response(400, 'UNSUPPORTED_EVENT')
+
+    body = event.get('body', '')
+
+    if GITHUB_SECRET is not None:
+        sig = headers.get('X-Hub-Signature')
+        if sig is None:
+            return api_gateway_response(400, 'NO_SIGNATURE')
+
+        pieces = sig.split('=')
+        if len(pieces) != 2 or pieces[0] != 'sha1':
+            return api_gateway_response(400, 'INVALID_SIGNATURE')
+
+        digest = hmac.new(GITHUB_SECRET, body, hashlib.sha1)
+
+        if not hmac.compare_digest(digest.hexdigest(), pieces[1]):
+            return api_gateway_response(400, 'BAD_SIGNATURE')
+
+    blogc_handler(body)
+    return api_gateway_response(201, 'ACCEPTED')
+
+
 def lambda_handler(event, context):
     if 'Records' in event:  # sns
         for record in event['Records']:
             if 'Sns' in record:
                 blogc_handler(record['Sns']['Message'])
     elif 'body' in event:  # api-gateway
-        blogc_handler(event['body'])
+        return api_gateway_handler(event['body'])
