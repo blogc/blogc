@@ -22,9 +22,10 @@ import hashlib
 import json
 import mimetypes
 import os
+import shutil
 import subprocess
 import tarfile
-import shutil
+import traceback
 try:
     import urllib.request as urllib2
 except ImportError:
@@ -240,6 +241,7 @@ def api_gateway_handler(event):
     try:
         blogc_handler(body)
     except Exception as err:
+        traceback.print_exc()
         return api_gateway_response(500, 'ERROR: %s' % err)
 
     return api_gateway_response(201, 'ACCEPTED')
