@@ -153,7 +153,7 @@ def sync_s3(src, dest, settings_file):
         remote_files[filename].delete()
 
 
-def sns_handler(message):
+def blogc_handler(message):
     print 'blogc-github-lambda %s' % BLOGC_VERSION
     payload = json.loads(message)
 
@@ -193,6 +193,9 @@ def sns_handler(message):
 
 
 def lambda_handler(event, context):
-    for record in event['Records']:
-        if 'Sns' in record:
-            sns_handler(record['Sns']['Message'])
+    if 'Records' in event:  # sns
+        for record in event['Records']:
+            if 'Sns' in record:
+                blogc_handler(record['Sns']['Message'])
+    elif 'body' in event:  # api-gateway
+        blogc_handler(event['body'])
