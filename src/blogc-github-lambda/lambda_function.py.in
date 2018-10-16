@@ -245,7 +245,7 @@ def api_gateway_handler(event):
         traceback.print_exc()
         return api_gateway_response(500, 'ERROR: %s' % err)
 
-    return api_gateway_response(201, 'ACCEPTED')
+    return api_gateway_response(202, 'ACCEPTED')
 
 
 def lambda_handler(event, context):
