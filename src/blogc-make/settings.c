@@ -89,7 +89,6 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
         return NULL;
 
     bm_settings_t *rv = bc_malloc(sizeof(bm_settings_t));
-    rv->root_dir = NULL;
     rv->global = bc_trie_new(free);
     rv->settings = bc_trie_new(free);
     rv->posts = NULL;
@@ -172,32 +171,11 @@ cleanup:
 }
 
 
-bm_settings_t*
-bm_settings_parse_file(const char *filename, bc_error_t **err)
-{
-    if (err == NULL || *err != NULL)
-        return NULL;
-
-    size_t content_len;
-    char *content = bc_file_get_contents(filename, true, &content_len, err);
-    if (*err != NULL)
-        return NULL;
-
-    bm_settings_t *rv = bm_settings_parse(content, content_len, err);
-    char *real_filename = realpath(filename, NULL);
-    rv->root_dir = bc_strdup(dirname(real_filename));
-    free(real_filename);
-    free(content);
-    return rv;
-}
-
-
 void
 bm_settings_free(bm_settings_t *settings)
 {
     if (settings == NULL)
         return;
-    free(settings->root_dir);
     bc_trie_free(settings->global);
     bc_trie_free(settings->settings);
     bc_strv_free(settings->posts);

@@ -117,7 +117,6 @@ test_settings2(void **state)
     bm_settings_t *s = bm_settings_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(s);
-    assert_null(s->root_dir);
     assert_int_equal(bc_trie_size(s->global), 7);
     assert_string_equal(bc_trie_lookup(s->global, "BOLA"), "asd");
     assert_string_equal(bc_trie_lookup(s->global, "GUDA"), "qwe");
@@ -207,7 +206,6 @@ test_settings_env2(void **state)
     bm_settings_t *s = bm_settings_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(s);
-    assert_null(s->root_dir);
     assert_int_equal(bc_trie_size(s->global), 7);
     assert_string_equal(bc_trie_lookup(s->global, "BOLA"), "asd");
     assert_string_equal(bc_trie_lookup(s->global, "GUDA"), "qwe");
@@ -297,7 +295,6 @@ test_settings_copy_files(void **state)
     bm_settings_t *s = bm_settings_parse(a, strlen(a), &err);
     assert_null(err);
     assert_non_null(s);
-    assert_null(s->root_dir);
     assert_int_equal(bc_trie_size(s->global), 7);
     assert_string_equal(bc_trie_lookup(s->global, "BOLA"), "asd");
     assert_string_equal(bc_trie_lookup(s->global, "GUDA"), "qwe");

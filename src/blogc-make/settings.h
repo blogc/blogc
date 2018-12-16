@@ -14,7 +14,6 @@
 #include "../common/utils.h"
 
 typedef struct {
-    char *root_dir;
     bc_trie_t *global;
     bc_trie_t *settings;
     char **posts;
@@ -25,7 +24,6 @@ typedef struct {
 
 bm_settings_t* bm_settings_parse(const char *content, size_t content_len,
     bc_error_t **err);
-bm_settings_t* bm_settings_parse_file(const char *filename, bc_error_t **err);
 void bm_settings_free(bm_settings_t *settings);
 
 #endif /* _MAKE_SETTINGS_H */
