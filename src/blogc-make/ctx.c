@@ -11,6 +11,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <libgen.h>
+#include <limits.h>
 #include <time.h>
 #include <stdlib.h>
 #include <stdbool.h>
