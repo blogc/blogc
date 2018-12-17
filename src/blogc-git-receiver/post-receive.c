@@ -6,6 +6,8 @@
  * See the file LICENSE.
  */
 
+#include <errno.h>
+#include <string.h>
 #include <stdio.h>
 #include <libgen.h>
 #include <unistd.h>
@@ -25,7 +27,8 @@ bgr_post_receive_hook(int argc, char *argv[])
     char *hooks_dir = dirname(argv[0]);  // this was validated by main()
     char *real_hooks_dir = realpath(hooks_dir, NULL);
     if (real_hooks_dir == NULL) {
-        fprintf(stderr, "error: failed to guess repository root.\n");
+        fprintf(stderr, "error: failed to guess repository root: %s\n",
+            strerror(errno));
         return 3;
     }
 

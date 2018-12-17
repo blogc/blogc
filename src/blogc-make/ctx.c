@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <errno.h>
 #include <libgen.h>
 #include <time.h>
 #include <stdlib.h>
@@ -170,8 +171,16 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     if (settings_file == NULL || err == NULL || *err != NULL)
         return NULL;
 
+    char real_filename[PATH_MAX];
+    if (NULL == realpath(settings_file, real_filename)) {
+        *err = bc_error_new_printf(BLOGC_MAKE_ERROR_SETTINGS,
+            "Failed to resolve settings file (%s): %s", settings_file,
+            strerror(errno));
+        return NULL;
+    }
+
     size_t content_len;
-    char *content = bc_file_get_contents(settings_file, true, &content_len,
+    char *content = bc_file_get_contents(real_filename, true, &content_len,
         err);
     if (*err != NULL)
         return NULL;
@@ -217,10 +226,8 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     }
     rv->settings = settings;
 
-    char *real_filename = realpath(settings_file, NULL);
     rv->settings_fctx = bm_filectx_new(rv, real_filename, NULL, NULL);
-    rv->root_dir = realpath(dirname(real_filename), NULL);
-    free(real_filename);
+    rv->root_dir = bc_strdup(dirname(real_filename));
 
     const char *output_dir = getenv("OUTPUT_DIR");
     rv->short_output_dir = bc_strdup(output_dir != NULL ? output_dir : "_build");

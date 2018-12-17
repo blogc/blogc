@@ -102,8 +102,14 @@ handle_request(void *arg)
     free(abs_path);
 
     if (real_path == NULL) {
-        status_code = 404;
-        error(client_socket, 404, "Not Found");
+        if (errno == ENOENT) {
+            status_code = 404;
+            error(client_socket, 404, "Not Found");
+        }
+        else {
+            status_code = 500;
+            error(client_socket, 500, "Internal Server Error");
+        }
         goto point2;
     }
 

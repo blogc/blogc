@@ -101,7 +101,8 @@ bgr_pre_receive_hook(int argc, char *argv[])
     char *hooks_dir = dirname(argv[0]);  // this was validated by main()
     char *real_hooks_dir = realpath(hooks_dir, NULL);
     if (real_hooks_dir == NULL) {
-        fprintf(stderr, "error: failed to guess repository root.\n");
+        fprintf(stderr, "error: failed to guess repository root: %s\n",
+            strerror(errno));
         return 3;
     }
 
@@ -152,7 +153,7 @@ default_sym:
         char *build_dir = realpath(sym, NULL);
         if (build_dir == NULL) {
             fprintf(stderr, "error: failed to get the hash of last built "
-                "commit.\n");
+                "commit: %s\n", strerror(errno));
             rv = 3;
             goto cleanup;
         }
