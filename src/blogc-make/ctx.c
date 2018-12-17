@@ -207,6 +207,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
         atom_template = bm_atom_deploy(settings, err);
         atom_template_tmp = true;
         if (*err != NULL) {
+            bm_settings_free(settings);
             return NULL;
         }
     }
