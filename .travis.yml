@@ -1,11 +1,6 @@
 dist: xenial
 language: c
 
-addons:
-  apt:
-    packages:
-      - ruby-ronn
-
 matrix:
   include:
     - compiler: gcc
@@ -87,6 +82,7 @@ matrix:
           packages:
             - gcc-mingw-w64-x86-64
 
-install: if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then gem install ronn; fi
+install:
+  - gem install ronn
 
 script: curl -sSf https://yatr.rgm.io/run.sh | bash
