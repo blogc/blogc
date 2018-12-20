@@ -227,7 +227,6 @@ LT_LIB_M
 AC_CONFIG_FILES([
   Makefile
   blogc.spec
-  src/blogc-github-lambda/lambda_function.py
 ])
 AC_CONFIG_FILES([tests/blogc/check_blogc.sh],
                 [chmod +x tests/blogc/check_blogc.sh])

@@ -27,8 +27,6 @@ EXTRA_DIST = \
 	$(NULL)
 
 CLEANFILES = \
-	src/blogc-github-lambda/LICENSE \
-	src/blogc-github-lambda/blogc \
 	$(NULL)
 
 MAINTAINERCLEANFILES = \
