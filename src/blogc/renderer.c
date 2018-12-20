@@ -215,7 +215,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
                         break;
                     }
                     current_source = sources;
-                    tmp_source = current_source->data;
+                    tmp_source = current_source != NULL ? current_source->data : NULL;
                 }
                 else if ((0 == strcmp("listing", node->data[0])) ||
                          (0 == strcmp("listing_once", node->data[0]))) {
@@ -245,7 +245,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
                         listing_start = tmp;
                         current_source = sources;
                     }
-                    tmp_source = current_source->data;
+                    tmp_source = current_source != NULL ? current_source->data : NULL;
                 }
                 break;
 
