@@ -4,6 +4,7 @@ export TESTS_ENVIRONMENT="
 	${VALGRIND:-valgrind} \
 		--tool=memcheck \
 		--leak-check=full \
+		--show-leak-kinds=all \
 		--leak-resolution=high \
 		--num-callers=20 \
 		--error-exitcode=1 \

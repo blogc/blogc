@@ -118,6 +118,9 @@ bc_error_print(bc_error_t *err, const char *prefix)
         case BC_ERROR_FILE:
             fprintf(stderr, "error: file: %s\n", err->msg);
             break;
+        case BC_ERROR_THREAD:
+            fprintf(stderr, "error: thread: %s\n", err->msg);
+            break;
         case BLOGC_ERROR_SOURCE_PARSER:
             fprintf(stderr, "error: source: %s\n", err->msg);
             break;

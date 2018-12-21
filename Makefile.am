@@ -69,6 +69,7 @@ noinst_HEADERS = \
 	src/common/error.h \
 	src/common/file.h \
 	src/common/stdin.h \
+	src/common/thread.h \
 	src/common/utf8.h \
 	src/common/utils.h \
 	$(NULL)
@@ -76,6 +77,7 @@ noinst_HEADERS = \
 noinst_LTLIBRARIES = \
 	libblogc.la \
 	libblogc_common.la \
+	libblogc_common_thread.la \
 	$(NULL)
 
 noinst_PROGRAMS = \
@@ -155,6 +157,31 @@ libblogc_common_la_SOURCES = \
 libblogc_common_la_CFLAGS = \
 	$(AM_CFLAGS) \
 	$(NULL)
+
+
+if BUILD_PTHREAD
+libblogc_common_thread_la_SOURCES = \
+	src/common/thread_pthread.c \
+	$(NULL)
+
+libblogc_common_thread_la_CFLAGS = \
+	$(AM_CFLAGS) \
+	$(PTHREAD_CFLAGS) \
+	$(NULL)
+
+libblogc_common_thread_la_LIBADD = \
+	$(PTHREAD_LIBS) \
+	libblogc_common.la \
+	$(NULL)
+else
+libblogc_common_thread_la_SOURCES = \
+	src/common/thread_windows.c \
+	$(NULL)
+
+libblogc_common_thread_la_LIBADD = \
+	libblogc_common.la \
+	$(NULL)
+endif
 
 
 blogc_SOURCES = \
@@ -271,6 +298,7 @@ blogc_runserver_LDADD = \
 	$(PTHREAD_LIBS) \
 	libblogc_runserver.la \
 	libblogc_common.la \
+	libblogc_common_thread.la \
 	$(NULL)
 
 libblogc_runserver_la_SOURCES = \

@@ -24,6 +24,12 @@ PKG_PROG_PKG_CONFIG
 
 AC_PROG_SED
 
+have_pthread=no
+AX_PTHREAD([
+  have_pthread=yes
+])
+AM_CONDITIONAL([BUILD_PTHREAD], [test "x$have_pthread" = "xyes"])
+
 RPM_VERSION=`echo ${PACKAGE_VERSION} | sed "s/-/./g"`
 AC_SUBST(RPM_VERSION)
 

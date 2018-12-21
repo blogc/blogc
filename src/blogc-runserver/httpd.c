@@ -21,6 +21,7 @@
 #include <pthread.h>
 #include "../common/error.h"
 #include "../common/file.h"
+#include "../common/thread.h"
 #include "../common/utils.h"
 #include "mime.h"
 #include "httpd-utils.h"
@@ -28,7 +29,7 @@
 #define LISTEN_BACKLOG 100
 
 typedef struct {
-    pthread_t thread;
+    bc_thread_t *thread;
     bool initialized;
 } thread_data_t;
 
@@ -212,9 +213,9 @@ point2:
 point1:
     fprintf(stderr, "[Thread-%zu] %s - - \"%s\" %d\n", thread_id + 1,
         ip, conn_line, status_code);
-    free(conn_line);
     bc_strv_free(pieces);
 point0:
+    free(conn_line);
     free(ip);
     close(client_socket);
     return NULL;
@@ -257,7 +258,7 @@ int
 br_httpd_run(const char *host, const char *port, const char *docroot,
     size_t max_threads)
 {
-    int err;
+    int r;
     struct addrinfo *result;
     struct addrinfo hints = {
         .ai_family = AF_UNSPEC,
@@ -268,11 +269,13 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
         .ai_addr = NULL,
         .ai_next = NULL,
     };
-    if (0 != (err = getaddrinfo(host, port, &hints, &result))) {
+    if (0 != (r = getaddrinfo(host, port, &hints, &result))) {
         fprintf(stderr, "Failed to get host:port info: %s\n",
-            gai_strerror(err));
+            gai_strerror(r));
         return 3;
     }
+
+    bc_error_t *err = NULL;
 
     thread_data_t threads[max_threads];
     for (size_t i = 0; i < max_threads; i++)
@@ -380,19 +383,36 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
         arg->docroot = docroot;
 
         if (threads[current_thread].initialized) {
-            if (pthread_join(threads[current_thread].thread, NULL) != 0) {
-                fprintf(stderr, "Failed to join thread\n");
-                free(arg->ip);
-                free(arg);
+            bc_thread_join(threads[current_thread].thread, &err);
+            bc_thread_free(threads[current_thread].thread);
+            threads[current_thread].thread = NULL;
+            threads[current_thread].initialized = false;
+            if (err != NULL) {
+                bc_error_print(err, "blogc-runserver");
+                bc_error_free(err);
+                err = NULL;
+                if (arg != NULL) {
+                    free(arg->ip);
+                    free(arg);
+                }
                 rv = 3;
                 goto cleanup;
             }
         }
 
-        if (pthread_create(&(threads[current_thread].thread), NULL,
-            handle_request, arg) != 0)
-        {
-            fprintf(stderr, "Failed to create thread\n");
+        threads[current_thread].thread = bc_thread_create(handle_request, arg,
+            false, &err);
+        if (err != NULL) {
+            bc_error_print(err, "blogc-runserver");
+            bc_error_free(err);
+            err = NULL;
+            if (arg != NULL) {
+                free(arg->ip);
+                free(arg);
+            }
+            bc_thread_free(threads[current_thread].thread);
+            threads[current_thread].thread = NULL;
+            threads[current_thread].initialized = false;
             rv = 3;
             goto cleanup;
         }
@@ -404,6 +424,18 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
     }
 
 cleanup:
+    for (size_t i = 0; i < max_threads; i++) {
+        if (threads[i].initialized && threads[i].thread != NULL) {
+            bc_thread_join(threads[i].thread, &err);
+            bc_thread_free(threads[i].thread);
+            if (err != NULL) {
+                bc_error_free(err);
+                err = NULL;
+                rv = 3;
+            }
+        }
+    }
+
     close(server_socket);
 
 cleanup0:
