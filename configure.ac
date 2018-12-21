@@ -134,12 +134,11 @@ RUNSERVER="disabled"
 AC_ARG_ENABLE([runserver], AS_HELP_STRING([--enable-runserver],
               [build blogc-runserver tool]))
 AS_IF([test "x$enable_runserver" = "xyes"], [
-  #AC_CHECK_HEADERS([signal.h limits.h fcntl.h unistd.h sys/stat.h sys/types.h sys/socket.h netinet/in.h arpa/inet.h],, [
-  #  AC_MSG_ERROR([blogc-runserver tool requested but required headers not found])
-  #])
-  #AX_PTHREAD([], [
-  #  AC_MSG_ERROR([blogc-runserver tool requested but pthread is not supported])
-  #])
+  AC_CHECK_HEADERS([sys/socket.h netdb.h netinet/in.h arpa/inet.h winsock2.h])
+  AC_CHECK_HEADERS([signal.h limits.h fcntl.h unistd.h sys/stat.h sys/types.h],, [
+    AC_MSG_ERROR([blogc-runserver tool requested but required headers not found])
+  ])
+  # FIXME: check if some thread implementation is available
   RUNSERVER="enabled"
   have_runserver=yes
 ])

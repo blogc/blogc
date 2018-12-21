@@ -6,6 +6,34 @@
  * See the file LICENSE.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
+
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif /* HAVE_NETINET_IN_H */
+
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif /* HAVE_ARPA_INET_H */
+
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif /* HAVE_NETDB_H */
+
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+#endif /* HAVE_PTHREAD */
+
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif /* HAVE_WINSOCK2_H */
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -14,11 +42,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <pthread.h>
 #include "../common/error.h"
 #include "../common/file.h"
 #include "../common/thread.h"
