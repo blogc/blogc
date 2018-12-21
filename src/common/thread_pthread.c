@@ -40,7 +40,7 @@ bc_thread_create(bc_thread_func_t func, void *arg, bool detached, bc_error_t **e
 
         if (0 != (r = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED))) {
             *err = bc_error_new_printf(BC_ERROR_THREAD,
-                "Failed to mark thread as detached: %s", strerror(r));
+                "Failed to detach thread: %s", strerror(r));
             return NULL;
         }
 

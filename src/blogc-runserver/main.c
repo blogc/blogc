@@ -48,11 +48,13 @@ print_usage(void)
 int
 main(int argc, char **argv)
 {
+#if !defined(WIN32) && !defined(_WIN32)
     struct sigaction new_action;
     new_action.sa_handler = SIG_IGN;
     sigemptyset(&new_action.sa_mask);
     new_action.sa_flags = 0;
     sigaction(SIGPIPE, &new_action, NULL);
+#endif
 
     int rv = 0;
     char *host = NULL;
@@ -98,7 +100,7 @@ main(int argc, char **argv)
                     max_threads = strtoul(ptr, &endptr, 10);
                     if (*ptr != '\0' && *endptr != '\0')
                         fprintf(stderr, "blogc-runserver: warning: invalid value "
-                            "for -m argument: %s. using %zu instead\n", ptr, max_threads);
+                            "for -m argument: %s. using %d instead\n", ptr, (int)max_threads);
                     break;
                 default:
                     print_usage();
