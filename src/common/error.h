@@ -9,6 +9,7 @@
 #ifndef _ERROR_H
 #define _ERROR_H
 
+#include <stdarg.h>
 #include <stddef.h>
 
 // error handling is centralized here for the sake of simplicity :/
@@ -38,7 +39,14 @@ typedef struct {
 } bc_error_t;
 
 bc_error_t* bc_error_new(bc_error_type_t type, const char *msg);
+bc_error_t* bc_error_new_vprintf(bc_error_type_t type, const char *format, va_list ap);
 bc_error_t* bc_error_new_printf(bc_error_type_t type, const char *format, ...);
+bc_error_t* bc_error_new_errno_vprintf(bc_error_type_t type, int errno_,
+    const char *format, va_list ap);
+bc_error_t* bc_error_new_errno_printf(bc_error_type_t type, int errno_,
+    const char *format, ...);
+bc_error_t* bc_error_new_default_errno_printf(bc_error_type_t type,
+    const char *format, ...);
 bc_error_t* bc_error_parser(bc_error_type_t type, const char *src,
     size_t src_len, size_t current, const char *format, ...);
 void bc_error_print(bc_error_t *err, const char *prefix);

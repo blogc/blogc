@@ -134,7 +134,12 @@ RUNSERVER="disabled"
 AC_ARG_ENABLE([runserver], AS_HELP_STRING([--enable-runserver],
               [build blogc-runserver tool]))
 AS_IF([test "x$enable_runserver" = "xyes"], [
-  AC_CHECK_HEADERS([sys/socket.h netdb.h netinet/in.h arpa/inet.h winsock2.h])
+  AC_CHECK_HEADERS([sys/socket.h netdb.h netinet/in.h arpa/inet.h winsock2.h ws2tcpip.h])
+#, [], [], [[
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+#]])
   AC_CHECK_HEADERS([signal.h limits.h fcntl.h unistd.h sys/stat.h sys/types.h],, [
     AC_MSG_ERROR([blogc-runserver tool requested but required headers not found])
   ])
@@ -225,7 +230,7 @@ AM_CONDITIONAL([USE_BGR_DEPS], [test "x$have_bgr_deps" = "xyes"])
 BASH="$ac_cv_path_bash"
 AC_SUBST(BASH)
 
-AC_CHECK_HEADERS([sys/stat.h sys/wait.h time.h])
+AC_CHECK_HEADERS([sys/stat.h sys/wait.h time.h windows.h])
 
 LT_LIB_M
 

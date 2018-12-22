@@ -299,6 +299,7 @@ blogc_runserver_LDADD = \
 	libblogc_runserver.la \
 	libblogc_common.la \
 	libblogc_common_thread.la \
+	-lws2_32 \
 	$(NULL)
 
 libblogc_runserver_la_SOURCES = \

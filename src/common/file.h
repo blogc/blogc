@@ -16,5 +16,6 @@
 #define BC_FILE_CHUNK_SIZE 1024
 
 char* bc_file_get_contents(const char *path, bool utf8, size_t *len, bc_error_t **err);
+char* bc_file_get_realpath(const char *path);
 
 #endif /* _FILE_H */

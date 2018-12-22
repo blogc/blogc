@@ -10,6 +10,11 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#if defined(WIN32) || defined(_WIN32)
+#define WINVER 0x0600
+#define _WIN32_WINNT 0x0600
+#endif /* WIN32 || _WIN32 */
+
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif /* HAVE_SYS_SOCKET_H */
@@ -34,8 +39,13 @@
 #include <winsock2.h>
 #endif /* HAVE_WINSOCK2_H */
 
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+
 #include <errno.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,6 +58,14 @@
 #include "../common/utils.h"
 #include "mime.h"
 #include "httpd-utils.h"
+
+#if defined(WIN32) || defined(_WIN32)
+#include <stdint.h>
+typedef uint8_t u_int8_t;
+typedef uint16_t u_int16_t;
+typedef uint32_t u_int32_t;
+typedef unsigned short in_port_t;
+#endif /* WIN32 || _WIN32 */
 
 #define LISTEN_BACKLOG 100
 
@@ -62,6 +80,22 @@ typedef struct {
     char *ip;
     const char *docroot;
 } request_data_t;
+
+
+static void
+error_printf(const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+#if defined(WIN32) || defined(_WIN32)
+    bc_error_t *rv = bc_error_new_errno_vprintf(0, WSAGetLastError(), format, ap);
+#else
+    bc_error_t *rv = bc_error_new_errno_vprintf(0, errno, format, ap);
+#endif
+    va_end(ap);
+    fprintf(stderr, "%s\n", rv->msg);
+    bc_error_free(rv);
+}
 
 
 static void
@@ -122,7 +156,7 @@ handle_request(void *arg)
     }
 
     char *abs_path = bc_strdup_printf("%s/%s", docroot, path);
-    char *real_path = realpath(abs_path, NULL);
+    char *real_path = bc_file_get_realpath(abs_path);
     free(abs_path);
 
     if (real_path == NULL) {
@@ -137,7 +171,7 @@ handle_request(void *arg)
         goto point2;
     }
 
-    char *real_root = realpath(docroot, NULL);
+    char *real_root = bc_file_get_realpath(docroot);
     if (real_root == NULL) {
         status_code = 500;
         error(client_socket, 500, "Internal Server Error");
@@ -251,7 +285,11 @@ br_httpd_get_ip(int af, const struct sockaddr *addr)
     char host[INET6_ADDRSTRLEN];
     if (af == AF_INET6) {
         struct sockaddr_in6 *a = (struct sockaddr_in6*) addr;
+//#if defined(WIN32) || defined(_WIN32)
+//        InetNtopA(af, &(a->sin6_addr), host, INET6_ADDRSTRLEN);
+//#else
         inet_ntop(af, &(a->sin6_addr), host, INET6_ADDRSTRLEN);
+//#endif
     }
     else {
         struct sockaddr_in *a = (struct sockaddr_in*) addr;
@@ -316,11 +354,12 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
     for (rp = result; rp != NULL; rp = rp->ai_next) {
         final_host = br_httpd_get_ip(rp->ai_family, rp->ai_addr);
         final_port = br_httpd_get_port(rp->ai_family, rp->ai_addr);
-        server_socket = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        server_socket = socket(rp->ai_family, rp->ai_socktype, IPPROTO_TCP);
+        printf("%d\n", rp->ai_protocol);
         if (server_socket == -1) {
             if (rp->ai_next == NULL) {
-                fprintf(stderr, "Failed to open server socket (%s:%d): %s\n",
-                    final_host, final_port, strerror(errno));
+                error_printf("Failed to open server socket (%s:%d)", final_host,
+                    final_port);
                 rv = 3;
                 goto cleanup0;
             }

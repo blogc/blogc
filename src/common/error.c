@@ -6,9 +6,19 @@
  * See the file LICENSE.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
+#ifdef HAVE_WINDOWS_H
+#include <windows.h>
+#endif /* HAVE_WINDOWS_H */
+
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 #include "error.h"
 #include "utils.h"
 
@@ -24,14 +34,68 @@ bc_error_new(bc_error_type_t type, const char *msg)
 
 
 bc_error_t*
+bc_error_new_vprintf(bc_error_type_t type, const char *format, va_list ap)
+{
+    char *tmp = bc_strdup_vprintf(format, ap);
+    bc_error_t *rv = bc_error_new(type, tmp);
+    free(tmp);
+    return rv;
+}
+
+
+bc_error_t*
 bc_error_new_printf(bc_error_type_t type, const char *format, ...)
 {
     va_list ap;
     va_start(ap, format);
-    char *tmp = bc_strdup_vprintf(format, ap);
+    bc_error_t *rv = bc_error_new_vprintf(type, format, ap);
     va_end(ap);
-    bc_error_t *rv = bc_error_new(type, tmp);
+    return rv;
+}
+
+
+bc_error_t*
+bc_error_new_errno_vprintf(bc_error_type_t type, int errno_, const char *format,
+    va_list ap)
+{
+    char *tmp = bc_strdup_vprintf(format, ap);
+#if defined(WIN32) || defined(_WIN32)
+    LPTSTR buf = "bola";
+    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+        NULL, errno_, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&buf,
+        0, NULL);
+    bc_error_t *rv = bc_error_new_printf(type, "%s: %s", tmp, buf);
+    LocalFree(buf);
+#else
+    bc_error_t *rv = bc_error_new_printf(type, "%s: %s", tmp, strerror(errno_));
+#endif
     free(tmp);
+    return rv;
+}
+
+
+bc_error_t*
+bc_error_new_errno_printf(bc_error_type_t type, int errno_, const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    bc_error_t *rv = bc_error_new_errno_vprintf(type, errno_, format, ap);
+    va_end(ap);
+    return rv;
+}
+
+
+bc_error_t*
+bc_error_new_default_errno_printf(bc_error_type_t type, const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+#if defined(WIN32) || defined(_WIN32)
+    bc_error_t *rv = bc_error_new_errno_vprintf(type, GetLastError(), format, ap);
+#else
+    bc_error_t *rv = bc_error_new_errno_vprintf(type, errno, format, ap);
+#endif
+    va_end(ap);
     return rv;
 }
 

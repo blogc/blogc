@@ -7,9 +7,11 @@
  */
 
 #include <errno.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "file.h"
 #include "error.h"
@@ -63,4 +65,26 @@ bc_file_get_contents(const char *path, bool utf8, size_t *len, bc_error_t **err)
     }
 
     return bc_string_free(str, false);
+}
+
+
+char*
+bc_file_get_realpath(const char *path)
+{
+    if (path == NULL)
+        return NULL;
+
+#if defined(WIN32) || defined(_WIN32)
+    char *buf = bc_malloc(_MAX_PATH);
+    if (NULL == _fullpath(buf, path, _MAX_PATH)) {
+#else
+    char *buf = bc_malloc(PATH_MAX);
+    if (NULL == realpath(path, buf)) {
+#endif
+
+        free(buf);
+        return NULL;
+    }
+
+    return buf;
 }
