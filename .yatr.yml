@@ -51,7 +51,7 @@ targets:
       - --disable-tests
       - --disable-git-receiver
       - --disable-make
-      - --disable-runserver
+      - --enable-runserver
     task_script: build-aux/build-windows.sh
   win64:
     configure_args:
@@ -62,5 +62,5 @@ targets:
       - --disable-tests
       - --disable-git-receiver
       - --disable-make
-      - --disable-runserver
+      - --enable-runserver
     task_script: build-aux/build-windows.sh
