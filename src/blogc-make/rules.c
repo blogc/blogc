@@ -818,13 +818,14 @@ bm_rule_executor(bm_ctx_t *ctx, bc_slist_t *rule_list)
 
         rule = NULL;
         for (size_t i = 0; rules[i].name != NULL; i++) {
-            if (strlen(rules[i].name) < (sep - rule_str))
+            if (strlen(rules[i].name) != (sep - rule_str))
                 continue;
             if (0 == strncmp(rule_str, rules[i].name, sep - rule_str)) {
                 rule = &(rules[i]);
                 rv = bm_rule_execute(ctx, rule, args);
                 if (rv != 0)
                     return rv;
+                break;
             }
         }
         if (rule == NULL) {
