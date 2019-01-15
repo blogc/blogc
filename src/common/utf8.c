@@ -1,7 +1,7 @@
 /*
  * blogc: A blog compiler.
  * Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de>
- * Copyright (c) 2014-2018 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (c) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
