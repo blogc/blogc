@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include "../common/utils.h"
 
-typedef char* (*blogc_funcvars_func_t) (void);
+typedef void (*blogc_funcvars_func_t) (bc_trie_t*);
 
 char* blogc_funcvars_lookup(const char *name, bc_trie_t *global);
 

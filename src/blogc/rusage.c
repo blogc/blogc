@@ -18,24 +18,28 @@
 #include <sys/resource.h>
 #endif /* HAVE_SYS_RESOURCE_H */
 
+#include <stdlib.h>
 #include "../common/utils.h"
 #include "rusage.h"
 
-// FIXME: optimize to use a single syscall for both cpu time and memory?
 
-
-long long
-blogc_rusage_get_cpu_time(void)
+blogc_rusage_t*
+blogc_rusage_get(void)
 {
 #ifndef HAVE_RUSAGE
-    return 0;
+    return NULL;
 #else
     struct rusage usage;
     if (0 != getrusage(RUSAGE_SELF, &usage))
-        return 0;
-    return (
+        return NULL;
+
+    blogc_rusage_t *rv = bc_malloc(sizeof(blogc_rusage_t));
+    rv->cpu_time = (
         (usage.ru_utime.tv_sec * 1000000) + usage.ru_utime.tv_usec +
         (usage.ru_stime.tv_sec * 1000000) + usage.ru_stime.tv_usec);
+    rv->memory = usage.ru_maxrss;
+
+    return rv;
 #endif
 }
 
@@ -56,27 +60,6 @@ blogc_rusage_format_cpu_time(long long time)
 
 
 char*
-blogc_rusage_cpu_time(void)
-{
-    return blogc_rusage_format_cpu_time(blogc_rusage_get_cpu_time());
-}
-
-
-long
-blogc_rusage_get_memory(void)
-{
-#ifndef HAVE_RUSAGE
-    return 0;
-#else
-    struct rusage usage;
-    if (0 != getrusage(RUSAGE_SELF, &usage))
-        return 0;
-    return usage.ru_maxrss;
-#endif
-}
-
-
-char*
 blogc_rusage_format_memory(long mem)
 {
     if (mem > 1048576)
@@ -87,8 +70,17 @@ blogc_rusage_format_memory(long mem)
 }
 
 
-char*
-blogc_rusage_memory(void)
+void
+blogc_rusage_inject(bc_trie_t *global)
 {
-    return blogc_rusage_format_memory(blogc_rusage_get_memory());
+    blogc_rusage_t *usage = blogc_rusage_get();
+    if (usage == NULL)
+        return;
+
+    bc_trie_insert(global, "BLOGC_RUSAGE_CPU_TIME",
+        blogc_rusage_format_cpu_time(usage->cpu_time));
+    bc_trie_insert(global, "BLOGC_RUSAGE_MEMORY",
+        blogc_rusage_format_memory(usage->memory));
+
+    free(usage);
 }

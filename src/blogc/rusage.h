@@ -17,19 +17,18 @@
 #define HAVE_RUSAGE 1
 #endif /* HAVE_SYS_RESOURCE_H */
 
+#include "../common/utils.h"
+
 typedef struct {
     long long cpu_time;  // in microseconds
     long memory;         // in kilobytes
 } blogc_rusage_t;
 
 blogc_rusage_t* blogc_rusage_get(void);
-long long blogc_rusage_get_cpu_time(void);  // in microseconds
-long blogc_rusage_get_memory(void);         // in kilobytes
 
 char* blogc_rusage_format_cpu_time(long long time);
 char* blogc_rusage_format_memory(long mem);
 
-char* blogc_rusage_cpu_time(void);
-char* blogc_rusage_memory(void);
+void blogc_rusage_inject(bc_trie_t *global);
 
 #endif /* ___RUSAGE_H */

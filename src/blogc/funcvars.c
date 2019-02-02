@@ -21,8 +21,8 @@ static const struct func_map {
 } funcs[] = {
 
 #ifdef HAVE_RUSAGE
-    {"BLOGC_RUSAGE_CPU_TIME", blogc_rusage_cpu_time},
-    {"BLOGC_RUSAGE_MEMORY", blogc_rusage_memory},
+    {"BLOGC_RUSAGE_CPU_TIME", blogc_rusage_inject},
+    {"BLOGC_RUSAGE_MEMORY", blogc_rusage_inject},
 #endif
 
     {NULL, NULL},
@@ -39,11 +39,8 @@ blogc_funcvars_lookup(const char *name, bc_trie_t *global)
 
     for (size_t i = 0; funcs[i].variable != NULL; i++) {
         if (0 == strcmp(name, funcs[i].variable)) {
-            char *val = funcs[i].func();
-            if (val == NULL)
-                return NULL;
-            bc_trie_insert(global, name, bc_strdup(val));
-            return val;
+            funcs[i].func(global);
+            return bc_strdup(bc_trie_lookup(global, name));
         }
     }
 
