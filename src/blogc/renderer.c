@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "datetime-parser.h"
+#include "funcvars.h"
 #include "template-parser.h"
 #include "renderer.h"
 #include "../common/error.h"
@@ -101,10 +102,15 @@ blogc_format_variable(const char *name, bc_trie_t *global, bc_trie_t *local,
     }
 
     if ((0 == strcmp(var, "FOREACH_ITEM")) &&
-        (foreach_var != NULL && foreach_var->data != NULL))
+        (foreach_var != NULL && foreach_var->data != NULL)) {
         value = foreach_var->data;
-    else
-        value = blogc_get_variable(var, global, local);
+    }
+    else {
+        value = blogc_funcvars_lookup(var, global);
+        if (value == NULL) {
+            value = blogc_get_variable(var, global, local);
+        }
+    }
 
     if (value == NULL) {
         free(var);
