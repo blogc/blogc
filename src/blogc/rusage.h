@@ -9,9 +9,13 @@
 #ifndef ___RUSAGE_H
 #define ___RUSAGE_H
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
 #ifdef HAVE_SYS_RESOURCE_H
-#define HAVE_RUSAGE
-#endif
+#define HAVE_RUSAGE 1
+#endif /* HAVE_SYS_RESOURCE_H */
 
 typedef struct {
     long long cpu_time;  // in microseconds
