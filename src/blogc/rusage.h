@@ -9,6 +9,16 @@
 #ifndef ___RUSAGE_H
 #define ___RUSAGE_H
 
+#ifdef HAVE_SYS_RESOURCE_H
+#define HAVE_RUSAGE
+#endif
+
+typedef struct {
+    long long cpu_time;  // in microseconds
+    long memory;         // in kilobytes
+} blogc_rusage_t;
+
+blogc_rusage_t* blogc_rusage_get(void);
 long long blogc_rusage_get_cpu_time(void);  // in microseconds
 long blogc_rusage_get_memory(void);         // in kilobytes
 

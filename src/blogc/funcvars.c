@@ -19,8 +19,12 @@ static const struct func_map {
     const char *variable;
     const blogc_funcvars_func_t func;
 } funcs[] = {
+
+#ifdef HAVE_RUSAGE
     {"BLOGC_RUSAGE_CPU_TIME", blogc_rusage_cpu_time},
     {"BLOGC_RUSAGE_MEMORY", blogc_rusage_memory},
+#endif
+
     {NULL, NULL},
 };
 

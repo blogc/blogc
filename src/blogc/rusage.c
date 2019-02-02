@@ -24,16 +24,19 @@
 // FIXME: optimize to use a single syscall for both cpu time and memory?
 
 
-#include <stdio.h>
 long long
 blogc_rusage_get_cpu_time(void)
 {
+#ifndef HAVE_RUSAGE
+    return 0;
+#else
     struct rusage usage;
     if (0 != getrusage(RUSAGE_SELF, &usage))
         return 0;
     return (
         (usage.ru_utime.tv_sec * 1000000) + usage.ru_utime.tv_usec +
         (usage.ru_stime.tv_sec * 1000000) + usage.ru_stime.tv_usec);
+#endif
 }
 
 
@@ -62,10 +65,14 @@ blogc_rusage_cpu_time(void)
 long
 blogc_rusage_get_memory(void)
 {
+#ifndef HAVE_RUSAGE
+    return 0;
+#else
     struct rusage usage;
     if (0 != getrusage(RUSAGE_SELF, &usage))
         return 0;
     return usage.ru_maxrss;
+#endif
 }
 
 
