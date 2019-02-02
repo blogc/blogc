@@ -47,12 +47,12 @@ blogc_rusage_get(void)
 char*
 blogc_rusage_format_cpu_time(long long time)
 {
-    if (time > 1000000)
+    if (time >= 1000000)
         return bc_strdup_printf("%.3s", ((float) time) / 1000000.0);
 
     // this is a special case: some systems may report the cpu time rounded up to the
     // milisecond. it is useless to show ".000" in this case.
-    if (time > 1000)
+    if (time >= 1000)
         return bc_strdup_printf("%.*fms", time % 1000 ? 3 : 0, ((float) time) / 1000.0);
 
     return bc_strdup_printf("%dus", time);
@@ -62,9 +62,9 @@ blogc_rusage_format_cpu_time(long long time)
 char*
 blogc_rusage_format_memory(long mem)
 {
-    if (mem > 1048576)
+    if (mem >= 1048576)
         return bc_strdup_printf("%.3fGB", ((float) mem) / 1048576.0);
-    if (mem > 1024)
+    if (mem >= 1024)
         return bc_strdup_printf("%.3fMB", ((float) mem) / 1024.0);
     return bc_strdup_printf("%dKB", mem);
 }
