@@ -14,7 +14,9 @@
 #endif /* HAVE_CONFIG_H */
 
 #ifdef HAVE_UNISTD_H
+#ifdef HAVE_GETHOSTNAME
 #define HAVE_SYSINFO_HOSTNAME 1
+#endif /* HAVE_GETHOSTNAME */
 #endif /* HAVE_UNISTD_H */
 
 #include "../common/utils.h"

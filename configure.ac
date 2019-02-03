@@ -221,6 +221,7 @@ BASH="$ac_cv_path_bash"
 AC_SUBST(BASH)
 
 AC_CHECK_HEADERS([sys/resource.h sys/stat.h sys/time.h sys/wait.h time.h unistd.h])
+AC_CHECK_FUNCS([gethostname])
 
 LT_LIB_M
 
