@@ -12,6 +12,7 @@
 
 #include "funcvars.h"
 #include "rusage.h"
+#include "sysinfo.h"
 #include "../common/utils.h"
 
 
@@ -23,6 +24,10 @@ static const struct func_map {
 #ifdef HAVE_RUSAGE
     {"BLOGC_RUSAGE_CPU_TIME", blogc_rusage_inject},
     {"BLOGC_RUSAGE_MEMORY", blogc_rusage_inject},
+#endif
+
+#ifdef HAVE_SYSINFO_HOSTNAME
+    {"BLOGC_SYSINFO_HOSTNAME", blogc_sysinfo_inject_hostname},
 #endif
 
     {NULL, NULL},

@@ -44,6 +44,7 @@ noinst_HEADERS = \
 	src/blogc/loader.h \
 	src/blogc/renderer.h \
 	src/blogc/rusage.h \
+	src/blogc/sysinfo.h \
 	src/blogc/source-parser.h \
 	src/blogc/template-parser.h \
 	src/blogc-git-receiver/post-receive.h \
@@ -130,6 +131,7 @@ libblogc_la_SOURCES = \
 	src/blogc/loader.c \
 	src/blogc/renderer.c \
 	src/blogc/rusage.c \
+	src/blogc/sysinfo.c \
 	src/blogc/source-parser.c \
 	src/blogc/template-parser.c \
 	$(NULL)
