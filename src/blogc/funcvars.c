@@ -30,6 +30,10 @@ static const struct func_map {
     {"BLOGC_SYSINFO_HOSTNAME", blogc_sysinfo_inject_hostname},
 #endif
 
+#ifdef HAVE_SYSINFO_DATETIME
+    {"BLOGC_SYSINFO_DATETIME", blogc_sysinfo_inject_datetime},
+#endif
+
     {NULL, NULL},
 };
 

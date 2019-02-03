@@ -19,9 +19,15 @@
 #endif /* HAVE_GETHOSTNAME */
 #endif /* HAVE_UNISTD_H */
 
+#ifdef HAVE_TIME_H
+#define HAVE_SYSINFO_DATETIME 1
+#endif /* HAVE_TIME_H */
+
 #include "../common/utils.h"
 
 char* blogc_sysinfo_get_hostname(void);
 void blogc_sysinfo_inject_hostname(bc_trie_t *global);
+char* blogc_sysinfo_get_datetime(void);
+void blogc_sysinfo_inject_datetime(bc_trie_t *global);
 
 #endif /* ___SYSINFO_H */

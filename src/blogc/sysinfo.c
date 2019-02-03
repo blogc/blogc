@@ -14,6 +14,10 @@
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif /* HAVE_TIME_H */
+
 #include <stdlib.h>
 #include "../common/utils.h"
 #include "sysinfo.h"
@@ -44,4 +48,36 @@ blogc_sysinfo_inject_hostname(bc_trie_t *global)
         return;
 
     bc_trie_insert(global, "BLOGC_SYSINFO_HOSTNAME", hostname);
+}
+
+
+char*
+blogc_sysinfo_get_datetime(void)
+{
+#ifndef HAVE_SYSINFO_DATETIME
+    return NULL;
+#else
+    time_t tmp;
+    if (-1 == time(&tmp))
+        return NULL;
+
+    struct tm *t = gmtime(&tmp);
+
+    char buf[1024];
+    if (0 == strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", t))
+        return NULL;
+
+    return bc_strdup(buf);
+#endif
+}
+
+
+void
+blogc_sysinfo_inject_datetime(bc_trie_t *global)
+{
+    char *t = blogc_sysinfo_get_datetime();
+    if (t == NULL)
+        return;
+
+    bc_trie_insert(global, "BLOGC_SYSINFO_DATETIME", t);
 }
