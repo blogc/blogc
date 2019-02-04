@@ -20,7 +20,7 @@
 char*
 bc_file_get_contents(const char *path, bool utf8, size_t *len, bc_error_t **err)
 {
-    if (path == NULL || err == NULL || *err != NULL)
+    if (path == NULL || len == NULL || err == NULL || *err != NULL)
         return NULL;
 
     *len = 0;

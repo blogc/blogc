@@ -26,7 +26,11 @@
 #include <time.h>
 #endif /* HAVE_TIME_H */
 
+#include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
+#include "../common/error.h"
+#include "../common/file.h"
 #include "../common/utils.h"
 #include "sysinfo.h"
 
@@ -115,4 +119,39 @@ blogc_sysinfo_inject_datetime(bc_trie_t *global)
         return;
 
     bc_trie_insert(global, "BLOGC_SYSINFO_DATETIME", t);
+}
+
+
+// it is obviously impossible that the same process runs inside and outside
+// docker at the same time, then an unprotected global variable should be fine
+// here
+static bool inside_docker_evaluated = false;
+static bool inside_docker = false;
+
+bool
+blogc_sysinfo_get_inside_docker(void)
+{
+    if (inside_docker_evaluated)
+        return inside_docker;
+    inside_docker_evaluated = true;
+
+    size_t len;
+    bc_error_t *err = NULL;
+    char *contents = bc_file_get_contents("/proc/1/cgroup", false, &len, &err);
+    if (err != NULL) {
+        inside_docker = false;
+        return inside_docker;
+    }
+
+    bool inside_docker = NULL != strstr(contents, "/docker/");
+    free(contents);
+    return inside_docker;
+}
+
+
+void
+blogc_sysinfo_inject_inside_docker(bc_trie_t *global)
+{
+    if (blogc_sysinfo_get_inside_docker())
+        bc_trie_insert(global, "BLOGC_SYSINFO_INSIDE_DOCKER", bc_strdup("1"));
 }
