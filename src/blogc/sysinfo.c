@@ -139,6 +139,7 @@ blogc_sysinfo_get_inside_docker(void)
     bc_error_t *err = NULL;
     char *contents = bc_file_get_contents("/proc/1/cgroup", false, &len, &err);
     if (err != NULL) {
+        bc_error_free(err);
         inside_docker = false;
         return inside_docker;
     }
