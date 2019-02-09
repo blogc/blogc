@@ -161,7 +161,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                 state = TEMPLATE_BLOCK_START;
 
             case TEMPLATE_BLOCK_START:
-                if (c == ' ')
+                if (bc_isspace(c))
                     break;
                 if (c >= 'a' && c <= 'z') {
                     state = TEMPLATE_BLOCK_TYPE;
@@ -183,7 +183,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
             case TEMPLATE_BLOCK_TYPE:
                 if (c >= 'a' && c <= 'z')
                     break;
-                if (c == ' ') {
+                if (bc_isspace(c)) {
                     if ((current - start == 5) &&
                         (0 == strncmp("block", src + start, 5)))
                     {
@@ -339,7 +339,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                 break;
 
             case TEMPLATE_BLOCK_BLOCK_TYPE_START:
-                if (c == ' ')
+                if (bc_isspace(c))
                     break;
                 if (c >= 'a' && c <= 'z') {
                     state = TEMPLATE_BLOCK_BLOCK_TYPE;
@@ -354,7 +354,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
             case TEMPLATE_BLOCK_BLOCK_TYPE:
                 if ((c >= 'a' && c <= 'z') || c == '_')
                     break;
-                if (c == ' ') {
+                if (bc_isspace(c)) {
                     if ((current - start == 5) &&
                         (0 == strncmp("entry", src + start, 5)))
                     {
@@ -387,7 +387,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                 break;
 
             case TEMPLATE_BLOCK_IF_START:
-                if (c == ' ')
+                if (bc_isspace(c))
                     break;
                 if (c >= 'A' && c <= 'Z') {
                     state = TEMPLATE_BLOCK_IF_VARIABLE;
@@ -402,7 +402,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
             case TEMPLATE_BLOCK_IF_VARIABLE:
                 if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
                     break;
-                if (c == ' ') {
+                if (bc_isspace(c)) {
                     end = current;
                     if (type == BLOGC_TEMPLATE_NODE_IF)
                         state = TEMPLATE_BLOCK_IF_OPERATOR_START;
@@ -417,22 +417,21 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                 break;
 
             case TEMPLATE_BLOCK_IF_OPERATOR_START:
-                if (c == ' ') {
+                if (bc_isspace(c))
                     break;
-                }
                 state = TEMPLATE_BLOCK_IF_OPERATOR;
                 op_start = current;
                 break;
 
             case TEMPLATE_BLOCK_IF_OPERATOR:
-                if (c != ' ')
+                if (!bc_isspace(c))
                     break;
                 state = TEMPLATE_BLOCK_IF_OPERAND_START;
                 op_end = current;
                 break;
 
             case TEMPLATE_BLOCK_IF_OPERAND_START:
-                if (c == ' ')
+                if (bc_isspace(c))
                     break;
                 if (c >= 'A' && c <= 'Z') {
                     state = TEMPLATE_BLOCK_IF_VARIABLE_OPERAND;
@@ -469,7 +468,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                 break;
 
             case TEMPLATE_BLOCK_FOREACH_START:
-                if (c == ' ')
+                if (bc_isspace(c))
                     break;
                 if (c >= 'A' && c <= 'Z') {
                     state = TEMPLATE_BLOCK_FOREACH_VARIABLE;
@@ -485,7 +484,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
             case TEMPLATE_BLOCK_FOREACH_VARIABLE:
                 if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
                     break;
-                if (c == ' ') {
+                if (bc_isspace(c)) {
                     end = current;
                     state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                     break;
@@ -497,7 +496,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                 break;
 
             case TEMPLATE_BLOCK_END_WHITESPACE_CLEANER:
-                if (c == ' ')
+                if (bc_isspace(c))
                     break;
                 if (c == '-') {
                     lstrip_next = true;
@@ -524,7 +523,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                 break;
 
             case TEMPLATE_VARIABLE_START:
-                if (c == ' ')
+                if (bc_isspace(c))
                     break;
                 if (c >= 'A' && c <= 'Z') {
                     state = TEMPLATE_VARIABLE;
@@ -540,7 +539,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
             case TEMPLATE_VARIABLE:
                 if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
                     break;
-                if (c == ' ') {
+                if (bc_isspace(c)) {
                     end = current;
                     state = TEMPLATE_VARIABLE_END;
                     break;
@@ -557,7 +556,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                 break;
 
             case TEMPLATE_VARIABLE_END:
-                if (c == ' ')
+                if (bc_isspace(c))
                     break;
                 if (c == '}') {
                     state = TEMPLATE_CLOSE_BRACKET;

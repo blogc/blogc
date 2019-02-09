@@ -167,6 +167,14 @@ bc_strdup_printf(const char *format, ...)
 }
 
 
+// locale-independent implementation of isspace
+bool
+bc_isspace(int c)
+{
+    return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';
+}
+
+
 bool
 bc_str_starts_with(const char *str, const char *prefix)
 {

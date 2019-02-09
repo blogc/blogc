@@ -339,6 +339,135 @@ test_template_parse_html(void **state)
 
 
 static void
+test_template_parse_html_whitespace(void **state)
+{
+    const char *a =
+        "<html>\n"
+        "    <head>\n"
+        "        {%\n   block entry\n%}\n"
+        "        <title>My cool blog >> {{ TITLE }}</title>\n"
+        "        {% \vendblock\v %}\n"
+        "        {% \r\nblock listing_once\n%}\n"
+        "        <title>My cool blog - Main page</title>\n"
+        "        {%\t endblock\t%}\n"
+        "    </head>\n"
+        "    <body>\n"
+        "        <h1>My cool blog</h1>\n"
+        "        {%\t\t\tblock entry\n%}\n"
+        "        <h2>{{\tTITLE\n}}</h2>\n"
+        "        {%\nifdef DATE\v%}<h4>Published in: {{\tDATE\t}}</h4>{%\fendif\f%}\n"
+        "        <pre>{{\tCONTENT\n}}</pre>\n"
+        "        {%\n\n  \nendblock\f\f\n\t%}\n"
+        "        {%\nblock\n\nlisting_once\t%}<ul>{%\tendblock\f\f%}\n"
+        "        {%\n\nblock\t\tlisting\f\t%}<p><a href=\"{{\t\fFILENAME\t\t}}.html\">"
+        "{{ TITLE }}</a>{%\f\tifdef\v\vDATE\f%} - {{\fDATE\f}}{%\tendif\f%}</p>{%\tendblock\t%}\n"
+        "        {%\tblock\tlisting_once\t%}</ul>{%\nendblock\n%}\n"
+        "    </body>\n"
+        "</html>\n";
+    bc_error_t *err = NULL;
+    bc_slist_t *ast = blogc_template_parse(a, strlen(a), &err);
+    assert_null(err);
+    assert_non_null(ast);
+    blogc_assert_template_node(ast, "<html>\n    <head>\n        ",
+        BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(ast->next, "entry",
+        BLOGC_TEMPLATE_NODE_BLOCK);
+    blogc_assert_template_node(ast->next->next,
+        "\n        <title>My cool blog >> ", BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(ast->next->next->next, "TITLE",
+        BLOGC_TEMPLATE_NODE_VARIABLE);
+    blogc_assert_template_node(ast->next->next->next->next,
+        "</title>\n        ", BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(ast->next->next->next->next->next, NULL,
+        BLOGC_TEMPLATE_NODE_ENDBLOCK);
+    blogc_assert_template_node(ast->next->next->next->next->next->next,
+        "\n        ", BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(ast->next->next->next->next->next->next->next,
+        "listing_once", BLOGC_TEMPLATE_NODE_BLOCK);
+    bc_slist_t *tmp = ast->next->next->next->next->next->next->next->next;
+    blogc_assert_template_node(tmp,
+        "\n        <title>My cool blog - Main page</title>\n        ",
+        BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next, NULL, BLOGC_TEMPLATE_NODE_ENDBLOCK);
+    blogc_assert_template_node(tmp->next->next,
+        "\n    </head>\n    <body>\n        <h1>My cool blog</h1>\n        ",
+        BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next->next->next, "entry",
+        BLOGC_TEMPLATE_NODE_BLOCK);
+    blogc_assert_template_node(tmp->next->next->next->next,
+        "\n        <h2>", BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next->next->next->next->next,
+        "TITLE", BLOGC_TEMPLATE_NODE_VARIABLE);
+    blogc_assert_template_node(tmp->next->next->next->next->next->next,
+        "</h2>\n        ", BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next->next->next->next->next->next->next,
+        "DATE", BLOGC_TEMPLATE_NODE_IFDEF);
+    tmp = tmp->next->next->next->next->next->next->next->next;
+    blogc_assert_template_node(tmp, "<h4>Published in: ",
+        BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next, "DATE", BLOGC_TEMPLATE_NODE_VARIABLE);
+    blogc_assert_template_node(tmp->next->next, "</h4>",
+        BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next->next->next, NULL,
+        BLOGC_TEMPLATE_NODE_ENDIF);
+    blogc_assert_template_node(tmp->next->next->next->next, "\n        <pre>",
+        BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next->next->next->next->next,
+        "CONTENT", BLOGC_TEMPLATE_NODE_VARIABLE);
+    blogc_assert_template_node(tmp->next->next->next->next->next->next,
+        "</pre>\n        ", BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next->next->next->next->next->next->next,
+        NULL, BLOGC_TEMPLATE_NODE_ENDBLOCK);
+    tmp = tmp->next->next->next->next->next->next->next->next;
+    blogc_assert_template_node(tmp, "\n        ", BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next, "listing_once",
+        BLOGC_TEMPLATE_NODE_BLOCK);
+    blogc_assert_template_node(tmp->next->next, "<ul>",
+        BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next->next->next, NULL,
+        BLOGC_TEMPLATE_NODE_ENDBLOCK);
+    blogc_assert_template_node(tmp->next->next->next->next, "\n        ",
+        BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next->next->next->next->next,
+        "listing", BLOGC_TEMPLATE_NODE_BLOCK);
+    blogc_assert_template_node(tmp->next->next->next->next->next->next,
+        "<p><a href=\"", BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next->next->next->next->next->next->next,
+        "FILENAME", BLOGC_TEMPLATE_NODE_VARIABLE);
+    tmp = tmp->next->next->next->next->next->next->next->next;
+    blogc_assert_template_node(tmp, ".html\">", BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next, "TITLE",
+        BLOGC_TEMPLATE_NODE_VARIABLE);
+    blogc_assert_template_node(tmp->next->next, "</a>",
+        BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next->next->next, "DATE",
+        BLOGC_TEMPLATE_NODE_IFDEF);
+    blogc_assert_template_node(tmp->next->next->next->next, " - ",
+        BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next->next->next->next->next, "DATE",
+        BLOGC_TEMPLATE_NODE_VARIABLE);
+    blogc_assert_template_node(tmp->next->next->next->next->next->next,
+        NULL, BLOGC_TEMPLATE_NODE_ENDIF);
+    blogc_assert_template_node(tmp->next->next->next->next->next->next->next,
+        "</p>", BLOGC_TEMPLATE_NODE_CONTENT);
+    tmp = tmp->next->next->next->next->next->next->next->next;
+    blogc_assert_template_node(tmp, NULL, BLOGC_TEMPLATE_NODE_ENDBLOCK);
+    blogc_assert_template_node(tmp->next, "\n        ",
+        BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next->next, "listing_once",
+        BLOGC_TEMPLATE_NODE_BLOCK);
+    blogc_assert_template_node(tmp->next->next->next, "</ul>",
+        BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next->next->next->next, NULL,
+        BLOGC_TEMPLATE_NODE_ENDBLOCK);
+    blogc_assert_template_node(tmp->next->next->next->next->next,
+        "\n    </body>\n</html>\n", BLOGC_TEMPLATE_NODE_CONTENT);
+    assert_null(tmp->next->next->next->next->next->next);
+    blogc_template_free_ast(ast);
+}
+
+
+static void
 test_template_parse_ifdef_and_var_outside_block(void **state)
 {
     const char *a =
@@ -1137,6 +1266,7 @@ main(void)
         unit_test(test_template_parse),
         unit_test(test_template_parse_crlf),
         unit_test(test_template_parse_html),
+        unit_test(test_template_parse_html_whitespace),
         unit_test(test_template_parse_ifdef_and_var_outside_block),
         unit_test(test_template_parse_nested_else),
         unit_test(test_template_parse_invalid_block_start),

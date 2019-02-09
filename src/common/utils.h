@@ -42,6 +42,7 @@ char* bc_strdup(const char *s);
 char* bc_strndup(const char *s, size_t n);
 char* bc_strdup_vprintf(const char *format, va_list ap);
 char* bc_strdup_printf(const char *format, ...);
+bool bc_isspace(int c);
 bool bc_str_starts_with(const char *str, const char *prefix);
 bool bc_str_ends_with(const char *str, const char *suffix);
 char* bc_str_lstrip(char *str);
