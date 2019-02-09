@@ -14,6 +14,6 @@
 
 typedef void (*blogc_funcvars_func_t) (bc_trie_t*);
 
-char* blogc_funcvars_lookup(const char *name, bc_trie_t *global);
+void blogc_funcvars_eval(bc_trie_t *global, const char *name);
 
 #endif /* ___FUNCVARS_H */

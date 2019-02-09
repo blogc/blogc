@@ -478,8 +478,29 @@ check_PROGRAMS += \
 
 if USE_LD_WRAP
 check_PROGRAMS += \
+	tests/blogc/check_funcvars \
 	tests/blogc/check_loader \
 	tests/common/check_stdin \
+	$(NULL)
+
+tests_blogc_check_funcvars_SOURCES = \
+	tests/blogc/check_funcvars.c \
+	$(NULL)
+
+tests_blogc_check_funcvars_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_check_funcvars_LDFLAGS = \
+	-no-install \
+	-Wl,--wrap=bc_file_get_contents \
+	$(NULL)
+#-Wl,--wrap=bc_file_get_contents
+
+tests_blogc_check_funcvars_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc.la \
+	libblogc_common.la \
 	$(NULL)
 
 tests_blogc_check_loader_SOURCES = \

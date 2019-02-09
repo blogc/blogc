@@ -43,20 +43,23 @@ static const struct func_map {
 };
 
 
-char*
-blogc_funcvars_lookup(const char *name, bc_trie_t *global)
+void
+blogc_funcvars_eval(bc_trie_t *global, const char *name)
 {
+    if (global == NULL || name == NULL)
+        return;
+
     // protect against evaluating the same function twice in the same global
     // context
     if (NULL != bc_trie_lookup(global, name))
-        return NULL;
+        return;
 
     for (size_t i = 0; funcs[i].variable != NULL; i++) {
         if (0 == strcmp(name, funcs[i].variable)) {
             funcs[i].func(global);
-            return bc_strdup(bc_trie_lookup(global, name));
+            return;
         }
     }
 
-    return NULL;
+    return;
 }

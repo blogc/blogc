@@ -106,10 +106,8 @@ blogc_format_variable(const char *name, bc_trie_t *global, bc_trie_t *local,
         value = foreach_var->data;
     }
     else {
-        value = blogc_funcvars_lookup(var, global);
-        if (value == NULL) {
-            value = blogc_get_variable(var, global, local);
-        }
+        blogc_funcvars_eval(global, var);
+        value = blogc_get_variable(var, global, local);
     }
 
     if (value == NULL) {
