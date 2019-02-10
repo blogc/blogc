@@ -480,6 +480,8 @@ if USE_LD_WRAP
 check_PROGRAMS += \
 	tests/blogc/check_funcvars \
 	tests/blogc/check_loader \
+	tests/blogc/check_sysinfo \
+	tests/blogc/check_sysinfo2 \
 	tests/common/check_stdin \
 	$(NULL)
 
@@ -495,7 +497,6 @@ tests_blogc_check_funcvars_LDFLAGS = \
 	-no-install \
 	-Wl,--wrap=bc_file_get_contents \
 	$(NULL)
-#-Wl,--wrap=bc_file_get_contents
 
 tests_blogc_check_funcvars_LDADD = \
 	$(CMOCKA_LIBS) \
@@ -517,6 +518,63 @@ tests_blogc_check_loader_LDFLAGS = \
 	$(NULL)
 
 tests_blogc_check_loader_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc.la \
+	libblogc_common.la \
+	$(NULL)
+
+tests_blogc_check_sysinfo_SOURCES = \
+	tests/blogc/check_sysinfo.c \
+	$(NULL)
+
+tests_blogc_check_sysinfo_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_check_sysinfo_LDFLAGS = \
+	-no-install \
+	-Wl,--wrap=bc_file_get_contents \
+	-Wl,--wrap=gethostname \
+	$(NULL)
+
+if HAVE_UNISTD_H
+if HAVE_SYS_TYPES_H
+if HAVE_PWD_H
+tests_blogc_check_sysinfo_LDFLAGS += \
+	-Wl,--wrap=geteuid \
+	-Wl,--wrap=getpwuid \
+	$(NULL)
+endif
+endif
+endif
+
+if HAVE_TIME_H
+tests_blogc_check_sysinfo_LDFLAGS += \
+	-Wl,--wrap=time \
+	-Wl,--wrap=gmtime \
+	$(NULL)
+endif
+
+tests_blogc_check_sysinfo_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc.la \
+	libblogc_common.la \
+	$(NULL)
+
+tests_blogc_check_sysinfo2_SOURCES = \
+	tests/blogc/check_sysinfo2.c \
+	$(NULL)
+
+tests_blogc_check_sysinfo2_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_check_sysinfo2_LDFLAGS = \
+	-no-install \
+	-Wl,--wrap=bc_file_get_contents \
+	$(NULL)
+
+tests_blogc_check_sysinfo2_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
 	libblogc_common.la \

@@ -101,6 +101,8 @@ blogc_sysinfo_get_datetime(void)
         return NULL;
 
     struct tm *t = gmtime(&tmp);
+    if (t == NULL)
+        return NULL;
 
     char buf[1024];
     if (0 == strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", t))

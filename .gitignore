@@ -61,6 +61,8 @@ blogc*.html
 /tests/blogc/check_loader
 /tests/blogc/check_renderer
 /tests/blogc/check_source_parser
+/tests/blogc/check_sysinfo
+/tests/blogc/check_sysinfo2
 /tests/blogc/check_template_parser
 /tests/blogc-git-receiver/check_pre_receive_parser
 /tests/blogc-git-receiver/check_pre_receive.sh

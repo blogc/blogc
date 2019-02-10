@@ -25,9 +25,6 @@ __wrap_bc_file_get_contents(const char *path, bool utf8, size_t *len, bc_error_t
     assert_false(utf8);
     char *rv = mock_type(char*);
     *len = strlen(rv);
-    bc_error_t *e = mock_type(bc_error_t*);
-    if (e != NULL)
-        *err = e;
     return rv;
 }
 
@@ -58,7 +55,6 @@ test_funcvars_eval_mocked(void **state)
     // as of when this test was written. the other functions should be tested
     // separately
     will_return(__wrap_bc_file_get_contents, bc_strdup("asd/docker/asd"));
-    will_return(__wrap_bc_file_get_contents, NULL);
     blogc_funcvars_eval(t, "BLOGC_SYSINFO_INSIDE_DOCKER");
     assert_string_equal(bc_trie_lookup(t, "BLOGC_SYSINFO_INSIDE_DOCKER"), "1");
     assert_int_equal(bc_trie_size(t), 1);
