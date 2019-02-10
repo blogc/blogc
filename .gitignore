@@ -60,6 +60,7 @@ blogc*.html
 /tests/blogc/check_funcvars
 /tests/blogc/check_loader
 /tests/blogc/check_renderer
+/tests/blogc/check_rusage
 /tests/blogc/check_source_parser
 /tests/blogc/check_sysinfo
 /tests/blogc/check_sysinfo2

@@ -48,7 +48,7 @@ char*
 blogc_rusage_format_cpu_time(long long time)
 {
     if (time >= 1000000)
-        return bc_strdup_printf("%.3s", ((float) time) / 1000000.0);
+        return bc_strdup_printf("%.3fs", ((float) time) / 1000000.0);
 
     // this is a special case: some systems may report the cpu time rounded up to the
     // milisecond. it is useless to show ".000" in this case.

@@ -13,9 +13,11 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#ifdef HAVE_SYS_TIME_H
 #ifdef HAVE_SYS_RESOURCE_H
 #define HAVE_RUSAGE 1
-#endif /* HAVE_SYS_RESOURCE_H */
+#endif
+#endif
 
 #include "../common/utils.h"
 

@@ -597,6 +597,34 @@ tests_common_check_stdin_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_common.la \
 	$(NULL)
+
+if HAVE_SYS_RESOURCE_H
+if HAVE_SYS_TIME_H
+check_PROGRAMS += \
+	tests/blogc/check_rusage \
+	$(NULL)
+
+tests_blogc_check_rusage_SOURCES = \
+	tests/blogc/check_rusage.c \
+	$(NULL)
+
+tests_blogc_check_rusage_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_check_rusage_LDFLAGS = \
+	-no-install \
+	-Wl,--wrap=getrusage \
+	$(NULL)
+
+tests_blogc_check_rusage_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc.la \
+	libblogc_common.la \
+	$(NULL)
+endif
+endif
+
 endif
 
 tests_blogc_check_content_parser_SOURCES = \
