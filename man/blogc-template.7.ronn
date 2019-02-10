@@ -137,6 +137,53 @@ An existing variable is not overrided by the truncate syntax. That means
 that if `FOO_5` variable exists, it won't be handled as a truncate
 "meta-variable", and `FOO_5` variable value will be returned normally.
 
+## PREDEFINED TEMPLATE VARIABLES
+
+blogc(1) provides some template variables, that can be used to display some build
+metadata in your website.
+
+If some of the variables are not available in the system running the build, they
+won't be defined. It is recommended to rely on template conditionals, mainly
+`ifdef` and `ifndef` when using these variables.
+
+### Static variables
+
+These variables are always available, and are set during the blogc(1) binary
+compilation.
+
+ * `BLOGC_VERSION`:
+   The version of blogc(1) used to build. e.g.: `blogc 0.14.1`.
+
+### Resource usage variables
+
+It is not possible to measure the resource usage of blogc(1) until the end of
+the execution, because the rendering of these variables itself is using resources,
+and the evaluation of the used resources was already done. To get better values,
+it is recommended to use these variables only in the website footer.
+
+ * `BLOGC_RUSAGE_CPU_TIME`:
+   The CPU time used to build, up to the point where this variable was used for
+   the first time in the template (value is cached). e.g.: `12.345ms`.
+
+ * `BLOGC_RUSAGE_MEMORY`:
+   The memory used to build, up to the point where this variable was used for the
+   first time in the template (value is cached). e.g.: `1.234MB`.
+
+### System information variables
+
+ * `BLOGC_SYSINFO_HOSTNAME`:
+   The hostname of the machine where the build happened (short hostname only, not
+   FQDN).
+
+ * `BLOGC_SYSINFO_USERNAME`:
+   The username of the user that executed the build.
+
+ * `BLOGC_SYSINFO_DATETIME`:
+   The GMT datetime of the build. e.g. `2019-02-10 22:00:00`.
+
+ * `BLOGC_SYSINFO_INSIDE_DOCKER`:
+   If built inside a docker container, this variable will be defined, with value `1`.
+
 ## TEMPLATE CONDITIONALS
 
 Template conditionals are used to include content to the output, or not,
