@@ -121,6 +121,25 @@ test_sysinfo_get_hostname(void **state)
 
 
 static void
+test_sysinfo_inject_hostname(void **state)
+{
+    bc_trie_t *t = bc_trie_new(free);
+
+    will_return(__wrap_gethostname, NULL);
+    will_return(__wrap_gethostname, -1);
+    blogc_sysinfo_inject_hostname(t);
+    assert_int_equal(bc_trie_size(t), 0);
+
+    will_return(__wrap_gethostname, "bola");
+    will_return(__wrap_gethostname, 0);
+    blogc_sysinfo_inject_hostname(t);
+    assert_int_equal(bc_trie_size(t), 1);
+    assert_string_equal(bc_trie_lookup(t, "BLOGC_SYSINFO_HOSTNAME"), "bola");
+    bc_trie_free(t);
+}
+
+
+static void
 test_sysinfo_get_username(void **state)
 {
     will_return(__wrap_getpwuid, NULL);
@@ -132,6 +151,23 @@ test_sysinfo_get_username(void **state)
     assert_non_null(f);
     assert_string_equal(f, "bola");
     free(f);
+}
+
+
+static void
+test_sysinfo_inject_username(void **state)
+{
+    bc_trie_t *t = bc_trie_new(free);
+
+    will_return(__wrap_getpwuid, NULL);
+    blogc_sysinfo_inject_username(t);
+    assert_int_equal(bc_trie_size(t), 0);
+
+    will_return(__wrap_getpwuid, "bola");
+    blogc_sysinfo_inject_username(t);
+    assert_int_equal(bc_trie_size(t), 1);
+    assert_string_equal(bc_trie_lookup(t, "BLOGC_SYSINFO_USERNAME"), "bola");
+    bc_trie_free(t);
 }
 
 
@@ -155,6 +191,27 @@ test_sysinfo_get_datetime(void **state)
 
 
 static void
+test_sysinfo_inject_datetime(void **state)
+{
+    bc_trie_t *t = bc_trie_new(free);
+
+    will_return(__wrap_time, -1);
+    blogc_sysinfo_inject_datetime(t);
+    assert_int_equal(bc_trie_size(t), 0);
+
+    will_return(__wrap_time, 2);
+    blogc_sysinfo_inject_datetime(t);
+    assert_int_equal(bc_trie_size(t), 0);
+
+    will_return(__wrap_time, 1);
+    blogc_sysinfo_inject_datetime(t);
+    assert_int_equal(bc_trie_size(t), 1);
+    assert_string_equal(bc_trie_lookup(t, "BLOGC_SYSINFO_DATETIME"), "1906-06-04 03:02:01");
+    bc_trie_free(t);
+}
+
+
+static void
 test_sysinfo_get_inside_docker(void **state)
 {
     // the "positive" case was already tested in check_funcvars. this is done
@@ -164,6 +221,10 @@ test_sysinfo_get_inside_docker(void **state)
 }
 
 
+// the blogc_sysinfo_inject_inside_docker() function was already indirectly
+// tested in check_funcvars.c
+
+
 int
 main(void)
 {
@@ -171,14 +232,17 @@ main(void)
 
 #ifdef HAVE_SYSINFO_HOSTNAME
         unit_test(test_sysinfo_get_hostname),
+        unit_test(test_sysinfo_inject_hostname),
 #endif
 
 #ifdef HAVE_SYSINFO_USERNAME
         unit_test(test_sysinfo_get_username),
+        unit_test(test_sysinfo_inject_username),
 #endif
 
 #ifdef HAVE_SYSINFO_DATETIME
         unit_test(test_sysinfo_get_datetime),
+        unit_test(test_sysinfo_inject_datetime),
 #endif
 
         unit_test(test_sysinfo_get_inside_docker),
