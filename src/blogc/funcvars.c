@@ -30,14 +30,11 @@ static const struct func_map {
     {"BLOGC_SYSINFO_HOSTNAME", blogc_sysinfo_inject_hostname},
 #endif
 
-#ifdef HAVE_SYSINFO_USERNAME
-    {"BLOGC_SYSINFO_USERNAME", blogc_sysinfo_inject_username},
-#endif
-
 #ifdef HAVE_SYSINFO_DATETIME
     {"BLOGC_SYSINFO_DATETIME", blogc_sysinfo_inject_datetime},
 #endif
 
+    {"BLOGC_SYSINFO_USERNAME", blogc_sysinfo_inject_username},
     {"BLOGC_SYSINFO_INSIDE_DOCKER", blogc_sysinfo_inject_inside_docker},
     {NULL, NULL},
 };

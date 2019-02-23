@@ -220,15 +220,13 @@ AM_CONDITIONAL([USE_BGR_DEPS], [test "x$have_bgr_deps" = "xyes"])
 BASH="$ac_cv_path_bash"
 AC_SUBST(BASH)
 
-AC_CHECK_HEADERS([sys/resource.h sys/stat.h sys/time.h sys/wait.h time.h unistd.h pwd.h])
+AC_CHECK_HEADERS([sys/resource.h sys/stat.h sys/time.h sys/wait.h time.h unistd.h])
 AC_CHECK_FUNCS([gethostname])
 
-AM_CONDITIONAL([HAVE_PWD_H], [test "x$ac_cv_header_pwd_h" = "xyes"])
 AM_CONDITIONAL([HAVE_TIME_H], [test "x$ac_cv_header_time_h" = "xyes"])
 AM_CONDITIONAL([HAVE_UNISTD_H], [test "x$ac_cv_header_unistd_h" = "xyes"])
 AM_CONDITIONAL([HAVE_SYS_RESOURCE_H], [test "x$ac_cv_header_sys_resource_h" = "xyes"])
 AM_CONDITIONAL([HAVE_SYS_TIME_H], [test "x$ac_cv_header_sys_time_h" = "xyes"])
-AM_CONDITIONAL([HAVE_SYS_TYPES_H], [test "x$ac_cv_header_sys_types_h" = "xyes"])
 
 LT_LIB_M
 

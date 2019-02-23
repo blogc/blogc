@@ -534,18 +534,13 @@ tests_blogc_check_sysinfo_CFLAGS = \
 tests_blogc_check_sysinfo_LDFLAGS = \
 	-no-install \
 	-Wl,--wrap=bc_file_get_contents \
-	-Wl,--wrap=gethostname \
+	-Wl,--wrap=getenv \
 	$(NULL)
 
 if HAVE_UNISTD_H
-if HAVE_SYS_TYPES_H
-if HAVE_PWD_H
 tests_blogc_check_sysinfo_LDFLAGS += \
-	-Wl,--wrap=geteuid \
-	-Wl,--wrap=getpwuid \
+	-Wl,--wrap=gethostname \
 	$(NULL)
-endif
-endif
 endif
 
 if HAVE_TIME_H

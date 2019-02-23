@@ -17,16 +17,11 @@
 #include "../../src/common/utils.h"
 #include "../../src/blogc/sysinfo.h"
 
-#ifdef HAVE_SYSINFO_HOSTNAME
-#include <unistd.h>
-#include <sys/types.h>
-#include <pwd.h>
-#endif
-
 #ifdef HAVE_SYSINFO_DATETIME
 #include <time.h>
 #endif
 
+#ifdef HAVE_SYSINFO_HOSTNAME
 int
 __wrap_gethostname(char *name, size_t len)
 {
@@ -36,29 +31,14 @@ __wrap_gethostname(char *name, size_t len)
         strcpy(name, f);
     return mock_type(int);
 }
-
-
-#ifdef HAVE_SYSINFO_HOSTNAME
-uid_t
-__wrap_geteuid(void)
-{
-    return 1234;
-}
-
-
-static struct passwd pw;
-
-struct passwd*
-__wrap_getpwuid(uid_t uid)
-{
-    assert_int_equal(uid, 1234);
-    char *n = mock_type(char*);
-    if (n == NULL)
-        return NULL;
-    pw.pw_name = n;
-    return &pw;
-}
 #endif
+
+
+char*
+__wrap_getenv(const char *name)
+{
+    return mock_type(char*);
+}
 
 
 #ifdef HAVE_SYSINFO_DATETIME
@@ -142,11 +122,11 @@ test_sysinfo_inject_hostname(void **state)
 static void
 test_sysinfo_get_username(void **state)
 {
-    will_return(__wrap_getpwuid, NULL);
+    will_return(__wrap_getenv, NULL);
     char *f = blogc_sysinfo_get_username();
     assert_null(f);
 
-    will_return(__wrap_getpwuid, "bola");
+    will_return(__wrap_getenv, "bola");
     f = blogc_sysinfo_get_username();
     assert_non_null(f);
     assert_string_equal(f, "bola");
@@ -159,11 +139,11 @@ test_sysinfo_inject_username(void **state)
 {
     bc_trie_t *t = bc_trie_new(free);
 
-    will_return(__wrap_getpwuid, NULL);
+    will_return(__wrap_getenv, NULL);
     blogc_sysinfo_inject_username(t);
     assert_int_equal(bc_trie_size(t), 0);
 
-    will_return(__wrap_getpwuid, "bola");
+    will_return(__wrap_getenv, "bola");
     blogc_sysinfo_inject_username(t);
     assert_int_equal(bc_trie_size(t), 1);
     assert_string_equal(bc_trie_lookup(t, "BLOGC_SYSINFO_USERNAME"), "bola");
@@ -235,10 +215,8 @@ main(void)
         unit_test(test_sysinfo_inject_hostname),
 #endif
 
-#ifdef HAVE_SYSINFO_USERNAME
         unit_test(test_sysinfo_get_username),
         unit_test(test_sysinfo_inject_username),
-#endif
 
 #ifdef HAVE_SYSINFO_DATETIME
         unit_test(test_sysinfo_get_datetime),

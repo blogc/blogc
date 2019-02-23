@@ -19,14 +19,6 @@
 #endif /* HAVE_GETHOSTNAME */
 #endif /* HAVE_UNISTD_H */
 
-#ifdef HAVE_UNISTD_H
-#ifdef HAVE_SYS_TYPES_H
-#ifdef HAVE_PWD_H
-#define HAVE_SYSINFO_USERNAME 1
-#endif /* HAVE_PWD_H */
-#endif /* HAVE_SYS_TYPES_H */
-#endif /* HAVE_UNISTD_H */
-
 #ifdef HAVE_TIME_H
 #define HAVE_SYSINFO_DATETIME 1
 #endif /* HAVE_TIME_H */

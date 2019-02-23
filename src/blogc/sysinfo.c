@@ -14,14 +14,6 @@
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif /* HAVE_SYS_TYPES_H */
-
-#ifdef HAVE_PWD_H
-#include <pwd.h>
-#endif /* HAVE_PWD_H */
-
 #ifdef HAVE_TIME_H
 #include <time.h>
 #endif /* HAVE_TIME_H */
@@ -66,16 +58,7 @@ blogc_sysinfo_inject_hostname(bc_trie_t *global)
 char*
 blogc_sysinfo_get_username(void)
 {
-#ifndef HAVE_SYSINFO_USERNAME
-    return NULL;
-#else
-    uid_t u = geteuid();
-    struct passwd *p = getpwuid(u);
-    if (p == NULL)
-        return NULL;
-
-    return bc_strdup(p->pw_name);
-#endif
+    return bc_strdup(getenv("LOGNAME"));
 }
 
 
