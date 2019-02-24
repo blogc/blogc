@@ -1951,11 +1951,15 @@ test_content_parse_inline_code(void **state)
     free(html);
     html = blogc_content_parse_inline("`bo\\`\\`la`\n");
     assert_non_null(html);
-    assert_string_equal(html, "<code>bo``la</code>\n");
+    assert_string_equal(html, "<code>bo\\`\\`la</code>\n");
     free(html);
     html = blogc_content_parse_inline("``bo\\`\\`la``\n");
     assert_non_null(html);
-    assert_string_equal(html, "<code>bo``la</code>\n");
+    assert_string_equal(html, "<code>bo\\`\\`la</code>\n");
+    free(html);
+    html = blogc_content_parse_inline("``bo`la``\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<code>bo`la</code>\n");
     free(html);
     html = blogc_content_parse_inline("``bola\n");
     assert_non_null(html);
@@ -2009,7 +2013,11 @@ test_content_parse_inline_link(void **state)
     free(html);
     html = blogc_content_parse_inline("[``bola(2)[3]**!\\```](http://example.org/)\n");
     assert_non_null(html);
-    assert_string_equal(html, "<a href=\"http://example.org/\"><code>bola(2)[3]**!`</code></a>\n");
+    assert_string_equal(html, "<a href=\"http://example.org/\"><code>bola(2)[3]**!\\`</code></a>\n");
+    free(html);
+    html = blogc_content_parse_inline("[``bola(2)[3]**!```](http://example.org/)\n");
+    assert_non_null(html);
+    assert_string_equal(html, "<a href=\"http://example.org/\"><code>bola(2)[3]**!</code>`</a>\n");
     free(html);
     html = blogc_content_parse_inline("test suite!)\n"
         "depends on [cmocka](http://cmocka.org/), though.\n");

@@ -219,6 +219,9 @@ Code is defined with 1 or 2 '`' before and after the text.
     This is inline code: `code`
     This is inline code: ``code``
 
+The later form is particularly useful when a '`' is part of the code, because
+escaping delimiters with '\' is not possible.
+
 ### Images
 
 Images are defined using the following syntax:

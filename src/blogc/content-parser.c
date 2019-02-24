@@ -347,7 +347,7 @@ blogc_content_parse_inline_internal(const char *src, size_t src_len)
                 free(tmp3);
                 tmp3 = NULL;
                 bc_string_append(rv, "<code>");
-                bc_string_append_escaped(rv, tmp2);
+                bc_string_append(rv, tmp2);
                 bc_string_append(rv, "</code>");
                 current = tmp - src;
                 tmp = NULL;
@@ -376,7 +376,7 @@ blogc_content_parse_inline_internal(const char *src, size_t src_len)
                 free(tmp3);
                 tmp3 = NULL;
                 bc_string_append(rv, "<code>");
-                bc_string_append_escaped(rv, tmp2);
+                bc_string_append(rv, tmp2);
                 bc_string_append(rv, "</code>");
                 current = tmp - src + 1;
                 tmp = NULL;
