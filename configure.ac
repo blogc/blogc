@@ -102,6 +102,8 @@ AC_ARG_ENABLE([make-embedded], AS_HELP_STRING([--enable-make-embedded],
               [build blogc-make tool embedded on blogc binary]))
 AC_ARG_ENABLE([make], AS_HELP_STRING([--enable-make],
               [build blogc-make tool]))
+AC_ARG_WITH([libsass], AS_HELP_STRING([--without-libsass],
+            [disable blogc-make dependency on libsass]))
 AS_IF([test "x$enable_make" = "xyes" -o "x$enable_make_embedded" = "xyes"], [
   AC_CHECK_HEADERS([dirent.h fcntl.h libgen.h sys/stat.h sys/wait.h time.h unistd.h],, [
     AC_MSG_ERROR([blogc-make tool requested but required headers not found])
@@ -118,10 +120,20 @@ AS_IF([test "x$enable_make" = "xyes" -o "x$enable_make_embedded" = "xyes"], [
     MAKE_="enabled"
     have_make=yes
   ])
+  AS_IF([test "x$with_libsass" != "xno"], [
+    PKG_CHECK_MODULES([LIBSASS], [libsass], [
+      MAKE_="${MAKE_} (with libsass)"
+      have_libsass=yes
+      AC_DEFINE([USE_LIBSASS], [], [Build blogc-make with libsass support])
+    ], [
+      have_libsass=no
+    ])
+  ])
 ])
 AM_CONDITIONAL([BUILD_MAKE], [test "x$have_make" = "xyes"])
 AM_CONDITIONAL([BUILD_MAKE_LIB], [test "x$have_make_lib" = "xyes"])
 AM_CONDITIONAL([BUILD_MAKE_EMBEDDED], [test "x$have_make_embedded" = "xyes"])
+AM_CONDITIONAL([USE_LIBSASS], [test "x$have_libsass" = "xyes"])
 
 RUNSERVER="disabled"
 AC_ARG_ENABLE([runserver], AS_HELP_STRING([--enable-runserver],

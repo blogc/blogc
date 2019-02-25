@@ -75,7 +75,11 @@ main(int argc, char **argv)
                     print_help();
                     goto cleanup;
                 case 'v':
-                    printf("%s\n", PACKAGE_STRING);
+                    printf(PACKAGE_STRING
+#ifdef USE_LIBSASS
+                           "+libsass"
+#endif
+                           "\n");
                     goto cleanup;
                 case 'D':
                     dev = true;

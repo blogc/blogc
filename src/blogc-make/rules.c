@@ -6,6 +6,10 @@
  * See the file LICENSE.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -21,6 +25,10 @@
 #include "settings.h"
 #include "utils.h"
 #include "rules.h"
+
+#ifdef USE_LIBSASS
+#include "./sass.h"
+#endif
 
 
 static void
@@ -850,6 +858,15 @@ const bm_rule_t rules[] = {
         .exec_func = copy_exec,
         .generate_files = true,
     },
+#ifdef USE_LIBSASS
+    {
+        .name = "sass",
+        .help = "build CSS stylesheets from Sass (.scss) sources",
+        .outputlist_func = bm_sass_outputlist,
+        .exec_func = bm_sass_exec,
+        .generate_files = true,
+    },
+#endif
     {
         .name = "clean",
         .help = "clean built files and empty directories in output directory",

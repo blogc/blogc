@@ -20,6 +20,7 @@ typedef struct {
     char **pages;
     char **copy;
     char **tags;
+    char **sass;
 } bm_settings_t;
 
 bm_settings_t* bm_settings_parse(const char *content, size_t content_len,

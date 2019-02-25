@@ -24,15 +24,9 @@
 
 
 int
-bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
+bm_exec_native_mkdir_p(const char *filename)
 {
-    if (verbose)
-        printf("Copying '%s' to '%s'\n", source->path, dest->path);
-    else
-        printf("  COPY     %s\n", dest->short_path);
-    fflush(stdout);
-
-    char *fname = bc_strdup(dest->path);
+    char *fname = bc_strdup(filename);
     for (char *tmp = fname; *tmp != '\0'; tmp++) {
         if (*tmp != '/' && *tmp != '\\')
             continue;
@@ -50,6 +44,23 @@ bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
         *tmp = bkp;
     }
     free(fname);
+
+    return 0;
+}
+
+
+int
+bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
+{
+    if (verbose)
+        printf("Copying '%s' to '%s'\n", source->path, dest->path);
+    else
+        printf("  COPY     %s\n", dest->short_path);
+    fflush(stdout);
+
+    int rv = bm_exec_native_mkdir_p(dest->path);
+    if (rv != 0)
+        return rv;
 
     int fd_from = open(source->path, O_RDONLY);
     if (fd_from < 0) {

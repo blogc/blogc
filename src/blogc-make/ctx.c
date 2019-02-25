@@ -6,6 +6,10 @@
  * See the file LICENSE.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -191,6 +195,16 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
         return NULL;
     }
     free(content);
+
+#ifndef USE_LIBSASS
+    if (settings->sass != NULL) {
+        *err = bc_error_new_printf(BLOGC_MAKE_ERROR_SETTINGS,
+            "[sass] section found in %s, but blogc-make was built without "
+            "libsass support", settings_file);
+        bm_settings_free(settings);
+        return NULL;
+    }
+#endif
 
     const char *template_dir = bc_trie_lookup(settings->settings, "template_dir");
     if (template_dir == NULL)

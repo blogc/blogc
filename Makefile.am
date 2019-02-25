@@ -60,6 +60,7 @@ noinst_HEADERS = \
 	src/blogc-make/httpd.h \
 	src/blogc-make/reloader.h \
 	src/blogc-make/rules.h \
+	src/blogc-make/sass.h \
 	src/blogc-make/settings.h \
 	src/blogc-make/utils.h \
 	src/blogc-runserver/httpd.h \
@@ -235,6 +236,16 @@ blogc_make_LDADD = \
 	libblogc_make.la \
 	libblogc_common.la \
 	$(NULL)
+
+if USE_LIBSASS
+blogc_make_CFLAGS += \
+	$(LIBSASS_CFLAGS) \
+	$(NULL)
+
+blogc_make_LDADD += \
+	$(LIBSASS_LIBS) \
+	$(NULL)
+endif
 endif
 
 if BUILD_MAKE_LIB
@@ -259,6 +270,20 @@ libblogc_make_la_LIBADD = \
 	$(PTHREAD_LIBS) \
 	libblogc_common.la \
 	$(NULL)
+
+if USE_LIBSASS
+libblogc_make_la_SOURCES += \
+	src/blogc-make/sass.c \
+	$(NULL)
+
+libblogc_make_la_CFLAGS += \
+	$(LIBSASS_CFLAGS) \
+	$(NULL)
+
+libblogc_make_la_LIBADD += \
+	$(LIBSASS_LIBS) \
+	$(NULL)
+endif
 endif
 
 

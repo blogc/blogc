@@ -72,6 +72,7 @@ static const char* list_sections[] = {
     "copy",
     "copy_files",  // backward compatibility
     "tags",
+    "sass",
     NULL,
 };
 
@@ -97,6 +98,7 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
     rv->pages = NULL;
     rv->copy = NULL;
     rv->tags = NULL;
+    rv->sass = NULL;
 
     // this is some code for compatibility with the [environment] section,
     // even if I never released a version with it, but some people is using
@@ -159,6 +161,7 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
     rv->posts = bc_config_get_list(config, "posts");
     rv->pages = bc_config_get_list(config, "pages");
     rv->tags = bc_config_get_list(config, "tags");
+    rv->sass = bc_config_get_list(config, "sass");
 
     // this is for backward compatibility too.
     rv->copy = bc_config_get_list(config, "copy");
@@ -184,5 +187,6 @@ bm_settings_free(bm_settings_t *settings)
     bc_strv_free(settings->pages);
     bc_strv_free(settings->copy);
     bc_strv_free(settings->tags);
+    bc_strv_free(settings->sass);
     free(settings);
 }
