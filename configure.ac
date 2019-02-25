@@ -122,7 +122,6 @@ AS_IF([test "x$enable_make" = "xyes" -o "x$enable_make_embedded" = "xyes"], [
 AM_CONDITIONAL([BUILD_MAKE], [test "x$have_make" = "xyes"])
 AM_CONDITIONAL([BUILD_MAKE_LIB], [test "x$have_make_lib" = "xyes"])
 AM_CONDITIONAL([BUILD_MAKE_EMBEDDED], [test "x$have_make_embedded" = "xyes"])
-AC_SUBST(MAKE_)
 
 RUNSERVER="disabled"
 AC_ARG_ENABLE([runserver], AS_HELP_STRING([--enable-runserver],
