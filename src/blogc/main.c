@@ -60,9 +60,8 @@ blogc_print_help(void)
         "    -d            enable debug\n"
         "    -i            read list of source files from standard input\n"
         "    -l            build listing page, from multiple source files\n"
-        "    -D KEY=VALUE  set global configuration parameter\n"
-        "    -p KEY        show the value of a global configuration parameter\n"
-        "                  after source parsing and exit\n"
+        "    -D KEY=VALUE  set global variable\n"
+        "    -p KEY        show the value of a variable after source parsing and exit\n"
         "    -t TEMPLATE   template file\n"
         "    -o OUTPUT     output file\n"
 #ifdef MAKE_EMBEDDED
@@ -292,9 +291,15 @@ main(int argc, char **argv)
     }
 
     if (print != NULL) {
-        const char *val = bc_trie_lookup(config, print);
+        const char *val = NULL;
+        if (!listing && s != NULL) {
+            val = bc_trie_lookup(s->data, print);
+        }
         if (val == NULL) {
-            fprintf(stderr, "blogc: error: configuration variable not found: %s\n",
+            val = bc_trie_lookup(config, print);
+        }
+        if (val == NULL) {
+            fprintf(stderr, "blogc: error: variable not found: %s\n",
                 print);
             rv = 3;
         }
