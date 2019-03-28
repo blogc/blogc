@@ -29,14 +29,14 @@ bgr_post_receive_hook(int argc, char *argv[])
     if (real_hooks_dir == NULL) {
         fprintf(stderr, "error: failed to guess repository root: %s\n",
             strerror(errno));
-        return 3;
+        return 1;
     }
 
     char *repo_path = bc_strdup(dirname(real_hooks_dir));
     free(real_hooks_dir);
     if (0 != chdir(repo_path)) {
         fprintf(stderr, "error: failed to change to repository root\n");
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 

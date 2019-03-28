@@ -103,14 +103,14 @@ bgr_pre_receive_hook(int argc, char *argv[])
     if (real_hooks_dir == NULL) {
         fprintf(stderr, "error: failed to guess repository root: %s\n",
             strerror(errno));
-        return 3;
+        return 1;
     }
 
     char *repo_dir = bc_strdup(dirname(real_hooks_dir));
     free(real_hooks_dir);
     if (0 != chdir(repo_dir)) {
         fprintf(stderr, "error: failed to change to repository root\n");
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
@@ -147,14 +147,14 @@ default_sym:
         if (0 != access(sym, R_OK)) {
             fprintf(stderr, "error: no previous build found. nothing to "
                 "rebuild.\n");
-            rv = 3;
+            rv = 1;
             goto cleanup;
         }
         char *build_dir = realpath(sym, NULL);
         if (build_dir == NULL) {
             fprintf(stderr, "error: failed to get the hash of last built "
                 "commit: %s\n", strerror(errno));
-            rv = 3;
+            rv = 1;
             goto cleanup;
         }
         char **pieces = bc_str_split(basename(build_dir), '-', 2);
@@ -163,7 +163,7 @@ default_sym:
             fprintf(stderr, "error: failed to parse the hash of last built "
                 "commit.\n");
             bc_strv_free(pieces);
-            rv = 3;
+            rv = 1;
             goto cleanup;
         }
         master = bc_strdup(pieces[0]);
@@ -183,7 +183,7 @@ default_sym:
 
     char dir[] = "/tmp/blogc_XXXXXX";
     if (NULL == mkdtemp(dir)) {
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
     tmpdir = dir;
@@ -193,7 +193,7 @@ default_sym:
     if (0 != system(git_archive_cmd)) {
         fprintf(stderr, "error: failed to extract git content to temporary "
             "directory: %s\n", tmpdir);
-        rv = 3;
+        rv = 1;
         free(git_archive_cmd);
         goto cleanup;
     }
@@ -202,14 +202,14 @@ default_sym:
     if (0 != chdir(tmpdir)) {
         fprintf(stderr, "error: failed to chdir (%s): %s\n", tmpdir,
             strerror(errno));
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
     char *buildsd = bgr_settings_get_builds_dir();
     if (buildsd == NULL) {
         fprintf(stderr, "error: failed to find builds directory path\n");
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
@@ -230,7 +230,7 @@ default_sym:
         int status_bmake = system("blogc-make -v 2> /dev/null > /dev/null");
         if (127 == bc_compat_status_code(status_bmake)) {
             fprintf(stderr, "error: failed to find blogc-make binary\n");
-            rv = 3;
+            rv = 1;
             goto cleanup;
         }
         build_cmd = bc_strdup_printf("OUTPUT_DIR=\"%s\" blogc-make -V all",
@@ -252,7 +252,7 @@ default_sym:
 
         if (make_impl == NULL) {
             fprintf(stderr, "error: no 'make' implementation found\n");
-            rv = 3;
+            rv = 1;
             goto cleanup;
         }
         build_cmd = bc_strdup_printf(
@@ -270,7 +270,7 @@ default_sym:
         fprintf(stderr, "error: failed to build website ...\n");
         rmdir_recursive(output_dir);
         free(build_cmd);
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
     free(build_cmd);
@@ -280,7 +280,7 @@ default_sym:
         fprintf(stderr, "error: failed to remove symlink (%s): %s\n", sym,
             strerror(errno));
         rmdir_recursive(output_dir);
-        rv = 3;
+        rv = 1;
         goto cleanup2;
     }
 
@@ -288,7 +288,7 @@ default_sym:
         fprintf(stderr, "error: failed to create symlink (%s): %s\n", sym,
             strerror(errno));
         rmdir_recursive(output_dir);
-        rv = 3;
+        rv = 1;
         goto cleanup2;
     }
 

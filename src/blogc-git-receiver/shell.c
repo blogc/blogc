@@ -42,7 +42,7 @@ bgr_shell(int argc, char *argv[])
     char *self = getenv("SHELL");
     if (self == NULL) {
         fprintf(stderr, "error: failed to find blogc-git-receiver path\n");
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
@@ -50,7 +50,7 @@ bgr_shell(int argc, char *argv[])
     const char *bd = bgr_settings_get_base_dir();
     if (bd == NULL) {
         fprintf(stderr, "error: failed to find base directory path\n");
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
@@ -58,7 +58,7 @@ bgr_shell(int argc, char *argv[])
     char *tmp_repo = bgr_shell_command_parse(argv[2]);
     if (tmp_repo == NULL) {
         fprintf(stderr, "error: invalid git-shell command: %s\n", argv[2]);
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
@@ -75,7 +75,7 @@ bgr_shell(int argc, char *argv[])
         if (0 != system(git_init_cmd)) {
             fprintf(stderr, "error: failed to create git repository: %s\n",
                 repo);
-            rv = 3;
+            rv = 1;
             free(git_init_cmd);
             goto cleanup;
         }
@@ -85,7 +85,7 @@ bgr_shell(int argc, char *argv[])
     if (0 != chdir(repo)) {
         fprintf(stderr, "error: failed to chdir (%s): %s\n", repo,
             strerror(errno));
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
@@ -95,7 +95,7 @@ bgr_shell(int argc, char *argv[])
         if (0 != mkdir("hooks", 0777)) {  // mkdir honors umask for us.
             fprintf(stderr, "error: failed to create directory (%s/hooks): "
                 "%s\n", repo, strerror(errno));
-            rv = 3;
+            rv = 1;
             goto cleanup;
         }
     }
@@ -103,7 +103,7 @@ bgr_shell(int argc, char *argv[])
     if (0 != chdir("hooks")) {
         fprintf(stderr, "error: failed to chdir (%s/hooks): %s\n", repo,
             strerror(errno));
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
@@ -111,7 +111,7 @@ bgr_shell(int argc, char *argv[])
         if (0 != unlink("pre-receive")) {
             fprintf(stderr, "error: failed to remove old symlink "
                 "(%s/hooks/pre-receive): %s\n", repo, strerror(errno));
-            rv = 3;
+            rv = 1;
             goto cleanup;
         }
     }
@@ -119,7 +119,7 @@ bgr_shell(int argc, char *argv[])
     if (0 != symlink(self, "pre-receive")) {
         fprintf(stderr, "error: failed to create symlink "
             "(%s/hooks/pre-receive): %s\n", repo, strerror(errno));
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
@@ -127,7 +127,7 @@ bgr_shell(int argc, char *argv[])
         if (0 != unlink("post-receive")) {
             fprintf(stderr, "error: failed to remove old symlink "
                 "(%s/hooks/post-receive): %s\n", repo, strerror(errno));
-            rv = 3;
+            rv = 1;
             goto cleanup;
         }
     }
@@ -135,7 +135,7 @@ bgr_shell(int argc, char *argv[])
     if (0 != symlink(self, "post-receive")) {
         fprintf(stderr, "error: failed to create symlink "
             "(%s/hooks/post-receive): %s\n", repo, strerror(errno));
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
@@ -143,7 +143,7 @@ git_exec:
 
     if (0 != chdir(bd)) {
         fprintf(stderr, "error: failed to chdir (%s): %s\n", bd, strerror(errno));
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
@@ -157,13 +157,13 @@ git_exec:
 
     if (sizeof(buffer) < (strlen(command) + strlen(quoted_repo) + 2)) {
         fprintf(stderr, "error: git-shell command is too big\n");
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
     if (0 > snprintf(buffer, sizeof(buffer), "%s %s", command, quoted_repo)) {
         fprintf(stderr, "error: failed to generate git-shell command\n");
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
@@ -177,7 +177,7 @@ git_exec:
 
         // execlp only returns on error, then something bad happened
         fprintf(stderr, "error: failed to execute git-shell\n");
-        return 3;
+        return 1;
     }
 
     printf("git-shell -c \"%s\"\n", buffer);  // used by tests, ignore

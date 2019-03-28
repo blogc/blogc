@@ -35,10 +35,10 @@ main(int argc, char *argv[])
     char *ssh_orig = getenv("SSH_ORIGINAL_COMMAND");
     if (argc == 1 && ssh_orig != NULL && argv[0][0] == '/') {
         setenv("SHELL", argv[0], 1);
-        char* _argv[3] = {argv[0], "-c", ssh_orig};
+        char* _argv[] = {argv[0], "-c", ssh_orig};
         return bgr_shell(3, _argv);
     }
 
     fprintf(stderr, "error: this is a special shell, go away!\n");
-    return 3;
+    return 1;
 }
