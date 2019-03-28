@@ -271,7 +271,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
     if (0 != (err = getaddrinfo(host, port, &hints, &result))) {
         fprintf(stderr, "Failed to get host:port info: %s\n",
             gai_strerror(err));
-        return 3;
+        return 1;
     }
 
     thread_data_t threads[max_threads];
@@ -295,7 +295,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
             if (rp->ai_next == NULL) {
                 fprintf(stderr, "Failed to open server socket (%s:%d): %s\n",
                     final_host, final_port, strerror(errno));
-                rv = 3;
+                rv = 1;
                 goto cleanup0;
             }
             continue;
@@ -307,7 +307,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
             if (rp->ai_next == NULL) {
                 fprintf(stderr, "Failed to set socket option (%s:%d): %s\n",
                     final_host, final_port, strerror(errno));
-                rv = 3;
+                rv = 1;
                 goto cleanup;
             }
             close(server_socket);
@@ -321,7 +321,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
             if (rp->ai_next == NULL) {
                 fprintf(stderr, "Failed to bind to server socket (%s:%d): %s\n",
                     final_host, final_port, strerror(errno));
-                rv = 3;
+                rv = 1;
                 goto cleanup;
             }
         }
@@ -332,7 +332,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
     if (-1 == listen(server_socket, LISTEN_BACKLOG)) {
         fprintf(stderr, "Failed to listen to server socket (%s:%d): %s\n",
             final_host, final_port, strerror(errno));
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
@@ -369,7 +369,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
         int client_socket = accept(server_socket, client_addr, &addrlen);
         if (client_socket == -1) {
             fprintf(stderr, "Failed to accept connection: %s\n", strerror(errno));
-            rv = 3;
+            rv = 1;
             goto cleanup;
         }
 
@@ -384,7 +384,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
                 fprintf(stderr, "Failed to join thread\n");
                 free(arg->ip);
                 free(arg);
-                rv = 3;
+                rv = 1;
                 goto cleanup;
             }
         }
@@ -393,7 +393,7 @@ br_httpd_run(const char *host, const char *port, const char *docroot,
             handle_request, arg) != 0)
         {
             fprintf(stderr, "Failed to create thread\n");
-            rv = 3;
+            rv = 1;
             goto cleanup;
         }
 

@@ -104,7 +104,7 @@ main(int argc, char **argv)
                     print_usage();
                     fprintf(stderr, "blogc-runserver: error: invalid "
                         "argument: -%c\n", argv[i][1]);
-                    rv = 3;
+                    rv = 1;
                     goto cleanup;
             }
         }
@@ -113,7 +113,7 @@ main(int argc, char **argv)
                 print_usage();
                 fprintf(stderr, "blogc-runserver: error: only one positional "
                     "argument allowed\n");
-                rv = 3;
+                rv = 1;
                 goto cleanup;
             }
             args++;
@@ -125,7 +125,7 @@ main(int argc, char **argv)
         print_usage();
         fprintf(stderr, "blogc-runserver: error: document root directory "
             "required\n");
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
@@ -133,7 +133,7 @@ main(int argc, char **argv)
         print_usage();
         fprintf(stderr, "blogc-runserver: error: invalid value for -m. "
             "Must be integer > 0 and <= 1000\n");
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
 
