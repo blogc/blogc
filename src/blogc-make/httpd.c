@@ -65,7 +65,7 @@ bm_httpd_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec, bc_slist_t *outputs,
     if (0 != (err = pthread_attr_init(&attr))) {
         fprintf(stderr, "blogc-make: error: failed to initialize httpd "
             "thread attributes: %s\n", strerror(err));
-        return 3;
+        return 1;
     }
 
     // we run the thread detached, because we don't want to wait it to join
@@ -73,7 +73,7 @@ bm_httpd_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec, bc_slist_t *outputs,
     if (0 != (err = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED))) {
         fprintf(stderr, "blogc-make: error: failed to mark httpd thread as "
             "detached: %s\n", strerror(err));
-        return 3;
+        return 1;
     }
 
     bm_httpd_t *rv = bc_malloc(sizeof(bm_httpd_t));
@@ -85,7 +85,7 @@ bm_httpd_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec, bc_slist_t *outputs,
         fprintf(stderr, "blogc-make: error: failed to create httpd "
             "thread: %s\n", strerror(err));
         free(rv);
-        return 3;
+        return 1;
     }
 
     // run the reloader

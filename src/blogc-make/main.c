@@ -98,7 +98,7 @@ main(int argc, char **argv)
                     print_usage();
                     fprintf(stderr, "blogc-make: error: invalid argument: "
                         "-%c\n", argv[i][1]);
-                    rv = 3;
+                    rv = 1;
                     goto cleanup;
             }
         }
@@ -115,7 +115,7 @@ main(int argc, char **argv)
         argc > 0 ? argv[0] : NULL, &err);
     if (err != NULL) {
         bc_error_print(err, "blogc-make");
-        rv = 3;
+        rv = 1;
         goto cleanup;
     }
     ctx->dev = dev;

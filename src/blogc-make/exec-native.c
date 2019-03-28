@@ -55,7 +55,7 @@ bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
     if (fd_from < 0) {
         fprintf(stderr, "blogc-make: error: failed to open source file to copy "
             " (%s): %s\n", source->path, strerror(errno));
-        return 3;
+        return 1;
     }
 
     int fd_to = open(dest->path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
@@ -63,7 +63,7 @@ bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
         fprintf(stderr, "blogc-make: error: failed to open destination file to "
             "copy (%s): %s\n", dest->path, strerror(errno));
         close(fd_from);
-        return 3;
+        return 1;
     }
 
     ssize_t nread;
@@ -77,7 +77,7 @@ bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
                     "destination file (%s): %s\n", dest->path, strerror(errno));
                 close(fd_from);
                 close(fd_to);
-                return 3;
+                return 1;
             }
             nread -= nwritten;
             out_ptr += nwritten;
@@ -136,7 +136,7 @@ bm_exec_native_rm(const char *output_dir, bm_filectx_t *dest, bool verbose)
     if (0 != unlink(dest->path)) {
         fprintf(stderr, "blogc-make: error: failed to remove file (%s): %s\n",
             dest->path, strerror(errno));
-        return 3;
+        return 1;
     }
 
     int rv = 0;
@@ -153,7 +153,7 @@ bm_exec_native_rm(const char *output_dir, bm_filectx_t *dest, bool verbose)
         if (err != NULL) {
             fprintf(stderr, "blogc-make: error: %s\n", err->msg);
             bc_error_free(err);
-            rv = 3;
+            rv = 1;
             break;
         }
         if (!empty) {
@@ -167,7 +167,7 @@ bm_exec_native_rm(const char *output_dir, bm_filectx_t *dest, bool verbose)
             fprintf(stderr,
                 "blogc-make: error: failed to remove directory(%s): %s\n",
                 dir, strerror(errno));
-            rv = 3;
+            rv = 1;
             break;
         }
         if (0 == strcmp(dir, output_dir)) {

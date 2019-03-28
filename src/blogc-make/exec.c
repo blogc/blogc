@@ -77,13 +77,13 @@ bm_exec_command(const char *cmd, const char *input, char **output,
     char **error, bc_error_t **err)
 {
     if (err == NULL || *err != NULL)
-        return 3;
+        return 1;
 
     int fd_in[2];
     if (-1 == pipe(fd_in)) {
         *err = bc_error_new_printf(BLOGC_MAKE_ERROR_EXEC,
             "Failed to create stdin pipe: %s", strerror(errno));
-        return 3;
+        return 1;
     }
 
     int fd_out[2];
@@ -92,7 +92,7 @@ bm_exec_command(const char *cmd, const char *input, char **output,
             "Failed to create stdout pipe: %s", strerror(errno));
         close(fd_in[0]);
         close(fd_in[1]);
-        return 3;
+        return 1;
     }
 
     int fd_err[2];
@@ -103,7 +103,7 @@ bm_exec_command(const char *cmd, const char *input, char **output,
         close(fd_in[1]);
         close(fd_out[0]);
         close(fd_out[1]);
-        return 3;
+        return 1;
     }
 
     pid_t pid = fork();
@@ -116,7 +116,7 @@ bm_exec_command(const char *cmd, const char *input, char **output,
         close(fd_out[1]);
         close(fd_err[0]);
         close(fd_err[1]);
-        return 3;
+        return 1;
     }
 
     // child
@@ -153,7 +153,7 @@ bm_exec_command(const char *cmd, const char *input, char **output,
             close(fd_in[1]);
             close(fd_out[0]);
             close(fd_err[0]);
-            return 3;
+            return 1;
         }
     }
 
@@ -170,7 +170,7 @@ bm_exec_command(const char *cmd, const char *input, char **output,
             close(fd_out[0]);
             close(fd_err[0]);
             bc_string_free(out, true);
-            return 3;
+            return 1;
         }
         if (out == NULL) {
             out = bc_string_new();
@@ -189,7 +189,7 @@ bm_exec_command(const char *cmd, const char *input, char **output,
                 "Failed to read from stderr pipe: %s", strerror(errno));
             close(fd_err[0]);
             bc_string_free(out, true);
-            return 3;
+            return 1;
         }
         if (out == NULL)
             out = bc_string_new();
@@ -283,7 +283,7 @@ bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *global_variables, bc_trie_t *local_varia
     bool only_first_source)
 {
     if (ctx == NULL)
-        return 3;
+        return 1;
 
     bc_string_t *input = bc_string_new();
     for (bc_slist_t *l = sources; l != NULL; l = l->next) {
@@ -315,7 +315,7 @@ bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *global_variables, bc_trie_t *local_varia
         free(err);
         bc_string_free(input, true);
         bc_error_free(error);
-        return 3;
+        return 1;
     }
 
     if (rv != 0 && ctx->verbose) {
@@ -355,7 +355,7 @@ bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *global_variables, bc_trie_t *local_varia
     free(out);
     free(err);
 
-    return rv == 127 ? 3 : rv;
+    return rv == 127 ? 1 : rv;
 }
 
 
@@ -364,7 +364,7 @@ bm_exec_blogc_runserver(bm_ctx_t *ctx, const char *host, const char *port,
     const char *threads)
 {
     if (ctx == NULL)
-        return 3;
+        return 1;
 
     bc_string_t *cmd = bc_string_new();
 
@@ -408,7 +408,7 @@ bm_exec_blogc_runserver(bm_ctx_t *ctx, const char *host, const char *port,
             fprintf(stderr,
                 "blogc-make: error: blogc-runserver command not found. Maybe "
                 "it is not installed?\n");
-            rv = 3;  // blogc-make exists, so we should not return 127
+            rv = 1;  // blogc-make exists, so we should not return 127
         }
         else {
             fprintf(stderr,

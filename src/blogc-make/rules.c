@@ -634,7 +634,7 @@ atom_dump_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 {
     char *content = bm_atom_generate(ctx->settings);
     if (content == NULL)
-        return 3;
+        return 1;
     printf("%s", content);
     free(content);
     return 0;
@@ -794,7 +794,7 @@ int
 bm_rule_executor(bm_ctx_t *ctx, bc_slist_t *rule_list)
 {
     if (ctx == NULL)
-        return 3;
+        return 1;
 
     const bm_rule_t *rule = NULL;
     int rv = 0;
@@ -831,7 +831,7 @@ bm_rule_executor(bm_ctx_t *ctx, bc_slist_t *rule_list)
         if (rule == NULL) {
             fprintf(stderr, "blogc-make: error: rule not found: %.*s\n",
                 (int) (sep - rule_str), rule_str);
-            rv = 3;
+            rv = 1;
         }
     }
 
@@ -843,7 +843,7 @@ int
 bm_rule_execute(bm_ctx_t *ctx, const bm_rule_t *rule, bc_trie_t *args)
 {
     if (ctx == NULL || rule == NULL)
-        return 3;
+        return 1;
 
     bc_slist_t *outputs = NULL;
     if (rule->outputlist_func != NULL) {

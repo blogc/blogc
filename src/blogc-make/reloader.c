@@ -42,7 +42,7 @@ bm_reloader_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec,
     struct sigaction current_action;
     if (sigaction(SIGINT, NULL, &current_action) < 0) {
         fprintf(stderr, "blogc-make: failed to run reloader: %s\n", strerror(errno));
-        return 3;
+        return 1;
     }
     if (current_action.sa_handler != sig_handler) {  // not installed yet
         // backup current handler
@@ -58,7 +58,7 @@ bm_reloader_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec,
         if (sigaction(SIGINT, &new_action, NULL) < 0) {
             fprintf(stderr, "blogc-make: failed to run reloader: %s\n",
                 strerror(errno));
-            return 3;
+            return 1;
         }
     }
 
