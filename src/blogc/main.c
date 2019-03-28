@@ -14,6 +14,12 @@
 #include <sys/stat.h>
 #endif /* HAVE_SYS_STAT_H */
 
+#ifdef HAVE_SYSEXITS_H
+#include <sysexits.h>
+#else
+#define EX_CONFIG 78
+#endif /* HAVE_SYSEXITS_H */
+
 #include <errno.h>
 #include <locale.h>
 #include <stdbool.h>
@@ -301,7 +307,7 @@ main(int argc, char **argv)
         if (val == NULL) {
             fprintf(stderr, "blogc: error: variable not found: %s\n",
                 print);
-            rv = 1;
+            rv = EX_CONFIG;
         }
         else {
             printf("%s\n", val);
