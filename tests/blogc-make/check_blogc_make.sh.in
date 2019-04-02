@@ -59,7 +59,7 @@ EOF
 done
 
 cat > "${TEMP}/proj/templates/main.tmpl" <<EOF
-{% block listing %}
+{% block listing_entry %}{{ CONTENT }}{% endblock %}{% block listing %}
 Listing: {% ifdef FILTER_TAG %}{{ FILTER_TAG }} - {% endif %}{{ TITLE }} - {{ DATE_FORMATTED }}
 {% endblock %}
 {% block entry %}
@@ -755,7 +755,13 @@ diff -uN "${TEMP}/proj/_build/post/post11/index.html" "${TEMP}/expected-post-pos
 rm -rf "${TEMP}/proj/_build"
 
 
-### default settings with some posts, order asc
+### default settings with some posts, order asc, listing_entry
+
+cat > "${TEMP}/proj/content/hue.txt" <<EOF
+TITLE: Hue
+----------------
+This is hue.
+EOF
 
 cat > "${TEMP}/proj/blogcfile" <<EOF
 [global]
@@ -768,6 +774,7 @@ BASE_DOMAIN = http://example.org
 [settings]
 html_order = ASC
 atom_order = ASC
+listing_entry = hue
 
 [posts]
 foo
@@ -784,6 +791,7 @@ grep "_build/post/bar/index\\.html" "${TEMP}/output.txt"
 rm "${TEMP}/output.txt"
 
 cat > "${TEMP}/expected-index.html" <<EOF
+<p>This is hue.</p>
 
 Listing: Foo - Oct 01, 2016, 12:00 AM GMT
 
@@ -865,7 +873,7 @@ diff -uN "${TEMP}/proj/_build/post/bar/index.html" "${TEMP}/expected-post-bar.ht
 rm -rf "${TEMP}/proj/_build"
 
 
-### default settings with some posts and tags, order asc
+### default settings with some posts and tags, order asc, listing_entry
 
 cat > "${TEMP}/proj/content/post/baz.txt" <<EOF
 TITLE: Baz
@@ -897,6 +905,7 @@ grep "_build/tag/tag2/index\\.html" "${TEMP}/output.txt"
 rm "${TEMP}/output.txt"
 
 cat > "${TEMP}/expected-index.html" <<EOF
+<p>This is hue.</p>
 
 Listing: Foo - Oct 01, 2016, 12:00 AM GMT
 
@@ -1047,6 +1056,7 @@ diff -uN "${TEMP}/proj/_build/post/bar/index.html" "${TEMP}/expected-post-bar.ht
 diff -uN "${TEMP}/proj/_build/post/baz/index.html" "${TEMP}/expected-post-baz.html"
 
 cat > "${TEMP}/expected-tag1.html" <<EOF
+<p>This is hue.</p>
 
 Listing: tag1 - Baz - Aug 01, 2016, 12:00 AM GMT
 
@@ -1055,6 +1065,7 @@ EOF
 diff -uN "${TEMP}/proj/_build/tag/tag1/index.html" "${TEMP}/expected-tag1.html"
 
 cat > "${TEMP}/expected-tag2.html" <<EOF
+<p>This is hue.</p>
 
 Listing: tag2 - Baz - Aug 01, 2016, 12:00 AM GMT
 
