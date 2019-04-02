@@ -166,7 +166,7 @@ blogc_split_list_variable(const char *name, bc_trie_t *global, bc_trie_t *local)
 
 
 char*
-blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool listing)
+blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *listing_entry, bc_trie_t *config, bool listing)
 {
     if (tmpl == NULL)
         return NULL;
@@ -220,6 +220,20 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *config, bool list
                     }
                     current_source = sources;
                     tmp_source = current_source != NULL ? current_source->data : NULL;
+                }
+                if (0 == strcmp("listing_entry", node->data[0])) {
+                    if (listing_entry == NULL || !listing) {
+
+                        // we can just skip anything and walk until the next
+                        // 'endblock'
+                        while (node->type != BLOGC_TEMPLATE_NODE_ENDBLOCK) {
+                            tmp = tmp->next;
+                            node = tmp->data;
+                        }
+                        break;
+                    }
+                    current_source = NULL;
+                    tmp_source = listing_entry;
                 }
                 else if ((0 == strcmp("listing", node->data[0])) ||
                          (0 == strcmp("listing_once", node->data[0]))) {

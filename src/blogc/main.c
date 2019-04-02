@@ -54,8 +54,8 @@ blogc_print_help(void)
 #ifdef MAKE_EMBEDDED
         "[-m] "
 #endif
-        "[-h] [-v] [-d] [-i] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
-        "          [-o OUTPUT] [SOURCE ...] - A blog compiler.\n"
+        "[-h] [-v] [-d] [-i] [-l [-e SOURCE]] [-D KEY=VALUE ...] [-p KEY]\n"
+        "          [-t TEMPLATE] [-o OUTPUT] [SOURCE ...] - A blog compiler.\n"
         "\n"
         "positional arguments:\n"
         "    SOURCE        source file(s)\n"
@@ -66,6 +66,7 @@ blogc_print_help(void)
         "    -d            enable debug\n"
         "    -i            read list of source files from standard input\n"
         "    -l            build listing page, from multiple source files\n"
+        "    -e SOURCE     source file with content for listing page. requires '-l'\n"
         "    -D KEY=VALUE  set global variable\n"
         "    -p KEY        show the value of a variable after source parsing and exit\n"
         "    -t TEMPLATE   template file\n"
@@ -85,8 +86,8 @@ blogc_print_usage(void)
 #ifdef MAKE_EMBEDDED
         "[-m] "
 #endif
-        "[-h] [-v] [-d] [-i] [-l] [-D KEY=VALUE ...] [-p KEY] [-t TEMPLATE]\n"
-        "             [-o OUTPUT] [SOURCE ...]\n");
+        "[-h] [-v] [-d] [-i] [-l [-e SOURCE]] [-D KEY=VALUE ...] [-p KEY]\n"
+        "             [-t TEMPLATE] [-o OUTPUT] [SOURCE ...]\n");
 }
 
 
@@ -160,6 +161,7 @@ main(int argc, char **argv)
     bool debug = false;
     bool input_stdin = false;
     bool listing = false;
+    char *listing_entry = NULL;
     char *template = NULL;
     char *output = NULL;
     char *print = NULL;
@@ -167,6 +169,7 @@ main(int argc, char **argv)
     char **pieces = NULL;
 
     bc_slist_t *sources = NULL;
+    bc_trie_t *listing_entry_source = NULL;
     bc_trie_t *config = bc_trie_new(free);
     bc_trie_insert(config, "BLOGC_VERSION", bc_strdup(PACKAGE_VERSION));
 
@@ -188,6 +191,12 @@ main(int argc, char **argv)
                     break;
                 case 'l':
                     listing = true;
+                    break;
+                case 'e':
+                    if (argv[i][2] != '\0')
+                        listing_entry = bc_strdup(argv[i] + 2);
+                    else if (i + 1 < argc)
+                        listing_entry = bc_strdup(argv[++i]);
                     break;
                 case 't':
                     if (argv[i][2] != '\0')
@@ -296,6 +305,15 @@ main(int argc, char **argv)
         goto cleanup2;
     }
 
+    if (listing && listing_entry != NULL) {
+        listing_entry_source = blogc_source_parse_from_file(listing_entry, &err);
+        if (err != NULL) {
+            bc_error_print(err, "blogc");
+            rv = 1;
+            goto cleanup2;
+        }
+    }
+
     if (print != NULL) {
         const char *val = NULL;
         if (!listing && s != NULL) {
@@ -332,7 +350,7 @@ main(int argc, char **argv)
     if (debug)
         blogc_debug_template(l);
 
-    char *out = blogc_render(l, s, config, listing);
+    char *out = blogc_render(l, s, listing_entry_source, config, listing);
 
     bool write_to_stdout = (output == NULL || (0 == strcmp(output, "-")));
 
@@ -366,6 +384,8 @@ cleanup:
     free(template);
     free(output);
     free(print);
+    free(listing_entry);
+    bc_trie_free(listing_entry_source);
     bc_slist_free_full(sources, free);
     return rv;
 }

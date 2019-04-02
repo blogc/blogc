@@ -58,7 +58,8 @@ test_template_parse(void **state)
         "{% block listing %}{{ BOLA }}{% endblock %}\n"
         "{% block listing_once %}asd{% endblock %}\n"
         "{%- foreach BOLA %}hahaha{% endforeach %}\n"
-        "{% if BOLA == \"1\\\"0\" %}aee{% else %}fffuuuuuuu{% endif %}";
+        "{% if BOLA == \"1\\\"0\" %}aee{% else %}fffuuuuuuu{% endif %}\n"
+        "{% block listing_entry %}lol{% endblock %}";
     bc_error_t *err = NULL;
     bc_slist_t *ast = blogc_template_parse(a, strlen(a), &err);
     assert_null(err);
@@ -120,7 +121,12 @@ test_template_parse(void **state)
         "fffuuuuuuu", BLOGC_TEMPLATE_NODE_CONTENT);
     blogc_assert_template_node(tmp->next->next->next->next->next->next->next->next,
         NULL, BLOGC_TEMPLATE_NODE_ENDIF);
-    assert_null(tmp->next->next->next->next->next->next->next->next->next);
+    tmp = tmp->next->next->next->next->next->next->next->next->next;
+    blogc_assert_template_node(tmp, "\n", BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next, "listing_entry", BLOGC_TEMPLATE_NODE_BLOCK);
+    blogc_assert_template_node(tmp->next->next, "lol", BLOGC_TEMPLATE_NODE_CONTENT);
+    blogc_assert_template_node(tmp->next->next->next, NULL, BLOGC_TEMPLATE_NODE_ENDBLOCK);
+    assert_null(tmp->next->next->next->next);
     blogc_template_free_ast(ast);
 }
 
@@ -835,7 +841,8 @@ test_template_parse_invalid_block_type(void **state)
     assert_null(ast);
     assert_int_equal(err->type, BLOGC_ERROR_TEMPLATE_PARSER);
     assert_string_equal(err->msg,
-        "Invalid block type. Allowed types are: 'entry', 'listing' and 'listing_once'.\n"
+        "Invalid block type. Allowed types are: 'entry', 'listing', 'listing_once' "
+        "and 'listing_entry'.\n"
         "Error occurred near line 1, position 16: {% block chunda %}");
     bc_error_free(err);
 }

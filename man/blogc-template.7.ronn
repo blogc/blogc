@@ -87,6 +87,21 @@ that the `TITLE` variable is defined:
     </ul>
     {% endblock %}
 
+### listing_entry block
+
+This block is identical to the `entry` block, but its content is included in
+the output file only when blogc(1) is called with `-l` and `-e` <SOURCE>. The
+variables available in the block are provided by the source file provided
+using `-e`.
+
+This is how a `listing_entry` block is defined:
+
+    {% block listing_entry %}
+    This content will only be included when rendering a listing, but with
+    content provided by a single entry.
+    {% endblock %}
+
+
 ## TEMPLATE VARIABLES
 
 Template variables are used to provide content to templates from blogc(1)

@@ -82,7 +82,7 @@ test_render_entry(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "foo\n"
         "\n"
@@ -129,11 +129,119 @@ test_render_listing(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(3);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, true);
+    char *out = blogc_render(l, s, NULL, NULL, true);
     assert_string_equal(out,
         "foo\n"
         "fuuu\n"
         "\n"
+        "\n"
+        "03:04\n"
+        "bola: asd\n"
+        "lol foo haha lol bar haha lol baz haha \n"
+        "\n"
+        "\n"
+        "2014-02-03 04:05:06\n"
+        "bola: asd2\n"
+        "\n"
+        "\n"
+        "\n"
+        "2013-01-02 03:04:05\n"
+        "bola: asd3\n"
+        "\n"
+        "\n"
+        "\n");
+    blogc_template_free_ast(l);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_listing_entry(void **state)
+{
+    const char *str =
+        "foo\n"
+        "{% block listing_once %}fuuu{% endblock %}\n"
+        "{% block entry %}\n"
+        "{% ifdef GUDA %}{{ GUDA }}{% endif %}\n"
+        "{% ifdef CHUNDA %}{{ CHUNDA }}{% endif %}\n"
+        "{% endblock %}\n"
+        "{% block listing_entry %}asd{% endblock %}\n"
+        "{% block listing %}\n"
+        "{% ifdef DATE_FORMATTED %}{{ DATE_FORMATTED }}{% endif %}\n"
+        "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
+        "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
+        "{% foreach TAGS_ASD %}yay{% endforeach %}\n"
+        "{% endblock %}\n";
+    bc_error_t *err = NULL;
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    bc_slist_t *s = create_sources(3);
+    assert_non_null(s);
+    char *out = blogc_render(l, s, NULL, NULL, true);
+    assert_string_equal(out,
+        "foo\n"
+        "fuuu\n"
+        "\n"
+        "\n"
+        "\n"
+        "03:04\n"
+        "bola: asd\n"
+        "lol foo haha lol bar haha lol baz haha \n"
+        "\n"
+        "\n"
+        "2014-02-03 04:05:06\n"
+        "bola: asd2\n"
+        "\n"
+        "\n"
+        "\n"
+        "2013-01-02 03:04:05\n"
+        "bola: asd3\n"
+        "\n"
+        "\n"
+        "\n");
+    blogc_template_free_ast(l);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_listing_entry2(void **state)
+{
+    const char *str =
+        "foo\n"
+        "{% block listing_once %}fuuu{% endblock %}\n"
+        "{% block entry %}\n"
+        "{% ifdef GUDA %}{{ GUDA }}{% endif %}\n"
+        "{% ifdef CHUNDA %}{{ CHUNDA }}{% endif %}\n"
+        "{% endblock %}\n"
+        "{% block listing_entry %}{{ FUUUUU }}{% endblock %}\n"
+        "{% block listing_entry %}{{ BAAAAA }}{% endblock %}\n"
+        "{% block listing %}\n"
+        "{% ifdef DATE_FORMATTED %}{{ DATE_FORMATTED }}{% endif %}\n"
+        "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
+        "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
+        "{% foreach TAGS_ASD %}yay{% endforeach %}\n"
+        "{% endblock %}\n";
+    bc_error_t *err = NULL;
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    bc_slist_t *s = create_sources(3);
+    assert_non_null(s);
+    bc_trie_t *entry = bc_trie_new(free);
+    bc_trie_insert(entry, "FUUUUU", bc_strdup("XD"));
+    bc_trie_insert(entry, "BAAAAA", bc_strdup(":p"));
+    char *out = blogc_render(l, s, entry, NULL, true);
+    bc_trie_free(entry);
+    assert_string_equal(out,
+        "foo\n"
+        "fuuu\n"
+        "\n"
+        "XD\n"
+        ":p\n"
         "\n"
         "03:04\n"
         "bola: asd\n"
@@ -175,7 +283,7 @@ test_render_listing_empty(void **state)
     bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
     assert_null(err);
-    char *out = blogc_render(l, NULL, NULL, true);
+    char *out = blogc_render(l, NULL, NULL, NULL, true);
     assert_string_equal(out,
         "foo\n"
         "fuuu\n"
@@ -204,7 +312,7 @@ test_render_ifdef(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "\n"
@@ -233,7 +341,7 @@ test_render_ifdef2(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "guda\n"
@@ -264,7 +372,7 @@ test_render_ifdef3(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "guda\n"
@@ -299,7 +407,7 @@ test_render_ifdef4(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "guda\n"
@@ -335,7 +443,7 @@ test_render_ifdef5(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "guda\n"
@@ -369,7 +477,7 @@ test_render_ifdef6(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "lol\n"
@@ -402,7 +510,7 @@ test_render_ifdef7(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "guda\n"
@@ -438,7 +546,7 @@ test_render_ifndef(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "chunda\n"
@@ -474,7 +582,7 @@ test_render_if_eq(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "gudabola\n"
@@ -511,7 +619,7 @@ test_render_if_neq(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "gudabola\n"
@@ -548,7 +656,7 @@ test_render_if_lt(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "gudabola\n"
@@ -585,7 +693,7 @@ test_render_if_gt(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "gudabola\n"
@@ -624,7 +732,7 @@ test_render_if_lt_eq(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "gudabola\n"
@@ -665,7 +773,7 @@ test_render_if_gt_eq(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "gudabola\n"
@@ -697,7 +805,7 @@ test_render_foreach(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         " foo  bar  baz \n"
@@ -722,7 +830,7 @@ test_render_foreach_if(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "   bar   \n"
@@ -748,7 +856,7 @@ test_render_foreach_if_else(void **state)
     assert_null(err);
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
-    char *out = blogc_render(l, s, NULL, false);
+    char *out = blogc_render(l, s, NULL, NULL, false);
     assert_string_equal(out,
         "\n"
         "foo yay baz \n"
@@ -762,7 +870,7 @@ test_render_foreach_if_else(void **state)
 static void
 test_render_null(void **state)
 {
-    assert_null(blogc_render(NULL, NULL, NULL, false));
+    assert_null(blogc_render(NULL, NULL, NULL, NULL, false));
 }
 
 
@@ -781,7 +889,7 @@ test_render_outside_block(void **state)
     assert_non_null(s);
     bc_trie_t *c = bc_trie_new(free);
     bc_trie_insert(c, "GUDA", bc_strdup("asd"));
-    char *out = blogc_render(l, s, c, false);
+    char *out = blogc_render(l, s, NULL, c, false);
     assert_string_equal(out,
         "bola\n"
         "\n"
@@ -815,7 +923,7 @@ test_render_prefer_local_variable(void **state)
     bc_trie_t *c = bc_trie_new(free);
     bc_trie_insert(c, "GUDA", bc_strdup("hehe"));
     bc_trie_insert(c, "LOL", bc_strdup("hmm"));
-    char *out = blogc_render(l, s, c, false);
+    char *out = blogc_render(l, s, NULL, c, false);
     assert_string_equal(out,
         "\n"
         "hmm\n"
@@ -849,7 +957,7 @@ test_render_respect_variable_scope(void **state)
     bc_slist_t *s = create_sources(1);
     assert_non_null(s);
     bc_trie_t *c = bc_trie_new(free);
-    char *out = blogc_render(l, s, c, false);
+    char *out = blogc_render(l, s, NULL, c, false);
     assert_string_equal(out,
         "\n"
         "\n"
@@ -882,7 +990,7 @@ test_render_ifcount_bug(void **state)
     s = bc_slist_append(s, bc_trie_new(free));
     bc_trie_insert(s->data, "TITLE", bc_strdup("bola"));
     bc_trie_t *c = bc_trie_new(free);
-    char *out = blogc_render(l, s, c, false);
+    char *out = blogc_render(l, s, NULL, c, false);
     assert_string_equal(out,
         "\n"
         "<h3>bola</h3>\n"
@@ -1117,6 +1225,8 @@ main(void)
     const UnitTest tests[] = {
         unit_test(test_render_entry),
         unit_test(test_render_listing),
+        unit_test(test_render_listing_entry),
+        unit_test(test_render_listing_entry2),
         unit_test(test_render_listing_empty),
         unit_test(test_render_ifdef),
         unit_test(test_render_ifdef2),

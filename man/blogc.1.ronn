@@ -4,14 +4,15 @@ blogc(1) -- a blog compiler
 ## SYNOPSIS
 
 `blogc` [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] <SOURCE><br>
-`blogc` `-l` [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] [<SOURCE> ...]<br>
-`blogc` `-l` `-p` <KEY> [`-d`] [`-D` <KEY>=<VALUE> ...] [<SOURCE> ...]<br>
+`blogc` `-l` [`-e` <SOURCE>] [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] [<SOURCE> ...]<br>
+`blogc` `-l` [`-e` <SOURCE>] [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] [<SOURCE> ...]<br>
+`blogc` `-l` [`-e` <SOURCE>] `-p` <KEY> [`-d`] [`-D` <KEY>=<VALUE> ...] [<SOURCE> ...]<br>
 `blogc` `-i` [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] &lt; <FILE_LIST><br>
-`blogc` `-i` `-l` [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] &lt; <FILE_LIST><br>
-`blogc` `-i` `-l` `-p` <KEY> [`-d`] [`-D` <KEY>=<VALUE> ...] &lt; <FILE_LIST><br>
+`blogc` `-i` `-l` [`-e` <SOURCE>] [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>] &lt; <FILE_LIST><br>
+`blogc` `-i` `-l` [`-e` <SOURCE>] `-p` <KEY> [`-d`] [`-D` <KEY>=<VALUE> ...] &lt; <FILE_LIST><br>
 `echo` `-e` "<SOURCE>\n..." | `blogc` `-i` [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>]<br>
-`echo` `-e` "<SOURCE>\n..." | `blogc` `-i` `-l` [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>]<br>
-`echo` `-e` "<SOURCE>\n..." | `blogc` `-i` `-l` `-p` <KEY> [`-d`] [`-D` <KEY>=<VALUE> ...]<br>
+`echo` `-e` "<SOURCE>\n..." | `blogc` `-i` `-l` [`-e` <SOURCE>] [`-d`] [`-D` <KEY>=<VALUE> ...] `-t` <TEMPLATE> [`-o` <OUTPUT>]<br>
+`echo` `-e` "<SOURCE>\n..." | `blogc` `-i` `-l` [`-e` <SOURCE>] `-p` <KEY> [`-d`] [`-D` <KEY>=<VALUE> ...]<br>
 `blogc` [`-h`|`-v`]
 
 ## DESCRIPTION
@@ -29,10 +30,14 @@ designed to be used with make(1).
     page or a post.
 
   * `listing`:
-    Listing mode, second example in [SYNOPSIS][], activated when
-    calling `blogc` with `-l` option. Accepts multiple source files, and allow
-    users to iterate over the content of all the source files to produce listing
-    pages, like indexes and feeds.
+    Listing mode, second example in [SYNOPSIS][], activated when calling `blogc`
+    with `-l` option. Accepts multiple source files, and allow users to iterate
+    over the content of all the source files to produce listing pages, like
+    indexes and feeds. By providing another source file to `blogc` with `-e`
+    option, third example in [SYNOPSIS][], its content will be available for usage
+    during listing, similar to the default entry mode. This is useful for users
+    that want to have an index page with content and posts listing together.
+    See blogc-template(7) for details.
 
 ## OPTIONS
 
@@ -49,6 +54,11 @@ designed to be used with make(1).
   * `-l`:
     Activates listing mode, allowing user to provide multiple source files. See
     blogc-source(7) for details.
+
+  * `-e` <SOURCE>:
+    When used together with `-l` the source file will be parsed and its content
+    will be made available for usage in the templates in listing mode. See
+    blogc-template(7) for details.
 
   * `-D` <KEY>=<VALUE>:
     Set global configuration parameter. <KEY> must be an ascii uppercase string,
@@ -99,6 +109,10 @@ can be overridden using environment variables. See strftime(3).
 Build index from source files:
 
     $ blogc -l -t template.tmpl -o index.html source1.txt source2.txt source3.txt
+
+Build index from source files, with additional content from `index.txt`:
+
+    $ blogc -l -e index.txt -t template.tmpl -o index.html source1.txt source2.txt source3.txt
 
 Build entry page from source file:
 
