@@ -256,6 +256,14 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     const char *content_dir = bm_ctx_settings_lookup(rv, "content_dir");
     const char *post_prefix = bm_ctx_settings_lookup(rv, "post_prefix");
     const char *source_ext = bm_ctx_settings_lookup(rv, "source_ext");
+    const char *listing_entry = bm_ctx_settings_lookup(rv, "listing_entry");
+
+    rv->listing_entry_fctx = NULL;
+    if (listing_entry != NULL) {
+        char *f = bm_generate_filename(content_dir, NULL, listing_entry, source_ext);
+        rv->listing_entry_fctx = bm_filectx_new(rv, f, listing_entry, NULL);
+        free(f);
+    }
 
     rv->posts_fctx = NULL;
     if (settings->posts != NULL) {
@@ -317,6 +325,7 @@ bm_ctx_reload(bm_ctx_t **ctx)
 
     bm_filectx_reload((*ctx)->main_template_fctx);
     bm_filectx_reload((*ctx)->atom_template_fctx);
+    bm_filectx_reload((*ctx)->listing_entry_fctx);
 
     for (bc_slist_t *tmp = (*ctx)->posts_fctx; tmp != NULL; tmp = tmp->next)
         bm_filectx_reload((bm_filectx_t*) tmp->data);
@@ -357,6 +366,8 @@ bm_ctx_free_internal(bm_ctx_t *ctx)
     ctx->atom_template_fctx = NULL;
     bm_filectx_free(ctx->settings_fctx);
     ctx->settings_fctx = NULL;
+    bm_filectx_free(ctx->listing_entry_fctx);
+    ctx->listing_entry_fctx = NULL;
 
     bc_slist_free_full(ctx->posts_fctx, (bc_free_func_t) bm_filectx_free);
     ctx->posts_fctx = NULL;

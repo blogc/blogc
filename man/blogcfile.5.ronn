@@ -95,6 +95,12 @@ however these rules can be customized with the following settings, from the
     option is useful if the user wants to host a page in the root of the website,
     and move the posts listing index to a subdirectory.
 
+  * `listing_entry` (default: unset):
+    The page that will be included in the listing pages of the website, without
+    the page prefix and without the extension, only the "slug" should be used.
+    See blogc(1) and the description of `listing_entry` block in blogc-template(7)
+    for details.
+
   * `locale` (default: unset):
     The locale to be used when calling blogc(1). E.g. `en_US.UTF-8`.
 

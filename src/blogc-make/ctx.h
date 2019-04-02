@@ -60,6 +60,7 @@ typedef struct {
     bm_filectx_t *main_template_fctx;
     bm_filectx_t *atom_template_fctx;
     bm_filectx_t *settings_fctx;
+    bm_filectx_t *listing_entry_fctx;
 
     bc_slist_t *posts_fctx;
     bc_slist_t *pages_fctx;

@@ -27,6 +27,7 @@ static const struct default_settings_map {
     {"atom_template", NULL},  // default: atom.c
     {"main_template", "main.tmpl"},
     {"source_ext", ".txt"},
+    {"listing_entry", NULL},
 
     // pagination
     {"pagination_prefix", "page"},
