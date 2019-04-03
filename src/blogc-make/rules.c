@@ -873,6 +873,8 @@ bm_rule_need_rebuild(bc_slist_t *sources, bm_filectx_t *settings,
         s = bc_slist_append(s, settings);
     if (template != NULL)
         s = bc_slist_append(s, template);
+    if (listing_entry != NULL)
+        s = bc_slist_append(s, listing_entry);
 
     for (bc_slist_t *l = sources; l != NULL; l = l->next) {
         s = bc_slist_append(s, l->data);
