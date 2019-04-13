@@ -315,13 +315,11 @@ main(int argc, char **argv)
     }
 
     if (print != NULL) {
-        const char *val = NULL;
+        bc_trie_t *local = NULL;
         if (!listing && s != NULL) {
-            val = bc_trie_lookup(s->data, print);
+            local = s->data;
         }
-        if (val == NULL) {
-            val = bc_trie_lookup(config, print);
-        }
+        char *val = blogc_format_variable(print, config, local, NULL);
         if (val == NULL) {
             fprintf(stderr, "blogc: error: variable not found: %s\n",
                 print);
@@ -330,6 +328,7 @@ main(int argc, char **argv)
         else {
             printf("%s\n", val);
         }
+        free(val);
         goto cleanup2;
     }
 
