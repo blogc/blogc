@@ -99,7 +99,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">Lol's Website</title>
-  <id>/atom.xml</id>
+  <id>http://example.org/atom.xml</id>
   <updated>2016-09-01T00:00:00Z</updated>
   <link href="http://example.org/" />
   <link href="http://example.org/atom.xml" rel="self" />
@@ -111,7 +111,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Bar</title>
-    <id>/post/bar/index.html</id>
+    <id>http://example.org/post/bar/index.html</id>
     <updated>2016-09-01T00:00:00Z</updated>
     <published>2016-09-01T00:00:00Z</published>
     <link href="http://example.org/post/bar/index.html" />
@@ -125,7 +125,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Foo</title>
-    <id>/post/foo/index.html</id>
+    <id>http://example.org/post/foo/index.html</id>
     <updated>2016-10-01T00:00:00Z</updated>
     <published>2016-10-01T00:00:00Z</published>
     <link href="http://example.org/post/foo/index.html" />
@@ -243,7 +243,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">Lol's Website</title>
-  <id>/atom.xml</id>
+  <id>http://example.org/atom.xml</id>
   <updated>2016-09-11T00:00:00Z</updated>
   <link href="http://example.org/" />
   <link href="http://example.org/atom.xml" rel="self" />
@@ -255,7 +255,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 11</title>
-    <id>/post/post11/index.html</id>
+    <id>http://example.org/post/post11/index.html</id>
     <updated>2016-09-11T00:00:00Z</updated>
     <published>2016-09-11T00:00:00Z</published>
     <link href="http://example.org/post/post11/index.html" />
@@ -269,7 +269,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 10</title>
-    <id>/post/post10/index.html</id>
+    <id>http://example.org/post/post10/index.html</id>
     <updated>2016-09-10T00:00:00Z</updated>
     <published>2016-09-10T00:00:00Z</published>
     <link href="http://example.org/post/post10/index.html" />
@@ -283,7 +283,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 09</title>
-    <id>/post/post09/index.html</id>
+    <id>http://example.org/post/post09/index.html</id>
     <updated>2016-09-09T00:00:00Z</updated>
     <published>2016-09-09T00:00:00Z</published>
     <link href="http://example.org/post/post09/index.html" />
@@ -297,7 +297,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 08</title>
-    <id>/post/post08/index.html</id>
+    <id>http://example.org/post/post08/index.html</id>
     <updated>2016-09-08T00:00:00Z</updated>
     <published>2016-09-08T00:00:00Z</published>
     <link href="http://example.org/post/post08/index.html" />
@@ -311,7 +311,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 07</title>
-    <id>/post/post07/index.html</id>
+    <id>http://example.org/post/post07/index.html</id>
     <updated>2016-09-07T00:00:00Z</updated>
     <published>2016-09-07T00:00:00Z</published>
     <link href="http://example.org/post/post07/index.html" />
@@ -325,7 +325,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 06</title>
-    <id>/post/post06/index.html</id>
+    <id>http://example.org/post/post06/index.html</id>
     <updated>2016-09-06T00:00:00Z</updated>
     <published>2016-09-06T00:00:00Z</published>
     <link href="http://example.org/post/post06/index.html" />
@@ -339,7 +339,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 05</title>
-    <id>/post/post05/index.html</id>
+    <id>http://example.org/post/post05/index.html</id>
     <updated>2016-09-05T00:00:00Z</updated>
     <published>2016-09-05T00:00:00Z</published>
     <link href="http://example.org/post/post05/index.html" />
@@ -353,7 +353,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 04</title>
-    <id>/post/post04/index.html</id>
+    <id>http://example.org/post/post04/index.html</id>
     <updated>2016-09-04T00:00:00Z</updated>
     <published>2016-09-04T00:00:00Z</published>
     <link href="http://example.org/post/post04/index.html" />
@@ -367,7 +367,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 03</title>
-    <id>/post/post03/index.html</id>
+    <id>http://example.org/post/post03/index.html</id>
     <updated>2016-09-03T00:00:00Z</updated>
     <published>2016-09-03T00:00:00Z</published>
     <link href="http://example.org/post/post03/index.html" />
@@ -381,7 +381,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 02</title>
-    <id>/post/post02/index.html</id>
+    <id>http://example.org/post/post02/index.html</id>
     <updated>2016-09-02T00:00:00Z</updated>
     <published>2016-09-02T00:00:00Z</published>
     <link href="http://example.org/post/post02/index.html" />
@@ -395,7 +395,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 01</title>
-    <id>/post/post01/index.html</id>
+    <id>http://example.org/post/post01/index.html</id>
     <updated>2016-09-01T00:00:00Z</updated>
     <published>2016-09-01T00:00:00Z</published>
     <link href="http://example.org/post/post01/index.html" />
@@ -469,7 +469,7 @@ cat > "${TEMP}/proj/templates/atom.tmpl" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">{{ SITE_TITLE }}{% ifdef FILTER_TAG %} - {{ FILTER_TAG }}{% endif %}</title>
-  <id>{{ BASE_URL }}/atom/{% ifdef FILTER_TAG %}{{ FILTER_TAG }}/{% endif %}</id>
+  <id>{{ BASE_DOMAIN }}{{ BASE_URL }}/atom/{% ifdef FILTER_TAG %}{{ FILTER_TAG }}/{% endif %}</id>
   <updated>{{ DATE_FIRST_FORMATTED }}</updated>
   <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/" />
   <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/atom/{% ifdef FILTER_TAG %}{{ FILTER_TAG }}/{% endif %}" rel="self" />
@@ -481,7 +481,7 @@ cat > "${TEMP}/proj/templates/atom.tmpl" <<EOF
   {% block listing %}
   <entry>
     <title type="text">{{ TITLE }}</title>
-    <id>{{ BASE_URL }}/post/{{ FILENAME }}/</id>
+    <id>{{ BASE_DOMAIN }}{{ BASE_URL }}/post/{{ FILENAME }}/</id>
     <updated>{{ DATE_FORMATTED }}</updated>
     <published>{{ DATE_FORMATTED }}</published>
     <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/post/{{ FILENAME }}/" />
@@ -516,7 +516,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">Lol's Website</title>
-  <id>/atom/</id>
+  <id>http://example.org/atom/</id>
   <updated>2016-09-11T00:00:00Z</updated>
   <link href="http://example.org/" />
   <link href="http://example.org/atom/" rel="self" />
@@ -528,7 +528,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 11</title>
-    <id>/post/post11/</id>
+    <id>http://example.org/post/post11/</id>
     <updated>2016-09-11T00:00:00Z</updated>
     <published>2016-09-11T00:00:00Z</published>
     <link href="http://example.org/post/post11/" />
@@ -542,7 +542,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 10</title>
-    <id>/post/post10/</id>
+    <id>http://example.org/post/post10/</id>
     <updated>2016-09-10T00:00:00Z</updated>
     <published>2016-09-10T00:00:00Z</published>
     <link href="http://example.org/post/post10/" />
@@ -556,7 +556,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 09</title>
-    <id>/post/post09/</id>
+    <id>http://example.org/post/post09/</id>
     <updated>2016-09-09T00:00:00Z</updated>
     <published>2016-09-09T00:00:00Z</published>
     <link href="http://example.org/post/post09/" />
@@ -570,7 +570,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 08</title>
-    <id>/post/post08/</id>
+    <id>http://example.org/post/post08/</id>
     <updated>2016-09-08T00:00:00Z</updated>
     <published>2016-09-08T00:00:00Z</published>
     <link href="http://example.org/post/post08/" />
@@ -584,7 +584,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 07</title>
-    <id>/post/post07/</id>
+    <id>http://example.org/post/post07/</id>
     <updated>2016-09-07T00:00:00Z</updated>
     <published>2016-09-07T00:00:00Z</published>
     <link href="http://example.org/post/post07/" />
@@ -598,7 +598,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 06</title>
-    <id>/post/post06/</id>
+    <id>http://example.org/post/post06/</id>
     <updated>2016-09-06T00:00:00Z</updated>
     <published>2016-09-06T00:00:00Z</published>
     <link href="http://example.org/post/post06/" />
@@ -612,7 +612,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 05</title>
-    <id>/post/post05/</id>
+    <id>http://example.org/post/post05/</id>
     <updated>2016-09-05T00:00:00Z</updated>
     <published>2016-09-05T00:00:00Z</published>
     <link href="http://example.org/post/post05/" />
@@ -626,7 +626,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 04</title>
-    <id>/post/post04/</id>
+    <id>http://example.org/post/post04/</id>
     <updated>2016-09-04T00:00:00Z</updated>
     <published>2016-09-04T00:00:00Z</published>
     <link href="http://example.org/post/post04/" />
@@ -640,7 +640,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 03</title>
-    <id>/post/post03/</id>
+    <id>http://example.org/post/post03/</id>
     <updated>2016-09-03T00:00:00Z</updated>
     <published>2016-09-03T00:00:00Z</published>
     <link href="http://example.org/post/post03/" />
@@ -654,7 +654,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 02</title>
-    <id>/post/post02/</id>
+    <id>http://example.org/post/post02/</id>
     <updated>2016-09-02T00:00:00Z</updated>
     <published>2016-09-02T00:00:00Z</published>
     <link href="http://example.org/post/post02/" />
@@ -668,7 +668,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Post 01</title>
-    <id>/post/post01/</id>
+    <id>http://example.org/post/post01/</id>
     <updated>2016-09-01T00:00:00Z</updated>
     <published>2016-09-01T00:00:00Z</published>
     <link href="http://example.org/post/post01/" />
@@ -806,7 +806,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">Lol's Website</title>
-  <id>/atom.xml</id>
+  <id>http://example.org/atom.xml</id>
   <updated>2016-10-01T00:00:00Z</updated>
   <link href="http://example.org/" />
   <link href="http://example.org/atom.xml" rel="self" />
@@ -818,7 +818,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Foo</title>
-    <id>/post/foo/index.html</id>
+    <id>http://example.org/post/foo/index.html</id>
     <updated>2016-10-01T00:00:00Z</updated>
     <published>2016-10-01T00:00:00Z</published>
     <link href="http://example.org/post/foo/index.html" />
@@ -832,7 +832,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Bar</title>
-    <id>/post/bar/index.html</id>
+    <id>http://example.org/post/bar/index.html</id>
     <updated>2016-09-01T00:00:00Z</updated>
     <published>2016-09-01T00:00:00Z</published>
     <link href="http://example.org/post/bar/index.html" />
@@ -922,7 +922,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">Lol's Website</title>
-  <id>/atom.xml</id>
+  <id>http://example.org/atom.xml</id>
   <updated>2016-10-01T00:00:00Z</updated>
   <link href="http://example.org/" />
   <link href="http://example.org/atom.xml" rel="self" />
@@ -934,7 +934,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Foo</title>
-    <id>/post/foo/index.html</id>
+    <id>http://example.org/post/foo/index.html</id>
     <updated>2016-10-01T00:00:00Z</updated>
     <published>2016-10-01T00:00:00Z</published>
     <link href="http://example.org/post/foo/index.html" />
@@ -948,7 +948,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Bar</title>
-    <id>/post/bar/index.html</id>
+    <id>http://example.org/post/bar/index.html</id>
     <updated>2016-09-01T00:00:00Z</updated>
     <published>2016-09-01T00:00:00Z</published>
     <link href="http://example.org/post/bar/index.html" />
@@ -962,7 +962,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Baz</title>
-    <id>/post/baz/index.html</id>
+    <id>http://example.org/post/baz/index.html</id>
     <updated>2016-08-01T00:00:00Z</updated>
     <published>2016-08-01T00:00:00Z</published>
     <link href="http://example.org/post/baz/index.html" />
@@ -982,7 +982,7 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">Lol's Website - tag1</title>
-  <id>/atom/tag1.xml</id>
+  <id>http://example.org/atom/tag1.xml</id>
   <updated>2016-08-01T00:00:00Z</updated>
   <link href="http://example.org/" />
   <link href="http://example.org/atom/tag1.xml" rel="self" />
@@ -994,7 +994,7 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
   
   <entry>
     <title type="text">Baz</title>
-    <id>/post/baz/index.html</id>
+    <id>http://example.org/post/baz/index.html</id>
     <updated>2016-08-01T00:00:00Z</updated>
     <published>2016-08-01T00:00:00Z</published>
     <link href="http://example.org/post/baz/index.html" />
@@ -1014,7 +1014,7 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">Lol's Website - tag2</title>
-  <id>/atom/tag2.xml</id>
+  <id>http://example.org/atom/tag2.xml</id>
   <updated>2016-08-01T00:00:00Z</updated>
   <link href="http://example.org/" />
   <link href="http://example.org/atom/tag2.xml" rel="self" />
@@ -1026,7 +1026,7 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
   
   <entry>
     <title type="text">Baz</title>
-    <id>/post/baz/index.html</id>
+    <id>http://example.org/post/baz/index.html</id>
     <updated>2016-08-01T00:00:00Z</updated>
     <published>2016-08-01T00:00:00Z</published>
     <link href="http://example.org/post/baz/index.html" />
@@ -1243,7 +1243,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">Lol's Website</title>
-  <id>/atoom/index.xml</id>
+  <id>http://example.org/atoom/index.xml</id>
   <updated>2016-10-01T00:00:00Z</updated>
   <link href="http://example.org/" />
   <link href="http://example.org/atoom/index.xml" rel="self" />
@@ -1255,7 +1255,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Foo</title>
-    <id>/poost/foo.html</id>
+    <id>http://example.org/poost/foo.html</id>
     <updated>2016-10-01T00:00:00Z</updated>
     <published>2016-10-01T00:00:00Z</published>
     <link href="http://example.org/poost/foo.html" />
@@ -1347,7 +1347,7 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">Lol's Website - tag1</title>
-  <id>/atoom/tag1/index.xml</id>
+  <id>http://example.org/atoom/tag1/index.xml</id>
   <updated>2016-08-01T00:00:00Z</updated>
   <link href="http://example.org/" />
   <link href="http://example.org/atoom/tag1/index.xml" rel="self" />
@@ -1359,7 +1359,7 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
   
   <entry>
     <title type="text">Baz</title>
-    <id>/poost/baz.html</id>
+    <id>http://example.org/poost/baz.html</id>
     <updated>2016-08-01T00:00:00Z</updated>
     <published>2016-08-01T00:00:00Z</published>
     <link href="http://example.org/poost/baz.html" />
@@ -1379,7 +1379,7 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">Lol's Website - tag2</title>
-  <id>/atoom/tag2/index.xml</id>
+  <id>http://example.org/atoom/tag2/index.xml</id>
   <updated>2016-08-01T00:00:00Z</updated>
   <link href="http://example.org/" />
   <link href="http://example.org/atoom/tag2/index.xml" rel="self" />
@@ -1391,7 +1391,7 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
   
   <entry>
     <title type="text">Baz</title>
-    <id>/poost/baz.html</id>
+    <id>http://example.org/poost/baz.html</id>
     <updated>2016-08-01T00:00:00Z</updated>
     <published>2016-08-01T00:00:00Z</published>
     <link href="http://example.org/poost/baz.html" />
@@ -1659,7 +1659,7 @@ cat > "${TEMP}/expected-atom-dump.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">{{ SITE_TITLE }}{% ifdef FILTER_TAG %} - {{ FILTER_TAG }}{% endif %}</title>
-  <id>{{ BASE_URL }}/atoom{% ifdef FILTER_TAG %}/{{ FILTER_TAG }}{% endif %}/index.xml</id>
+  <id>{{ BASE_DOMAIN }}{{ BASE_URL }}/atoom{% ifdef FILTER_TAG %}/{{ FILTER_TAG }}{% endif %}/index.xml</id>
   <updated>{{ DATE_FIRST_FORMATTED }}</updated>
   <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/" />
   <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/atoom{% ifdef FILTER_TAG %}/{{ FILTER_TAG }}{% endif %}/index.xml" rel="self" />
@@ -1671,7 +1671,7 @@ cat > "${TEMP}/expected-atom-dump.xml" <<EOF
   {% block listing %}
   <entry>
     <title type="text">{{ TITLE }}</title>
-    <id>{{ BASE_URL }}/poost/{{ FILENAME }}.html</id>
+    <id>{{ BASE_DOMAIN }}{{ BASE_URL }}/poost/{{ FILENAME }}.html</id>
     <updated>{{ DATE_FORMATTED }}</updated>
     <published>{{ DATE_FORMATTED }}</published>
     <link href="{{ BASE_DOMAIN }}{{ BASE_URL }}/poost/{{ FILENAME }}.html" />
@@ -1784,7 +1784,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">Lol's Website</title>
-  <id>/index.xml</id>
+  <id>http://example.org/index.xml</id>
   <updated>2016-10-01T00:00:00Z</updated>
   <link href="http://example.org/" />
   <link href="http://example.org/index.xml" rel="self" />
@@ -1796,7 +1796,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Foo</title>
-    <id>/foo/index.html</id>
+    <id>http://example.org/foo/index.html</id>
     <updated>2016-10-01T00:00:00Z</updated>
     <published>2016-10-01T00:00:00Z</published>
     <link href="http://example.org/foo/index.html" />
@@ -1916,7 +1916,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">Lol's Website</title>
-  <id>/index.xml</id>
+  <id>http://example.org/index.xml</id>
   <updated>2016-10-01T00:00:00Z</updated>
   <link href="http://example.org/" />
   <link href="http://example.org/index.xml" rel="self" />
@@ -1928,7 +1928,7 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
   
   <entry>
     <title type="text">Foo</title>
-    <id>/foo.html</id>
+    <id>http://example.org/foo.html</id>
     <updated>2016-10-01T00:00:00Z</updated>
     <published>2016-10-01T00:00:00Z</published>
     <link href="http://example.org/foo.html" />
@@ -1948,7 +1948,7 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">Lol's Website - tag1</title>
-  <id>/tag1/index.xml</id>
+  <id>http://example.org/tag1/index.xml</id>
   <updated>2016-08-01T00:00:00Z</updated>
   <link href="http://example.org/" />
   <link href="http://example.org/tag1/index.xml" rel="self" />
@@ -1960,7 +1960,7 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
   
   <entry>
     <title type="text">Baz</title>
-    <id>/baz.html</id>
+    <id>http://example.org/baz.html</id>
     <updated>2016-08-01T00:00:00Z</updated>
     <published>2016-08-01T00:00:00Z</published>
     <link href="http://example.org/baz.html" />
@@ -1980,7 +1980,7 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text">Lol's Website - tag2</title>
-  <id>/tag2/index.xml</id>
+  <id>http://example.org/tag2/index.xml</id>
   <updated>2016-08-01T00:00:00Z</updated>
   <link href="http://example.org/" />
   <link href="http://example.org/tag2/index.xml" rel="self" />
@@ -1992,7 +1992,7 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
   
   <entry>
     <title type="text">Baz</title>
-    <id>/baz.html</id>
+    <id>http://example.org/baz.html</id>
     <updated>2016-08-01T00:00:00Z</updated>
     <published>2016-08-01T00:00:00Z</published>
     <link href="http://example.org/baz.html" />
