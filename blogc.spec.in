@@ -88,6 +88,9 @@ rm -rf $RPM_BUILD_ROOT
 %license LICENSE
 
 %changelog
+* Sun Apr 21 2019 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.16.1-1
+- New release.
+
 * Sat Apr 13 2019 Rafael G. Martins <rafael@rafaelmartins.eng.br> 0.16.0-1
 - New release.
 
