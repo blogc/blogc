@@ -43,12 +43,6 @@ however these rules can be customized with the following settings, from the
   * `atom_ext` (default: `.xml`):
     The extension of the generated Atom feeds.
 
-  * `atom_legacy_entry_id` (default: `false`):
-    Before `0.14.0` blogc-make(1) was generating "broken" entry IDs in the atom feeds.
-    This behavior was fixed in version `0.14.0` and current users that don't want
-    to have their old posts re-shared due to the change of IDs should set this to
-    `true`, to keep using the old format.
-
   * `atom_order` (default: `DESC`):
     The ordering (`ASC` or `DESC`) of the Atom feeds. Please note that the files
     are not sorted by date, they are sorted by their order in the `[posts]`
