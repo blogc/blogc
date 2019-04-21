@@ -75,21 +75,11 @@ bm_atom_generate(bm_settings_t *settings)
     char *post_url = bm_generate_filename(NULL, post_prefix, "{{ FILENAME }}",
         post_ext);
 
-    char *entry_id = NULL;
-    if (bc_str_to_bool(bc_trie_lookup(settings->settings, "atom_legacy_entry_id"))) {
-        entry_id = bc_strdup_printf("%s%s/{{ FILENAME }}/",
-            post_prefix[0] == '\0' ? "" : "/", post_prefix);
-    }
-    else {
-        entry_id = bc_strdup(post_url);
-    }
-
     char *rv = bc_strdup_printf(atom_template, atom_url->str, atom_url->str,
-        entry_id, post_url);
+        post_url, post_url);
 
     bc_string_free(atom_url, true);
     free(post_url);
-    free(entry_id);
 
     return rv;
 }
@@ -100,6 +90,13 @@ bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
 {
     if (settings == NULL || err == NULL || *err != NULL)
         return NULL;
+
+    if (NULL != bc_trie_lookup(settings->settings, "atom_legacy_entry_id")) {
+        *err = bc_error_new_printf(BLOGC_MAKE_ERROR_ATOM,
+            "'atom_legacy_entry_id' setting is not supported anymore. see "
+            "https://blogc.rgm.io/news/blogc-0.16.1/ for details");
+        return NULL;
+    }
 
     // this is not really portable
     char fname[] = "/tmp/blogc-make_XXXXXX";
