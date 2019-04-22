@@ -45,7 +45,7 @@ bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
             fprintf(stderr, "blogc-make: error: failed to create output "
                 "directory (%s): %s\n", fname, strerror(errno));
             free(fname);
-            exit(2);
+            return 1;
         }
         *tmp = bkp;
     }
