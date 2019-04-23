@@ -6,9 +6,17 @@
  * See the file LICENSE.
  */
 
+#include <errno.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
+#include "../common/error.h"
 #include "../common/utils.h"
+
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
 
 
 char*
@@ -58,4 +66,31 @@ bm_generate_filename(const char *dir, const char *prefix, const char *fname,
     }
 
     return bc_string_free(rv, false);
+}
+
+
+char*
+bm_abspath(const char *path, bc_error_t **err)
+{
+    if (err == NULL || *err != NULL)
+        return NULL;
+
+    if (path[0] == '/') {
+        return bc_strdup(path);
+    }
+
+    char cwd[PATH_MAX];
+    if (NULL == getcwd(cwd, sizeof(cwd))) {
+        *err = bc_error_new_printf(BLOGC_MAKE_ERROR_UTILS,
+            "Failed to detect absolute path (%s): %s", path, strerror(errno));
+        return NULL;
+    }
+
+    if (cwd[0] != '/') {
+        *err = bc_error_new_printf(BLOGC_MAKE_ERROR_UTILS,
+            "Failed to get current working directory: %s", cwd);
+        return NULL;
+    }
+
+    return bc_strdup_printf("%s/%s", cwd, path);
 }

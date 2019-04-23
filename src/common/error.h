@@ -28,6 +28,7 @@ typedef enum {
     BLOGC_MAKE_ERROR_SETTINGS = 300,
     BLOGC_MAKE_ERROR_EXEC,
     BLOGC_MAKE_ERROR_ATOM,
+    BLOGC_MAKE_ERROR_UTILS,
 
 } bc_error_type_t;
 

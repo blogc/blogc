@@ -172,22 +172,21 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     if (settings_file == NULL || err == NULL || *err != NULL)
         return NULL;
 
-    char real_filename[PATH_MAX];
-    if (NULL == realpath(settings_file, real_filename)) {
-        *err = bc_error_new_printf(BLOGC_MAKE_ERROR_SETTINGS,
-            "Failed to resolve settings file (%s): %s", settings_file,
-            strerror(errno));
-        return NULL;
-    }
-
-    size_t content_len;
-    char *content = bc_file_get_contents(real_filename, true, &content_len,
-        err);
+    char *abs_filename = bm_abspath(settings_file, err);
     if (*err != NULL)
         return NULL;
 
+    size_t content_len;
+    char *content = bc_file_get_contents(abs_filename, true, &content_len,
+        err);
+    if (*err != NULL) {
+        free(abs_filename);
+        return NULL;
+    }
+
     bm_settings_t *settings = bm_settings_parse(content, content_len, err);
     if (settings == NULL || *err != NULL) {
+        free(abs_filename);
         free(content);
         return NULL;
     }
@@ -208,6 +207,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
         atom_template = bm_atom_deploy(settings, err);
         atom_template_tmp = true;
         if (*err != NULL) {
+            free(abs_filename);
             bm_settings_free(settings);
             return NULL;
         }
@@ -228,8 +228,9 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     }
     rv->settings = settings;
 
-    rv->settings_fctx = bm_filectx_new(rv, real_filename, NULL, NULL);
-    rv->root_dir = bc_strdup(dirname(real_filename));
+    rv->settings_fctx = bm_filectx_new(rv, abs_filename, NULL, NULL);
+    rv->root_dir = bc_strdup(dirname(abs_filename));
+    free(abs_filename);
 
     const char *output_dir = getenv("OUTPUT_DIR");
     rv->short_output_dir = bc_strdup(output_dir != NULL ? output_dir : "_build");

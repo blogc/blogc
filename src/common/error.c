@@ -136,6 +136,12 @@ bc_error_print(bc_error_t *err, const char *prefix)
         case BLOGC_MAKE_ERROR_EXEC:
             fprintf(stderr, "error: exec: %s\n", err->msg);
             break;
+        case BLOGC_MAKE_ERROR_ATOM:
+            fprintf(stderr, "error: atom: %s\n", err->msg);
+            break;
+        case BLOGC_MAKE_ERROR_UTILS:
+            fprintf(stderr, "error: utils: %s\n", err->msg);
+            break;
         default:
             fprintf(stderr, "error: %s\n", err->msg);
     }
