@@ -69,6 +69,7 @@ noinst_HEADERS = \
 	src/common/config-parser.h \
 	src/common/error.h \
 	src/common/file.h \
+	src/common/sort.h \
 	src/common/stdin.h \
 	src/common/utf8.h \
 	src/common/utils.h \
@@ -151,6 +152,7 @@ libblogc_common_la_SOURCES = \
 	src/common/config-parser.c \
 	src/common/error.c \
 	src/common/file.c \
+	src/common/sort.c \
 	src/common/stdin.c \
 	src/common/utf8.c \
 	src/common/utils.c \
@@ -472,6 +474,7 @@ check_PROGRAMS += \
 	tests/blogc/check_template_parser \
 	tests/common/check_config_parser \
 	tests/common/check_error \
+	tests/common/check_sort \
 	tests/common/check_utf8 \
 	tests/common/check_utils \
 	$(NULL)
@@ -742,6 +745,23 @@ tests_common_check_error_LDFLAGS = \
 	$(NULL)
 
 tests_common_check_error_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc_common.la \
+	$(NULL)
+
+tests_common_check_sort_SOURCES = \
+	tests/common/check_sort.c \
+	$(NULL)
+
+tests_common_check_sort_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_common_check_sort_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_common_check_sort_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc_common.la \
 	$(NULL)
