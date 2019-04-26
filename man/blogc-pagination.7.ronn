@@ -30,9 +30,15 @@ files passed as arguments to it:
     provided tag, instead of filtering the whole file set.
 
   * `FILTER_REVERSE`:
-    Any string, if defined, blogc(1) will list files in reverse order. This
-    is always the first filter applied to the files. All the other filters will
-    get the files already in the reverse order, and won't care about this.
+    Boolean (1/y/yes/true/on), if set, blogc(1) will list files in reverse order.
+    This is always the first filter applied to the files. All the previous filters
+    will get the files already in the reverse order, and won't care about this.
+
+  * `FILTER_SORT`:
+    Boolean (1/y/yes/true/on), if set, blogc(1) will sort files using the `DATE`
+    variable provided in the files, instead of respecting the order of the
+    source files provided to blogc(1). All the previous filters will get the
+    files already sorted, and won't care about this.
 
 ## TEMPLATE VARIABLES
 

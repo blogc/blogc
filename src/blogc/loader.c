@@ -12,12 +12,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "datetime-parser.h"
 #include "source-parser.h"
 #include "template-parser.h"
 #include "loader.h"
 #include "../common/error.h"
 #include "../common/file.h"
 #include "../common/utils.h"
+#include "../common/sort.h"
 
 
 char*
@@ -97,26 +99,104 @@ blogc_source_parse_from_file(const char *f, bc_error_t **err)
 }
 
 
+static int
+sort_source(const void *a, const void *b)
+{
+    const char *ca = bc_trie_lookup((bc_trie_t*) a, "c");
+    const char *cb = bc_trie_lookup((bc_trie_t*) b, "c");
+
+    if (ca == NULL || cb == NULL) {
+        return 0;  // wat
+    }
+
+    return strcmp(cb, ca);
+}
+
+
+static int
+sort_source_reverse(const void *a, const void *b)
+{
+    return sort_source(b, a);
+}
+
+
 bc_slist_t*
 blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
 
-    bool reverse = bc_trie_lookup(conf, "FILTER_REVERSE");
+    bool sort = bc_str_to_bool(bc_trie_lookup(conf, "FILTER_SORT"));
+
     bc_slist_t* sources = NULL;
+    bc_error_t *tmp_err = NULL;
+    size_t with_date = 0;
     for (bc_slist_t *tmp = l; tmp != NULL; tmp = tmp->next) {
-        if (reverse) {
-            sources = bc_slist_prepend(sources, tmp->data);
+        char *f = tmp->data;
+        bc_trie_t *s = blogc_source_parse_from_file(f, &tmp_err);
+        if (s == NULL) {
+            *err = bc_error_new_printf(BLOGC_ERROR_LOADER,
+                "An error occurred while parsing source file: %s\n\n%s",
+                f, tmp_err->msg);
+            bc_error_free(tmp_err);
+            bc_slist_free_full(sources, (bc_free_func_t) bc_trie_free);
+            return NULL;
         }
-        else {
-            sources = bc_slist_append(sources, tmp->data);
+
+        const char *date = bc_trie_lookup(s, "DATE");
+        if (date != NULL) {
+            with_date++;
         }
+
+        if (sort) {
+            if (date == NULL) {
+                *err = bc_error_new_printf(BLOGC_ERROR_LOADER,
+                    "'FILTER_SORT' requires that 'DATE' variable is set for "
+                    "every source file: %s", f);
+                bc_trie_free(s);
+                bc_slist_free_full(sources, (bc_free_func_t) bc_trie_free);
+                return NULL;
+            }
+
+            char *timestamp = blogc_convert_datetime(date, "%s", &tmp_err);
+            if (timestamp == NULL) {
+                *err = bc_error_new_printf(BLOGC_ERROR_LOADER,
+                    "An error occurred while parsing 'DATE' variable: %s"
+                    "\n\n%s", f, tmp_err->msg);
+                bc_error_free(tmp_err);
+                bc_trie_free(s);
+                bc_slist_free_full(sources, (bc_free_func_t) bc_trie_free);
+                return NULL;
+            }
+
+            bc_trie_insert(s, "c", timestamp);
+        }
+
+        sources = bc_slist_append(sources, s);
     }
 
-    bc_error_t *tmp_err = NULL;
-    bc_slist_t *rv = NULL;
-    size_t with_date = 0;
+    if (with_date > 0 && with_date < bc_slist_length(l)) {
+        *err = bc_error_new_printf(BLOGC_ERROR_LOADER,
+            "'DATE' variable provided for at least one source file, but not "
+            "for all source files. It must be provided for all files.");
+        bc_slist_free_full(sources, (bc_free_func_t) bc_trie_free);
+        return NULL;
+    }
+
+    bool reverse = bc_str_to_bool(bc_trie_lookup(conf, "FILTER_REVERSE"));
+
+    if (sort) {
+        sources = bc_slist_sort(sources, reverse ? sort_source_reverse : sort_source);
+    }
+    else if (reverse) {
+        bc_slist_t *tmp_sources = NULL;
+        for (bc_slist_t *tmp = sources; tmp != NULL; tmp = tmp->next) {
+            tmp_sources = bc_slist_prepend(tmp_sources, tmp->data);
+        }
+        bc_slist_t *tmp = sources;
+        sources = tmp_sources;
+        bc_slist_free(tmp);
+    }
 
     const char *filter_tag = bc_trie_lookup(conf, "FILTER_TAG");
     const char *filter_page = bc_trie_lookup(conf, "FILTER_PAGE");
@@ -146,19 +226,9 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
     size_t end = start + per_page;
     size_t counter = 0;
 
+    bc_slist_t *rv = NULL;
     for (bc_slist_t *tmp = sources; tmp != NULL; tmp = tmp->next) {
-        char *f = tmp->data;
-        bc_trie_t *s = blogc_source_parse_from_file(f, &tmp_err);
-        if (s == NULL) {
-            *err = bc_error_new_printf(BLOGC_ERROR_LOADER,
-                "An error occurred while parsing source file: %s\n\n%s",
-                f, tmp_err->msg);
-            bc_error_free(tmp_err);
-            tmp_err = NULL;
-            bc_slist_free_full(rv, (bc_free_func_t) bc_trie_free);
-            rv = NULL;
-            break;
-        }
+        bc_trie_t *s = tmp->data;
         if (filter_tag != NULL) {
             const char *tags_str = bc_trie_lookup(s, "TAGS");
             // if user wants to filter by tag and no tag is provided, skip it
@@ -188,20 +258,10 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
             }
             counter++;
         }
-        if (bc_trie_lookup(s, "DATE") != NULL)
-            with_date++;
         rv = bc_slist_append(rv, s);
     }
 
     bc_slist_free(sources);
-
-    if (with_date > 0 && with_date < bc_slist_length(rv)) {
-        *err = bc_error_new_printf(BLOGC_ERROR_LOADER,
-            "'DATE' variable provided for at least one source file, but not "
-            "for all source files. It must be provided for all files.\n");
-        bc_slist_free_full(rv, (bc_free_func_t) bc_trie_free);
-        rv = NULL;
-    }
 
     bool first = true;
     for (bc_slist_t *tmp = rv; tmp != NULL; tmp = tmp->next) {

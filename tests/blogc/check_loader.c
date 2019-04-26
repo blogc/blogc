@@ -169,12 +169,57 @@ test_source_parse_from_files(void **state)
 
 
 static void
-test_source_parse_from_files_filter_reverse(void **state)
+test_source_parse_from_files_filter_sort(void **state)
 {
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
+        "ASD: 123\n"
+        "DATE: 2001-02-02 04:05:06\n"
+        "--------\n"
+        "bola"));
+    will_return(__wrap_bc_file_get_contents, "bola2.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
+        "ASD: 456\n"
+        "DATE: 2001-02-01 04:05:06\n"
+        "--------\n"
+        "bola"));
     will_return(__wrap_bc_file_get_contents, "bola3.txt");
     will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 789\n"
-        "DATE: 2003-02-03 04:05:06\n"
+        "DATE: 2001-02-03 04:05:06\n"
+        "--------\n"
+        "bola"));
+    bc_error_t *err = NULL;
+    bc_slist_t *s = NULL;
+    s = bc_slist_append(s, bc_strdup("bola1.txt"));
+    s = bc_slist_append(s, bc_strdup("bola2.txt"));
+    s = bc_slist_append(s, bc_strdup("bola3.txt"));
+    bc_trie_t *c = bc_trie_new(free);
+    bc_trie_insert(c, "FILTER_SORT", bc_strdup("1"));
+    bc_slist_t *t = blogc_source_parse_from_files(c, s, &err);
+    assert_null(err);
+    assert_non_null(t);
+    assert_int_equal(bc_slist_length(t), 3);  // it is enough, no need to look at the items
+    assert_int_equal(bc_trie_size(c), 5);
+    assert_string_equal(bc_trie_lookup(c, "FILTER_SORT"), "1");
+    assert_string_equal(bc_trie_lookup(c, "FILENAME_FIRST"), "bola3");
+    assert_string_equal(bc_trie_lookup(c, "FILENAME_LAST"), "bola2");
+    assert_string_equal(bc_trie_lookup(c, "DATE_FIRST"), "2001-02-03 04:05:06");
+    assert_string_equal(bc_trie_lookup(c, "DATE_LAST"), "2001-02-01 04:05:06");
+    bc_trie_free(c);
+    bc_slist_free_full(s, free);
+    bc_slist_free_full(t, (bc_free_func_t) bc_trie_free);
+}
+
+
+static void
+test_source_parse_from_files_filter_reverse(void **state)
+{
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
+        "ASD: 123\n"
+        "DATE: 2001-02-03 04:05:06\n"
+        "TAGS: chunda\n"
         "--------\n"
         "bola"));
     will_return(__wrap_bc_file_get_contents, "bola2.txt");
@@ -184,11 +229,10 @@ test_source_parse_from_files_filter_reverse(void **state)
         "TAGS: bola, chunda\n"
         "--------\n"
         "bola"));
-    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, "bola3.txt");
     will_return(__wrap_bc_file_get_contents, bc_strdup(
-        "ASD: 123\n"
-        "DATE: 2001-02-03 04:05:06\n"
-        "TAGS: chunda\n"
+        "ASD: 789\n"
+        "DATE: 2003-02-03 04:05:06\n"
         "--------\n"
         "bola"));
     bc_error_t *err = NULL;
@@ -197,7 +241,7 @@ test_source_parse_from_files_filter_reverse(void **state)
     s = bc_slist_append(s, bc_strdup("bola2.txt"));
     s = bc_slist_append(s, bc_strdup("bola3.txt"));
     bc_trie_t *c = bc_trie_new(free);
-    bc_trie_insert(c, "FILTER_REVERSE", bc_strdup(""));
+    bc_trie_insert(c, "FILTER_REVERSE", bc_strdup("1"));
     bc_slist_t *t = blogc_source_parse_from_files(c, s, &err);
     assert_null(err);
     assert_non_null(t);
@@ -207,7 +251,53 @@ test_source_parse_from_files_filter_reverse(void **state)
     assert_string_equal(bc_trie_lookup(c, "FILENAME_LAST"), "bola1");
     assert_string_equal(bc_trie_lookup(c, "DATE_FIRST"), "2003-02-03 04:05:06");
     assert_string_equal(bc_trie_lookup(c, "DATE_LAST"), "2001-02-03 04:05:06");
-    assert_string_equal(bc_trie_lookup(c, "FILTER_REVERSE"), "");
+    assert_string_equal(bc_trie_lookup(c, "FILTER_REVERSE"), "1");
+    bc_trie_free(c);
+    bc_slist_free_full(s, free);
+    bc_slist_free_full(t, (bc_free_func_t) bc_trie_free);
+}
+
+
+static void
+test_source_parse_from_files_filter_sort_reverse(void **state)
+{
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
+        "ASD: 123\n"
+        "DATE: 2001-02-02 04:05:06\n"
+        "--------\n"
+        "bola"));
+    will_return(__wrap_bc_file_get_contents, "bola2.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
+        "ASD: 456\n"
+        "DATE: 2001-02-01 04:05:06\n"
+        "--------\n"
+        "bola"));
+    will_return(__wrap_bc_file_get_contents, "bola3.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
+        "ASD: 789\n"
+        "DATE: 2001-02-03 04:05:06\n"
+        "--------\n"
+        "bola"));
+    bc_error_t *err = NULL;
+    bc_slist_t *s = NULL;
+    s = bc_slist_append(s, bc_strdup("bola1.txt"));
+    s = bc_slist_append(s, bc_strdup("bola2.txt"));
+    s = bc_slist_append(s, bc_strdup("bola3.txt"));
+    bc_trie_t *c = bc_trie_new(free);
+    bc_trie_insert(c, "FILTER_SORT", bc_strdup("1"));
+    bc_trie_insert(c, "FILTER_REVERSE", bc_strdup("1"));
+    bc_slist_t *t = blogc_source_parse_from_files(c, s, &err);
+    assert_null(err);
+    assert_non_null(t);
+    assert_int_equal(bc_slist_length(t), 3);  // it is enough, no need to look at the items
+    assert_int_equal(bc_trie_size(c), 6);
+    assert_string_equal(bc_trie_lookup(c, "FILTER_SORT"), "1");
+    assert_string_equal(bc_trie_lookup(c, "FILTER_REVERSE"), "1");
+    assert_string_equal(bc_trie_lookup(c, "FILENAME_FIRST"), "bola2");
+    assert_string_equal(bc_trie_lookup(c, "FILENAME_LAST"), "bola3");
+    assert_string_equal(bc_trie_lookup(c, "DATE_FIRST"), "2001-02-01 04:05:06");
+    assert_string_equal(bc_trie_lookup(c, "DATE_LAST"), "2001-02-03 04:05:06");
     bc_trie_free(c);
     bc_slist_free_full(s, free);
     bc_slist_free_full(t, (bc_free_func_t) bc_trie_free);
@@ -496,7 +586,7 @@ test_source_parse_from_files_filter_by_page3(void **state)
 
 
 static void
-test_source_parse_from_files_filter_by_page_and_tag(void **state)
+test_source_parse_from_files_filter_sort_and_by_page_and_tag(void **state)
 {
     will_return(__wrap_bc_file_get_contents, "bola1.txt");
     will_return(__wrap_bc_file_get_contents, bc_strdup(
@@ -555,6 +645,7 @@ test_source_parse_from_files_filter_by_page_and_tag(void **state)
     s = bc_slist_append(s, bc_strdup("bola6.txt"));
     s = bc_slist_append(s, bc_strdup("bola7.txt"));
     bc_trie_t *c = bc_trie_new(free);
+    bc_trie_insert(c, "FILTER_SORT", bc_strdup("1"));
     bc_trie_insert(c, "FILTER_TAG", bc_strdup("chunda"));
     bc_trie_insert(c, "FILTER_PAGE", bc_strdup("2"));
     bc_trie_insert(c, "FILTER_PER_PAGE", bc_strdup("2"));
@@ -562,11 +653,12 @@ test_source_parse_from_files_filter_by_page_and_tag(void **state)
     assert_null(err);
     assert_non_null(t);
     assert_int_equal(bc_slist_length(t), 2);  // it is enough, no need to look at the items
-    assert_int_equal(bc_trie_size(c), 11);
-    assert_string_equal(bc_trie_lookup(c, "FILENAME_FIRST"), "bola5");
-    assert_string_equal(bc_trie_lookup(c, "FILENAME_LAST"), "bola7");
-    assert_string_equal(bc_trie_lookup(c, "DATE_FIRST"), "2005-02-03 04:05:06");
-    assert_string_equal(bc_trie_lookup(c, "DATE_LAST"), "2007-02-03 04:05:06");
+    assert_int_equal(bc_trie_size(c), 12);
+    assert_string_equal(bc_trie_lookup(c, "FILENAME_FIRST"), "bola3");
+    assert_string_equal(bc_trie_lookup(c, "FILENAME_LAST"), "bola2");
+    assert_string_equal(bc_trie_lookup(c, "DATE_FIRST"), "2003-02-03 04:05:06");
+    assert_string_equal(bc_trie_lookup(c, "DATE_LAST"), "2002-02-03 04:05:06");
+    assert_string_equal(bc_trie_lookup(c, "FILTER_SORT"), "1");
     assert_string_equal(bc_trie_lookup(c, "FILTER_TAG"), "chunda");
     assert_string_equal(bc_trie_lookup(c, "FILTER_PAGE"), "2");
     assert_string_equal(bc_trie_lookup(c, "FILTER_PER_PAGE"), "2");
@@ -755,9 +847,76 @@ test_source_parse_from_files_without_all_dates(void **state)
     assert_int_equal(err->type, BLOGC_ERROR_LOADER);
     assert_string_equal(err->msg,
         "'DATE' variable provided for at least one source file, but not for "
-        "all source files. It must be provided for all files.\n");
+        "all source files. It must be provided for all files.");
     bc_error_free(err);
     assert_int_equal(bc_trie_size(c), 0);
+    bc_trie_free(c);
+    bc_slist_free_full(s, free);
+}
+
+
+static void
+test_source_parse_from_files_filter_sort_without_all_dates(void **state)
+{
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
+        "ASD: 123\n"
+        "DATE: 2002-02-03 04:05:06\n"
+        "--------\n"
+        "bola"));
+    will_return(__wrap_bc_file_get_contents, "bola2.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
+        "ASD: 456\n"
+        "--------\n"
+        "bola"));
+    bc_error_t *err = NULL;
+    bc_slist_t *s = NULL;
+    s = bc_slist_append(s, bc_strdup("bola1.txt"));
+    s = bc_slist_append(s, bc_strdup("bola2.txt"));
+    s = bc_slist_append(s, bc_strdup("bola3.txt"));
+    bc_trie_t *c = bc_trie_new(free);
+    bc_trie_insert(c, "FILTER_SORT", bc_strdup("1"));
+    bc_slist_t *t = blogc_source_parse_from_files(c, s, &err);
+    assert_null(t);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_LOADER);
+    assert_string_equal(err->msg,
+        "'FILTER_SORT' requires that 'DATE' variable is set for every source "
+        "file: bola2.txt");
+    bc_error_free(err);
+    assert_int_equal(bc_trie_size(c), 1);
+    assert_string_equal(bc_trie_lookup(c, "FILTER_SORT"), "1");
+    bc_trie_free(c);
+    bc_slist_free_full(s, free);
+}
+
+
+static void
+test_source_parse_from_files_filter_sort_with_wrong_date(void **state)
+{
+    will_return(__wrap_bc_file_get_contents, "bola1.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
+        "ASD: 123\n"
+        "DATE: 2002-02-03 04:05:ab\n"
+        "--------\n"
+        "bola"));
+    bc_error_t *err = NULL;
+    bc_slist_t *s = NULL;
+    s = bc_slist_append(s, bc_strdup("bola1.txt"));
+    s = bc_slist_append(s, bc_strdup("bola2.txt"));
+    s = bc_slist_append(s, bc_strdup("bola3.txt"));
+    bc_trie_t *c = bc_trie_new(free);
+    bc_trie_insert(c, "FILTER_SORT", bc_strdup("1"));
+    bc_slist_t *t = blogc_source_parse_from_files(c, s, &err);
+    assert_null(t);
+    assert_non_null(err);
+    assert_int_equal(err->type, BLOGC_ERROR_LOADER);
+    assert_string_equal(err->msg,
+        "An error occurred while parsing 'DATE' variable: bola1.txt\n\nInvalid "
+        "first digit of seconds. Found 'a', must be integer >= 0 and <= 6.");
+    bc_error_free(err);
+    assert_int_equal(bc_trie_size(c), 1);
+    assert_string_equal(bc_trie_lookup(c, "FILTER_SORT"), "1");
     bc_trie_free(c);
     bc_slist_free_full(s, free);
 }
@@ -790,15 +949,19 @@ main(void)
         unit_test(test_source_parse_from_file),
         unit_test(test_source_parse_from_file_null),
         unit_test(test_source_parse_from_files),
+        unit_test(test_source_parse_from_files_filter_sort),
         unit_test(test_source_parse_from_files_filter_reverse),
+        unit_test(test_source_parse_from_files_filter_sort_reverse),
         unit_test(test_source_parse_from_files_filter_by_tag),
         unit_test(test_source_parse_from_files_filter_by_page),
         unit_test(test_source_parse_from_files_filter_by_page2),
         unit_test(test_source_parse_from_files_filter_by_page3),
-        unit_test(test_source_parse_from_files_filter_by_page_and_tag),
+        unit_test(test_source_parse_from_files_filter_sort_and_by_page_and_tag),
         unit_test(test_source_parse_from_files_filter_by_page_invalid),
         unit_test(test_source_parse_from_files_filter_by_page_invalid2),
         unit_test(test_source_parse_from_files_without_all_dates),
+        unit_test(test_source_parse_from_files_filter_sort_without_all_dates),
+        unit_test(test_source_parse_from_files_filter_sort_with_wrong_date),
         unit_test(test_source_parse_from_files_null),
     };
     return run_tests(tests);
