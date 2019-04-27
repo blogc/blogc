@@ -31,6 +31,7 @@ typedef struct _bc_slist_t {
 
 bc_slist_t* bc_slist_append(bc_slist_t *l, void *data);
 bc_slist_t* bc_slist_prepend(bc_slist_t *l, void *data);
+bc_slist_t* bc_slist_remove(bc_slist_t *l, bc_slist_t *r, bc_free_func_t free_func);
 void bc_slist_free(bc_slist_t *l);
 void bc_slist_free_full(bc_slist_t *l, bc_free_func_t free_func);
 size_t bc_slist_length(bc_slist_t *l);

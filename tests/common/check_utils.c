@@ -54,6 +54,40 @@ test_slist_prepend(void **state)
 
 
 static void
+test_slist_remove(void **state)
+{
+    bc_slist_t *l = NULL;
+    l = bc_slist_append(l, bc_strdup("bola"));
+    l = bc_slist_append(l, bc_strdup("guda"));
+    l = bc_slist_append(l, bc_strdup("chunda"));
+    l = bc_slist_append(l, bc_strdup("pumba"));
+    l = bc_slist_append(l, bc_strdup("bussunda"));
+    l = bc_slist_remove(l, l->next->next, free);
+    assert_non_null(l);
+    assert_string_equal(l->data, "bola");
+    assert_string_equal(l->next->data, "guda");
+    assert_string_equal(l->next->next->data, "pumba");
+    assert_string_equal(l->next->next->next->data, "bussunda");
+    assert_null(l->next->next->next->next);
+
+    l = bc_slist_remove(l, l, free);
+    assert_non_null(l);
+    assert_string_equal(l->data, "guda");
+    assert_string_equal(l->next->data, "pumba");
+    assert_string_equal(l->next->next->data, "bussunda");
+    assert_null(l->next->next->next);
+
+    l = bc_slist_remove(l, l->next->next, free);
+    assert_non_null(l);
+    assert_string_equal(l->data, "guda");
+    assert_string_equal(l->next->data, "pumba");
+    assert_null(l->next->next);
+
+    bc_slist_free_full(l, free);
+}
+
+
+static void
 test_slist_free(void **state)
 {
     bc_slist_t *l = NULL;
@@ -1049,6 +1083,7 @@ main(void)
         // slist
         unit_test(test_slist_append),
         unit_test(test_slist_prepend),
+        unit_test(test_slist_remove),
         unit_test(test_slist_free),
         unit_test(test_slist_length),
 

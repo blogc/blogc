@@ -74,6 +74,25 @@ bc_slist_prepend(bc_slist_t *l, void *data)
 }
 
 
+bc_slist_t*
+bc_slist_remove(bc_slist_t *l, bc_slist_t *r, bc_free_func_t free_func)
+{
+    bc_slist_t *p = NULL;
+    for (bc_slist_t *tmp = l; tmp != NULL; p = tmp, tmp = tmp->next) {
+        if (tmp == r) {
+            if (p == NULL)
+                l = tmp->next;
+            else
+                p->next = tmp->next;
+            if ((free_func != NULL) && (l->data != NULL))
+                free_func(tmp->data);
+            free(tmp);
+            return l;
+        }
+    }
+}
+
+
 void
 bc_slist_free_full(bc_slist_t *l, bc_free_func_t free_func)
 {
