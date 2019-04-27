@@ -28,6 +28,7 @@ static const struct default_settings_map {
     {"main_template", "main.tmpl"},
     {"source_ext", ".txt"},
     {"listing_entry", NULL},
+    {"posts_autoload", NULL},
     {"posts_sort", NULL},
 
     // pagination

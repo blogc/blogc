@@ -755,6 +755,254 @@ diff -uN "${TEMP}/proj/_build/post/post11/index.html" "${TEMP}/expected-post-pos
 rm -rf "${TEMP}/proj/_build"
 
 
+### default settings with some posts, order asc, posts_autoload
+
+mkdir -p "${TEMP}/proj/content/post2"
+
+cat > "${TEMP}/proj/content/post2/foo.txt" <<EOF
+TITLE: Foo
+DATE: 2016-10-01
+----------------
+This is foo.
+EOF
+
+cat > "${TEMP}/proj/content/post2/bar.txt" <<EOF
+TITLE: Bar
+DATE: 2016-09-01
+----------------
+This is bar.
+EOF
+
+cat > "${TEMP}/proj/blogcfile" <<EOF
+[global]
+AUTHOR_NAME = Lol
+AUTHOR_EMAIL = author@example.com
+SITE_TITLE = Lol's Website
+SITE_TAGLINE = WAT?!
+BASE_DOMAIN = http://example.org
+
+[settings]
+html_order = asc
+atom_order = asc
+posts_autoload = yes
+post_prefix = post2
+EOF
+
+ls "${TEMP}/proj/content/post"
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
+grep "_build/index\\.html" "${TEMP}/output.txt"
+grep "_build/atom\\.xml" "${TEMP}/output.txt"
+grep "_build/page/1/index\\.html" "${TEMP}/output.txt"
+grep "_build/post2/foo/index\\.html" "${TEMP}/output.txt"
+grep "_build/post2/bar/index\\.html" "${TEMP}/output.txt"
+
+rm "${TEMP}/output.txt"
+
+cat > "${TEMP}/expected-index.html" <<EOF
+
+Listing: Bar - Sep 01, 2016, 12:00 AM GMT
+
+Listing: Foo - Oct 01, 2016, 12:00 AM GMT
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/index.html" "${TEMP}/expected-index.html"
+diff -uN "${TEMP}/proj/_build/page/1/index.html" "${TEMP}/expected-index.html"
+
+cat > "${TEMP}/expected-atom.xml" <<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">Lol's Website</title>
+  <id>http://example.org/atom.xml</id>
+  <updated>2016-09-01T00:00:00Z</updated>
+  <link href="http://example.org/" />
+  <link href="http://example.org/atom.xml" rel="self" />
+  <author>
+    <name>Lol</name>
+    <email>author@example.com</email>
+  </author>
+  <subtitle type="text">WAT?!</subtitle>
+  
+  <entry>
+    <title type="text">Bar</title>
+    <id>http://example.org/post2/bar/index.html</id>
+    <updated>2016-09-01T00:00:00Z</updated>
+    <published>2016-09-01T00:00:00Z</published>
+    <link href="http://example.org/post2/bar/index.html" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is bar.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="text">Foo</title>
+    <id>http://example.org/post2/foo/index.html</id>
+    <updated>2016-10-01T00:00:00Z</updated>
+    <published>2016-10-01T00:00:00Z</published>
+    <link href="http://example.org/post2/foo/index.html" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is foo.</p>
+]]></content>
+  </entry>
+  
+</feed>
+EOF
+diff -uN "${TEMP}/proj/_build/atom.xml" "${TEMP}/expected-atom.xml"
+
+cat > "${TEMP}/expected-post-foo.html" <<EOF
+
+
+Foo - Oct 01, 2016, 12:00 AM GMT
+
+<p>This is foo.</p>
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/post2/foo/index.html" "${TEMP}/expected-post-foo.html"
+
+cat > "${TEMP}/expected-post-bar.html" <<EOF
+
+
+Bar - Sep 01, 2016, 12:00 AM GMT
+
+<p>This is bar.</p>
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/post2/bar/index.html" "${TEMP}/expected-post-bar.html"
+
+rm -rf "${TEMP}/proj/_build" "${TEMP}/proj/content/post2"
+
+
+### default settings with some posts, order desc, posts_autoload
+
+mkdir -p "${TEMP}/proj/content/post2"
+
+cat > "${TEMP}/proj/content/post2/foo.txt" <<EOF
+TITLE: Foo
+DATE: 2016-08-01
+----------------
+This is foo.
+EOF
+
+cat > "${TEMP}/proj/content/post2/bar.txt" <<EOF
+TITLE: Bar
+DATE: 2016-09-01
+----------------
+This is bar.
+EOF
+
+cat > "${TEMP}/proj/blogcfile" <<EOF
+[global]
+AUTHOR_NAME = Lol
+AUTHOR_EMAIL = author@example.com
+SITE_TITLE = Lol's Website
+SITE_TAGLINE = WAT?!
+BASE_DOMAIN = http://example.org
+
+[settings]
+posts_autoload = yes
+post_prefix = post2
+EOF
+
+ls "${TEMP}/proj/content/post"
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc-make -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
+grep "_build/index\\.html" "${TEMP}/output.txt"
+grep "_build/atom\\.xml" "${TEMP}/output.txt"
+grep "_build/page/1/index\\.html" "${TEMP}/output.txt"
+grep "_build/post2/foo/index\\.html" "${TEMP}/output.txt"
+grep "_build/post2/bar/index\\.html" "${TEMP}/output.txt"
+
+rm "${TEMP}/output.txt"
+
+cat > "${TEMP}/expected-index.html" <<EOF
+
+Listing: Bar - Sep 01, 2016, 12:00 AM GMT
+
+Listing: Foo - Aug 01, 2016, 12:00 AM GMT
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/index.html" "${TEMP}/expected-index.html"
+diff -uN "${TEMP}/proj/_build/page/1/index.html" "${TEMP}/expected-index.html"
+
+cat > "${TEMP}/expected-atom.xml" <<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">Lol's Website</title>
+  <id>http://example.org/atom.xml</id>
+  <updated>2016-09-01T00:00:00Z</updated>
+  <link href="http://example.org/" />
+  <link href="http://example.org/atom.xml" rel="self" />
+  <author>
+    <name>Lol</name>
+    <email>author@example.com</email>
+  </author>
+  <subtitle type="text">WAT?!</subtitle>
+  
+  <entry>
+    <title type="text">Bar</title>
+    <id>http://example.org/post2/bar/index.html</id>
+    <updated>2016-09-01T00:00:00Z</updated>
+    <published>2016-09-01T00:00:00Z</published>
+    <link href="http://example.org/post2/bar/index.html" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is bar.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="text">Foo</title>
+    <id>http://example.org/post2/foo/index.html</id>
+    <updated>2016-08-01T00:00:00Z</updated>
+    <published>2016-08-01T00:00:00Z</published>
+    <link href="http://example.org/post2/foo/index.html" />
+    <author>
+      <name>Lol</name>
+      <email>author@example.com</email>
+    </author>
+    <content type="html"><![CDATA[<p>This is foo.</p>
+]]></content>
+  </entry>
+  
+</feed>
+EOF
+diff -uN "${TEMP}/proj/_build/atom.xml" "${TEMP}/expected-atom.xml"
+
+cat > "${TEMP}/expected-post-foo.html" <<EOF
+
+
+Foo - Aug 01, 2016, 12:00 AM GMT
+
+<p>This is foo.</p>
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/post2/foo/index.html" "${TEMP}/expected-post-foo.html"
+
+cat > "${TEMP}/expected-post-bar.html" <<EOF
+
+
+Bar - Sep 01, 2016, 12:00 AM GMT
+
+<p>This is bar.</p>
+
+
+EOF
+diff -uN "${TEMP}/proj/_build/post2/bar/index.html" "${TEMP}/expected-post-bar.html"
+
+rm -rf "${TEMP}/proj/_build" "${TEMP}/proj/content/post2"
+
+
 ### default settings with some posts, order asc, posts_sort
 
 cat > "${TEMP}/proj/blogcfile" <<EOF

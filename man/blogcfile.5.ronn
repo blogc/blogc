@@ -110,6 +110,12 @@ however these rules can be customized with the following settings, from the
     The prefix of the posts file names. It is used for both content and output
     directories, and is relative to `content_dir` and the output directory.
 
+  * `posts_autoload` (default: `false`):
+    If true, blogc-make(1) will guess the source files from the posts directory
+    (`content_dir`/`post_prefix`) and ignore anything listed in `[posts]` section.
+    This setting automatically enable `posts_sort`, as there's no manually-provided
+    order of posts to follow.
+
   * `posts_per_page` (default: `10`):
     Number of posts per page in the pagination pages. If negative, all the posts
     are included. If `0`, no post listing pages are generated. Also, if negative or
@@ -140,6 +146,9 @@ of the post is `content/post/foo.txt`, the line added to the `[posts]` section
 is `foo`.
 
 All the posts are relative to the `post_prefix` in the root of the website.
+
+This section can be omitted if using the `posts_autoload` setting, as it will
+guess the posts from the directory.
 
 ### Pages listing
 

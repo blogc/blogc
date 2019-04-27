@@ -63,8 +63,10 @@ typedef struct {
     bm_filectx_t *listing_entry_fctx;
 
     bc_slist_t *posts_fctx;
+    bool posts_deleted;
     bc_slist_t *pages_fctx;
     bc_slist_t *copy_fctx;
+
 } bm_ctx_t;
 
 bm_filectx_t* bm_filectx_new(bm_ctx_t *ctx, const char *filename, const char *slug,
@@ -76,6 +78,7 @@ void bm_filectx_free(bm_filectx_t *fctx);
 bm_ctx_t* bm_ctx_new(bm_ctx_t *base, const char *settings_file,
     const char *argv0, bc_error_t **err);
 bool bm_ctx_reload(bm_ctx_t **ctx);
+void bm_ctx_autoload_posts(bm_ctx_t *ctx);
 void bm_ctx_free_internal(bm_ctx_t *ctx);
 void bm_ctx_free(bm_ctx_t *ctx);
 const char* bm_ctx_settings_lookup(bm_ctx_t *ctx, const char *key);
