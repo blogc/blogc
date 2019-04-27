@@ -31,10 +31,16 @@ posts_ordering(bm_ctx_t *ctx, bc_trie_t *variables, const char *variable)
         return;  // something is wrong, let's not add any variable
 
     const char *value = bm_ctx_settings_lookup_str(ctx, variable);
-    if (value != NULL && ((0 == strcmp(value, "ASC")) || (0 == strcmp(value, "asc"))))
-        return;  // user explicitly asked for ASC
+    bool asc = 0 == strcasecmp(value, "asc");
+    bool sort = bc_str_to_bool(bm_ctx_settings_lookup(ctx, "posts_sort"));
 
-    bc_trie_insert(variables, "FILTER_REVERSE", bc_strdup("1"));
+    if (sort) {
+        bc_trie_insert(variables, "FILTER_SORT", bc_strdup("1"));
+    }
+
+    if ((sort && asc) || (!sort && !asc)) {
+        bc_trie_insert(variables, "FILTER_REVERSE", bc_strdup("1"));
+    }
 }
 
 

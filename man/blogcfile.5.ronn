@@ -115,6 +115,11 @@ however these rules can be customized with the following settings, from the
     are included. If `0`, no post listing pages are generated. Also, if negative or
     `0`, the `pagination` build rule is disabled.
 
+  * `posts_sort` (default: `false`):
+    If true, blogc(1) will sort the posts by date, despite the order of the posts
+    in the `[posts]` section. It is compatible with `html_order` and `atom_order`
+    settings.
+
   * `source_ext` (default: `.txt`):
     The extension of the source files.
 
