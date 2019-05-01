@@ -13,7 +13,6 @@
 #include <libgen.h>
 #include <limits.h>
 #include <time.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
@@ -268,11 +267,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     }
 
     rv->posts_fctx = NULL;
-    rv->posts_deleted = false;
-    if (bc_str_to_bool(bc_trie_lookup(settings->settings, "posts_autoload"))) {
-        bm_ctx_autoload_posts(rv);
-    }
-    else if (settings->posts != NULL) {
+    if (settings->posts != NULL) {
         for (size_t i = 0; settings->posts[i] != NULL; i++) {
             char *f = bm_generate_filename(content_dir, post_prefix,
                 settings->posts[i], source_ext);
@@ -311,7 +306,7 @@ bm_ctx_reload(bm_ctx_t **ctx)
     if (*ctx == NULL || (*ctx)->settings_fctx == NULL)
         return false;
 
-    if ((*ctx)->posts_deleted || bm_filectx_changed((*ctx)->settings_fctx, NULL, NULL)) {
+    if (bm_filectx_changed((*ctx)->settings_fctx, NULL, NULL)) {
         // reload everything! we could just reload settings_fctx, as this
         // would force rebuilding everything, but we need to know new/deleted
         // files
@@ -333,13 +328,8 @@ bm_ctx_reload(bm_ctx_t **ctx)
     bm_filectx_reload((*ctx)->atom_template_fctx);
     bm_filectx_reload((*ctx)->listing_entry_fctx);
 
-    if (bc_str_to_bool(bm_ctx_settings_lookup(*ctx, "posts_autoload"))) {
-        bm_ctx_autoload_posts(*ctx);
-    }
-    else {
-        for (bc_slist_t *tmp = (*ctx)->posts_fctx; tmp != NULL; tmp = tmp->next)
-            bm_filectx_reload((bm_filectx_t*) tmp->data);
-    }
+    for (bc_slist_t *tmp = (*ctx)->posts_fctx; tmp != NULL; tmp = tmp->next)
+        bm_filectx_reload((bm_filectx_t*) tmp->data);
 
     for (bc_slist_t *tmp = (*ctx)->pages_fctx; tmp != NULL; tmp = tmp->next)
         bm_filectx_reload((bm_filectx_t*) tmp->data);
@@ -348,96 +338,6 @@ bm_ctx_reload(bm_ctx_t **ctx)
         bm_filectx_reload((bm_filectx_t*) tmp->data);
 
     return true;
-}
-
-
-void
-bm_ctx_autoload_posts(bm_ctx_t *ctx)
-{
-    if (ctx == NULL)
-        return;
-
-    const char *content_dir = bm_ctx_settings_lookup(ctx, "content_dir");
-    const char *post_prefix = bm_ctx_settings_lookup(ctx, "post_prefix");
-    const char *source_ext = bm_ctx_settings_lookup(ctx, "source_ext");
-
-    char *posts_dir = bm_generate_filename(content_dir, post_prefix, NULL, NULL);
-    char *abs_posts_dir = bc_strdup_printf("%s/%s", ctx->root_dir, posts_dir);
-    DIR *dir = opendir(abs_posts_dir);
-    if (dir == NULL) {
-        fprintf(stderr,
-            "blogc-make: warning: failed to open directory for posts autoload "
-            "(%s): %s\n", abs_posts_dir, strerror(errno));
-        free(posts_dir);
-        free(abs_posts_dir);
-        return;
-    }
-    free(abs_posts_dir);
-
-    // trick 0: avoid additional loops if we are not reloading
-    bool reloading = ctx->posts_fctx != NULL;
-
-    // trick 1: set all the post file contexts as unreadable, so we can detect
-    // which ones were deleted.
-    for (bc_slist_t *tmp = ctx->posts_fctx; tmp != NULL; tmp = tmp->next) {
-        bm_filectx_t *fc = tmp->data;
-        if (fc->readable) {
-            fc->readable = false;
-        }
-    }
-
-    struct dirent *e;
-    while (NULL != (e = readdir(dir))) {
-        if ((0 == strcmp(e->d_name, ".")) || (0 == strcmp(e->d_name, "..")))
-            continue;
-        if (!bc_str_ends_with(e->d_name, source_ext))
-            continue;
-        char *tmp = bc_strdup_printf("%s/%s", posts_dir, e->d_name);
-
-        // trick 2: if the file context exists in the index, just set it as
-        // readable
-        bm_filectx_t *fc = NULL;
-        if (reloading) {
-            for (bc_slist_t *t = ctx->posts_fctx; t != NULL; t = t->next) {
-                bm_filectx_t *fct = t->data;
-                if (0 == strcmp(fct->short_path, tmp)) {
-                    fc = fct;
-                    break;
-                }
-            }
-        }
-        if (fc != NULL) {
-            fc->readable = true;
-            bm_filectx_reload(fc);
-        }
-        else {
-            e->d_name[strlen(e->d_name) - strlen(source_ext)] = 0;
-            fc = bm_filectx_new(ctx, tmp, e->d_name, NULL);
-            ctx->posts_fctx = bc_slist_append(ctx->posts_fctx, fc);
-        }
-        free(tmp);
-    }
-
-    // trick 3: delete the unreadable file contexts
-    ctx->posts_deleted = false;
-    if (reloading) {
-        for (bc_slist_t *tmp = ctx->posts_fctx; tmp != NULL;) {
-            bm_filectx_t *fc = tmp->data;
-            if (!fc->readable) {
-                bc_slist_t *next = tmp->next;
-                ctx->posts_fctx = bc_slist_remove(ctx->posts_fctx, tmp,
-                    (bc_free_func_t) bm_filectx_free);
-                tmp = next;
-                ctx->posts_deleted = true;
-            }
-            else {
-                tmp = tmp->next;
-            }
-        }
-    }
-
-    closedir(dir);
-    free(posts_dir);
 }
 
 

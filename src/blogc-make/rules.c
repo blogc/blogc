@@ -32,9 +32,7 @@ posts_ordering(bm_ctx_t *ctx, bc_trie_t *variables, const char *variable)
 
     const char *value = bm_ctx_settings_lookup_str(ctx, variable);
     bool asc = 0 == strcasecmp(value, "asc");
-    bool posts_autoload = bc_str_to_bool(bm_ctx_settings_lookup(ctx, "posts_autoload"));
-    bool posts_sort = bc_str_to_bool(bm_ctx_settings_lookup(ctx, "posts_sort"));
-    bool sort = posts_sort || posts_autoload;
+    bool sort = bc_str_to_bool(bm_ctx_settings_lookup(ctx, "posts_sort"));
 
     if (sort) {
         bc_trie_insert(variables, "FILTER_SORT", bc_strdup("1"));
@@ -77,7 +75,7 @@ posts_pagination_enabled(bm_ctx_t *ctx, const  char *variable)
 static bc_slist_t*
 index_outputlist(bm_ctx_t *ctx)
 {
-    if (ctx == NULL || ctx->posts_fctx == NULL)
+    if (ctx == NULL || ctx->settings->posts == NULL)
         return NULL;
 
     if (!posts_pagination_enabled(ctx, "posts_per_page"))
@@ -99,7 +97,7 @@ index_outputlist(bm_ctx_t *ctx)
 static int
 index_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 {
-    if (ctx == NULL || ctx->posts_fctx == NULL)
+    if (ctx == NULL || ctx->settings->posts == NULL)
         return 0;
 
     int rv = 0;
@@ -116,8 +114,7 @@ index_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         bm_filectx_t *fctx = l->data;
         if (fctx == NULL)
             continue;
-        if (ctx->posts_deleted ||
-            bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
+        if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->listing_entry_fctx, ctx->main_template_fctx, fctx, false))
         {
             rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->listing_entry_fctx,
@@ -138,7 +135,7 @@ index_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 static bc_slist_t*
 atom_outputlist(bm_ctx_t *ctx)
 {
-    if (ctx == NULL || ctx->posts_fctx == NULL)
+    if (ctx == NULL || ctx->settings->posts == NULL)
         return NULL;
 
     if (!posts_pagination_enabled(ctx, "atom_posts_per_page"))
@@ -160,7 +157,7 @@ atom_outputlist(bm_ctx_t *ctx)
 static int
 atom_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 {
-    if (ctx == NULL || ctx->posts_fctx == NULL)
+    if (ctx == NULL || ctx->settings->posts == NULL)
         return 0;
 
     int rv = 0;
@@ -176,8 +173,7 @@ atom_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         bm_filectx_t *fctx = l->data;
         if (fctx == NULL)
             continue;
-        if (ctx->posts_deleted ||
-            bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL, NULL,
+        if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL, NULL,
                 fctx, false))
         {
             rv = bm_exec_blogc(ctx, variables, NULL, true, NULL, ctx->atom_template_fctx,
@@ -198,7 +194,7 @@ atom_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 static bc_slist_t*
 atom_tags_outputlist(bm_ctx_t *ctx)
 {
-    if (ctx == NULL || ctx->posts_fctx == NULL || ctx->settings->tags == NULL)
+    if (ctx == NULL || ctx->settings->posts == NULL || ctx->settings->tags == NULL)
         return NULL;
 
     if (!posts_pagination_enabled(ctx, "atom_posts_per_page"))
@@ -222,7 +218,7 @@ atom_tags_outputlist(bm_ctx_t *ctx)
 static int
 atom_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 {
-    if (ctx == NULL || ctx->posts_fctx == NULL || ctx->settings->tags == NULL)
+    if (ctx == NULL || ctx->settings->posts == NULL || ctx->settings->tags == NULL)
         return 0;
 
     int rv = 0;
@@ -243,8 +239,7 @@ atom_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         bc_trie_insert(variables, "FILTER_TAG",
             bc_strdup(ctx->settings->tags[i]));
 
-        if (ctx->posts_deleted ||
-            bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL, NULL,
+        if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL, NULL,
                 fctx, false))
         {
             rv = bm_exec_blogc(ctx, variables, NULL, true, NULL, ctx->atom_template_fctx,
@@ -265,7 +260,7 @@ atom_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 static bc_slist_t*
 pagination_outputlist(bm_ctx_t *ctx)
 {
-    if (ctx == NULL || ctx->posts_fctx == NULL)
+    if (ctx == NULL || ctx->settings->posts == NULL)
         return NULL;
 
     // not using posts_pagination_enabled() here because we need to calculate
@@ -298,7 +293,7 @@ pagination_outputlist(bm_ctx_t *ctx)
 static int
 pagination_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 {
-    if (ctx == NULL || ctx->posts_fctx == NULL)
+    if (ctx == NULL || ctx->settings->posts == NULL)
         return 0;
 
     int rv = 0;
@@ -320,8 +315,7 @@ pagination_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (fctx == NULL)
             continue;
         bc_trie_insert(variables, "FILTER_PAGE", bc_strdup_printf("%zu", page));
-        if (ctx->posts_deleted ||
-            bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
+        if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->listing_entry_fctx, ctx->main_template_fctx, fctx, false))
         {
             rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->listing_entry_fctx,
@@ -342,7 +336,7 @@ pagination_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 static bc_slist_t*
 posts_outputlist(bm_ctx_t *ctx)
 {
-    if (ctx == NULL || ctx->posts_fctx == NULL)
+    if (ctx == NULL || ctx->settings->posts == NULL)
         return NULL;
 
     bc_slist_t *rv = NULL;
@@ -350,10 +344,9 @@ posts_outputlist(bm_ctx_t *ctx)
     const char *post_prefix = bm_ctx_settings_lookup(ctx, "post_prefix");
     const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
 
-    for (bc_slist_t *l = ctx->posts_fctx; l != NULL; l = l->next) {
-        bm_filectx_t *fc = l->data;
+    for (size_t i = 0; ctx->settings->posts[i] != NULL; i++) {
         char *f = bm_generate_filename(ctx->short_output_dir, post_prefix,
-            fc->slug, html_ext);
+            ctx->settings->posts[i], html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
@@ -364,7 +357,7 @@ posts_outputlist(bm_ctx_t *ctx)
 static int
 posts_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 {
-    if (ctx == NULL || ctx->posts_fctx == NULL)
+    if (ctx == NULL || ctx->settings->posts == NULL)
         return 0;
 
     int rv = 0;
@@ -410,7 +403,7 @@ posts_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 static bc_slist_t*
 tags_outputlist(bm_ctx_t *ctx)
 {
-    if (ctx == NULL || ctx->posts_fctx == NULL || ctx->settings->tags == NULL)
+    if (ctx == NULL || ctx->settings->posts == NULL || ctx->settings->tags == NULL)
         return NULL;
 
     if (!posts_pagination_enabled(ctx, "posts_per_page"))
@@ -434,7 +427,7 @@ tags_outputlist(bm_ctx_t *ctx)
 static int
 tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 {
-    if (ctx == NULL || ctx->posts_fctx == NULL || ctx->settings->tags == NULL)
+    if (ctx == NULL || ctx->settings->posts == NULL || ctx->settings->tags == NULL)
         return 0;
 
     int rv = 0;
@@ -456,8 +449,7 @@ tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         bc_trie_insert(variables, "FILTER_TAG",
             bc_strdup(ctx->settings->tags[i]));
 
-        if (ctx->posts_deleted ||
-            bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
+        if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->listing_entry_fctx, ctx->main_template_fctx, fctx, false))
         {
             rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->listing_entry_fctx,
