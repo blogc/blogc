@@ -117,8 +117,8 @@ however these rules can be customized with the following settings, from the
 
   * `posts_sort` (default: `false`):
     If true, blogc(1) will sort the posts by date, despite the order of the posts
-    in the `[posts]` section. It is compatible with `html_order` and `atom_order`
-    settings.
+    in the `[posts]` section, in descending order. This setting is compatible with
+    `html_order` and `atom_order` settings, to control the order of the posts.
 
   * `source_ext` (default: `.txt`):
     The extension of the source files.

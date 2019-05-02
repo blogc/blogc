@@ -31,14 +31,15 @@ files passed as arguments to it:
 
   * `FILTER_REVERSE`:
     Boolean (1/y/yes/true/on), if set, blogc(1) will list files in reverse order.
-    This is always the first filter applied to the files. All the previous filters
-    will get the files already in the reverse order, and won't care about this.
+    This filter is combined with `FILTER_SORT`, and all the other filters will
+    get the files already in the reverse order.
 
   * `FILTER_SORT`:
     Boolean (1/y/yes/true/on), if set, blogc(1) will sort files using the `DATE`
     variable provided in the files, instead of respecting the order of the
-    source files provided to blogc(1). All the previous filters will get the
-    files already sorted, and won't care about this.
+    source files provided to blogc(1). The files are sorted in descending order
+    and combined with `FILTER_REVERSE`, that will result in the files sorted in
+    ascending order. All the other filters will get the files already sorted.
 
 ## TEMPLATE VARIABLES
 
