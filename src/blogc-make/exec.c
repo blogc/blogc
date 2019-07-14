@@ -218,9 +218,9 @@ list_variables(const char *key, const char *value, bc_string_t *str)
 
 char*
 bm_exec_build_blogc_cmd(const char *blogc_bin, bm_settings_t *settings,
-    bc_trie_t *global_variables, bc_trie_t *local_variables, bool listing,
-    const char *listing_entry, const char *template, const char *output,
-    bool dev, bool sources_stdin)
+    bc_trie_t *global_variables, bc_trie_t *local_variables, const char *print,
+    bool listing, const char *listing_entry, const char *template,
+    const char *output, bool dev, bool sources_stdin)
 {
     bc_string_t *rv = bc_string_new();
 
@@ -254,6 +254,10 @@ bm_exec_build_blogc_cmd(const char *blogc_bin, bm_settings_t *settings,
         bc_string_append(rv, " -D MAKE_ENV_DEV=1 -D MAKE_ENV='dev'");
     }
 
+    if (print != NULL) {
+        bc_string_append_printf(rv, " -p %s", print);
+    }
+
     if (listing) {
         bc_string_append(rv, " -l");
         if (listing_entry != NULL) {
@@ -285,8 +289,9 @@ bm_exec_build_blogc_cmd(const char *blogc_bin, bm_settings_t *settings,
 
 int
 bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *global_variables, bc_trie_t *local_variables,
-    bool listing, bm_filectx_t *listing_entry, bm_filectx_t *template,
-    bm_filectx_t *output, bc_slist_t *sources, bool only_first_source)
+    const char *print, bool listing, bm_filectx_t *listing_entry,
+    bm_filectx_t *template, bm_filectx_t *output, bc_slist_t *sources,
+    bool only_first_source)
 {
     if (ctx == NULL)
         return 1;
@@ -299,7 +304,7 @@ bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *global_variables, bc_trie_t *local_varia
     }
 
     char *cmd = bm_exec_build_blogc_cmd(ctx->blogc, ctx->settings, global_variables,
-        local_variables, listing, listing_entry == NULL ? NULL : listing_entry->path,
+        local_variables, print, listing, listing_entry == NULL ? NULL : listing_entry->path,
         template->path, output->path, ctx->dev, input->len > 0);
 
     if (ctx->verbose)

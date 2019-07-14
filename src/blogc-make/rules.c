@@ -117,8 +117,9 @@ index_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->listing_entry_fctx, ctx->main_template_fctx, fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->listing_entry_fctx,
-                ctx->main_template_fctx, fctx, ctx->posts_fctx, false);
+            rv = bm_exec_blogc(ctx, variables, NULL, NULL, true,
+                ctx->listing_entry_fctx, ctx->main_template_fctx, fctx,
+                ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -176,8 +177,8 @@ atom_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL, NULL,
                 fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, NULL, true, NULL, ctx->atom_template_fctx,
-                fctx, ctx->posts_fctx, false);
+            rv = bm_exec_blogc(ctx, variables, NULL, NULL, true, NULL,
+                ctx->atom_template_fctx, fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -242,8 +243,8 @@ atom_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL, NULL,
                 fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, NULL, true, NULL, ctx->atom_template_fctx,
-                fctx, ctx->posts_fctx, false);
+            rv = bm_exec_blogc(ctx, variables, NULL, NULL, true, NULL,
+                ctx->atom_template_fctx, fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -318,8 +319,9 @@ pagination_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->listing_entry_fctx, ctx->main_template_fctx, fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->listing_entry_fctx,
-                ctx->main_template_fctx, fctx, ctx->posts_fctx, false);
+            rv = bm_exec_blogc(ctx, variables, NULL, NULL, true,
+                ctx->listing_entry_fctx, ctx->main_template_fctx, fctx,
+                ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -384,8 +386,8 @@ posts_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         {
             bc_trie_t *local = bc_trie_new(NULL);
             bc_trie_insert(local, "MAKE_SLUG", s_fctx->slug);  // no need to copy
-            rv = bm_exec_blogc(ctx, variables, local, false, NULL, ctx->main_template_fctx,
-                o_fctx, s, true);
+            rv = bm_exec_blogc(ctx, variables, local, NULL, false, NULL,
+                ctx->main_template_fctx, o_fctx, s, true);
             bc_trie_free(local);
             if (rv != 0)
                 break;
@@ -452,8 +454,9 @@ tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->listing_entry_fctx, ctx->main_template_fctx, fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->listing_entry_fctx,
-                ctx->main_template_fctx, fctx, ctx->posts_fctx, false);
+            rv = bm_exec_blogc(ctx, variables, NULL, NULL, true,
+                ctx->listing_entry_fctx, ctx->main_template_fctx, fctx,
+                ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -515,8 +518,8 @@ pages_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         {
             bc_trie_t *local = bc_trie_new(NULL);
             bc_trie_insert(local, "MAKE_SLUG", s_fctx->slug); // no need to copy
-            rv = bm_exec_blogc(ctx, variables, local, false, NULL, ctx->main_template_fctx,
-                o_fctx, s, true);
+            rv = bm_exec_blogc(ctx, variables, local, NULL, false, NULL,
+                ctx->main_template_fctx, o_fctx, s, true);
             bc_trie_free(local);
             if (rv != 0)
                 break;
