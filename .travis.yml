@@ -28,7 +28,7 @@ matrix:
           packages:
             - cmocka
             - xz
-          update: true
+          osx_image: xcode11
     - compiler: gcc
       env:
         - TARGET=check-make-embedded
