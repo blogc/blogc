@@ -416,7 +416,7 @@ pagination_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
     const char *pagination_prefix = bm_ctx_settings_lookup(ctx, "pagination_prefix");
     const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
 
-    for (bc_slist_t *l = outputs; l != NULL; l = l->next, page++) {
+    for (bc_slist_t *l = outputs; l != NULL; l = l->next) {
         bm_filectx_t *fctx = l->data;
         if (fctx == NULL)
             continue;
@@ -431,14 +431,14 @@ pagination_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 
             // it is impossible to have more output files per tag than the whole
             // amount of output pages
-            for (size_t k = 0; k < bc_slist_length(outputs); k++) {
-                char *j = bc_strdup_printf("%d", k + 1);
+            for (size_t k = 1; k <= bc_slist_length(outputs); k++) {
+                char *j = bc_strdup_printf("%d", k);
                 char *f = bm_generate_filename(ctx->short_output_dir, prefix,
                     j, html_ext);
                 free(j);
                 if (0 == strcmp(fctx->short_path, f)) {
                     tag = ctx->settings->tags[i];
-                    page = k + 1;
+                    page = k;
                     b = true;
                     free(f);
                     break;
