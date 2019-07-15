@@ -416,7 +416,9 @@ bm_exec_blogc_get_variable(bm_ctx_t *ctx, bc_trie_t *global_variables,
         return NULL;
     }
 
-    char *val = bc_strndup(out, strlen(out) - 1);
+    char *val = NULL;
+    if (out != NULL)
+        val = bc_strndup(out, strlen(out) - 1);
 
     bc_string_free(input, true);
     free(cmd);
