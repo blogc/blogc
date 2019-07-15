@@ -16,6 +16,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sysexits.h>
 #include <errno.h>
 #include <libgen.h>
 #include "../common/compat.h"
@@ -408,7 +409,8 @@ bm_exec_blogc_get_variable(bm_ctx_t *ctx, bc_trie_t *global_variables,
     }
 
     if (rv != 0) {
-        fprintf(stderr, "blogc-make: error: %s\n", bc_str_strip(err));
+        if (rv != EX_CONFIG)
+            fprintf(stderr, "blogc-make: error: %s\n", bc_str_strip(err));
         bc_string_free(input, true);
         free(cmd);
         free(out);
