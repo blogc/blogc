@@ -22,10 +22,13 @@ char* bm_exec_build_blogc_cmd(const char *blogc_bin, bm_settings_t *settings,
     bc_trie_t *global_variables, bc_trie_t *local_variables, const char *print,
     bool listing, const char *listing_entry, const char *template,
     const char *output, bool dev, bool sources_stdin);
-int bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *global_variables, bc_trie_t *local_variables,
-    const char *print, bool listing, bm_filectx_t *listing_entry,
+int bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *global_variables,
+    bc_trie_t *local_variables, bool listing, bm_filectx_t *listing_entry,
     bm_filectx_t *template, bm_filectx_t *output, bc_slist_t *sources,
     bool only_first_source);
+char* bm_exec_blogc_get_variable(bm_ctx_t *ctx, bc_trie_t *global_variables,
+    bc_trie_t *local_variables, const char *variable, bool listing,
+    bc_slist_t *sources, bool only_first_source);
 int bm_exec_blogc_runserver(bm_ctx_t *ctx, const char *host, const char *port,
     const char *threads);
 

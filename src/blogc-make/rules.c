@@ -11,7 +11,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
-#include <math.h>
 #include "../common/utils.h"
 #include "atom.h"
 #include "ctx.h"
@@ -117,9 +116,8 @@ index_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->listing_entry_fctx, ctx->main_template_fctx, fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, NULL, NULL, true,
-                ctx->listing_entry_fctx, ctx->main_template_fctx, fctx,
-                ctx->posts_fctx, false);
+            rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->listing_entry_fctx,
+                ctx->main_template_fctx, fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -177,8 +175,8 @@ atom_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL, NULL,
                 fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, NULL, NULL, true, NULL,
-                ctx->atom_template_fctx, fctx, ctx->posts_fctx, false);
+            rv = bm_exec_blogc(ctx, variables, NULL, true, NULL, ctx->atom_template_fctx,
+                fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -243,8 +241,8 @@ atom_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL, NULL,
                 fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, NULL, NULL, true, NULL,
-                ctx->atom_template_fctx, fctx, ctx->posts_fctx, false);
+            rv = bm_exec_blogc(ctx, variables, NULL, true, NULL, ctx->atom_template_fctx,
+                fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -264,17 +262,24 @@ pagination_outputlist(bm_ctx_t *ctx)
     if (ctx == NULL || ctx->settings->posts == NULL)
         return NULL;
 
-    // not using posts_pagination_enabled() here because we need to calculate
-    // posts per page here anyway, and the condition is different.
-    long posts_per_page = strtol(bm_ctx_settings_lookup_str(ctx, "posts_per_page"),
-        NULL, 10);
-    if (posts_per_page <= 0)
+    if (!posts_pagination_enabled(ctx, "posts_per_page"))
         return NULL;
 
-    bc_slist_t *rv = NULL;
+    bc_trie_t *variables = bc_trie_new(free);
+    posts_pagination(ctx, variables, "posts_per_page");
 
-    long num_posts = bc_slist_length(ctx->posts_fctx);
-    size_t pages = ceilf(((float) num_posts) / posts_per_page);
+    char *last_page = bm_exec_blogc_get_variable(ctx, variables, NULL, "LAST_PAGE",
+        true, ctx->posts_fctx, false);
+
+    bc_trie_free(variables);
+
+    if (last_page == NULL)
+        return NULL;
+
+    long pages = strtol(last_page, NULL, 10);
+    free(last_page);
+
+    bc_slist_t *rv = NULL;
 
     const char *pagination_prefix = bm_ctx_settings_lookup(ctx, "pagination_prefix");
     const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
@@ -319,9 +324,142 @@ pagination_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->listing_entry_fctx, ctx->main_template_fctx, fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, NULL, NULL, true,
-                ctx->listing_entry_fctx, ctx->main_template_fctx, fctx,
-                ctx->posts_fctx, false);
+            rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->listing_entry_fctx,
+                ctx->main_template_fctx, fctx, ctx->posts_fctx, false);
+            if (rv != 0)
+                break;
+        }
+    }
+
+    bc_trie_free(variables);
+
+    return rv;
+}
+
+
+// PAGINATION TAGS RULE
+
+static bc_slist_t*
+pagination_tags_outputlist(bm_ctx_t *ctx)
+{
+    if (ctx == NULL || ctx->settings->posts == NULL || ctx->settings->tags == NULL)
+        return NULL;
+
+    if (!posts_pagination_enabled(ctx, "posts_per_page"))
+        return NULL;
+
+    bc_trie_t *variables = bc_trie_new(free);
+    posts_pagination(ctx, variables, "posts_per_page");
+
+    const char *tag_prefix = bm_ctx_settings_lookup(ctx, "tag_prefix");
+    const char *pagination_prefix = bm_ctx_settings_lookup(ctx, "pagination_prefix");
+    const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
+
+    bc_slist_t *rv = NULL;
+
+    for (size_t k = 0; ctx->settings->tags[k] != NULL; k++) {
+        bc_trie_t *local = bc_trie_new(free);
+        bc_trie_insert(local, "FILTER_TAG", bc_strdup(ctx->settings->tags[k]));
+
+        char *last_page = bm_exec_blogc_get_variable(ctx, variables, local,
+            "LAST_PAGE", true, ctx->posts_fctx, false);
+
+        bc_trie_free(local);
+
+        if (last_page == NULL)
+            break;
+
+        long pages = strtol(last_page, NULL, 10);
+        free(last_page);
+
+        char *prefix = bc_strdup_printf("%s/%s/%s", tag_prefix,
+            ctx->settings->tags[k], pagination_prefix);
+
+        for (size_t i = 0; i < pages; i++) {
+            char *j = bc_strdup_printf("%d", i + 1);
+            char *f = bm_generate_filename(ctx->short_output_dir, prefix,
+                j, html_ext);
+            rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
+            free(j);
+            free(f);
+        }
+
+        free(prefix);
+    }
+
+    bc_trie_free(variables);
+
+    return rv;
+}
+
+static int
+pagination_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
+{
+    if (ctx == NULL || ctx->settings->posts == NULL || ctx->settings->tags == NULL)
+        return 0;
+
+    int rv = 0;
+    size_t page = 1;
+
+    bc_trie_t *variables = bc_trie_new(free);
+    // not using posts_pagination because we set FILTER_PAGE anyway, and the
+    // first value inserted in that function would be useless
+    bc_trie_insert(variables, "FILTER_PER_PAGE",
+        bc_strdup(bm_ctx_settings_lookup_str(ctx, "posts_per_page")));
+    posts_ordering(ctx, variables, "html_order");
+    bc_trie_insert(variables, "DATE_FORMAT",
+        bc_strdup(bm_ctx_settings_lookup_str(ctx, "date_format")));
+    bc_trie_insert(variables, "MAKE_RULE", bc_strdup("pagination_tags"));
+    bc_trie_insert(variables, "MAKE_TYPE", bc_strdup("post"));
+
+    const char *tag_prefix = bm_ctx_settings_lookup(ctx, "tag_prefix");
+    const char *pagination_prefix = bm_ctx_settings_lookup(ctx, "pagination_prefix");
+    const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
+
+    for (bc_slist_t *l = outputs; l != NULL; l = l->next, page++) {
+        bm_filectx_t *fctx = l->data;
+        if (fctx == NULL)
+            continue;
+
+        // this is very expensive, but we don't have another way to detect the
+        // tag and page from the file path right now :/
+        char *tag = NULL;
+        for (size_t i = 0; ctx->settings->tags[i] != NULL; i++) {
+            char *prefix = bc_strdup_printf("%s/%s/%s", tag_prefix,
+                ctx->settings->tags[i], pagination_prefix);
+            bool b = false;
+
+            // it is impossible to have more output files per tag than the whole
+            // amount of output pages
+            for (size_t k = 0; k < bc_slist_length(outputs); k++) {
+                char *j = bc_strdup_printf("%d", k + 1);
+                char *f = bm_generate_filename(ctx->short_output_dir, prefix,
+                    j, html_ext);
+                free(j);
+                if (0 == strcmp(fctx->short_path, f)) {
+                    tag = ctx->settings->tags[i];
+                    page = k + 1;
+                    b = true;
+                    free(f);
+                    break;
+                }
+                free(f);
+            }
+            free(prefix);
+            if (b)
+                break;
+        }
+        if (tag == NULL)
+            continue;
+
+        bc_trie_insert(variables, "FILTER_TAG", bc_strdup(tag));
+        bc_trie_insert(variables, "FILTER_PAGE", bc_strdup_printf("%zu", page));
+
+        if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
+                ctx->listing_entry_fctx, ctx->main_template_fctx, fctx, false))
+        {
+            rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->listing_entry_fctx,
+                ctx->main_template_fctx, fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -386,8 +524,8 @@ posts_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         {
             bc_trie_t *local = bc_trie_new(NULL);
             bc_trie_insert(local, "MAKE_SLUG", s_fctx->slug);  // no need to copy
-            rv = bm_exec_blogc(ctx, variables, local, NULL, false, NULL,
-                ctx->main_template_fctx, o_fctx, s, true);
+            rv = bm_exec_blogc(ctx, variables, local, false, NULL, ctx->main_template_fctx,
+                o_fctx, s, true);
             bc_trie_free(local);
             if (rv != 0)
                 break;
@@ -454,9 +592,8 @@ tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx,
                 ctx->listing_entry_fctx, ctx->main_template_fctx, fctx, false))
         {
-            rv = bm_exec_blogc(ctx, variables, NULL, NULL, true,
-                ctx->listing_entry_fctx, ctx->main_template_fctx, fctx,
-                ctx->posts_fctx, false);
+            rv = bm_exec_blogc(ctx, variables, NULL, true, ctx->listing_entry_fctx,
+                ctx->main_template_fctx, fctx, ctx->posts_fctx, false);
             if (rv != 0)
                 break;
         }
@@ -518,8 +655,8 @@ pages_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         {
             bc_trie_t *local = bc_trie_new(NULL);
             bc_trie_insert(local, "MAKE_SLUG", s_fctx->slug); // no need to copy
-            rv = bm_exec_blogc(ctx, variables, local, NULL, false, NULL,
-                ctx->main_template_fctx, o_fctx, s, true);
+            rv = bm_exec_blogc(ctx, variables, local, false, NULL, ctx->main_template_fctx,
+                o_fctx, s, true);
             bc_trie_free(local);
             if (rv != 0)
                 break;
@@ -687,6 +824,13 @@ const bm_rule_t rules[] = {
         .generate_files = true,
     },
     {
+        .name = "pagination_tags",
+        .help = "build pagination pages for each tag from posts",
+        .outputlist_func = pagination_tags_outputlist,
+        .exec_func = pagination_tags_exec,
+        .generate_files = true,
+    },
+    {
         .name = "posts",
         .help = "build individual pages for each post",
         .outputlist_func = posts_outputlist,
@@ -724,8 +868,8 @@ const bm_rule_t rules[] = {
     {
         .name = "runserver",
         .help = "run blogc-runserver pointing to output directory, if available,\n"
-            "                  rebuilding as needed\n"
-            "                  arguments: host (127.0.0.1), port (8080) and threads (20)",
+            "                     rebuilding as needed\n"
+            "                     arguments: host (127.0.0.1), port (8080) and threads (20)",
         .outputlist_func = NULL,
         .exec_func = runserver_exec,
         .generate_files = false,
@@ -946,13 +1090,13 @@ bm_rule_print_help(void)
     printf("\nhelper rules:\n");
     for (size_t i = 0; rules[i].name != NULL; i++) {
         if (!rules[i].generate_files) {
-            printf("    %-12s  %s\n", rules[i].name, rules[i].help);
+            printf("    %-15s  %s\n", rules[i].name, rules[i].help);
         }
     }
     printf("\nbuild rules:\n");
     for (size_t i = 0; rules[i].name != NULL; i++) {
         if (rules[i].generate_files) {
-            printf("    %-12s  %s\n", rules[i].name, rules[i].help);
+            printf("    %-15s  %s\n", rules[i].name, rules[i].help);
         }
     }
 }

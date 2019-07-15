@@ -289,9 +289,8 @@ bm_exec_build_blogc_cmd(const char *blogc_bin, bm_settings_t *settings,
 
 int
 bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *global_variables, bc_trie_t *local_variables,
-    const char *print, bool listing, bm_filectx_t *listing_entry,
-    bm_filectx_t *template, bm_filectx_t *output, bc_slist_t *sources,
-    bool only_first_source)
+    bool listing, bm_filectx_t *listing_entry, bm_filectx_t *template,
+    bm_filectx_t *output, bc_slist_t *sources, bool only_first_source)
 {
     if (ctx == NULL)
         return 1;
@@ -304,7 +303,7 @@ bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *global_variables, bc_trie_t *local_varia
     }
 
     char *cmd = bm_exec_build_blogc_cmd(ctx->blogc, ctx->settings, global_variables,
-        local_variables, print, listing, listing_entry == NULL ? NULL : listing_entry->path,
+        local_variables, NULL, listing, listing_entry == NULL ? NULL : listing_entry->path,
         template->path, output->path, ctx->dev, input->len > 0);
 
     if (ctx->verbose)
@@ -367,6 +366,64 @@ bm_exec_blogc(bm_ctx_t *ctx, bc_trie_t *global_variables, bc_trie_t *local_varia
     free(err);
 
     return rv == 127 ? 1 : rv;
+}
+
+
+char*
+bm_exec_blogc_get_variable(bm_ctx_t *ctx, bc_trie_t *global_variables,
+    bc_trie_t *local_variables, const char *variable, bool listing,
+    bc_slist_t *sources, bool only_first_source)
+{
+    if (ctx == NULL)
+        return NULL;
+
+    bc_string_t *input = bc_string_new();
+    for (bc_slist_t *l = sources; l != NULL; l = l->next) {
+        bc_string_append_printf(input, "%s\n", ((bm_filectx_t*) l->data)->path);
+        if (only_first_source)
+            break;
+    }
+
+    char *cmd = bm_exec_build_blogc_cmd(ctx->blogc, ctx->settings, global_variables,
+        local_variables, variable, listing, NULL, NULL, NULL, ctx->dev, input->len > 0);
+
+    if (ctx->verbose)
+        printf("%s\n", cmd);
+    fflush(stdout);
+
+    char *out = NULL;
+    char *err = NULL;
+    bc_error_t *error = NULL;
+
+    int rv = bm_exec_command(cmd, input->str, &out, &err, &error);
+
+    if (error != NULL) {
+        bc_error_print(error, "blogc-make");
+        bc_error_free(error);
+        bc_string_free(input, true);
+        free(cmd);
+        free(out);
+        free(err);
+        return NULL;
+    }
+
+    if (rv != 0) {
+        fprintf(stderr, "blogc-make: error: %s\n", bc_str_strip(err));
+        bc_string_free(input, true);
+        free(cmd);
+        free(out);
+        free(err);
+        return NULL;
+    }
+
+    char *val = bc_strndup(out, strlen(out) - 1);
+
+    bc_string_free(input, true);
+    free(cmd);
+    free(out);
+    free(err);
+
+    return val;
 }
 
 

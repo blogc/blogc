@@ -256,7 +256,6 @@ libblogc_make_la_CFLAGS = \
 	$(NULL)
 
 libblogc_make_la_LIBADD = \
-	$(LIBM) \
 	$(PTHREAD_LIBS) \
 	libblogc_common.la \
 	$(NULL)

@@ -114,6 +114,18 @@ The rule passes the following helper variables to blogc(1):
   * `MAKE_TYPE`:
     `post`
 
+### pagination_tags
+
+Build pagination pages for each tag from posts. This rule is disabled if
+`posts_per_page` value in blogcfile(5) is negative or `0`.
+
+The rule passes the following helper variables to blogc(1):
+
+  * `MAKE_RULE`:
+    `pagination_tags`
+  * `MAKE_TYPE`:
+    `post`
+
 ### posts
 
 Build individual pages for each post.

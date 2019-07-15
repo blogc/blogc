@@ -29,16 +29,16 @@ print_help(void)
         "               - A simple build tool for blogc.\n"
         "\n"
         "positional arguments:\n"
-        "    RULE          build rule(s) to run. can include comma-separated\n"
-        "                  key-value pairs of rule arguments in the format\n"
-        "                  RULE:arg1=value1,arg2=value2,... (default: all)\n"
+        "    RULE             build rule(s) to run. can include comma-separated\n"
+        "                     key-value pairs of rule arguments in the format\n"
+        "                     RULE:arg1=value1,arg2=value2,... (default: all)\n"
         "\n"
         "optional arguments:\n"
-        "    -h            show this help message and exit\n"
-        "    -v            show version and exit\n"
-        "    -D            build for development environment\n"
-        "    -V            be verbose when executing commands\n"
-        "    -f FILE       read FILE as blogcfile\n");
+        "    -h               show this help message and exit\n"
+        "    -v               show version and exit\n"
+        "    -D               build for development environment\n"
+        "    -V               be verbose when executing commands\n"
+        "    -f FILE          read FILE as blogcfile\n");
     bm_rule_print_help();
 }
 
