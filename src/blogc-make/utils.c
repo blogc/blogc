@@ -28,7 +28,7 @@ bm_generate_filename(const char *dir, const char *prefix, const char *fname,
     bool have_ext = ext != NULL && ext[0] != '\0';
     bool have_ext_noslash = have_ext && ext[0] != '/';
     bool is_index = have_fname && have_ext && (
-        (0 == strcmp(fname, "index")) && ext[0] == '/');
+        (0 == strcmp(fname, "index")) && ext[0] == '/') && !have_prefix;
 
     bc_string_t *rv = bc_string_new();
 
@@ -66,6 +66,38 @@ bm_generate_filename(const char *dir, const char *prefix, const char *fname,
     }
 
     return bc_string_free(rv, false);
+}
+
+
+char*
+bm_generate_filename2(const char *dir, const char *prefix, const char *fname,
+    const char *prefix2, const char *fname2, const char *ext)
+{
+    bool have_prefix = prefix != NULL && prefix[0] != '\0';
+    bool have_fname = fname != NULL && fname[0] != '\0';
+    bool have_prefix2 = prefix2 != NULL && prefix2[0] != '\0';
+
+    bc_string_t *p = bc_string_new();
+
+    if (have_prefix)
+        bc_string_append(p, prefix);
+
+    if (have_prefix && (have_fname || have_prefix2))
+        bc_string_append_c(p, '/');
+
+    if (have_fname)
+        bc_string_append(p, fname);
+
+    if (have_fname && have_prefix2)
+        bc_string_append_c(p, '/');
+
+    if (have_prefix2)
+        bc_string_append(p, prefix2);
+
+    char *rv = bm_generate_filename(dir, p->str, fname2, ext);
+    bc_string_free(p, true);
+
+    return rv;
 }
 
 

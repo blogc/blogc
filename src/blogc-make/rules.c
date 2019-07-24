@@ -367,24 +367,19 @@ pagination_tags_outputlist(bm_ctx_t *ctx)
         bc_trie_free(local);
 
         if (last_page == NULL)
-            break;
+            continue;
 
         long pages = strtol(last_page, NULL, 10);
         free(last_page);
 
-        char *prefix = bc_strdup_printf("%s/%s/%s", tag_prefix,
-            ctx->settings->tags[k], pagination_prefix);
-
         for (size_t i = 0; i < pages; i++) {
             char *j = bc_strdup_printf("%d", i + 1);
-            char *f = bm_generate_filename(ctx->short_output_dir, prefix,
-                j, html_ext);
+            char *f = bm_generate_filename2(ctx->short_output_dir, tag_prefix,
+                ctx->settings->tags[k], pagination_prefix, j, html_ext);
             rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
             free(j);
             free(f);
         }
-
-        free(prefix);
     }
 
     bc_trie_free(variables);
@@ -425,16 +420,14 @@ pagination_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         // tag and page from the file path right now :/
         char *tag = NULL;
         for (size_t i = 0; ctx->settings->tags[i] != NULL; i++) {
-            char *prefix = bc_strdup_printf("%s/%s/%s", tag_prefix,
-                ctx->settings->tags[i], pagination_prefix);
             bool b = false;
 
             // it is impossible to have more output files per tag than the whole
             // amount of output pages
             for (size_t k = 1; k <= bc_slist_length(outputs); k++) {
                 char *j = bc_strdup_printf("%d", k);
-                char *f = bm_generate_filename(ctx->short_output_dir, prefix,
-                    j, html_ext);
+                char *f = bm_generate_filename2(ctx->short_output_dir, tag_prefix,
+                    ctx->settings->tags[i], pagination_prefix, j, html_ext);
                 free(j);
                 if (0 == strcmp(fctx->short_path, f)) {
                     tag = ctx->settings->tags[i];
@@ -445,7 +438,6 @@ pagination_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
                 }
                 free(f);
             }
-            free(prefix);
             if (b)
                 break;
         }

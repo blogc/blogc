@@ -13,6 +13,8 @@
 
 char* bm_generate_filename(const char *dir, const char *prefix, const char *fname,
     const char *ext);
+char* bm_generate_filename2(const char *dir, const char *prefix, const char *fname,
+    const char *prefix2, const char *fname2, const char *ext);
 char* bm_abspath(const char *path, bc_error_t **err);
 
 #endif /* _MAKE_UTILS_H */
