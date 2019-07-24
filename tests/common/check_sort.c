@@ -11,6 +11,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../../src/common/utils.h"
 #include "../../src/common/sort.h"
 
@@ -26,7 +27,7 @@ static void
 test_slist_sort_empty(void **state)
 {
     bc_slist_t *l = NULL;
-    assert_null(bc_slist_sort(l, sort_func));
+    assert_null(bc_slist_sort(l, (bc_sort_func_t) sort_func));
 }
 
 
@@ -36,7 +37,7 @@ test_slist_sort_single(void **state)
     bc_slist_t *l = NULL;
     l = bc_slist_append(l, bc_strdup("a"));
 
-    l = bc_slist_sort(l, sort_func);
+    l = bc_slist_sort(l, (bc_sort_func_t) sort_func);
 
     assert_non_null(l);
     assert_string_equal(l->data, "a");
@@ -54,7 +55,7 @@ test_slist_sort_sorted(void **state)
     l = bc_slist_append(l, bc_strdup("b"));
     l = bc_slist_append(l, bc_strdup("c"));
 
-    l = bc_slist_sort(l, sort_func);
+    l = bc_slist_sort(l, (bc_sort_func_t) sort_func);
 
     assert_non_null(l);
     assert_string_equal(l->data, "a");
@@ -75,7 +76,7 @@ test_slist_sort_reverse(void **state)
     l = bc_slist_append(l, bc_strdup("b"));
     l = bc_slist_append(l, bc_strdup("a"));
 
-    l = bc_slist_sort(l, sort_func);
+    l = bc_slist_sort(l, (bc_sort_func_t) sort_func);
 
     assert_non_null(l);
     assert_string_equal(l->data, "a");
@@ -97,7 +98,7 @@ test_slist_sort_mixed1(void **state)
     l = bc_slist_append(l, bc_strdup("c"));
     l = bc_slist_append(l, bc_strdup("b"));
 
-    l = bc_slist_sort(l, sort_func);
+    l = bc_slist_sort(l, (bc_sort_func_t) sort_func);
 
     assert_non_null(l);
     assert_string_equal(l->data, "a");
@@ -119,7 +120,7 @@ test_slist_sort_mixed2(void **state)
     l = bc_slist_append(l, bc_strdup("a"));
     l = bc_slist_append(l, bc_strdup("d"));
 
-    l = bc_slist_sort(l, sort_func);
+    l = bc_slist_sort(l, (bc_sort_func_t) sort_func);
 
     assert_non_null(l);
     assert_string_equal(l->data, "a");
