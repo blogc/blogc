@@ -186,7 +186,8 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
     bool reverse = bc_str_to_bool(bc_trie_lookup(conf, "FILTER_REVERSE"));
 
     if (sort) {
-        sources = bc_slist_sort(sources, reverse ? sort_source_reverse : sort_source);
+        sources = bc_slist_sort(sources,
+            (bc_sort_func_t) (reverse ? sort_source_reverse : sort_source));
     }
     else if (reverse) {
         bc_slist_t *tmp_sources = NULL;
