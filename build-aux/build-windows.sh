@@ -4,7 +4,7 @@ set -ex
 
 DESTDIR="${PN}-${TARGET}-${PV}"
 
-${MAKE_CMD:-make} blogc.exe
+${MAKE_CMD:-make}
 
 rm -rf "${DESTDIR}"
 mkdir -p "${DESTDIR}"

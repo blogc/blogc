@@ -14,14 +14,13 @@
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
-
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <squareball.h>
 
 #include "../../src/blogc-make/exec.h"
 #include "../../src/blogc-make/settings.h"
-#include "../../src/common/utils.h"
 
 
 int
@@ -75,16 +74,16 @@ test_find_binary(void **state)
 static void
 test_build_blogc_cmd_with_settings(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "locale", bc_strdup("en_US.utf8"));
-    settings->global = bc_trie_new(free);
-    bc_trie_insert(settings->global, "FOO", bc_strdup("BAR"));
-    bc_trie_insert(settings->global, "BAR", bc_strdup("BAZ"));
-    bc_trie_t *variables = bc_trie_new(free);
-    bc_trie_insert(variables, "LOL", bc_strdup("HEHE"));
-    bc_trie_t *local = bc_trie_new(free);
-    bc_trie_insert(local, "ASD", bc_strdup("QWE"));
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "locale", sb_strdup("en_US.utf8"));
+    settings->global = sb_trie_new(free);
+    sb_trie_insert(settings->global, "FOO", sb_strdup("BAR"));
+    sb_trie_insert(settings->global, "BAR", sb_strdup("BAZ"));
+    sb_trie_t *variables = sb_trie_new(free);
+    sb_trie_insert(variables, "LOL", sb_strdup("HEHE"));
+    sb_trie_t *local = sb_trie_new(free);
+    sb_trie_insert(local, "ASD", sb_strdup("QWE"));
     settings->tags = NULL;
 
     char *rv = bm_exec_build_blogc_cmd("blogc", settings, variables, local, NULL,
@@ -113,10 +112,10 @@ test_build_blogc_cmd_with_settings(void **state)
         "LC_ALL='en_US.utf8' blogc -D FOO='BAR' -D BAR='BAZ'");
     free(rv);
 
-    bc_trie_free(local);
-    bc_trie_free(variables);
-    bc_trie_free(settings->settings);
-    bc_trie_free(settings->global);
+    sb_trie_free(local);
+    sb_trie_free(variables);
+    sb_trie_free(settings->settings);
+    sb_trie_free(settings->global);
     free(settings);
 }
 
@@ -124,16 +123,16 @@ test_build_blogc_cmd_with_settings(void **state)
 static void
 test_build_blogc_cmd_with_settings_and_dev(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "locale", bc_strdup("en_US.utf8"));
-    settings->global = bc_trie_new(free);
-    bc_trie_insert(settings->global, "FOO", bc_strdup("BAR"));
-    bc_trie_insert(settings->global, "BAR", bc_strdup("BAZ"));
-    bc_trie_t *variables = bc_trie_new(free);
-    bc_trie_insert(variables, "LOL", bc_strdup("HEHE"));
-    bc_trie_t *local = bc_trie_new(free);
-    bc_trie_insert(local, "ASD", bc_strdup("QWE"));
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "locale", sb_strdup("en_US.utf8"));
+    settings->global = sb_trie_new(free);
+    sb_trie_insert(settings->global, "FOO", sb_strdup("BAR"));
+    sb_trie_insert(settings->global, "BAR", sb_strdup("BAZ"));
+    sb_trie_t *variables = sb_trie_new(free);
+    sb_trie_insert(variables, "LOL", sb_strdup("HEHE"));
+    sb_trie_t *local = sb_trie_new(free);
+    sb_trie_insert(local, "ASD", sb_strdup("QWE"));
     settings->tags = NULL;
 
     char *rv = bm_exec_build_blogc_cmd("blogc", settings, variables, local, NULL,
@@ -166,10 +165,10 @@ test_build_blogc_cmd_with_settings_and_dev(void **state)
         "-D MAKE_ENV_DEV=1 -D MAKE_ENV='dev'");
     free(rv);
 
-    bc_trie_free(local);
-    bc_trie_free(variables);
-    bc_trie_free(settings->settings);
-    bc_trie_free(settings->global);
+    sb_trie_free(local);
+    sb_trie_free(variables);
+    sb_trie_free(settings->settings);
+    sb_trie_free(settings->global);
     free(settings);
 }
 
@@ -177,17 +176,17 @@ test_build_blogc_cmd_with_settings_and_dev(void **state)
 static void
 test_build_blogc_cmd_with_settings_and_tags(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "locale", bc_strdup("en_US.utf8"));
-    settings->global = bc_trie_new(free);
-    bc_trie_insert(settings->global, "FOO", bc_strdup("BAR"));
-    bc_trie_insert(settings->global, "BAR", bc_strdup("BAZ"));
-    bc_trie_t *variables = bc_trie_new(free);
-    bc_trie_insert(variables, "LOL", bc_strdup("HEHE"));
-    bc_trie_t *local = bc_trie_new(free);
-    bc_trie_insert(local, "ASD", bc_strdup("QWE"));
-    settings->tags = bc_str_split("asd foo bar", ' ', 0);
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "locale", sb_strdup("en_US.utf8"));
+    settings->global = sb_trie_new(free);
+    sb_trie_insert(settings->global, "FOO", sb_strdup("BAR"));
+    sb_trie_insert(settings->global, "BAR", sb_strdup("BAZ"));
+    sb_trie_t *variables = sb_trie_new(free);
+    sb_trie_insert(variables, "LOL", sb_strdup("HEHE"));
+    sb_trie_t *local = sb_trie_new(free);
+    sb_trie_insert(local, "ASD", sb_strdup("QWE"));
+    settings->tags = sb_str_split("asd foo bar", ' ', 0);
 
     char *rv = bm_exec_build_blogc_cmd("blogc", settings, variables, local, NULL,
         true, NULL, "main.tmpl", "foo.html", true, true);
@@ -219,11 +218,11 @@ test_build_blogc_cmd_with_settings_and_tags(void **state)
         "-D BAR='BAZ' -D MAKE_ENV_DEV=1 -D MAKE_ENV='dev'");
     free(rv);
 
-    bc_trie_free(local);
-    bc_trie_free(variables);
-    bc_trie_free(settings->settings);
-    bc_trie_free(settings->global);
-    bc_strv_free(settings->tags);
+    sb_trie_free(local);
+    sb_trie_free(variables);
+    sb_trie_free(settings->settings);
+    sb_trie_free(settings->global);
+    sb_strv_free(settings->tags);
     free(settings);
 }
 
@@ -231,10 +230,10 @@ test_build_blogc_cmd_with_settings_and_tags(void **state)
 static void
 test_build_blogc_cmd_without_settings(void **state)
 {
-    bc_trie_t *variables = bc_trie_new(free);
-    bc_trie_insert(variables, "LOL", bc_strdup("HEHE"));
-    bc_trie_t *local = bc_trie_new(free);
-    bc_trie_insert(local, "ASD", bc_strdup("QWE"));
+    sb_trie_t *variables = sb_trie_new(free);
+    sb_trie_insert(variables, "LOL", sb_strdup("HEHE"));
+    sb_trie_t *local = sb_trie_new(free);
+    sb_trie_insert(local, "ASD", sb_strdup("QWE"));
 
     char *rv = bm_exec_build_blogc_cmd("blogc", NULL, variables, local, NULL,
         true, NULL, "main.tmpl", "foo.html", false, true);
@@ -261,18 +260,18 @@ test_build_blogc_cmd_without_settings(void **state)
         "blogc");
     free(rv);
 
-    bc_trie_free(local);
-    bc_trie_free(variables);
+    sb_trie_free(local);
+    sb_trie_free(variables);
 }
 
 
 static void
 test_build_blogc_cmd_print(void **state)
 {
-    bc_trie_t *variables = bc_trie_new(free);
-    bc_trie_insert(variables, "LOL", bc_strdup("HEHE"));
-    bc_trie_t *local = bc_trie_new(free);
-    bc_trie_insert(local, "ASD", bc_strdup("QWE"));
+    sb_trie_t *variables = sb_trie_new(free);
+    sb_trie_insert(variables, "LOL", sb_strdup("HEHE"));
+    sb_trie_t *local = sb_trie_new(free);
+    sb_trie_insert(local, "ASD", sb_strdup("QWE"));
 
     char *rv = bm_exec_build_blogc_cmd("blogc", NULL, variables, local, "LOL",
         false, NULL, NULL, NULL, false, true);
@@ -296,8 +295,8 @@ test_build_blogc_cmd_print(void **state)
         "blogc -p LOL");
     free(rv);
 
-    bc_trie_free(local);
-    bc_trie_free(variables);
+    sb_trie_free(local);
+    sb_trie_free(variables);
 }
 
 

@@ -10,26 +10,23 @@
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
-
 #include <stdlib.h>
 #include <string.h>
+#include <squareball.h>
 
 #include "../../src/blogc-make/atom.h"
 #include "../../src/blogc-make/settings.h"
-#include "../../src/common/file.h"
-#include "../../src/common/error.h"
-#include "../../src/common/utils.h"
 
 
 static void
 test_atom_generate_empty_file(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "atom_prefix", bc_strdup(""));
-    bc_trie_insert(settings->settings, "atom_ext", bc_strdup(".xml"));
-    bc_trie_insert(settings->settings, "post_prefix", bc_strdup(""));
-    bc_trie_insert(settings->settings, "html_ext", bc_strdup(".html"));
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "atom_prefix", sb_strdup(""));
+    sb_trie_insert(settings->settings, "atom_ext", sb_strdup(".xml"));
+    sb_trie_insert(settings->settings, "post_prefix", sb_strdup(""));
+    sb_trie_insert(settings->settings, "html_ext", sb_strdup(".html"));
 
     char *cmp = bm_atom_generate(settings);
 
@@ -68,7 +65,7 @@ test_atom_generate_empty_file(void **state)
         "</feed>\n");
 
     free(cmp);
-    bc_trie_free(settings->settings);
+    sb_trie_free(settings->settings);
     free(settings);
 }
 
@@ -76,12 +73,12 @@ test_atom_generate_empty_file(void **state)
 static void
 test_atom_generate_empty_dir(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "atom_prefix", bc_strdup(""));
-    bc_trie_insert(settings->settings, "atom_ext", bc_strdup("/index.xml"));
-    bc_trie_insert(settings->settings, "post_prefix", bc_strdup(""));
-    bc_trie_insert(settings->settings, "html_ext", bc_strdup("/index.html"));
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "atom_prefix", sb_strdup(""));
+    sb_trie_insert(settings->settings, "atom_ext", sb_strdup("/index.xml"));
+    sb_trie_insert(settings->settings, "post_prefix", sb_strdup(""));
+    sb_trie_insert(settings->settings, "html_ext", sb_strdup("/index.html"));
 
     char *cmp = bm_atom_generate(settings);
 
@@ -120,7 +117,7 @@ test_atom_generate_empty_dir(void **state)
         "</feed>\n");
 
     free(cmp);
-    bc_trie_free(settings->settings);
+    sb_trie_free(settings->settings);
     free(settings);
 }
 
@@ -128,12 +125,12 @@ test_atom_generate_empty_dir(void **state)
 static void
 test_atom_generate_file(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "atom_prefix", bc_strdup("atom"));
-    bc_trie_insert(settings->settings, "atom_ext", bc_strdup(".xml"));
-    bc_trie_insert(settings->settings, "post_prefix", bc_strdup("post"));
-    bc_trie_insert(settings->settings, "html_ext", bc_strdup(".html"));
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "atom_prefix", sb_strdup("atom"));
+    sb_trie_insert(settings->settings, "atom_ext", sb_strdup(".xml"));
+    sb_trie_insert(settings->settings, "post_prefix", sb_strdup("post"));
+    sb_trie_insert(settings->settings, "html_ext", sb_strdup(".html"));
 
     char *cmp = bm_atom_generate(settings);
 
@@ -172,7 +169,7 @@ test_atom_generate_file(void **state)
         "</feed>\n");
 
     free(cmp);
-    bc_trie_free(settings->settings);
+    sb_trie_free(settings->settings);
     free(settings);
 }
 
@@ -180,12 +177,12 @@ test_atom_generate_file(void **state)
 static void
 test_atom_generate_dir(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "atom_prefix", bc_strdup("atom"));
-    bc_trie_insert(settings->settings, "atom_ext", bc_strdup("/index.xml"));
-    bc_trie_insert(settings->settings, "post_prefix", bc_strdup("post"));
-    bc_trie_insert(settings->settings, "html_ext", bc_strdup("/index.html"));
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "atom_prefix", sb_strdup("atom"));
+    sb_trie_insert(settings->settings, "atom_ext", sb_strdup("/index.xml"));
+    sb_trie_insert(settings->settings, "post_prefix", sb_strdup("post"));
+    sb_trie_insert(settings->settings, "html_ext", sb_strdup("/index.html"));
 
     char *cmp = bm_atom_generate(settings);
 
@@ -224,7 +221,7 @@ test_atom_generate_dir(void **state)
         "</feed>\n");
 
     free(cmp);
-    bc_trie_free(settings->settings);
+    sb_trie_free(settings->settings);
     free(settings);
 }
 
@@ -232,21 +229,21 @@ test_atom_generate_dir(void **state)
 static void
 test_atom_empty_file(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "atom_prefix", bc_strdup(""));
-    bc_trie_insert(settings->settings, "atom_ext", bc_strdup(".xml"));
-    bc_trie_insert(settings->settings, "post_prefix", bc_strdup(""));
-    bc_trie_insert(settings->settings, "html_ext", bc_strdup(".html"));
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "atom_prefix", sb_strdup(""));
+    sb_trie_insert(settings->settings, "atom_ext", sb_strdup(".xml"));
+    sb_trie_insert(settings->settings, "post_prefix", sb_strdup(""));
+    sb_trie_insert(settings->settings, "html_ext", sb_strdup(".html"));
 
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     char *rv = bm_atom_deploy(settings, &err);
 
     assert_non_null(rv);
     assert_null(err);
 
     size_t cmp_len;
-    char *cmp = bc_file_get_contents(rv, true, &cmp_len, &err);
+    char *cmp = sb_file_get_contents_utf8(rv, &cmp_len, &err);
 
     assert_non_null(cmp);
     assert_null(err);
@@ -286,7 +283,7 @@ test_atom_empty_file(void **state)
     free(cmp);
     bm_atom_destroy(rv);
     free(rv);
-    bc_trie_free(settings->settings);
+    sb_trie_free(settings->settings);
     free(settings);
 }
 
@@ -294,21 +291,21 @@ test_atom_empty_file(void **state)
 static void
 test_atom_empty_dir(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "atom_prefix", bc_strdup(""));
-    bc_trie_insert(settings->settings, "atom_ext", bc_strdup("/index.xml"));
-    bc_trie_insert(settings->settings, "post_prefix", bc_strdup(""));
-    bc_trie_insert(settings->settings, "html_ext", bc_strdup("/index.html"));
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "atom_prefix", sb_strdup(""));
+    sb_trie_insert(settings->settings, "atom_ext", sb_strdup("/index.xml"));
+    sb_trie_insert(settings->settings, "post_prefix", sb_strdup(""));
+    sb_trie_insert(settings->settings, "html_ext", sb_strdup("/index.html"));
 
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     char *rv = bm_atom_deploy(settings, &err);
 
     assert_non_null(rv);
     assert_null(err);
 
     size_t cmp_len;
-    char *cmp = bc_file_get_contents(rv, true, &cmp_len, &err);
+    char *cmp = sb_file_get_contents_utf8(rv, &cmp_len, &err);
 
     assert_non_null(cmp);
     assert_null(err);
@@ -348,7 +345,7 @@ test_atom_empty_dir(void **state)
     free(cmp);
     bm_atom_destroy(rv);
     free(rv);
-    bc_trie_free(settings->settings);
+    sb_trie_free(settings->settings);
     free(settings);
 }
 
@@ -356,21 +353,21 @@ test_atom_empty_dir(void **state)
 static void
 test_atom_file(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "atom_prefix", bc_strdup("atom"));
-    bc_trie_insert(settings->settings, "atom_ext", bc_strdup(".xml"));
-    bc_trie_insert(settings->settings, "post_prefix", bc_strdup("post"));
-    bc_trie_insert(settings->settings, "html_ext", bc_strdup(".html"));
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "atom_prefix", sb_strdup("atom"));
+    sb_trie_insert(settings->settings, "atom_ext", sb_strdup(".xml"));
+    sb_trie_insert(settings->settings, "post_prefix", sb_strdup("post"));
+    sb_trie_insert(settings->settings, "html_ext", sb_strdup(".html"));
 
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     char *rv = bm_atom_deploy(settings, &err);
 
     assert_non_null(rv);
     assert_null(err);
 
     size_t cmp_len;
-    char *cmp = bc_file_get_contents(rv, true, &cmp_len, &err);
+    char *cmp = sb_file_get_contents_utf8(rv, &cmp_len, &err);
 
     assert_non_null(cmp);
     assert_null(err);
@@ -410,7 +407,7 @@ test_atom_file(void **state)
     free(cmp);
     bm_atom_destroy(rv);
     free(rv);
-    bc_trie_free(settings->settings);
+    sb_trie_free(settings->settings);
     free(settings);
 }
 
@@ -418,21 +415,21 @@ test_atom_file(void **state)
 static void
 test_atom_dir(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "atom_prefix", bc_strdup("atom"));
-    bc_trie_insert(settings->settings, "atom_ext", bc_strdup("/index.xml"));
-    bc_trie_insert(settings->settings, "post_prefix", bc_strdup("post"));
-    bc_trie_insert(settings->settings, "html_ext", bc_strdup("/index.html"));
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "atom_prefix", sb_strdup("atom"));
+    sb_trie_insert(settings->settings, "atom_ext", sb_strdup("/index.xml"));
+    sb_trie_insert(settings->settings, "post_prefix", sb_strdup("post"));
+    sb_trie_insert(settings->settings, "html_ext", sb_strdup("/index.html"));
 
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     char *rv = bm_atom_deploy(settings, &err);
 
     assert_non_null(rv);
     assert_null(err);
 
     size_t cmp_len;
-    char *cmp = bc_file_get_contents(rv, true, &cmp_len, &err);
+    char *cmp = sb_file_get_contents_utf8(rv, &cmp_len, &err);
 
     assert_non_null(cmp);
     assert_null(err);
@@ -472,7 +469,7 @@ test_atom_dir(void **state)
     free(cmp);
     bm_atom_destroy(rv);
     free(rv);
-    bc_trie_free(settings->settings);
+    sb_trie_free(settings->settings);
     free(settings);
 }
 
@@ -480,27 +477,26 @@ test_atom_dir(void **state)
 static void
 test_atom_legacy_entry_id_empty(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "atom_prefix", bc_strdup(""));
-    bc_trie_insert(settings->settings, "atom_ext", bc_strdup(".xml"));
-    bc_trie_insert(settings->settings, "post_prefix", bc_strdup(""));
-    bc_trie_insert(settings->settings, "html_ext", bc_strdup(".html"));
-    bc_trie_insert(settings->settings, "atom_legacy_entry_id", bc_strdup("1"));
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "atom_prefix", sb_strdup(""));
+    sb_trie_insert(settings->settings, "atom_ext", sb_strdup(".xml"));
+    sb_trie_insert(settings->settings, "post_prefix", sb_strdup(""));
+    sb_trie_insert(settings->settings, "html_ext", sb_strdup(".html"));
+    sb_trie_insert(settings->settings, "atom_legacy_entry_id", sb_strdup("1"));
 
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     char *rv = bm_atom_deploy(settings, &err);
 
     assert_null(rv);
     assert_non_null(err);
 
-    assert_int_equal(err->type, BLOGC_MAKE_ERROR_ATOM);
-    assert_string_equal(err->msg,
-        "'atom_legacy_entry_id' setting is not supported anymore. see "
+    assert_string_equal(sb_error_to_string(err),
+        "atom: 'atom_legacy_entry_id' setting is not supported anymore. see "
         "https://blogc.rgm.io/news/blogc-0.16.1/ for details");
 
-    bc_error_free(err);
-    bc_trie_free(settings->settings);
+    sb_error_free(err);
+    sb_trie_free(settings->settings);
     free(settings);
 }
 
@@ -508,27 +504,26 @@ test_atom_legacy_entry_id_empty(void **state)
 static void
 test_atom_legacy_entry_id(void **state)
 {
-    bm_settings_t *settings = bc_malloc(sizeof(bm_settings_t));
-    settings->settings = bc_trie_new(free);
-    bc_trie_insert(settings->settings, "atom_prefix", bc_strdup("atom"));
-    bc_trie_insert(settings->settings, "atom_ext", bc_strdup(".xml"));
-    bc_trie_insert(settings->settings, "post_prefix", bc_strdup("post"));
-    bc_trie_insert(settings->settings, "html_ext", bc_strdup(".html"));
-    bc_trie_insert(settings->settings, "atom_legacy_entry_id", bc_strdup("1"));
+    bm_settings_t *settings = sb_malloc(sizeof(bm_settings_t));
+    settings->settings = sb_trie_new(free);
+    sb_trie_insert(settings->settings, "atom_prefix", sb_strdup("atom"));
+    sb_trie_insert(settings->settings, "atom_ext", sb_strdup(".xml"));
+    sb_trie_insert(settings->settings, "post_prefix", sb_strdup("post"));
+    sb_trie_insert(settings->settings, "html_ext", sb_strdup(".html"));
+    sb_trie_insert(settings->settings, "atom_legacy_entry_id", sb_strdup("1"));
 
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
     char *rv = bm_atom_deploy(settings, &err);
 
     assert_null(rv);
     assert_non_null(err);
 
-    assert_int_equal(err->type, BLOGC_MAKE_ERROR_ATOM);
-    assert_string_equal(err->msg,
-        "'atom_legacy_entry_id' setting is not supported anymore. see "
+    assert_string_equal(sb_error_to_string(err),
+        "atom: 'atom_legacy_entry_id' setting is not supported anymore. see "
         "https://blogc.rgm.io/news/blogc-0.16.1/ for details");
 
-    bc_error_free(err);
-    bc_trie_free(settings->settings);
+    sb_error_free(err);
+    sb_trie_free(settings->settings);
     free(settings);
 }
 

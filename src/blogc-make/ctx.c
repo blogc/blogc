@@ -14,11 +14,11 @@
 #include <limits.h>
 #include <time.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
-#include "../common/error.h"
-#include "../common/file.h"
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "atom.h"
 #include "settings.h"
 #include "exec.h"
@@ -33,13 +33,13 @@ bm_filectx_new(bm_ctx_t *ctx, const char *filename, const char *slug,
     if (ctx == NULL || filename == NULL)
         return NULL;
 
-    char *f = filename[0] == '/' ? bc_strdup(filename) :
-        bc_strdup_printf("%s/%s", ctx->root_dir, filename);
+    char *f = filename[0] == '/' ? sb_strdup(filename) :
+        sb_strdup_printf("%s/%s", ctx->root_dir, filename);
 
-    bm_filectx_t *rv = bc_malloc(sizeof(bm_filectx_t));
+    bm_filectx_t *rv = sb_malloc(sizeof(bm_filectx_t));
     rv->path = f;
-    rv->short_path = bc_strdup(filename);
-    rv->slug = bc_strdup(slug);
+    rv->short_path = sb_strdup(filename);
+    rv->slug = sb_strdup(slug);
 
     if (st == NULL) {
         struct stat buf;
@@ -62,14 +62,14 @@ bm_filectx_new(bm_ctx_t *ctx, const char *filename, const char *slug,
 }
 
 
-bc_slist_t*
-bm_filectx_new_r(bc_slist_t *l, bm_ctx_t *ctx, const char *filename)
+sb_slist_t*
+bm_filectx_new_r(sb_slist_t *l, bm_ctx_t *ctx, const char *filename)
 {
     if (ctx == NULL || filename == NULL)
         return NULL;
 
-    char *f = filename[0] == '/' ? bc_strdup(filename) :
-        bc_strdup_printf("%s/%s", ctx->root_dir, filename);
+    char *f = filename[0] == '/' ? sb_strdup(filename) :
+        sb_strdup_printf("%s/%s", ctx->root_dir, filename);
 
     struct stat buf;
     if (0 != stat(f, &buf)) {
@@ -88,7 +88,7 @@ bm_filectx_new_r(bc_slist_t *l, bm_ctx_t *ctx, const char *filename)
         while (NULL != (e = readdir(dir))) {
             if ((0 == strcmp(e->d_name, ".")) || (0 == strcmp(e->d_name, "..")))
                 continue;
-            char *tmp = bc_strdup_printf("%s/%s", filename, e->d_name);
+            char *tmp = sb_strdup_printf("%s/%s", filename, e->d_name);
             l = bm_filectx_new_r(l, ctx, tmp);
             free(tmp);
         }
@@ -98,7 +98,7 @@ bm_filectx_new_r(bc_slist_t *l, bm_ctx_t *ctx, const char *filename)
         return l;
     }
 
-    l = bc_slist_append(l, bm_filectx_new(ctx, filename, NULL, &buf));
+    l = sb_slist_append(l, bm_filectx_new(ctx, filename, NULL, &buf));
     free(f);
     return l;
 }
@@ -167,7 +167,7 @@ bm_filectx_free(bm_filectx_t *fctx)
 
 bm_ctx_t*
 bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
-    bc_error_t **err)
+    sb_error_t **err)
 {
     if (settings_file == NULL || err == NULL || *err != NULL)
         return NULL;
@@ -177,7 +177,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
         return NULL;
 
     size_t content_len;
-    char *content = bc_file_get_contents(abs_filename, true, &content_len,
+    char *content = sb_file_get_contents_utf8(abs_filename, &content_len,
         err);
     if (*err != NULL) {
         free(abs_filename);
@@ -192,16 +192,16 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     }
     free(content);
 
-    const char *template_dir = bc_trie_lookup(settings->settings, "template_dir");
+    const char *template_dir = sb_trie_lookup(settings->settings, "template_dir");
     if (template_dir == NULL)
         template_dir = "";
 
     char *atom_template = NULL;
     bool atom_template_tmp = false;
-    const char *atom_template_conf = bc_trie_lookup(settings->settings,
+    const char *atom_template_conf = sb_trie_lookup(settings->settings,
         "atom_template");
     if (atom_template_conf != NULL) {
-        atom_template = bc_strdup_printf("%s/%s", template_dir, atom_template_conf);
+        atom_template = sb_strdup_printf("%s/%s", template_dir, atom_template_conf);
     }
     else {
         atom_template = bm_atom_deploy(settings, err);
@@ -215,7 +215,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
 
     bm_ctx_t *rv = NULL;
     if (base == NULL) {
-        rv = bc_malloc(sizeof(bm_ctx_t));
+        rv = sb_malloc(sizeof(bm_ctx_t));
         rv->blogc = bm_exec_find_binary(argv0, "blogc", "BLOGC");
         rv->blogc_runserver = bm_exec_find_binary(argv0, "blogc-runserver",
             "BLOGC_RUNSERVER");
@@ -229,23 +229,23 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     rv->settings = settings;
 
     rv->settings_fctx = bm_filectx_new(rv, abs_filename, NULL, NULL);
-    rv->root_dir = bc_strdup(dirname(abs_filename));
+    rv->root_dir = sb_strdup(dirname(abs_filename));
     free(abs_filename);
 
     const char *output_dir = getenv("OUTPUT_DIR");
-    rv->short_output_dir = bc_strdup(output_dir != NULL ? output_dir : "_build");
+    rv->short_output_dir = sb_strdup(output_dir != NULL ? output_dir : "_build");
 
     if (rv->short_output_dir[0] == '/') {
-        rv->output_dir = bc_strdup(rv->short_output_dir);
+        rv->output_dir = sb_strdup(rv->short_output_dir);
     }
     else {
-        rv->output_dir = bc_strdup_printf("%s/%s", rv->root_dir,
+        rv->output_dir = sb_strdup_printf("%s/%s", rv->root_dir,
             rv->short_output_dir);
     }
 
     // can't return null and set error after this!
 
-    char *main_template = bc_strdup_printf("%s/%s", template_dir,
+    char *main_template = sb_strdup_printf("%s/%s", template_dir,
         bm_ctx_settings_lookup(rv, "main_template"));
     rv->main_template_fctx = bm_filectx_new(rv, main_template, NULL, NULL);
     free(main_template);
@@ -271,7 +271,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
         for (size_t i = 0; settings->posts[i] != NULL; i++) {
             char *f = bm_generate_filename(content_dir, post_prefix,
                 settings->posts[i], source_ext);
-            rv->posts_fctx = bc_slist_append(rv->posts_fctx,
+            rv->posts_fctx = sb_slist_append(rv->posts_fctx,
                 bm_filectx_new(rv, f, settings->posts[i], NULL));
             free(f);
         }
@@ -282,7 +282,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
         for (size_t i = 0; settings->pages[i] != NULL; i++) {
             char *f = bm_generate_filename(content_dir, NULL, settings->pages[i],
                 source_ext);
-            rv->pages_fctx = bc_slist_append(rv->pages_fctx,
+            rv->pages_fctx = sb_slist_append(rv->pages_fctx,
                 bm_filectx_new(rv, f, settings->pages[i], NULL));
             free(f);
         }
@@ -312,13 +312,13 @@ bm_ctx_reload(bm_ctx_t **ctx)
         // files
 
         // needs to dup path, because it may be freed when reloading.
-        char *tmp = bc_strdup((*ctx)->settings_fctx->path);
-        bc_error_t *err = NULL;
+        char *tmp = sb_strdup((*ctx)->settings_fctx->path);
+        sb_error_t *err = NULL;
         *ctx = bm_ctx_new(*ctx, tmp, NULL, &err);
         free(tmp);
         if (err != NULL) {
-            bc_error_print(err, "blogc-make");
-            bc_error_free(err);
+            fprintf(stderr, "blogc-make: error: %s\n", sb_error_to_string(err));
+            sb_error_free(err);
             return false;
         }
         return true;
@@ -328,13 +328,13 @@ bm_ctx_reload(bm_ctx_t **ctx)
     bm_filectx_reload((*ctx)->atom_template_fctx);
     bm_filectx_reload((*ctx)->listing_entry_fctx);
 
-    for (bc_slist_t *tmp = (*ctx)->posts_fctx; tmp != NULL; tmp = tmp->next)
+    for (sb_slist_t *tmp = (*ctx)->posts_fctx; tmp != NULL; tmp = tmp->next)
         bm_filectx_reload((bm_filectx_t*) tmp->data);
 
-    for (bc_slist_t *tmp = (*ctx)->pages_fctx; tmp != NULL; tmp = tmp->next)
+    for (sb_slist_t *tmp = (*ctx)->pages_fctx; tmp != NULL; tmp = tmp->next)
         bm_filectx_reload((bm_filectx_t*) tmp->data);
 
-    for (bc_slist_t *tmp = (*ctx)->copy_fctx; tmp != NULL; tmp = tmp->next)
+    for (sb_slist_t *tmp = (*ctx)->copy_fctx; tmp != NULL; tmp = tmp->next)
         bm_filectx_reload((bm_filectx_t*) tmp->data);
 
     return true;
@@ -370,11 +370,11 @@ bm_ctx_free_internal(bm_ctx_t *ctx)
     bm_filectx_free(ctx->listing_entry_fctx);
     ctx->listing_entry_fctx = NULL;
 
-    bc_slist_free_full(ctx->posts_fctx, (bc_free_func_t) bm_filectx_free);
+    sb_slist_free_full(ctx->posts_fctx, (sb_free_func_t) bm_filectx_free);
     ctx->posts_fctx = NULL;
-    bc_slist_free_full(ctx->pages_fctx, (bc_free_func_t) bm_filectx_free);
+    sb_slist_free_full(ctx->pages_fctx, (sb_free_func_t) bm_filectx_free);
     ctx->pages_fctx = NULL;
-    bc_slist_free_full(ctx->copy_fctx, (bc_free_func_t) bm_filectx_free);
+    sb_slist_free_full(ctx->copy_fctx, (sb_free_func_t) bm_filectx_free);
     ctx->copy_fctx = NULL;
 }
 
@@ -396,7 +396,7 @@ bm_ctx_settings_lookup(bm_ctx_t *ctx, const char *key)
 {
     if (ctx == NULL || ctx->settings == NULL || ctx->settings->settings == NULL)
         return NULL;
-    return bc_trie_lookup(ctx->settings->settings, key);
+    return sb_trie_lookup(ctx->settings->settings, key);
 }
 
 

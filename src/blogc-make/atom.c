@@ -10,8 +10,8 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-#include "../common/error.h"
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "settings.h"
 #include "utils.h"
 #include "atom.h"
@@ -53,32 +53,32 @@ bm_atom_generate(bm_settings_t *settings)
     if (settings == NULL)
         return NULL;
 
-    const char *atom_prefix = bc_trie_lookup(settings->settings, "atom_prefix");
-    const char *atom_ext = bc_trie_lookup(settings->settings, "atom_ext");
-    const char *post_prefix = bc_trie_lookup(settings->settings, "post_prefix");
-    const char *post_ext = bc_trie_lookup(settings->settings, "html_ext");
+    const char *atom_prefix = sb_trie_lookup(settings->settings, "atom_prefix");
+    const char *atom_ext = sb_trie_lookup(settings->settings, "atom_ext");
+    const char *post_prefix = sb_trie_lookup(settings->settings, "post_prefix");
+    const char *post_ext = sb_trie_lookup(settings->settings, "html_ext");
 
-    bc_string_t *atom_url = bc_string_new();
+    sb_string_t *atom_url = sb_string_new();
 
     if (atom_prefix[0] != '\0')
-        bc_string_append_c(atom_url, '/');
+        sb_string_append_c(atom_url, '/');
 
-    bc_string_append(atom_url, atom_prefix);
-    bc_string_append(atom_url, "{% ifdef FILTER_TAG %}/{{ FILTER_TAG }}");
+    sb_string_append(atom_url, atom_prefix);
+    sb_string_append(atom_url, "{% ifdef FILTER_TAG %}/{{ FILTER_TAG }}");
 
     if (atom_prefix[0] == '\0' && atom_ext[0] != '/')
-        bc_string_append(atom_url, "{% else %}/index");
+        sb_string_append(atom_url, "{% else %}/index");
 
-    bc_string_append(atom_url, "{% endif %}");
-    bc_string_append(atom_url, atom_ext);
+    sb_string_append(atom_url, "{% endif %}");
+    sb_string_append(atom_url, atom_ext);
 
     char *post_url = bm_generate_filename(NULL, post_prefix, "{{ FILENAME }}",
         post_ext);
 
-    char *rv = bc_strdup_printf(atom_template, atom_url->str, atom_url->str,
+    char *rv = sb_strdup_printf(atom_template, atom_url->str, atom_url->str,
         post_url, post_url);
 
-    bc_string_free(atom_url, true);
+    sb_string_free(atom_url, true);
     free(post_url);
 
     return rv;
@@ -86,14 +86,14 @@ bm_atom_generate(bm_settings_t *settings)
 
 
 char*
-bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
+bm_atom_deploy(bm_settings_t *settings, sb_error_t **err)
 {
     if (settings == NULL || err == NULL || *err != NULL)
         return NULL;
 
-    if (NULL != bc_trie_lookup(settings->settings, "atom_legacy_entry_id")) {
-        *err = bc_error_new_printf(BLOGC_MAKE_ERROR_ATOM,
-            "'atom_legacy_entry_id' setting is not supported anymore. see "
+    if (NULL != sb_trie_lookup(settings->settings, "atom_legacy_entry_id")) {
+        *err = sb_strerror_new(
+            "atom: 'atom_legacy_entry_id' setting is not supported anymore. see "
             "https://blogc.rgm.io/news/blogc-0.16.1/ for details");
         return NULL;
     }
@@ -102,8 +102,8 @@ bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
     char fname[] = "/tmp/blogc-make_XXXXXX";
     int fd;
     if (-1 == (fd = mkstemp(fname))) {
-        *err = bc_error_new_printf(BLOGC_MAKE_ERROR_ATOM,
-            "Failed to create temporary atom template: %s", strerror(errno));
+        *err = sb_strerror_new_printf(
+            "atom: Failed to create temporary atom template: %s", strerror(errno));
         return NULL;
     }
 
@@ -115,8 +115,8 @@ bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
     }
 
     if (-1 == write(fd, content, strlen(content))) {
-        *err = bc_error_new_printf(BLOGC_MAKE_ERROR_ATOM,
-            "Failed to write to temporary atom template: %s", strerror(errno));
+        *err = sb_strerror_new_printf(
+            "atom: Failed to write to temporary atom template: %s", strerror(errno));
         free(content);
         close(fd);
         unlink(fname);
@@ -126,7 +126,7 @@ bm_atom_deploy(bm_settings_t *settings, bc_error_t **err)
     free(content);
     close(fd);
 
-    return bc_strdup(fname);
+    return sb_strdup(fname);
 }
 
 

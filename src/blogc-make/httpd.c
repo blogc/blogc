@@ -11,7 +11,8 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "ctx.h"
 #include "exec.h"
 #include "reloader.h"
@@ -23,7 +24,7 @@
 
 typedef struct {
     bm_ctx_t *ctx;
-    bc_trie_t *args;
+    sb_trie_t *args;
 } bm_httpd_t;
 
 
@@ -32,8 +33,8 @@ httpd_thread(void *arg)
 {
     bm_httpd_t *httpd = arg;
 
-    int rv = bm_exec_blogc_runserver(httpd->ctx, bc_trie_lookup(httpd->args, "host"),
-        bc_trie_lookup(httpd->args, "port"), bc_trie_lookup(httpd->args, "threads"));
+    int rv = bm_exec_blogc_runserver(httpd->ctx, sb_trie_lookup(httpd->args, "host"),
+        sb_trie_lookup(httpd->args, "port"), sb_trie_lookup(httpd->args, "threads"));
 
     free(httpd);
 
@@ -45,8 +46,8 @@ httpd_thread(void *arg)
 
 
 int
-bm_httpd_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec, bc_slist_t *outputs,
-    bc_trie_t *args)
+bm_httpd_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec, sb_slist_t *outputs,
+    sb_trie_t *args)
 {
     // this is here to avoid that the httpd starts running in the middle of the
     // first build, as the reloader and the httpd are started in parallel.
@@ -76,7 +77,7 @@ bm_httpd_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec, bc_slist_t *outputs,
         return 1;
     }
 
-    bm_httpd_t *rv = bc_malloc(sizeof(bm_httpd_t));
+    bm_httpd_t *rv = sb_malloc(sizeof(bm_httpd_t));
     rv->ctx = *ctx;
     rv->args = args;
 

@@ -12,7 +12,8 @@
 #include <cmocka.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../../src/common/utils.h"
+#include <squareball.h>
+
 #include "../../src/blogc-runserver/httpd-utils.h"
 
 
@@ -89,7 +90,7 @@ static void
 test_urldecode(void **state)
 {
     for (size_t i = 0; i < 128; i++) {
-        char *t = bc_strdup_printf("%%%02x", i);
+        char *t = sb_strdup_printf("%%%02x", i);
         char *r = br_urldecode(t);
         assert_int_equal(r[0], i);
         assert_int_equal(r[1], 0);

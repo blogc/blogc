@@ -10,11 +10,10 @@
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
-
 #include <stdlib.h>
+#include <squareball.h>
 
 #include "../../src/blogc-make/utils.h"
-#include "../../src/common/utils.h"
 
 
 static void

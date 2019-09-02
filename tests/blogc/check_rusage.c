@@ -15,7 +15,8 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include <sys/resource.h>
-#include "../../src/common/utils.h"
+#include <squareball.h>
+
 #include "../../src/blogc/rusage.h"
 
 
@@ -99,18 +100,18 @@ test_rusage_format_memory(void **state)
 static void
 test_rusage_inject(void **state)
 {
-    bc_trie_t *t = bc_trie_new(free);
+    sb_trie_t *t = sb_trie_new(free);
 
     will_return(__wrap_getrusage, -1);
     blogc_rusage_inject(t);
-    assert_int_equal(bc_trie_size(t), 0);
+    assert_int_equal(sb_trie_size(t), 0);
 
     will_return(__wrap_getrusage, 0);
     blogc_rusage_inject(t);
-    assert_int_equal(bc_trie_size(t), 2);
-    assert_string_equal(bc_trie_lookup(t, "BLOGC_RUSAGE_CPU_TIME"), "4.000s");
-    assert_string_equal(bc_trie_lookup(t, "BLOGC_RUSAGE_MEMORY"), "10.010MB");
-    bc_trie_free(t);
+    assert_int_equal(sb_trie_size(t), 2);
+    assert_string_equal(sb_trie_lookup(t, "BLOGC_RUSAGE_CPU_TIME"), "4.000s");
+    assert_string_equal(sb_trie_lookup(t, "BLOGC_RUSAGE_MEMORY"), "10.010MB");
+    sb_trie_free(t);
 }
 
 

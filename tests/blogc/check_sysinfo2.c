@@ -13,8 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "../../src/common/error.h"
-#include "../../src/common/utils.h"
+#include <squareball.h>
+
 #include "../../src/blogc/sysinfo.h"
 
 // this test exists because we can't test more than one return values for
@@ -23,11 +23,10 @@
 
 
 char*
-__wrap_bc_file_get_contents(const char *path, bool utf8, size_t *len, bc_error_t **err)
+__wrap_sb_file_get_contents(const char *path, size_t *len, sb_error_t **err)
 {
     assert_string_equal(path, "/proc/1/cgroup");
-    assert_false(utf8);
-    *err = bc_error_new(0, "");
+    *err = sb_strerror_new("");
     return NULL;
 }
 

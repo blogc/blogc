@@ -12,8 +12,8 @@
 #include <libgen.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "../common/utils.h"
-#include "../common/config-parser.h"
+#include <squareball.h>
+
 #include "settings.h"
 #include "post-receive.h"
 
@@ -32,7 +32,7 @@ bgr_post_receive_hook(int argc, char *argv[])
         return 1;
     }
 
-    char *repo_path = bc_strdup(dirname(real_hooks_dir));
+    char *repo_path = sb_strdup(dirname(real_hooks_dir));
     free(real_hooks_dir);
     if (0 != chdir(repo_path)) {
         fprintf(stderr, "error: failed to change to repository root\n");
@@ -47,11 +47,11 @@ bgr_post_receive_hook(int argc, char *argv[])
     if ((0 == system("git config --local remote.mirror.pushurl > /dev/null")) ||
         (0 == system("git config --local remote.mirror.url > /dev/null")))
     {
-        mirror = bc_strdup("mirror");
+        mirror = sb_strdup("mirror");
         goto push;
     }
 
-    bc_config_t *config = bgr_settings_parse();
+    sb_config_t *config = bgr_settings_parse();
     if (config == NULL) {
         fprintf(stderr, "warning: repository mirroring disabled\n");
         goto cleanup;
@@ -60,13 +60,13 @@ bgr_post_receive_hook(int argc, char *argv[])
     char *section = bgr_settings_get_section(config, repo_path);
     if (section == NULL) {
         fprintf(stderr, "warning: repository mirroring disabled\n");
-        bc_config_free(config);
+        sb_config_free(config);
         goto cleanup;
     }
 
-    mirror = bc_strdup(bc_config_get(config, section, "mirror"));
+    mirror = sb_strdup(sb_config_get(config, section, "mirror"));
     free(section);
-    bc_config_free(config);
+    sb_config_free(config);
 
     if (mirror == NULL) {
         fprintf(stderr, "warning: repository mirroring disabled\n");
@@ -76,7 +76,7 @@ bgr_post_receive_hook(int argc, char *argv[])
 push:
 
     {
-        char *git_cmd = bc_strdup_printf("git push --mirror %s", mirror);
+        char *git_cmd = sb_strdup_printf("git push --mirror %s", mirror);
         if (0 != system(git_cmd))
             fprintf(stderr, "warning: failed push to git mirror\n");
         free(git_cmd);

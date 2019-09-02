@@ -9,10 +9,12 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <squareball.h>
 
 #include "template-parser.h"
-#include "../common/error.h"
-#include "../common/utils.h"
+
+#define is_space(c) (c == ' ' || c == '\f' || c == '\n' || c == '\r' || \
+    c == '\t' || c == '\v')
 
 
 typedef enum {
@@ -41,8 +43,8 @@ typedef enum {
 } blogc_template_parser_state_t;
 
 
-bc_slist_t*
-blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
+sb_slist_t*
+blogc_template_parse(const char *src, size_t src_len, sb_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -63,7 +65,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
     bool foreach_open = false;
     bool block_foreach_open = false;
 
-    bc_slist_t *ast = NULL;
+    sb_slist_t *ast = NULL;
     blogc_template_node_t *node = NULL;
 
     /*
@@ -94,21 +96,21 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
 
             case TEMPLATE_START:
                 if (last) {
-                    node = bc_malloc(sizeof(blogc_template_node_t));
+                    node = sb_malloc(sizeof(blogc_template_node_t));
                     node->type = type;
                     if (lstrip_next) {
-                        tmp = bc_strndup(src + start, src_len - start);
-                        node->data[0] = bc_strdup(bc_str_lstrip(tmp));
+                        tmp = sb_strndup(src + start, src_len - start);
+                        node->data[0] = sb_strdup(sb_str_lstrip(tmp));
                         free(tmp);
                         tmp = NULL;
                         lstrip_next = false;
                     }
                     else {
-                        node->data[0] = bc_strndup(src + start, src_len - start);
+                        node->data[0] = sb_strndup(src + start, src_len - start);
                     }
                     node->op = 0;
                     node->data[1] = NULL;
-                    ast = bc_slist_append(ast, node);
+                    ast = sb_slist_append(ast, node);
                     previous = node;
                     node = NULL;
                 }
@@ -125,21 +127,21 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                     else
                         state = TEMPLATE_VARIABLE_START;
                     if (end > start) {
-                        node = bc_malloc(sizeof(blogc_template_node_t));
+                        node = sb_malloc(sizeof(blogc_template_node_t));
                         node->type = type;
                         if (lstrip_next) {
-                            tmp = bc_strndup(src + start, end - start);
-                            node->data[0] = bc_strdup(bc_str_lstrip(tmp));
+                            tmp = sb_strndup(src + start, end - start);
+                            node->data[0] = sb_strdup(sb_str_lstrip(tmp));
                             free(tmp);
                             tmp = NULL;
                             lstrip_next = false;
                         }
                         else {
-                            node->data[0] = bc_strndup(src + start, end - start);
+                            node->data[0] = sb_strndup(src + start, end - start);
                         }
                         node->op = 0;
                         node->data[1] = NULL;
-                        ast = bc_slist_append(ast, node);
+                        ast = sb_slist_append(ast, node);
                         previous = node;
                         node = NULL;
                     }
@@ -153,7 +155,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                     if ((previous != NULL) &&
                         (previous->type == BLOGC_TEMPLATE_NODE_CONTENT))
                     {
-                        previous->data[0] = bc_str_rstrip(previous->data[0]);  // does not need copy
+                        previous->data[0] = sb_str_rstrip(previous->data[0]);  // does not need copy
                     }
                     state = TEMPLATE_BLOCK_START;
                     break;
@@ -161,7 +163,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                 state = TEMPLATE_BLOCK_START;
 
             case TEMPLATE_BLOCK_START:
-                if (bc_isspace(c))
+                if (is_space(c))
                     break;
                 if (c >= 'a' && c <= 'z') {
                     state = TEMPLATE_BLOCK_TYPE;
@@ -169,21 +171,20 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                     break;
                 }
                 if (c == '-') {
-                    *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                        src_len, current,
-                        "Invalid statement syntax. Duplicated whitespace "
-                        "cleaner before statement.");
+                    *err = sb_parser_error_new(src, src_len, current,
+                        "template: Invalid statement syntax. Duplicated "
+                        "whitespace cleaner before statement.");
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid statement syntax. Must begin with lowercase letter.");
+                *err = sb_parser_error_new(src, src_len, current,
+                    "template: Invalid statement syntax. Must begin with "
+                    "lowercase letter.");
                 break;
 
             case TEMPLATE_BLOCK_TYPE:
                 if (c >= 'a' && c <= 'z')
                     break;
-                if (bc_isspace(c)) {
+                if (is_space(c)) {
                     if ((current - start == 5) &&
                         (0 == strncmp("block", src + start, 5)))
                     {
@@ -195,8 +196,8 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                             block_foreach_open = foreach_open;
                             break;
                         }
-                        *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
-                            src, src_len, current, "Blocks can't be nested.");
+                        *err = sb_parser_error_new(src, src_len, current,
+                            "template: Blocks can't be nested.");
                         break;
                     }
                     else if ((current - start == 8) &&
@@ -204,16 +205,18 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                     {
                         if (block_open) {
                             if (if_count != block_if_count) {
-                                *err = bc_error_new_printf(BLOGC_ERROR_TEMPLATE_PARSER,
-                                    "%d open 'if', 'ifdef' and/or 'ifndef' statements "
-                                    "were not closed inside a '%s' block!",
+                                *err = sb_strerror_new_printf(
+                                    "template: %d open 'if', 'ifdef' and/or "
+                                    "'ifndef' statements were not closed "
+                                    "inside a '%s' block!",
                                     if_count - block_if_count, block_type);
                                 break;
                             }
                             if (!block_foreach_open && foreach_open) {
-                                *err = bc_error_new_printf(BLOGC_ERROR_TEMPLATE_PARSER,
-                                    "An open 'foreach' statement was not closed "
-                                    "inside a '%s' block!", block_type);
+                                *err = sb_strerror_new_printf(
+                                    "template: An open 'foreach' statement was "
+                                    "not closed inside a '%s' block!",
+                                    block_type);
                                 break;
                             }
                             state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
@@ -221,9 +224,9 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                             block_open = false;
                             break;
                         }
-                        *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
-                            src, src_len, current,
-                            "'endblock' statement without an open 'block' statement.");
+                        *err = sb_parser_error_new(src, src_len, current,
+                            "template: 'endblock' statement without an open "
+                            "'block' statement.");
                         break;
                     }
                     else if ((current - start == 5) &&
@@ -268,16 +271,14 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                                 else_open = true;
                                 break;
                             }
-                            *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
-                                src, src_len, current,
-                                "More than one 'else' statement for an open 'if', "
-                                "'ifdef' or 'ifndef' statement.");
+                            *err = sb_parser_error_new(src, src_len, current,
+                                "template: More than one 'else' statement for "
+                                "an open 'if', 'ifdef' or 'ifndef' statement.");
                             break;
                         }
-                        *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
-                            src, src_len, current,
-                            "'else' statement without an open 'if', 'ifdef' or "
-                            "'ifndef' statement.");
+                        *err = sb_parser_error_new(src, src_len, current,
+                            "template: 'else' statement without an open 'if', "
+                            "'ifdef' or 'ifndef' statement.");
                         break;
                     }
                     else if ((current - start == 5) &&
@@ -292,10 +293,9 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                             else_open = false;
                             break;
                         }
-                        *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
-                            src, src_len, current,
-                            "'endif' statement without an open 'if', 'ifdef' or "
-                            "'ifndef' statement.");
+                        *err = sb_parser_error_new(src, src_len, current,
+                            "template: 'endif' statement without an open 'if', "
+                            "'ifdef' or 'ifndef' statement.");
                         break;
                     }
                     else if ((current - start == 7) &&
@@ -308,9 +308,8 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                             foreach_open = true;
                             break;
                         }
-                        *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
-                            src, src_len, current, "'foreach' statements can't "
-                            "be nested.");
+                        *err = sb_parser_error_new(src, src_len, current,
+                            "template: 'foreach' statements can't be nested.");
                         break;
                     }
                     else if ((current - start == 10) &&
@@ -324,37 +323,35 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                             foreach_open = false;
                             break;
                         }
-                        *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
-                            src, src_len, current,
-                            "'endforeach' statement without an open 'foreach' "
-                            "statement.");
+                        *err = sb_parser_error_new(src, src_len, current,
+                            "template: 'endforeach' statement without an open "
+                            "'foreach' statement.");
                         break;
                     }
                 }
-                *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid statement type: Allowed types are: 'block', "
+                *err = sb_parser_error_new(src, src_len, current,
+                    "template: Invalid statement type: Allowed types are: 'block', "
                     "'endblock', 'if', 'ifdef', 'ifndef', 'else', 'endif', "
                     "'foreach' and 'endforeach'.");
                 break;
 
             case TEMPLATE_BLOCK_BLOCK_TYPE_START:
-                if (bc_isspace(c))
+                if (is_space(c))
                     break;
                 if (c >= 'a' && c <= 'z') {
                     state = TEMPLATE_BLOCK_BLOCK_TYPE;
                     start = current;
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid block syntax. Must begin with lowercase letter.");
+                *err = sb_parser_error_new(src, src_len, current,
+                    "template: Invalid block syntax. Must begin with lowercase "
+                    "letter.");
                 break;
 
             case TEMPLATE_BLOCK_BLOCK_TYPE:
                 if ((c >= 'a' && c <= 'z') || c == '_')
                     break;
-                if (bc_isspace(c)) {
+                if (is_space(c)) {
                     if ((current - start == 5) &&
                         (0 == strncmp("entry", src + start, 5)))
                     {
@@ -388,29 +385,28 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                         break;
                     }
                 }
-                *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid block type. Allowed types are: 'entry', 'listing', "
-                    "'listing_once' and 'listing_entry'.");
+                *err = sb_parser_error_new(src, src_len, current,
+                    "template: Invalid block type. Allowed types are: 'entry', "
+                    "'listing', 'listing_once' and 'listing_entry'.");
                 break;
 
             case TEMPLATE_BLOCK_IF_START:
-                if (bc_isspace(c))
+                if (is_space(c))
                     break;
                 if (c >= 'A' && c <= 'Z') {
                     state = TEMPLATE_BLOCK_IF_VARIABLE;
                     start = current;
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid variable name. Must begin with uppercase letter.");
+                *err = sb_parser_error_new(src, src_len, current,
+                    "template: Invalid variable name. Must begin with uppercase "
+                    "letter.");
                 break;
 
             case TEMPLATE_BLOCK_IF_VARIABLE:
                 if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
                     break;
-                if (bc_isspace(c)) {
+                if (is_space(c)) {
                     end = current;
                     if (type == BLOGC_TEMPLATE_NODE_IF)
                         state = TEMPLATE_BLOCK_IF_OPERATOR_START;
@@ -418,28 +414,27 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                         state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid variable name. Must be uppercase letter, number "
-                    "or '_'.");
+                *err = sb_parser_error_new(src, src_len, current,
+                    "template: Invalid variable name. Must be uppercase letter, "
+                    "number or '_'.");
                 break;
 
             case TEMPLATE_BLOCK_IF_OPERATOR_START:
-                if (bc_isspace(c))
+                if (is_space(c))
                     break;
                 state = TEMPLATE_BLOCK_IF_OPERATOR;
                 op_start = current;
                 break;
 
             case TEMPLATE_BLOCK_IF_OPERATOR:
-                if (!bc_isspace(c))
+                if (!is_space(c))
                     break;
                 state = TEMPLATE_BLOCK_IF_OPERAND_START;
                 op_end = current;
                 break;
 
             case TEMPLATE_BLOCK_IF_OPERAND_START:
-                if (bc_isspace(c))
+                if (is_space(c))
                     break;
                 if (c >= 'A' && c <= 'Z') {
                     state = TEMPLATE_BLOCK_IF_VARIABLE_OPERAND;
@@ -453,9 +448,8 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                 }
                 op_start = 0;
                 op_end = 0;
-                *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid 'if' operand. Must be double-quoted static "
+                *err = sb_parser_error_new(src, src_len, current,
+                    "template: Invalid 'if' operand. Must be double-quoted static "
                     "string or variable.");
                 break;
 
@@ -476,35 +470,33 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                 break;
 
             case TEMPLATE_BLOCK_FOREACH_START:
-                if (bc_isspace(c))
+                if (is_space(c))
                     break;
                 if (c >= 'A' && c <= 'Z') {
                     state = TEMPLATE_BLOCK_FOREACH_VARIABLE;
                     start = current;
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid foreach variable name. Must begin with uppercase "
-                    "letter.");
+                *err = sb_parser_error_new(src, src_len, current,
+                    "template: Invalid foreach variable name. Must begin with "
+                    "uppercase letter.");
                 break;
 
             case TEMPLATE_BLOCK_FOREACH_VARIABLE:
                 if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
                     break;
-                if (bc_isspace(c)) {
+                if (is_space(c)) {
                     end = current;
                     state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid foreach variable name. Must be uppercase letter, "
-                    "number or '_'.");
+                *err = sb_parser_error_new(src, src_len, current,
+                    "template: Invalid foreach variable name. Must be uppercase "
+                    "letter, number or '_'.");
                 break;
 
             case TEMPLATE_BLOCK_END_WHITESPACE_CLEANER:
-                if (bc_isspace(c))
+                if (is_space(c))
                     break;
                 if (c == '-') {
                     lstrip_next = true;
@@ -519,19 +511,17 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                     break;
                 }
                 if (c == '-') {
-                    *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                        src_len, current,
-                        "Invalid statement syntax. Duplicated whitespace "
+                    *err = sb_parser_error_new(src, src_len, current,
+                        "template: Invalid statement syntax. Duplicated whitespace "
                         "cleaner after statement.");
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid statement syntax. Must end with '%%}'.");
+                *err = sb_parser_error_new(src, src_len, current,
+                    "template: Invalid statement syntax. Must end with '%}'.");
                 break;
 
             case TEMPLATE_VARIABLE_START:
-                if (bc_isspace(c))
+                if (is_space(c))
                     break;
                 if (c >= 'A' && c <= 'Z') {
                     state = TEMPLATE_VARIABLE;
@@ -539,15 +529,15 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                     start = current;
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid variable name. Must begin with uppercase letter.");
+                *err = sb_parser_error_new(src, src_len, current,
+                    "template: Invalid variable name. Must begin with uppercase "
+                    "letter.");
                 break;
 
             case TEMPLATE_VARIABLE:
                 if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
                     break;
-                if (bc_isspace(c)) {
+                if (is_space(c)) {
                     end = current;
                     state = TEMPLATE_VARIABLE_END;
                     break;
@@ -557,22 +547,20 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                     state = TEMPLATE_CLOSE_BRACKET;
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid variable name. Must be uppercase letter, number "
-                    "or '_'.");
+                *err = sb_parser_error_new(src, src_len, current,
+                    "template: Invalid variable name. Must be uppercase letter, "
+                    "number or '_'.");
                 break;
 
             case TEMPLATE_VARIABLE_END:
-                if (bc_isspace(c))
+                if (is_space(c))
                     break;
                 if (c == '}') {
                     state = TEMPLATE_CLOSE_BRACKET;
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid statement syntax. Must end with '}}'.");
+                *err = sb_parser_error_new(src, src_len, current,
+                    "template: Invalid statement syntax. Must end with '}}'.");
                 break;
 
             case TEMPLATE_CLOSE_BRACKET:
@@ -596,9 +584,8 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                                 tmp_op = BLOGC_TEMPLATE_OP_NEQ;
                         }
                         if (tmp_op == 0) {
-                            *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER,
-                                src, src_len, op_start,
-                                "Invalid 'if' operator. Must be '<', '>', "
+                            *err = sb_parser_error_new(src, src_len, op_start,
+                                "template: Invalid 'if' operator. Must be '<', '>', "
                                 "'<=', '>=', '==' or '!='.");
                             op_start = 0;
                             op_end = 0;
@@ -607,21 +594,21 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                         op_start = 0;
                         op_end = 0;
                     }
-                    node = bc_malloc(sizeof(blogc_template_node_t));
+                    node = sb_malloc(sizeof(blogc_template_node_t));
                     node->type = type;
                     node->op = tmp_op;
                     node->data[0] = NULL;
                     node->data[1] = NULL;
                     if (end > start)
-                        node->data[0] = bc_strndup(src + start, end - start);
+                        node->data[0] = sb_strndup(src + start, end - start);
                     if (end2 > start2) {
-                        node->data[1] = bc_strndup(src + start2, end2 - start2);
+                        node->data[1] = sb_strndup(src + start2, end2 - start2);
                         start2 = 0;
                         end2 = 0;
                     }
                     if (type == BLOGC_TEMPLATE_NODE_BLOCK)
                         block_type = node->data[0];
-                    ast = bc_slist_append(ast, node);
+                    ast = sb_slist_append(ast, node);
                     previous = node;
                     node = NULL;
                     state = TEMPLATE_START;
@@ -629,9 +616,8 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                     start = current + 1;
                     break;
                 }
-                *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
-                    src_len, current,
-                    "Invalid statement syntax. Must end with '}'.");
+                *err = sb_parser_error_new(src, src_len, current,
+                    "template: Invalid statement syntax. Must end with '}'.");
                 break;
 
         }
@@ -644,18 +630,17 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
 
     if (*err == NULL) {
         if (state == TEMPLATE_BLOCK_IF_STRING_OPERAND)
-            *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src, src_len,
-                start2, "Found an open double-quoted string.");
+            *err = sb_parser_error_new(src, src_len, start2,
+                "template: Found an open double-quoted string.");
         else if (if_count != 0)
-            *err = bc_error_new_printf(BLOGC_ERROR_TEMPLATE_PARSER,
-                "%d open 'if', 'ifdef' and/or 'ifndef' statements were not closed!",
-                if_count);
+            *err = sb_strerror_new_printf(
+                "template: %d open 'if', 'ifdef' and/or 'ifndef' statements "
+                "were not closed!", if_count);
         else if (block_open)
-            *err = bc_error_new(BLOGC_ERROR_TEMPLATE_PARSER,
-                "An open block was not closed!");
+            *err = sb_strerror_new("template: An open block was not closed!");
         else if (foreach_open)
-            *err = bc_error_new(BLOGC_ERROR_TEMPLATE_PARSER,
-                "An open 'foreach' statement was not closed!");
+            *err = sb_strerror_new(
+                "template: An open 'foreach' statement was not closed!");
     }
 
     if (*err != NULL) {
@@ -672,9 +657,9 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
 
 
 void
-blogc_template_free_ast(bc_slist_t *ast)
+blogc_template_free_ast(sb_slist_t *ast)
 {
-    for (bc_slist_t *tmp = ast; tmp != NULL; tmp = tmp->next) {
+    for (sb_slist_t *tmp = ast; tmp != NULL; tmp = tmp->next) {
         blogc_template_node_t *data = tmp->data;
         if (data == NULL)
             continue;
@@ -682,5 +667,5 @@ blogc_template_free_ast(bc_slist_t *ast)
         free(data->data[1]);
         free(data);
     }
-    bc_slist_free(ast);
+    sb_slist_free(ast);
 }

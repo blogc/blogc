@@ -9,11 +9,11 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <squareball.h>
 
-#include "funcvars.h"
 #include "rusage.h"
 #include "sysinfo.h"
-#include "../common/utils.h"
+#include "funcvars.h"
 
 
 static const struct func_map {
@@ -41,14 +41,14 @@ static const struct func_map {
 
 
 void
-blogc_funcvars_eval(bc_trie_t *global, const char *name)
+blogc_funcvars_eval(sb_trie_t *global, const char *name)
 {
     if (global == NULL || name == NULL)
         return;
 
     // protect against evaluating the same function twice in the same global
     // context
-    if (NULL != bc_trie_lookup(global, name))
+    if (NULL != sb_trie_lookup(global, name))
         return;
 
     for (size_t i = 0; funcs[i].variable != NULL; i++) {

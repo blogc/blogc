@@ -10,8 +10,7 @@
 #define _TEMPLATE_PARSER_H
 
 #include <stddef.h>
-#include "../common/error.h"
-#include "../common/utils.h"
+#include <squareball.h>
 
 /*
  * note: whitespace cleaners are NOT added to AST. we fix strings right during
@@ -48,11 +47,11 @@ typedef struct {
     // 2 slots to store node data.
     char *data[2];
 
-    bc_slist_t *childs;
+    sb_slist_t *childs;
 } blogc_template_node_t;
 
-bc_slist_t* blogc_template_parse(const char *src, size_t src_len,
-    bc_error_t **err);
-void blogc_template_free_ast(bc_slist_t *ast);
+sb_slist_t* blogc_template_parse(const char *src, size_t src_len,
+    sb_error_t **err);
+void blogc_template_free_ast(sb_slist_t *ast);
 
 #endif /* _TEMPLATE_PARSER_H */

@@ -10,10 +10,10 @@
 #define ___FUNCVARS_H
 
 #include <stdbool.h>
-#include "../common/utils.h"
+#include <squareball.h>
 
-typedef void (*blogc_funcvars_func_t) (bc_trie_t*);
+typedef void (*blogc_funcvars_func_t) (sb_trie_t*);
 
-void blogc_funcvars_eval(bc_trie_t *global, const char *name);
+void blogc_funcvars_eval(sb_trie_t *global, const char *name);
 
 #endif /* ___FUNCVARS_H */

@@ -9,7 +9,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "shell-command-parser.h"
 
 typedef enum {
@@ -28,7 +29,7 @@ bgr_shell_command_parse(const char *command)
     size_t start = 0;
     size_t command_len = strlen(command);
 
-    bc_string_t *rv = bc_string_new();
+    sb_string_t *rv = sb_string_new();
 
     for (size_t current = 0; current < command_len; current++) {
 
@@ -76,7 +77,7 @@ bgr_shell_command_parse(const char *command)
 
             case START_ESCAPED:
                 if (c == '!' || c == '\'') {
-                    bc_string_append_c(rv, c);
+                    sb_string_append_c(rv, c);
                     state = START_REPO;
                     break;
                 }
@@ -84,7 +85,7 @@ bgr_shell_command_parse(const char *command)
 
             case REPO:
                 if (c == '\'') {
-                    bc_string_append_len(rv, command + start, current - start);
+                    sb_string_append_len(rv, command + start, current - start);
                     state = START_REPO;
                     break;
                 }
@@ -93,9 +94,9 @@ bgr_shell_command_parse(const char *command)
     }
 
     if (rv->len > 0)
-        return bc_string_free(rv, false);
+        return sb_string_free(rv, false);
 
 error:
-    bc_string_free(rv, true);
+    sb_string_free(rv, true);
     return NULL;
 }

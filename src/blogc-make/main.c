@@ -14,8 +14,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "../common/error.h"
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "ctx.h"
 #include "rules.h"
 
@@ -60,9 +60,9 @@ main(int argc, char **argv)
     setlocale(LC_ALL, "");
 
     int rv = 0;
-    bc_error_t *err = NULL;
+    sb_error_t *err = NULL;
 
-    bc_slist_t *rules = NULL;
+    sb_slist_t *rules = NULL;
     bool verbose = false;
     bool dev = false;
     char *blogcfile = NULL;
@@ -85,9 +85,9 @@ main(int argc, char **argv)
                     break;
                 case 'f':
                     if (argv[i][2] != '\0')
-                        blogcfile = bc_strdup(argv[i] + 2);
+                        blogcfile = sb_strdup(argv[i] + 2);
                     else if (i + 1 < argc)
-                        blogcfile = bc_strdup(argv[++i]);
+                        blogcfile = sb_strdup(argv[++i]);
                     break;
 #ifdef MAKE_EMBEDDED
                 case 'm':
@@ -103,18 +103,18 @@ main(int argc, char **argv)
             }
         }
         else {
-            rules = bc_slist_append(rules, bc_strdup(argv[i]));
+            rules = sb_slist_append(rules, sb_strdup(argv[i]));
         }
     }
 
     if (rules == NULL) {
-        rules = bc_slist_append(rules, bc_strdup("all"));
+        rules = sb_slist_append(rules, sb_strdup("all"));
     }
 
     ctx = bm_ctx_new(NULL, blogcfile ? blogcfile : "blogcfile",
         argc > 0 ? argv[0] : NULL, &err);
     if (err != NULL) {
-        bc_error_print(err, "blogc-make");
+        fprintf(stderr, "blogc-make: error: %s\n", sb_error_to_string(err));
         rv = 1;
         goto cleanup;
     }
@@ -125,10 +125,10 @@ main(int argc, char **argv)
 
 cleanup:
 
-    bc_slist_free_full(rules, free);
+    sb_slist_free_full(rules, free);
     free(blogcfile);
     bm_ctx_free(ctx);
-    bc_error_free(err);
+    sb_error_free(err);
 
     return rv;
 }

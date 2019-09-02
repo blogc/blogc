@@ -21,9 +21,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../common/error.h"
-#include "../common/file.h"
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "sysinfo.h"
 
 
@@ -39,37 +38,37 @@ blogc_sysinfo_get_hostname(void)
         return NULL;
 
     // FIXME: return FQDN instead of local host name
-    return bc_strdup(buf);
+    return sb_strdup(buf);
 #endif
 }
 
 
 void
-blogc_sysinfo_inject_hostname(bc_trie_t *global)
+blogc_sysinfo_inject_hostname(sb_trie_t *global)
 {
     char *hostname = blogc_sysinfo_get_hostname();
     if (hostname == NULL)
         return;
 
-    bc_trie_insert(global, "BLOGC_SYSINFO_HOSTNAME", hostname);
+    sb_trie_insert(global, "BLOGC_SYSINFO_HOSTNAME", hostname);
 }
 
 
 char*
 blogc_sysinfo_get_username(void)
 {
-    return bc_strdup(getenv("LOGNAME"));
+    return sb_strdup(getenv("LOGNAME"));
 }
 
 
 void
-blogc_sysinfo_inject_username(bc_trie_t *global)
+blogc_sysinfo_inject_username(sb_trie_t *global)
 {
     char *username = blogc_sysinfo_get_username();
     if (username == NULL)
         return;
 
-    bc_trie_insert(global, "BLOGC_SYSINFO_USERNAME", username);
+    sb_trie_insert(global, "BLOGC_SYSINFO_USERNAME", username);
 }
 
 
@@ -91,19 +90,19 @@ blogc_sysinfo_get_datetime(void)
     if (0 == strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", t))
         return NULL;
 
-    return bc_strdup(buf);
+    return sb_strdup(buf);
 #endif
 }
 
 
 void
-blogc_sysinfo_inject_datetime(bc_trie_t *global)
+blogc_sysinfo_inject_datetime(sb_trie_t *global)
 {
     char *t = blogc_sysinfo_get_datetime();
     if (t == NULL)
         return;
 
-    bc_trie_insert(global, "BLOGC_SYSINFO_DATETIME", t);
+    sb_trie_insert(global, "BLOGC_SYSINFO_DATETIME", t);
 }
 
 
@@ -121,10 +120,10 @@ blogc_sysinfo_get_inside_docker(void)
     inside_docker_evaluated = true;
 
     size_t len;
-    bc_error_t *err = NULL;
-    char *contents = bc_file_get_contents("/proc/1/cgroup", false, &len, &err);
+    sb_error_t *err = NULL;
+    char *contents = sb_file_get_contents("/proc/1/cgroup", &len, &err);
     if (err != NULL) {
-        bc_error_free(err);
+        sb_error_free(err);
         inside_docker = false;
         return inside_docker;
     }
@@ -136,8 +135,8 @@ blogc_sysinfo_get_inside_docker(void)
 
 
 void
-blogc_sysinfo_inject_inside_docker(bc_trie_t *global)
+blogc_sysinfo_inject_inside_docker(sb_trie_t *global)
 {
     if (blogc_sysinfo_get_inside_docker())
-        bc_trie_insert(global, "BLOGC_SYSINFO_INSIDE_DOCKER", bc_strdup("1"));
+        sb_trie_insert(global, "BLOGC_SYSINFO_INSIDE_DOCKER", sb_strdup("1"));
 }

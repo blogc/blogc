@@ -24,15 +24,15 @@
 #endif /* HAVE_TIME_H */
 
 #include <stdbool.h>
-#include "../common/utils.h"
+#include <squareball.h>
 
 char* blogc_sysinfo_get_hostname(void);
-void blogc_sysinfo_inject_hostname(bc_trie_t *global);
+void blogc_sysinfo_inject_hostname(sb_trie_t *global);
 char* blogc_sysinfo_get_username(void);
-void blogc_sysinfo_inject_username(bc_trie_t *global);
+void blogc_sysinfo_inject_username(sb_trie_t *global);
 char* blogc_sysinfo_get_datetime(void);
-void blogc_sysinfo_inject_datetime(bc_trie_t *global);
+void blogc_sysinfo_inject_datetime(sb_trie_t *global);
 bool blogc_sysinfo_get_inside_docker(void);
-void blogc_sysinfo_inject_inside_docker(bc_trie_t *global);
+void blogc_sysinfo_inject_inside_docker(sb_trie_t *global);
 
 #endif /* ___SYSINFO_H */

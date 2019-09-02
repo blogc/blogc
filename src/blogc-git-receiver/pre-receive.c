@@ -15,9 +15,8 @@
 #include <dirent.h>
 #include <time.h>
 #include <libgen.h>
-#include "../common/compat.h"
-#include "../common/utils.h"
-#include "../common/stdin.h"
+#include <squareball.h>
+
 #include "settings.h"
 #include "pre-receive-parser.h"
 #include "pre-receive.h"
@@ -58,7 +57,7 @@ rmdir_recursive(const char *dir)
     while (NULL != (e = readdir(d))) {
         if ((0 == strcmp(e->d_name, ".")) || (0 == strcmp(e->d_name, "..")))
             continue;
-        char *f = bc_strdup_printf("%s/%s", dir, e->d_name);
+        char *f = sb_strdup_printf("%s/%s", dir, e->d_name);
         if (0 != stat(f, &buf)) {
             fprintf(stderr, "error: failed to stat directory entry (%s): %s\n",
                 e->d_name, strerror(errno));
@@ -106,7 +105,7 @@ bgr_pre_receive_hook(int argc, char *argv[])
         return 1;
     }
 
-    char *repo_dir = bc_strdup(dirname(real_hooks_dir));
+    char *repo_dir = sb_strdup(dirname(real_hooks_dir));
     free(real_hooks_dir);
     if (0 != chdir(repo_dir)) {
         fprintf(stderr, "error: failed to change to repository root\n");
@@ -114,33 +113,33 @@ bgr_pre_receive_hook(int argc, char *argv[])
         goto cleanup;
     }
 
-    bc_config_t *config = bgr_settings_parse();
+    sb_config_t *config = bgr_settings_parse();
     if (config == NULL) {
         goto default_sym;
     }
 
     char *section = bgr_settings_get_section(config, repo_dir);
     if (section == NULL) {
-        bc_config_free(config);
+        sb_config_free(config);
         goto default_sym;
     }
 
-    const char *sym_tmp = bc_config_get(config, section, "symlink");
+    const char *sym_tmp = sb_config_get(config, section, "symlink");
     if (sym_tmp == NULL) {
         free(section);
-        bc_config_free(config);
+        sb_config_free(config);
         goto default_sym;
     }
 
-    sym = bc_str_starts_with(sym_tmp, "/") ? bc_strdup(sym_tmp) :
-            bc_strdup_printf("%s/%s", repo_dir, sym_tmp);
+    sym = sb_str_starts_with(sym_tmp, "/") ? sb_strdup(sym_tmp) :
+            sb_strdup_printf("%s/%s", repo_dir, sym_tmp);
     free(section);
-    bc_config_free(config);
+    sb_config_free(config);
 
 default_sym:
 
     if (sym == NULL) {
-        sym = bc_strdup_printf("%s/htdocs", repo_dir);
+        sym = sb_strdup_printf("%s/htdocs", repo_dir);
     }
 
     if (NULL == getenv("GIT_DIR")) {
@@ -157,20 +156,20 @@ default_sym:
             rv = 1;
             goto cleanup;
         }
-        char **pieces = bc_str_split(basename(build_dir), '-', 2);
+        char **pieces = sb_str_split(basename(build_dir), '-', 2);
         free(build_dir);
-        if (bc_strv_length(pieces) != 2) {
+        if (sb_strv_length(pieces) != 2) {
             fprintf(stderr, "error: failed to parse the hash of last built "
                 "commit.\n");
-            bc_strv_free(pieces);
+            sb_strv_free(pieces);
             rv = 1;
             goto cleanup;
         }
-        master = bc_strdup(pieces[0]);
-        bc_strv_free(pieces);
+        master = sb_strdup(pieces[0]);
+        sb_strv_free(pieces);
     }
     else {
-        char *input = bc_stdin_read();
+        char *input = sb_stdin_get_contents();
         master = bgr_pre_receive_parse(input);
         free(input);
     }
@@ -188,7 +187,7 @@ default_sym:
     }
     tmpdir = dir;
 
-    char *git_archive_cmd = bc_strdup_printf(
+    char *git_archive_cmd = sb_strdup_printf(
         "git archive \"%s\" | tar -x -C \"%s\" -f -", master, tmpdir);
     if (0 != system(git_archive_cmd)) {
         fprintf(stderr, "error: failed to extract git content to temporary "
@@ -214,12 +213,12 @@ default_sym:
     }
 
     unsigned long epoch = time(NULL);
-    output_dir = bc_strdup_printf("%s/%s-%lu", buildsd, master, epoch);
+    output_dir = sb_strdup_printf("%s/%s-%lu", buildsd, master, epoch);
     free(buildsd);
 
     if (0 == access(output_dir, F_OK)) {
         char *tmp = output_dir;
-        output_dir = bc_strdup_printf("%s-", tmp);
+        output_dir = sb_strdup_printf("%s-", tmp);
         free(tmp);
     }
 
@@ -228,24 +227,24 @@ default_sym:
     char *build_cmd = NULL;
     if (0 == access("blogcfile", F_OK)) {
         int status_bmake = system("blogc-make -v 2> /dev/null > /dev/null");
-        if (127 == bc_compat_status_code(status_bmake)) {
+        if (127 == sb_compat_status_code(status_bmake)) {
             fprintf(stderr, "error: failed to find blogc-make binary\n");
             rv = 1;
             goto cleanup;
         }
-        build_cmd = bc_strdup_printf("OUTPUT_DIR=\"%s\" blogc-make -V all",
+        build_cmd = sb_strdup_printf("OUTPUT_DIR=\"%s\" blogc-make -V all",
             output_dir);
     }
     else if ((0 == access("Makefile", F_OK)) || (0 == access("GNUMakefile", F_OK))) {
         const char *make_impl = NULL;
 
         int status_gmake = system("gmake -f /dev/null 2> /dev/null > /dev/null");
-        if (127 != bc_compat_status_code(status_gmake)) {
+        if (127 != sb_compat_status_code(status_gmake)) {
             make_impl = "gmake";
         }
         else {
             int status_make = system("make -f /dev/null 2> /dev/null > /dev/null");
-            if (127 != bc_compat_status_code(status_make)) {
+            if (127 != sb_compat_status_code(status_make)) {
                 make_impl = "make";
             }
         }
@@ -255,7 +254,7 @@ default_sym:
             rv = 1;
             goto cleanup;
         }
-        build_cmd = bc_strdup_printf(
+        build_cmd = sb_strdup_printf(
             "%s -j%d OUTPUT_DIR=\"%s\" BLOGC_GIT_RECEIVER=1", make_impl,
             cpu_count(), output_dir);
     }

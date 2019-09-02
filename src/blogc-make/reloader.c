@@ -14,7 +14,8 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "ctx.h"
 #include "rules.h"
 #include "reloader.h"
@@ -36,7 +37,7 @@ sig_handler(int signum)
 
 int
 bm_reloader_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec,
-    bc_slist_t *outputs, bc_trie_t *args)
+    sb_slist_t *outputs, sb_trie_t *args)
 {
     // install ^C handler
     struct sigaction current_action;

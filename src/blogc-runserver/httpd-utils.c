@@ -9,14 +9,15 @@
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "httpd-utils.h"
 
 
 char*
 br_readline(int socket)
 {
-    bc_string_t *rv = bc_string_new();
+    sb_string_t *rv = sb_string_new();
     char buffer[READLINE_BUFFER_SIZE];
     ssize_t len;
     bool end = false;
@@ -30,7 +31,7 @@ br_readline(int socket)
                     end = true;
                     break;
                 }
-                bc_string_append_c(rv, buffer[i]);
+                sb_string_append_c(rv, buffer[i]);
             }
         }
         if (len < READLINE_BUFFER_SIZE) {
@@ -38,7 +39,7 @@ br_readline(int socket)
         }
     }
 
-    return bc_string_free(rv, false);
+    return sb_string_free(rv, false);
 }
 
 
@@ -58,7 +59,7 @@ br_hextoi(const char c)
 char*
 br_urldecode(const char *str)
 {
-    bc_string_t *rv = bc_string_new();
+    sb_string_t *rv = sb_string_new();
 
     for (size_t i = 0; i < strlen(str); i++) {
         switch (str[i]) {
@@ -67,22 +68,22 @@ br_urldecode(const char *str)
                     int p1 = br_hextoi(str[i + 1]) * 16;
                     int p2 = br_hextoi(str[i + 2]);
                     if (p1 >= 0 && p2 >= 0) {
-                        bc_string_append_c(rv, p1 + p2);
+                        sb_string_append_c(rv, p1 + p2);
                         i += 2;
                         continue;
                     }
                 }
-                bc_string_append_c(rv, '%');
+                sb_string_append_c(rv, '%');
                 break;
             case '+':
-                bc_string_append_c(rv, ' ');
+                sb_string_append_c(rv, ' ');
                 break;
             default:
-                bc_string_append_c(rv, str[i]);
+                sb_string_append_c(rv, str[i]);
         }
     }
 
-    return bc_string_free(rv, false);
+    return sb_string_free(rv, false);
 }
 
 

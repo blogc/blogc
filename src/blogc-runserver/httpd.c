@@ -19,11 +19,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <pthread.h>
-#include "../common/error.h"
-#include "../common/file.h"
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "mime.h"
 #include "httpd-utils.h"
+#include "httpd.h"
 
 #define LISTEN_BACKLOG 100
 
@@ -43,7 +43,7 @@ typedef struct {
 static void
 error(int socket, int status_code, const char *error)
 {
-    char *str = bc_strdup_printf(
+    char *str = sb_strdup_printf(
         "HTTP/1.0 %d %s\r\n"
         "Content-Type: text/html\r\n"
         "Content-Length: %zu\r\n"
@@ -74,8 +74,8 @@ handle_request(void *arg)
 
     unsigned short status_code = 200;
 
-    char **pieces = bc_str_split(conn_line, ' ', 3);
-    if (bc_strv_length(pieces) != 3) {
+    char **pieces = sb_str_split(conn_line, ' ', 3);
+    if (sb_strv_length(pieces) != 3) {
         status_code = 400;
         error(client_socket, 400, "Bad Request");
         goto point1;
@@ -87,9 +87,9 @@ handle_request(void *arg)
         goto point1;
     }
 
-    char **pieces2 = bc_str_split(pieces[1], '?', 2);
+    char **pieces2 = sb_str_split(pieces[1], '?', 2);
     char *path = br_urldecode(pieces2[0]);
-    bc_strv_free(pieces2);
+    sb_strv_free(pieces2);
 
     if (path == NULL) {
         status_code = 400;
@@ -97,7 +97,7 @@ handle_request(void *arg)
         goto point2;
     }
 
-    char *abs_path = bc_strdup_printf("%s/%s", docroot, path);
+    char *abs_path = sb_strdup_printf("%s/%s", docroot, path);
     char *real_path = realpath(abs_path, NULL);
     free(abs_path);
 
@@ -161,7 +161,7 @@ handle_request(void *arg)
     if (add_slash) {
         // production webservers usually returns 301 in such cases, but 302 is
         // better for development/testing.
-        char *tmp = bc_strdup_printf(
+        char *tmp = sb_strdup_printf(
             "HTTP/1.0 302 Found\r\n"
             "Location: %s/\r\n"
             "Content-Length: 0\r\n"
@@ -177,16 +177,16 @@ handle_request(void *arg)
     }
 
     size_t len;
-    bc_error_t *err = NULL;
-    char* contents = bc_file_get_contents(real_path, false, &len, &err);
+    sb_error_t *err = NULL;
+    char* contents = sb_file_get_contents(real_path, &len, &err);
     if (err != NULL) {
         status_code = 500;
         error(client_socket, 500, "Internal Server Error");
-        bc_error_free(err);
+        sb_error_free(err);
         goto point4;
     }
 
-    char *out = bc_strdup_printf(
+    char *out = sb_strdup_printf(
         "HTTP/1.0 200 OK\r\n"
         "Content-Type: %s\r\n"
         "Content-Length: %zu\r\n"
@@ -213,7 +213,7 @@ point1:
     fprintf(stderr, "[Thread-%zu] %s - - \"%s\" %d\n", thread_id + 1,
         ip, conn_line, status_code);
     free(conn_line);
-    bc_strv_free(pieces);
+    sb_strv_free(pieces);
 point0:
     free(ip);
     close(client_socket);
@@ -233,7 +233,7 @@ br_httpd_get_ip(int af, const struct sockaddr *addr)
         struct sockaddr_in *a = (struct sockaddr_in*) addr;
         inet_ntop(af, &(a->sin_addr), host, INET6_ADDRSTRLEN);
     }
-    return bc_strdup(host);
+    return sb_strdup(host);
 }
 
 

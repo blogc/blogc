@@ -13,7 +13,8 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "httpd.h"
 
 
@@ -63,9 +64,9 @@ main(int argc, char **argv)
     char *endptr;
 
     char *tmp_host = getenv("BLOGC_RUNSERVER_DEFAULT_HOST");
-    char *default_host = bc_strdup(tmp_host != NULL ? tmp_host : "127.0.0.1");
+    char *default_host = sb_strdup(tmp_host != NULL ? tmp_host : "127.0.0.1");
     char *tmp_port = getenv("BLOGC_RUNSERVER_DEFAULT_PORT");
-    char *default_port = bc_strdup(tmp_port != NULL ? tmp_port : "8080");
+    char *default_port = sb_strdup(tmp_port != NULL ? tmp_port : "8080");
 
     size_t args = 0;
 
@@ -80,15 +81,15 @@ main(int argc, char **argv)
                     goto cleanup;
                 case 't':
                     if (argv[i][2] != '\0')
-                        host = bc_strdup(argv[i] + 2);
+                        host = sb_strdup(argv[i] + 2);
                     else
-                        host = bc_strdup(argv[++i]);
+                        host = sb_strdup(argv[++i]);
                     break;
                 case 'p':
                     if (argv[i][2] != '\0')
-                        port = bc_strdup(argv[i] + 2);
+                        port = sb_strdup(argv[i] + 2);
                     else
-                        port = bc_strdup(argv[++i]);
+                        port = sb_strdup(argv[++i]);
                     break;
                 case 'm':
                     if (argv[i][2] != '\0')
@@ -117,7 +118,7 @@ main(int argc, char **argv)
                 goto cleanup;
             }
             args++;
-            docroot = bc_strdup(argv[i]);
+            docroot = sb_strdup(argv[i]);
         }
     }
 

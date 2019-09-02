@@ -10,12 +10,11 @@
 #define _MAKE_SETTINGS_H
 
 #include <stddef.h>
-#include "../common/error.h"
-#include "../common/utils.h"
+#include <squareball.h>
 
 typedef struct {
-    bc_trie_t *global;
-    bc_trie_t *settings;
+    sb_trie_t *global;
+    sb_trie_t *settings;
     char **posts;
     char **pages;
     char **copy;
@@ -23,7 +22,7 @@ typedef struct {
 } bm_settings_t;
 
 bm_settings_t* bm_settings_parse(const char *content, size_t content_len,
-    bc_error_t **err);
+    sb_error_t **err);
 void bm_settings_free(bm_settings_t *settings);
 
 #endif /* _MAKE_SETTINGS_H */

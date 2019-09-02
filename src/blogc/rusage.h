@@ -19,7 +19,7 @@
 #endif
 #endif
 
-#include "../common/utils.h"
+#include <squareball.h>
 
 typedef struct {
     long long cpu_time;  // in microseconds
@@ -31,6 +31,6 @@ blogc_rusage_t* blogc_rusage_get(void);
 char* blogc_rusage_format_cpu_time(long long time);
 char* blogc_rusage_format_memory(long mem);
 
-void blogc_rusage_inject(bc_trie_t *global);
+void blogc_rusage_inject(sb_trie_t *global);
 
 #endif /* ___RUSAGE_H */

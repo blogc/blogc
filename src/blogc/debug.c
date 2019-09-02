@@ -7,9 +7,9 @@
  */
 
 #include <stdio.h>
+#include <squareball.h>
 
 #include "template-parser.h"
-#include "../common/utils.h"
 #include "debug.h"
 
 
@@ -34,9 +34,9 @@ get_operator(blogc_template_operator_t op)
 
 
 void
-blogc_debug_template(bc_slist_t *ast)
+blogc_debug_template(sb_slist_t *ast)
 {
-    for (bc_slist_t *tmp = ast; tmp != NULL; tmp = tmp->next) {
+    for (sb_slist_t *tmp = ast; tmp != NULL; tmp = tmp->next) {
         blogc_template_node_t *data = tmp->data;
         fprintf(stderr, "DEBUG: <TEMPLATE ");
         switch (data->type) {

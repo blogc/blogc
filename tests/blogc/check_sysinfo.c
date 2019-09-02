@@ -13,8 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "../../src/common/error.h"
-#include "../../src/common/utils.h"
+#include <squareball.h>
+
 #include "../../src/blogc/sysinfo.h"
 
 #ifdef HAVE_SYSINFO_DATETIME
@@ -73,10 +73,9 @@ __wrap_gmtime(const time_t *timep)
 
 
 char*
-__wrap_bc_file_get_contents(const char *path, bool utf8, size_t *len, bc_error_t **err)
+__wrap_sb_file_get_contents(const char *path, size_t *len, sb_error_t **err)
 {
     assert_string_equal(path, "/proc/1/cgroup");
-    assert_false(utf8);
     char *rv = mock_type(char*);
     *len = strlen(rv);
     return rv;
@@ -103,19 +102,19 @@ test_sysinfo_get_hostname(void **state)
 static void
 test_sysinfo_inject_hostname(void **state)
 {
-    bc_trie_t *t = bc_trie_new(free);
+    sb_trie_t *t = sb_trie_new(free);
 
     will_return(__wrap_gethostname, NULL);
     will_return(__wrap_gethostname, -1);
     blogc_sysinfo_inject_hostname(t);
-    assert_int_equal(bc_trie_size(t), 0);
+    assert_int_equal(sb_trie_size(t), 0);
 
     will_return(__wrap_gethostname, "bola");
     will_return(__wrap_gethostname, 0);
     blogc_sysinfo_inject_hostname(t);
-    assert_int_equal(bc_trie_size(t), 1);
-    assert_string_equal(bc_trie_lookup(t, "BLOGC_SYSINFO_HOSTNAME"), "bola");
-    bc_trie_free(t);
+    assert_int_equal(sb_trie_size(t), 1);
+    assert_string_equal(sb_trie_lookup(t, "BLOGC_SYSINFO_HOSTNAME"), "bola");
+    sb_trie_free(t);
 }
 
 
@@ -137,17 +136,17 @@ test_sysinfo_get_username(void **state)
 static void
 test_sysinfo_inject_username(void **state)
 {
-    bc_trie_t *t = bc_trie_new(free);
+    sb_trie_t *t = sb_trie_new(free);
 
     will_return(__wrap_getenv, NULL);
     blogc_sysinfo_inject_username(t);
-    assert_int_equal(bc_trie_size(t), 0);
+    assert_int_equal(sb_trie_size(t), 0);
 
     will_return(__wrap_getenv, "bola");
     blogc_sysinfo_inject_username(t);
-    assert_int_equal(bc_trie_size(t), 1);
-    assert_string_equal(bc_trie_lookup(t, "BLOGC_SYSINFO_USERNAME"), "bola");
-    bc_trie_free(t);
+    assert_int_equal(sb_trie_size(t), 1);
+    assert_string_equal(sb_trie_lookup(t, "BLOGC_SYSINFO_USERNAME"), "bola");
+    sb_trie_free(t);
 }
 
 
@@ -173,21 +172,21 @@ test_sysinfo_get_datetime(void **state)
 static void
 test_sysinfo_inject_datetime(void **state)
 {
-    bc_trie_t *t = bc_trie_new(free);
+    sb_trie_t *t = sb_trie_new(free);
 
     will_return(__wrap_time, -1);
     blogc_sysinfo_inject_datetime(t);
-    assert_int_equal(bc_trie_size(t), 0);
+    assert_int_equal(sb_trie_size(t), 0);
 
     will_return(__wrap_time, 2);
     blogc_sysinfo_inject_datetime(t);
-    assert_int_equal(bc_trie_size(t), 0);
+    assert_int_equal(sb_trie_size(t), 0);
 
     will_return(__wrap_time, 1);
     blogc_sysinfo_inject_datetime(t);
-    assert_int_equal(bc_trie_size(t), 1);
-    assert_string_equal(bc_trie_lookup(t, "BLOGC_SYSINFO_DATETIME"), "1906-06-04 03:02:01");
-    bc_trie_free(t);
+    assert_int_equal(sb_trie_size(t), 1);
+    assert_string_equal(sb_trie_lookup(t, "BLOGC_SYSINFO_DATETIME"), "1906-06-04 03:02:01");
+    sb_trie_free(t);
 }
 
 
@@ -196,7 +195,7 @@ test_sysinfo_get_inside_docker(void **state)
 {
     // the "positive" case was already tested in check_funcvars. this is done
     // this way because this function caches the results in a global variable.
-    will_return(__wrap_bc_file_get_contents, bc_strdup("bola"));
+    will_return(__wrap_sb_file_get_contents, sb_strdup("bola"));
     assert_false(blogc_sysinfo_get_inside_docker());
 }
 

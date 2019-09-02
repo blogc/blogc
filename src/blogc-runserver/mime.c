@@ -9,8 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "../common/utils.h"
+#include <squareball.h>
+
 #include "httpd-utils.h"
+#include "mime.h"
 
 
 // mime types with index should be in the begin of the list. first NULL
@@ -153,7 +155,7 @@ br_mime_guess_index(const char *path)
 {
     char *found = NULL;
     for (size_t i = 0; content_types[i].index != NULL; i++) {
-        char *f = bc_strdup_printf("%s/%s", path, content_types[i].index);
+        char *f = sb_strdup_printf("%s/%s", path, content_types[i].index);
         if (0 == access(f, F_OK)) {
             found = f;
             break;

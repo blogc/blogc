@@ -22,6 +22,8 @@ AS_IF([test "x$ac_cv_prog_cc_c99" = "xno"], [
 
 PKG_PROG_PKG_CONFIG
 
+SQUAREBALL_INIT
+
 AC_PROG_SED
 
 RPM_VERSION=`echo ${PACKAGE_VERSION} | sed "s/-/./g"`
