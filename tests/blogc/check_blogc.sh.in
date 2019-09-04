@@ -167,7 +167,7 @@ cat > "${TEMP}/main.tmpl" <<EOF
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>{% block entry %}{{ TITLE }}{% endblock %}{% block listing_once %}{{ SITE_TITLE }}{% endblock %}</title>
+    <title>{% ifdef FOO1 %}{{ FOO1 }} {% endif %}{% block entry %}{{ TITLE }}{% endblock %}{% block listing_once %}{{ SITE_TITLE }}{% endblock %}</title>
   </head>
   <body>
     <a href="{{ BASE_URL }}/"><div class="name">{{ SITE_TITLE }}</div></a>{% block listing_entry %}{{ CONTENT }}{% endblock %}
@@ -223,7 +223,7 @@ cat > "${TEMP}/expected-output.html" <<EOF
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Chunda's website</title>
+    <title>asd Chunda's website</title>
   </head>
   <body>
     <a href="/"><div class="name">Chunda's website</div></a>
@@ -261,6 +261,7 @@ ${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc \
     -D BASE_URL= \
     -D SITE_TITLE="Chunda's website" \
     -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -D FOO1="asd" \
     -t "${TEMP}/main.tmpl" \
     -o "${TEMP}/output.html" \
     -l \
@@ -273,6 +274,7 @@ echo -e "${TEMP}/post1.txt\n${TEMP}/post2.txt" | ${TESTS_ENVIRONMENT} @abs_top_b
     -D BASE_URL= \
     -D SITE_TITLE="Chunda's website" \
     -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -D FOO1="asd" \
     -t "${TEMP}/main.tmpl" \
     -o "${TEMP}/output2.html" \
     -l \
@@ -285,6 +287,7 @@ ${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc \
     -D BASE_URL= \
     -D SITE_TITLE="Chunda's website" \
     -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -D FOO1="asd" \
     -t "${TEMP}/main.tmpl" \
     -l \
     "${TEMP}/post1.txt" "${TEMP}/post2.txt" > "${TEMP}/output3.html"
@@ -296,6 +299,7 @@ echo -e "${TEMP}/post1.txt\n${TEMP}/post2.txt" | ${TESTS_ENVIRONMENT} @abs_top_b
     -D BASE_URL= \
     -D SITE_TITLE="Chunda's website" \
     -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -D FOO1="asd" \
     -t "${TEMP}/main.tmpl" \
     -l \
     -i > "${TEMP}/output4.html"
@@ -472,3 +476,17 @@ ${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc \
     "${TEMP}/post1.txt" 2>&1 | tee "${TEMP}/output.txt" || true
 
 grep "blogc: error: template: Invalid block type" "${TEMP}/output.txt"
+
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc \
+    -D 123=a 2>&1 | tee "${TEMP}/output.txt" || true
+
+grep \
+    "blogc: error: invalid value for -D (first character in configuration key must be uppercase): 123" \
+    "${TEMP}/output.txt"
+
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc \
+    -D A1-3=a 2>&1 | tee "${TEMP}/output.txt" || true
+
+grep \
+    "blogc: error: invalid value for -D (configuration key must be uppercase with '_' and digits after first character): A1-3" \
+    "${TEMP}/output.txt"

@@ -236,12 +236,23 @@ main(int argc, char **argv)
                             goto cleanup;
                         }
                         for (size_t j = 0; pieces[0][j] != '\0'; j++) {
-                            if (!((pieces[0][j] >= 'A' && pieces[0][j] <= 'Z') ||
-                                pieces[0][j] == '_'))
-                            {
+                            char c = pieces[0][j];
+                            if (j == 0) {
+                                if (!(c >= 'A' && c <= 'Z')) {
+                                    fprintf(stderr, "blogc: error: invalid value "
+                                        "for -D (first character in configuration "
+                                        "key must be uppercase): %s\n", pieces[0]);
+                                    bc_strv_free(pieces);
+                                    rv = 1;
+                                    goto cleanup;
+                                }
+                                continue;
+                            }
+                            if (!((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')) {
                                 fprintf(stderr, "blogc: error: invalid value "
                                     "for -D (configuration key must be uppercase "
-                                    "with '_'): %s\n", pieces[0]);
+                                    "with '_' and digits after first character): %s\n",
+                                    pieces[0]);
                                 bc_strv_free(pieces);
                                 rv = 1;
                                 goto cleanup;
