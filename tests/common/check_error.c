@@ -28,7 +28,12 @@ test_error_new(void **state)
 static void
 test_error_new_printf(void **state)
 {
-    bc_error_t *error = bc_error_new_printf(2, "bola %s", "guda");
+    bc_error_t *error = bc_error_new_printf(2, NULL);
+    assert_non_null(error);
+    assert_int_equal(error->type, 2);
+    assert_string_equal(error->msg, "");
+    bc_error_free(error);
+    error = bc_error_new_printf(2, "bola %s", "guda");
     assert_non_null(error);
     assert_int_equal(error->type, 2);
     assert_string_equal(error->msg, "bola guda");

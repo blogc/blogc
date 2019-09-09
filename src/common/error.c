@@ -26,6 +26,8 @@ bc_error_new(bc_error_type_t type, const char *msg)
 bc_error_t*
 bc_error_new_printf(bc_error_type_t type, const char *format, ...)
 {
+    if (format == NULL)
+        return bc_error_new(type, "");
     va_list ap;
     va_start(ap, format);
     char *tmp = bc_strdup_vprintf(format, ap);
@@ -40,6 +42,8 @@ bc_error_t*
 bc_error_parser(bc_error_type_t type, const char *src, size_t src_len,
     size_t current, const char *format, ...)
 {
+    if (format == NULL)
+        return bc_error_new(type, "");
     va_list ap;
     va_start(ap, format);
     char *msg = bc_strdup_vprintf(format, ap);

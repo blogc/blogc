@@ -138,6 +138,8 @@ bc_strndup(const char *s, size_t n)
 char*
 bc_strdup_vprintf(const char *format, va_list ap)
 {
+    if (format == NULL)
+        return NULL;
     va_list ap2;
     va_copy(ap2, ap);
     int l = vsnprintf(NULL, 0, format, ap2);
@@ -159,6 +161,8 @@ bc_strdup_vprintf(const char *format, va_list ap)
 char*
 bc_strdup_printf(const char *format, ...)
 {
+    if (format == NULL)
+        return NULL;
     va_list ap;
     va_start(ap, format);
     char *tmp = bc_strdup_vprintf(format, ap);
@@ -464,6 +468,8 @@ bc_string_append_printf(bc_string_t *str, const char *format, ...)
 {
     if (str == NULL)
         return NULL;
+    if (format == NULL)
+        return str;
     va_list ap;
     va_start(ap, format);
     char *tmp = bc_strdup_vprintf(format, ap);

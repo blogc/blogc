@@ -117,6 +117,7 @@ test_strndup(void **state)
 static void
 test_strdup_printf(void **state)
 {
+    assert_null(bc_strdup_printf(NULL));
     char *str = bc_strdup_printf("bola");
     assert_string_equal(str, "bola");
     free(str);
@@ -554,6 +555,9 @@ static void
 test_string_append_printf(void **state)
 {
     bc_string_t *str = bc_string_new();
+    str = bc_string_append_printf(str, NULL);
+    assert_string_equal(str->str, "");
+    assert_non_null(str);
     str = bc_string_append_printf(str, "guda: %s %d", "bola", 1);
     assert_non_null(str);
     assert_string_equal(str->str, "guda: bola 1");
