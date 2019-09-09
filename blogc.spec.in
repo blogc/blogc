@@ -56,8 +56,10 @@ blogc-runserver is a simple HTTP server to test blogc websites.
 %endif
 make %{?_smp_mflags}
 
+%if ! 0%{?el8}
 %check
 make check
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
