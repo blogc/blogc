@@ -357,7 +357,7 @@ bc_config_list_keys(bc_config_t *config, const char *section)
     if (config == NULL)
         return NULL;
 
-    bc_configparser_section_t *s = bc_trie_lookup(config->root, section);
+    const bc_configparser_section_t *s = bc_trie_lookup(config->root, section);
     if (s == NULL)
         return NULL;
 
@@ -386,7 +386,7 @@ bc_config_get(bc_config_t *config, const char *section, const char *key)
     if (config == NULL)
         return NULL;
 
-    bc_configparser_section_t *s = bc_trie_lookup(config->root, section);
+    const bc_configparser_section_t *s = bc_trie_lookup(config->root, section);
     if (s == NULL)
         return NULL;
 
@@ -414,7 +414,7 @@ bc_config_get_list(bc_config_t *config, const char *section)
     if (config == NULL)
         return NULL;
 
-    bc_configparser_section_t *s = bc_trie_lookup(config->root, section);
+    const bc_configparser_section_t *s = bc_trie_lookup(config->root, section);
     if (s == NULL)
         return NULL;
 
