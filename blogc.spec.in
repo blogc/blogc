@@ -52,7 +52,11 @@ blogc-runserver is a simple HTTP server to test blogc websites.
 %if 0%{?el6}
 %configure --disable-git-receiver --enable-make --enable-runserver --enable-tests
 %else
+%if 0%{?el8}
+%configure --enable-git-receiver --enable-make --enable-runserver --disable-tests
+%else
 %configure --enable-git-receiver --enable-make --enable-runserver --enable-tests
+%endif
 %endif
 make %{?_smp_mflags}
 
