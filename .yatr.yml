@@ -19,6 +19,7 @@ targets:
       - --disable-tests
     task_script: build-aux/clang-analyzer.sh
     archive_extract_filter: "*.tar.xz"
+    publish_on_failure: true
   valgrind:
     configure_args:
       - --enable-valgrind
