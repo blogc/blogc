@@ -29,6 +29,7 @@ matrix:
           packages:
             - cmocka
             - xz
+          update: true
     - compiler: gcc
       env:
         - TARGET=check-make-embedded
