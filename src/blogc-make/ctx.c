@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
 #include "../common/error.h"
 #include "../common/file.h"
 #include "../common/utils.h"

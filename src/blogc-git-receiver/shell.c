@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
-#include <sys/stat.h>
 #include "../common/utils.h"
 #include "settings.h"
 #include "shell-command-parser.h"
