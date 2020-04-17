@@ -10,13 +10,18 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#ifdef HAVE_SYSEXITS_H
+#include <sysexits.h>
+#else
+#define EX_CONFIG 78
+#endif /* HAVE_SYSEXITS_H */
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include <sysexits.h>
 #include <errno.h>
 #include <libgen.h>
 #include "../common/compat.h"
