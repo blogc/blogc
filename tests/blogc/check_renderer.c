@@ -234,14 +234,139 @@ test_render_listing_entry2(void **state)
     bc_trie_t *entry = bc_trie_new(free);
     bc_trie_insert(entry, "FUUUUU", bc_strdup("XD"));
     bc_trie_insert(entry, "BAAAAA", bc_strdup(":p"));
-    char *out = blogc_render(l, s, entry, NULL, true);
-    bc_trie_free(entry);
+    bc_slist_t *e = NULL;
+    e = bc_slist_append(e, entry);
+    char *out = blogc_render(l, s, e, NULL, true);
+    bc_slist_free_full(e, (bc_free_func_t) bc_trie_free);
     assert_string_equal(out,
         "foo\n"
         "fuuu\n"
         "\n"
         "XD\n"
+        "\n"
+        "\n"
+        "03:04\n"
+        "bola: asd\n"
+        "lol foo haha lol bar haha lol baz haha \n"
+        "\n"
+        "\n"
+        "2014-02-03 04:05:06\n"
+        "bola: asd2\n"
+        "\n"
+        "\n"
+        "\n"
+        "2013-01-02 03:04:05\n"
+        "bola: asd3\n"
+        "\n"
+        "\n"
+        "\n");
+    blogc_template_free_ast(l);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_listing_entry3(void **state)
+{
+    const char *str =
+        "foo\n"
+        "{% block listing_once %}fuuu{% endblock %}\n"
+        "{% block entry %}\n"
+        "{% ifdef GUDA %}{{ GUDA }}{% endif %}\n"
+        "{% ifdef CHUNDA %}{{ CHUNDA }}{% endif %}\n"
+        "{% endblock %}\n"
+        "{% block listing_entry %}{{ FUUUUU }}{% endblock %}\n"
+        "{% block listing_entry %}{{ BAAAAA }}{% endblock %}\n"
+        "{% block listing %}\n"
+        "{% ifdef DATE_FORMATTED %}{{ DATE_FORMATTED }}{% endif %}\n"
+        "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
+        "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
+        "{% foreach TAGS_ASD %}yay{% endforeach %}\n"
+        "{% endblock %}\n";
+    bc_error_t *err = NULL;
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    bc_slist_t *s = create_sources(3);
+    assert_non_null(s);
+    bc_trie_t *entry = bc_trie_new(free);
+    bc_trie_insert(entry, "FUUUUU", bc_strdup("XD"));
+    bc_trie_insert(entry, "BAAAAA", bc_strdup(":p"));
+    bc_slist_t *e = NULL;
+    e = bc_slist_append(e, NULL);
+    e = bc_slist_append(e, entry);
+    char *out = blogc_render(l, s, e, NULL, true);
+    bc_slist_free_full(e, (bc_free_func_t) bc_trie_free);
+    assert_string_equal(out,
+        "foo\n"
+        "fuuu\n"
+        "\n"
+        "\n"
         ":p\n"
+        "\n"
+        "03:04\n"
+        "bola: asd\n"
+        "lol foo haha lol bar haha lol baz haha \n"
+        "\n"
+        "\n"
+        "2014-02-03 04:05:06\n"
+        "bola: asd2\n"
+        "\n"
+        "\n"
+        "\n"
+        "2013-01-02 03:04:05\n"
+        "bola: asd3\n"
+        "\n"
+        "\n"
+        "\n");
+    blogc_template_free_ast(l);
+    bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
+    free(out);
+}
+
+
+static void
+test_render_listing_entry4(void **state)
+{
+    const char *str =
+        "foo\n"
+        "{% block listing_once %}fuuu{% endblock %}\n"
+        "{% block entry %}\n"
+        "{% ifdef GUDA %}{{ GUDA }}{% endif %}\n"
+        "{% ifdef CHUNDA %}{{ CHUNDA }}{% endif %}\n"
+        "{% endblock %}\n"
+        "{% block listing_entry %}{{ FUUUUU }}{% endblock %}\n"
+        "{% block listing_entry %}{{ DDDDDD }}{% endblock %}\n"
+        "{% block listing %}\n"
+        "{% ifdef DATE_FORMATTED %}{{ DATE_FORMATTED }}{% endif %}\n"
+        "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
+        "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
+        "{% foreach TAGS_ASD %}yay{% endforeach %}\n"
+        "{% endblock %}\n";
+    bc_error_t *err = NULL;
+    bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
+    assert_non_null(l);
+    assert_null(err);
+    bc_slist_t *s = create_sources(3);
+    assert_non_null(s);
+    bc_trie_t *entry1 = bc_trie_new(free);
+    bc_trie_insert(entry1, "FUUUUU", bc_strdup("XD"));
+    bc_trie_insert(entry1, "BAAAAA", bc_strdup(":p"));
+    bc_trie_t *entry2 = bc_trie_new(free);
+    bc_trie_insert(entry2, "CCCCCC", bc_strdup("er"));
+    bc_trie_insert(entry2, "DDDDDD", bc_strdup("ty"));
+    bc_slist_t *e = NULL;
+    e = bc_slist_append(e, entry1);
+    e = bc_slist_append(e, entry2);
+    char *out = blogc_render(l, s, e, NULL, true);
+    bc_slist_free_full(e, (bc_free_func_t) bc_trie_free);
+    assert_string_equal(out,
+        "foo\n"
+        "fuuu\n"
+        "\n"
+        "XD\n"
+        "ty\n"
         "\n"
         "03:04\n"
         "bola: asd\n"
@@ -1227,6 +1352,8 @@ main(void)
         unit_test(test_render_listing),
         unit_test(test_render_listing_entry),
         unit_test(test_render_listing_entry2),
+        unit_test(test_render_listing_entry3),
+        unit_test(test_render_listing_entry4),
         unit_test(test_render_listing_empty),
         unit_test(test_render_ifdef),
         unit_test(test_render_ifdef2),

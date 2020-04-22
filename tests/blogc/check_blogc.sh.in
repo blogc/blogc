@@ -170,7 +170,7 @@ cat > "${TEMP}/main.tmpl" <<EOF
     <title>{% ifdef FOO1 %}{{ FOO1 }} {% endif %}{% block entry %}{{ TITLE }}{% endblock %}{% block listing_once %}{{ SITE_TITLE }}{% endblock %}</title>
   </head>
   <body>
-    <a href="{{ BASE_URL }}/"><div class="name">{{ SITE_TITLE }}</div></a>{% block listing_entry %}{{ CONTENT }}{% endblock %}
+    <a href="{{ BASE_URL }}/"><div class="name">{{ SITE_TITLE }}</div></a>{% block listing_entry %}{{ CONTENT }}{% endblock %}{% block listing_entry %}{{ CONTENT }}{% endblock %}
     {% block listing_once %}
     <section class="main">
       <div class="container">
@@ -468,6 +468,113 @@ echo -e "${TEMP}/post1.txt\n${TEMP}/post2.txt" | ${TESTS_ENVIRONMENT} @abs_top_b
     -i > "${TEMP}/output12.html"
 
 diff -uN "${TEMP}/output12.html" "${TEMP}/expected-output3.html"
+
+cat > "${TEMP}/expected-output4.html" <<EOF
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Chunda's website</title>
+  </head>
+  <body>
+    <a href="/"><div class="name">Chunda's website</div></a><p>foo?</p>
+
+    
+    <section class="main">
+      <div class="container">
+        <div class="content">
+          <div class="page-heading">Blog</div>
+          <ul>
+    
+    
+            <li class="post-item">
+              <div class="meta">Jan 01, 2010, 11:11 AM GMT</div>
+              <a href="/post/post1/"><div>foo</div></a>
+            </li>
+    
+            <li class="post-item">
+              <div class="meta">Jan 01, 2010, 10:22 PM GMT</div>
+              <a href="/post/post2/"><div>bar</div></a>
+            </li>
+    
+    
+          </ul>
+        </div>
+      </div>
+    </section>
+    
+    
+  </body>
+</html>
+EOF
+
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -e "" \
+    -e "${TEMP}/post1.txt" \
+    -e "${TEMP}/post3.txt" \
+    -t "${TEMP}/main.tmpl" \
+    -o "${TEMP}/output13.html" \
+    -l \
+    "${TEMP}/post1.txt" "${TEMP}/post2.txt"
+
+diff -uN "${TEMP}/output13.html" "${TEMP}/expected-output4.html"
+
+
+cat > "${TEMP}/expected-output5.html" <<EOF
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Chunda's website</title>
+  </head>
+  <body>
+    <a href="/"><div class="name">Chunda's website</div></a><p>foo?</p>
+<p>bar?</p>
+
+    
+    <section class="main">
+      <div class="container">
+        <div class="content">
+          <div class="page-heading">Blog</div>
+          <ul>
+    
+    
+            <li class="post-item">
+              <div class="meta">Jan 01, 2010, 11:11 AM GMT</div>
+              <a href="/post/post1/"><div>foo</div></a>
+            </li>
+    
+            <li class="post-item">
+              <div class="meta">Jan 01, 2010, 10:22 PM GMT</div>
+              <a href="/post/post2/"><div>bar</div></a>
+            </li>
+    
+    
+          </ul>
+        </div>
+      </div>
+    </section>
+    
+    
+  </body>
+</html>
+EOF
+
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -e "${TEMP}/post1.txt" \
+    -e "${TEMP}/post3.txt" \
+    -t "${TEMP}/main.tmpl" \
+    -o "${TEMP}/output14.html" \
+    -l \
+    "${TEMP}/post1.txt" "${TEMP}/post2.txt"
+
+diff -uN "${TEMP}/output14.html" "${TEMP}/expected-output5.html"
 
 echo "{% block listig %}foo{% endblock %}\n" > "${TEMP}/error.tmpl"
 

@@ -57,8 +57,11 @@ designed to be used with make(1).
 
   * `-e` <SOURCE>:
     When used together with `-l` the source file will be parsed and its content
-    will be made available for usage in the templates in listing mode. See
-    blogc-template(7) for details.
+    will be made available for usage in the templates in listing mode via
+    `listing_entry` blocks. This option can be used more than once, so users can
+    have more than one `listing_entry` block in the same template. Passing an
+    empty string will skip the `listing_entry` block. See blogc-template(7) for
+    details.
 
   * `-D` <KEY>=<VALUE>:
     Set global configuration parameter. <KEY> must be an ascii uppercase string,

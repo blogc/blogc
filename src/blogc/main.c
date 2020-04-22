@@ -161,7 +161,6 @@ main(int argc, char **argv)
     bool debug = false;
     bool input_stdin = false;
     bool listing = false;
-    char *listing_entry = NULL;
     char *template = NULL;
     char *output = NULL;
     char *print = NULL;
@@ -169,7 +168,8 @@ main(int argc, char **argv)
     char **pieces = NULL;
 
     bc_slist_t *sources = NULL;
-    bc_trie_t *listing_entry_source = NULL;
+    bc_slist_t *listing_entries = NULL;
+    bc_slist_t *listing_entries_source = NULL;
     bc_trie_t *config = bc_trie_new(free);
     bc_trie_insert(config, "BLOGC_VERSION", bc_strdup(PACKAGE_VERSION));
 
@@ -194,9 +194,9 @@ main(int argc, char **argv)
                     break;
                 case 'e':
                     if (argv[i][2] != '\0')
-                        listing_entry = bc_strdup(argv[i] + 2);
+                        listing_entries = bc_slist_append(listing_entries, bc_strdup(argv[i] + 2));
                     else if (i + 1 < argc)
-                        listing_entry = bc_strdup(argv[++i]);
+                        listing_entries = bc_slist_append(listing_entries, bc_strdup(argv[++i]));
                     break;
                 case 't':
                     if (argv[i][2] != '\0')
@@ -316,12 +316,19 @@ main(int argc, char **argv)
         goto cleanup2;
     }
 
-    if (listing && listing_entry != NULL) {
-        listing_entry_source = blogc_source_parse_from_file(listing_entry, &err);
-        if (err != NULL) {
-            bc_error_print(err, "blogc");
-            rv = 1;
-            goto cleanup2;
+    if (listing) {
+        for (bc_slist_t *tmp = listing_entries; tmp != NULL; tmp = tmp->next) {
+            if (0 == strlen(tmp->data)) {
+                listing_entries_source = bc_slist_append(listing_entries_source, NULL);
+                continue;
+            }
+            bc_trie_t *e = blogc_source_parse_from_file(tmp->data, &err);
+            if (err != NULL) {
+                bc_error_print(err, "blogc");
+                rv = 1;
+                goto cleanup2;
+            }
+            listing_entries_source = bc_slist_append(listing_entries_source, e);
         }
     }
 
@@ -360,7 +367,7 @@ main(int argc, char **argv)
     if (debug)
         blogc_debug_template(l);
 
-    char *out = blogc_render(l, s, listing_entry_source, config, listing);
+    char *out = blogc_render(l, s, listing_entries_source, config, listing);
 
     bool write_to_stdout = (output == NULL || (0 == strcmp(output, "-")));
 
@@ -394,8 +401,8 @@ cleanup:
     free(template);
     free(output);
     free(print);
-    free(listing_entry);
-    bc_trie_free(listing_entry_source);
+    bc_slist_free_full(listing_entries, free);
+    bc_slist_free_full(listing_entries_source, (bc_free_func_t) bc_trie_free);
     bc_slist_free_full(sources, free);
     return rv;
 }

@@ -18,7 +18,7 @@ char* blogc_format_variable(const char *name, bc_trie_t *global, bc_trie_t *loca
     bc_slist_t *foreach_var);
 bc_slist_t* blogc_split_list_variable(const char *name, bc_trie_t *global,
     bc_trie_t *local);
-char* blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *listing_entr,
+char* blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_slist_t *listing_entries,
     bc_trie_t *config, bool listing);
 
 #endif /* _RENDERER_H */

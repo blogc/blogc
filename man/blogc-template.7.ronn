@@ -74,7 +74,7 @@ This is how a `listing_once` block is defined:
     will be included only once.
     {% endblock %}
 
-This is a 'real life' usage example of a `listing_once` block, supposing
+This is a 'real world' usage example of a `listing_once` block, supposing
 that the `TITLE` variable is defined:
 
     {% block listing_once %}
@@ -90,9 +90,9 @@ that the `TITLE` variable is defined:
 ### listing_entry block
 
 This block is identical to the `entry` block, but its content is included in
-the output file only when blogc(1) is called with `-l` and `-e` <SOURCE>. The
-variables available in the block are provided by the source file provided
-using `-e`.
+the output file only when blogc(1) is called with `-l` and `-e` <SOURCE>
+options. The variables available in the block are provided by the source
+file provided using `-e` <SOURCE> option.
 
 This is how a `listing_entry` block is defined:
 
@@ -101,6 +101,14 @@ This is how a `listing_entry` block is defined:
     content provided by a single entry.
     {% endblock %}
 
+When multiple `listing_entry` blocks are defined, blogc(1) should be called
+with multiple `-e` <SOURCE> options. If a `listing_entry` block does not have
+a corresponding `-e` <SOURCE> option, or if its value is an empty string,
+the content of the `listing_entry` block is not included.
+
+`listing_entry` blocks inside iterator are evaluated as multiple blocks and
+also require multiple `-e` <SOURCE> options. blogc(1) won't use the same
+source for every iteration.
 
 ## TEMPLATE VARIABLES
 

@@ -166,7 +166,8 @@ blogc_split_list_variable(const char *name, bc_trie_t *global, bc_trie_t *local)
 
 
 char*
-blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *listing_entry, bc_trie_t *config, bool listing)
+blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_slist_t *listing_entries,
+    bc_trie_t *config, bool listing)
 {
     if (tmpl == NULL)
         return NULL;
@@ -194,6 +195,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *listing_entry, bc
     int cmp = 0;
 
     bc_slist_t *tmp = tmpl;
+    bc_slist_t *current_listing_entry = listing_entries;
     while (tmp != NULL) {
         blogc_template_node_t *node = tmp->data;
 
@@ -222,8 +224,12 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_trie_t *listing_entry, bc
                     tmp_source = current_source != NULL ? current_source->data : NULL;
                 }
                 if (0 == strcmp("listing_entry", node->data[0])) {
+                    bc_trie_t *listing_entry = NULL;
+                    if (current_listing_entry != NULL) {
+                        listing_entry = current_listing_entry->data;
+                        current_listing_entry = current_listing_entry->next;
+                    }
                     if (listing_entry == NULL || !listing) {
-
                         // we can just skip anything and walk until the next
                         // 'endblock'
                         while (node->type != BLOGC_TEMPLATE_NODE_ENDBLOCK) {
