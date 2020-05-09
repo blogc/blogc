@@ -1,0 +1,81 @@
+name: yatr
+on:
+  - push
+
+jobs:
+  yatr:
+    runs-on: "${{ matrix.image }}"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - distcheck
+          - valgrind
+          - check-make-embedded
+        compiler:
+          - gcc
+          - clang
+        image:
+          - ubuntu-18.04
+        include:
+          - target: distcheck
+            compiler: clang
+            image: macos-10.15
+          - target: clang-analyzer
+            compiler: clang
+            image: ubuntu-18.04
+          - target: static
+            compiler: gcc
+            image: ubuntu-18.04
+          - target: static-all
+            compiler: gcc
+            image: ubuntu-18.04
+          - target: win32
+            compiler: gcc
+            image: ubuntu-18.04
+          - target: win64
+            compiler: gcc
+            image: ubuntu-18.04
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo gem install ronn
+          if [[ "x${{ matrix.image }}" = xubuntu-* ]]; then
+              if [[ "x${{ matrix.target }}" = *check* ]] || [[ "x${{ matrix.target }}" = xvalgrind ]]; then
+                  sudo apt-get install -y libcmocka-dev
+              fi
+              if [[ "x${{ matrix.target }}" = xvalgrind ]]; then
+                  sudo apt-get install -y valgrind
+              fi
+              if [[ "x${{ matrix.target }}" = xclang-analyzer ]]; then
+                  sudo apt-get install -y clang-tools
+              fi
+              if [[ "x${{ matrix.target }}" = xwin32 ]]; then
+                  sudo apt-get install -y gcc-mingw-w64-i686
+              fi
+              if [[ "x${{ matrix.target }}" = xwin64 ]]; then
+                  sudo apt-get install -y gcc-mingw-w64-x86-64
+              fi
+          elif [[ "x${{ matrix.image }}" = xmacos-* ]]; then
+              brew install automake coreutils cmocka pkg-config
+          fi
+
+      - name: Run yatr
+        if: ${{ matrix.compiler == 'gcc' }}
+        env:
+          CC: "${{ matrix.compiler }}"
+          TARGET: "${{ matrix.target }}"
+          DISTFILES_URL: "${{ secrets.DISTFILES_URL }}"
+        run: curl -sSf https://yatr.rgm.io/run.sh | bash
+
+      - name: Run yatr without publisher
+        if: ${{ matrix.compiler != 'gcc' }}
+        env:
+          CC: "${{ matrix.compiler }}"
+          TARGET: "${{ matrix.target }}"
+        run: curl -sSf https://yatr.rgm.io/run.sh | bash
