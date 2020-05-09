@@ -25,6 +25,9 @@ jobs:
           - target: clang-analyzer
             compiler: clang
             image: ubuntu-18.04
+          - target: dist-srpm
+            compiler: gcc
+            image: ubuntu-18.04
           - target: static
             compiler: gcc
             image: ubuntu-18.04
