@@ -112,7 +112,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Bar</title>
     <id>http://example.org/post/bar/index.html</id>
@@ -126,7 +125,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is bar.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Foo</title>
     <id>http://example.org/post/foo/index.html</id>
@@ -140,7 +138,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is foo.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/atom.xml" "${TEMP}/expected-atom.xml"
@@ -256,7 +253,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Post 11</title>
     <id>http://example.org/post/post11/index.html</id>
@@ -270,7 +266,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 11.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 10</title>
     <id>http://example.org/post/post10/index.html</id>
@@ -284,7 +279,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 10.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 09</title>
     <id>http://example.org/post/post09/index.html</id>
@@ -298,7 +292,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 09.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 08</title>
     <id>http://example.org/post/post08/index.html</id>
@@ -312,7 +305,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 08.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 07</title>
     <id>http://example.org/post/post07/index.html</id>
@@ -326,7 +318,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 07.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 06</title>
     <id>http://example.org/post/post06/index.html</id>
@@ -340,7 +331,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 06.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 05</title>
     <id>http://example.org/post/post05/index.html</id>
@@ -354,7 +344,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 05.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 04</title>
     <id>http://example.org/post/post04/index.html</id>
@@ -368,7 +357,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 04.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 03</title>
     <id>http://example.org/post/post03/index.html</id>
@@ -382,7 +370,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 03.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 02</title>
     <id>http://example.org/post/post02/index.html</id>
@@ -396,7 +383,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 02.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 01</title>
     <id>http://example.org/post/post01/index.html</id>
@@ -410,7 +396,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 01.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/atom.xml" "${TEMP}/expected-atom.xml"
@@ -482,7 +467,7 @@ cat > "${TEMP}/proj/templates/atom.tmpl" <<EOF
     <email>{{ AUTHOR_EMAIL }}</email>
   </author>
   <subtitle type="text">{{ SITE_TAGLINE }}</subtitle>
-  {% block listing %}
+  {%- block listing %}
   <entry>
     <title type="text">{{ TITLE }}</title>
     <id>{{ BASE_DOMAIN }}{{ BASE_URL }}/post/{{ FILENAME }}/</id>
@@ -495,7 +480,7 @@ cat > "${TEMP}/proj/templates/atom.tmpl" <<EOF
     </author>
     <content type="html"><![CDATA[{{ CONTENT }}]]></content>
   </entry>
-  {% endblock %}
+  {%- endblock %}
 </feed>
 EOF
 
@@ -529,7 +514,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Post 11</title>
     <id>http://example.org/post/post11/</id>
@@ -543,7 +527,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 11.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 10</title>
     <id>http://example.org/post/post10/</id>
@@ -557,7 +540,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 10.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 09</title>
     <id>http://example.org/post/post09/</id>
@@ -571,7 +553,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 09.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 08</title>
     <id>http://example.org/post/post08/</id>
@@ -585,7 +566,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 08.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 07</title>
     <id>http://example.org/post/post07/</id>
@@ -599,7 +579,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 07.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 06</title>
     <id>http://example.org/post/post06/</id>
@@ -613,7 +592,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 06.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 05</title>
     <id>http://example.org/post/post05/</id>
@@ -627,7 +605,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 05.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 04</title>
     <id>http://example.org/post/post04/</id>
@@ -641,7 +618,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 04.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 03</title>
     <id>http://example.org/post/post03/</id>
@@ -655,7 +631,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 03.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 02</title>
     <id>http://example.org/post/post02/</id>
@@ -669,7 +644,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 02.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Post 01</title>
     <id>http://example.org/post/post01/</id>
@@ -683,7 +657,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is Post 01.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/atom.xml" "${TEMP}/expected-atom.xml"
@@ -932,7 +905,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Bar</title>
     <id>http://example.org/post/bar/index.html</id>
@@ -946,7 +918,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is bar.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Foo</title>
     <id>http://example.org/post/foo/index.html</id>
@@ -960,7 +931,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is foo.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/atom.xml" "${TEMP}/expected-atom.xml"
@@ -1042,7 +1012,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Foo</title>
     <id>http://example.org/post/foo/index.html</id>
@@ -1056,7 +1025,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is foo.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Bar</title>
     <id>http://example.org/post/bar/index.html</id>
@@ -1070,7 +1038,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is bar.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/atom.xml" "${TEMP}/expected-atom.xml"
@@ -1161,7 +1128,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Foo</title>
     <id>http://example.org/post/foo/index.html</id>
@@ -1175,7 +1141,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is foo.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Bar</title>
     <id>http://example.org/post/bar/index.html</id>
@@ -1189,7 +1154,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is bar.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/atom.xml" "${TEMP}/expected-atom.xml"
@@ -1282,7 +1246,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Foo</title>
     <id>http://example.org/post/foo/index.html</id>
@@ -1296,7 +1259,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is foo.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Bar</title>
     <id>http://example.org/post/bar/index.html</id>
@@ -1310,7 +1272,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is bar.</p>
 ]]></content>
   </entry>
-  
   <entry>
     <title type="text">Baz</title>
     <id>http://example.org/post/baz/index.html</id>
@@ -1324,7 +1285,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is baz.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/atom.xml" "${TEMP}/expected-atom.xml"
@@ -1342,7 +1302,6 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Baz</title>
     <id>http://example.org/post/baz/index.html</id>
@@ -1356,7 +1315,6 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
     <content type="html"><![CDATA[<p>This is baz.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/atom/tag1.xml" "${TEMP}/expected-atom-tag1.xml"
@@ -1374,7 +1332,6 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Baz</title>
     <id>http://example.org/post/baz/index.html</id>
@@ -1388,7 +1345,6 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
     <content type="html"><![CDATA[<p>This is baz.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/atom/tag2.xml" "${TEMP}/expected-atom-tag2.xml"
@@ -1613,7 +1569,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Foo</title>
     <id>http://example.org/poost/foo.html</id>
@@ -1627,7 +1582,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is foo.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/atoom/index.xml" "${TEMP}/expected-atom.xml"
@@ -1722,7 +1676,6 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Baz</title>
     <id>http://example.org/poost/baz.html</id>
@@ -1736,7 +1689,6 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
     <content type="html"><![CDATA[<p>This is baz.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/atoom/tag1/index.xml" "${TEMP}/expected-atom-tag1.xml"
@@ -1754,7 +1706,6 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Baz</title>
     <id>http://example.org/poost/baz.html</id>
@@ -1768,7 +1719,6 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
     <content type="html"><![CDATA[<p>This is baz.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/atoom/tag2/index.xml" "${TEMP}/expected-atom-tag2.xml"
@@ -2063,7 +2013,7 @@ cat > "${TEMP}/expected-atom-dump.xml" <<EOF
     <email>{{ AUTHOR_EMAIL }}</email>
   </author>
   <subtitle type="text">{{ SITE_TAGLINE }}</subtitle>
-  {% block listing %}
+  {%- block listing %}
   <entry>
     <title type="text">{{ TITLE }}</title>
     <id>{{ BASE_DOMAIN }}{{ BASE_URL }}/poost/{{ FILENAME }}.html</id>
@@ -2076,7 +2026,7 @@ cat > "${TEMP}/expected-atom-dump.xml" <<EOF
     </author>
     <content type="html"><![CDATA[{{ CONTENT }}]]></content>
   </entry>
-  {% endblock %}
+  {%- endblock %}
 </feed>
 EOF
 diff -uN "${TEMP}/atom.xml" "${TEMP}/expected-atom-dump.xml"
@@ -2189,7 +2139,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Foo</title>
     <id>http://example.org/foo/index.html</id>
@@ -2203,7 +2152,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is foo.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/index.xml" "${TEMP}/expected-atom.xml"
@@ -2326,7 +2274,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Foo</title>
     <id>http://example.org/foo.html</id>
@@ -2340,7 +2287,6 @@ cat > "${TEMP}/expected-atom.xml" <<EOF
     <content type="html"><![CDATA[<p>This is foo.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/index.xml" "${TEMP}/expected-atom.xml"
@@ -2358,7 +2304,6 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Baz</title>
     <id>http://example.org/baz.html</id>
@@ -2372,7 +2317,6 @@ cat > "${TEMP}/expected-atom-tag1.xml" <<EOF
     <content type="html"><![CDATA[<p>This is baz.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/tag1/index.xml" "${TEMP}/expected-atom-tag1.xml"
@@ -2390,7 +2334,6 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
     <email>author@example.com</email>
   </author>
   <subtitle type="text">WAT?!</subtitle>
-  
   <entry>
     <title type="text">Baz</title>
     <id>http://example.org/baz.html</id>
@@ -2404,7 +2347,6 @@ cat > "${TEMP}/expected-atom-tag2.xml" <<EOF
     <content type="html"><![CDATA[<p>This is baz.</p>
 ]]></content>
   </entry>
-  
 </feed>
 EOF
 diff -uN "${TEMP}/proj/_build/tag2/index.xml" "${TEMP}/expected-atom-tag2.xml"

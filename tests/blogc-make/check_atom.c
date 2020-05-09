@@ -51,7 +51,7 @@ test_atom_generate_empty_file(void **state)
         "    <email>{{ AUTHOR_EMAIL }}</email>\n"
         "  </author>\n"
         "  <subtitle type=\"text\">{{ SITE_TAGLINE }}</subtitle>\n"
-        "  {% block listing %}\n"
+        "  {%- block listing %}\n"
         "  <entry>\n"
         "    <title type=\"text\">{{ TITLE }}</title>\n"
         "    <id>{{ BASE_DOMAIN }}{{ BASE_URL }}/{{ FILENAME }}.html</id>\n"
@@ -64,7 +64,7 @@ test_atom_generate_empty_file(void **state)
         "    </author>\n"
         "    <content type=\"html\"><![CDATA[{{ CONTENT }}]]></content>\n"
         "  </entry>\n"
-        "  {% endblock %}\n"
+        "  {%- endblock %}\n"
         "</feed>\n");
 
     free(cmp);
@@ -103,7 +103,7 @@ test_atom_generate_empty_dir(void **state)
         "    <email>{{ AUTHOR_EMAIL }}</email>\n"
         "  </author>\n"
         "  <subtitle type=\"text\">{{ SITE_TAGLINE }}</subtitle>\n"
-        "  {% block listing %}\n"
+        "  {%- block listing %}\n"
         "  <entry>\n"
         "    <title type=\"text\">{{ TITLE }}</title>\n"
         "    <id>{{ BASE_DOMAIN }}{{ BASE_URL }}/{{ FILENAME }}/index.html</id>\n"
@@ -116,7 +116,7 @@ test_atom_generate_empty_dir(void **state)
         "    </author>\n"
         "    <content type=\"html\"><![CDATA[{{ CONTENT }}]]></content>\n"
         "  </entry>\n"
-        "  {% endblock %}\n"
+        "  {%- endblock %}\n"
         "</feed>\n");
 
     free(cmp);
@@ -155,7 +155,7 @@ test_atom_generate_file(void **state)
         "    <email>{{ AUTHOR_EMAIL }}</email>\n"
         "  </author>\n"
         "  <subtitle type=\"text\">{{ SITE_TAGLINE }}</subtitle>\n"
-        "  {% block listing %}\n"
+        "  {%- block listing %}\n"
         "  <entry>\n"
         "    <title type=\"text\">{{ TITLE }}</title>\n"
         "    <id>{{ BASE_DOMAIN }}{{ BASE_URL }}/post/{{ FILENAME }}.html</id>\n"
@@ -168,7 +168,7 @@ test_atom_generate_file(void **state)
         "    </author>\n"
         "    <content type=\"html\"><![CDATA[{{ CONTENT }}]]></content>\n"
         "  </entry>\n"
-        "  {% endblock %}\n"
+        "  {%- endblock %}\n"
         "</feed>\n");
 
     free(cmp);
@@ -207,7 +207,7 @@ test_atom_generate_dir(void **state)
         "    <email>{{ AUTHOR_EMAIL }}</email>\n"
         "  </author>\n"
         "  <subtitle type=\"text\">{{ SITE_TAGLINE }}</subtitle>\n"
-        "  {% block listing %}\n"
+        "  {%- block listing %}\n"
         "  <entry>\n"
         "    <title type=\"text\">{{ TITLE }}</title>\n"
         "    <id>{{ BASE_DOMAIN }}{{ BASE_URL }}/post/{{ FILENAME }}/index.html</id>\n"
@@ -220,7 +220,7 @@ test_atom_generate_dir(void **state)
         "    </author>\n"
         "    <content type=\"html\"><![CDATA[{{ CONTENT }}]]></content>\n"
         "  </entry>\n"
-        "  {% endblock %}\n"
+        "  {%- endblock %}\n"
         "</feed>\n");
 
     free(cmp);
@@ -267,7 +267,7 @@ test_atom_empty_file(void **state)
         "    <email>{{ AUTHOR_EMAIL }}</email>\n"
         "  </author>\n"
         "  <subtitle type=\"text\">{{ SITE_TAGLINE }}</subtitle>\n"
-        "  {% block listing %}\n"
+        "  {%- block listing %}\n"
         "  <entry>\n"
         "    <title type=\"text\">{{ TITLE }}</title>\n"
         "    <id>{{ BASE_DOMAIN }}{{ BASE_URL }}/{{ FILENAME }}.html</id>\n"
@@ -280,7 +280,7 @@ test_atom_empty_file(void **state)
         "    </author>\n"
         "    <content type=\"html\"><![CDATA[{{ CONTENT }}]]></content>\n"
         "  </entry>\n"
-        "  {% endblock %}\n"
+        "  {%- endblock %}\n"
         "</feed>\n");
 
     free(cmp);
@@ -329,7 +329,7 @@ test_atom_empty_dir(void **state)
         "    <email>{{ AUTHOR_EMAIL }}</email>\n"
         "  </author>\n"
         "  <subtitle type=\"text\">{{ SITE_TAGLINE }}</subtitle>\n"
-        "  {% block listing %}\n"
+        "  {%- block listing %}\n"
         "  <entry>\n"
         "    <title type=\"text\">{{ TITLE }}</title>\n"
         "    <id>{{ BASE_DOMAIN }}{{ BASE_URL }}/{{ FILENAME }}/index.html</id>\n"
@@ -342,7 +342,7 @@ test_atom_empty_dir(void **state)
         "    </author>\n"
         "    <content type=\"html\"><![CDATA[{{ CONTENT }}]]></content>\n"
         "  </entry>\n"
-        "  {% endblock %}\n"
+        "  {%- endblock %}\n"
         "</feed>\n");
 
     free(cmp);
@@ -391,7 +391,7 @@ test_atom_file(void **state)
         "    <email>{{ AUTHOR_EMAIL }}</email>\n"
         "  </author>\n"
         "  <subtitle type=\"text\">{{ SITE_TAGLINE }}</subtitle>\n"
-        "  {% block listing %}\n"
+        "  {%- block listing %}\n"
         "  <entry>\n"
         "    <title type=\"text\">{{ TITLE }}</title>\n"
         "    <id>{{ BASE_DOMAIN }}{{ BASE_URL }}/post/{{ FILENAME }}.html</id>\n"
@@ -404,7 +404,7 @@ test_atom_file(void **state)
         "    </author>\n"
         "    <content type=\"html\"><![CDATA[{{ CONTENT }}]]></content>\n"
         "  </entry>\n"
-        "  {% endblock %}\n"
+        "  {%- endblock %}\n"
         "</feed>\n");
 
     free(cmp);
@@ -453,7 +453,7 @@ test_atom_dir(void **state)
         "    <email>{{ AUTHOR_EMAIL }}</email>\n"
         "  </author>\n"
         "  <subtitle type=\"text\">{{ SITE_TAGLINE }}</subtitle>\n"
-        "  {% block listing %}\n"
+        "  {%- block listing %}\n"
         "  <entry>\n"
         "    <title type=\"text\">{{ TITLE }}</title>\n"
         "    <id>{{ BASE_DOMAIN }}{{ BASE_URL }}/post/{{ FILENAME }}/index.html</id>\n"
@@ -466,7 +466,7 @@ test_atom_dir(void **state)
         "    </author>\n"
         "    <content type=\"html\"><![CDATA[{{ CONTENT }}]]></content>\n"
         "  </entry>\n"
-        "  {% endblock %}\n"
+        "  {%- endblock %}\n"
         "</feed>\n");
 
     free(cmp);

@@ -30,7 +30,7 @@ static const char atom_template[] =
     "    <email>{{ AUTHOR_EMAIL }}</email>\n"
     "  </author>\n"
     "  <subtitle type=\"text\">{{ SITE_TAGLINE }}</subtitle>\n"
-    "  {%% block listing %%}\n"
+    "  {%%- block listing %%}\n"
     "  <entry>\n"
     "    <title type=\"text\">{{ TITLE }}</title>\n"
     "    <id>{{ BASE_DOMAIN }}{{ BASE_URL }}%s</id>\n"
@@ -43,7 +43,7 @@ static const char atom_template[] =
     "    </author>\n"
     "    <content type=\"html\"><![CDATA[{{ CONTENT }}]]></content>\n"
     "  </entry>\n"
-    "  {%% endblock %%}\n"
+    "  {%%- endblock %%}\n"
     "</feed>\n";
 
 
