@@ -71,16 +71,9 @@ jobs:
           fi
 
       - name: Run yatr
-        if: ${{ matrix.compiler == 'gcc' || matrix.target == 'clang-analyzer' }}
         env:
           CC: "${{ matrix.compiler }}"
           TARGET: "${{ matrix.target }}"
           DISTFILES_URL: "${{ secrets.DISTFILES_URL }}"
-        run: curl -sSf https://yatr.rgm.io/run.sh | bash
-
-      - name: Run yatr without publisher
-        if: ${{ matrix.compiler != 'gcc' && matrix.target != 'clang-analyzer' }}
-        env:
-          CC: "${{ matrix.compiler }}"
-          TARGET: "${{ matrix.target }}"
+          DISABLE_PUBLISHER: "${{ matrix.compiler != 'gcc' && matrix.target != 'clang-analyzer' }}"
         run: curl -sSf https://yatr.rgm.io/run.sh | bash
