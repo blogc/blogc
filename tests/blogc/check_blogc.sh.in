@@ -183,7 +183,7 @@ cat > "${TEMP}/main.tmpl" <<EOF
               <div class="meta">{{ DATE_FORMATTED }}</div>
               <a href="{{ BASE_URL }}/post/{{ FILENAME }}/"><div>{{ TITLE }}</div></a>
             </li>
-    {% endblock %}
+    {% endblock %}{% block listing_empty %}vazio{% endblock %}
     {% block listing_once %}
           </ul>
         </div>
@@ -575,6 +575,45 @@ ${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc \
     "${TEMP}/post1.txt" "${TEMP}/post2.txt"
 
 diff -uN "${TEMP}/output14.html" "${TEMP}/expected-output5.html"
+
+
+cat > "${TEMP}/expected-output6.html" <<EOF
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Chunda's website</title>
+  </head>
+  <body>
+    <a href="/"><div class="name">Chunda's website</div></a>
+    
+    <section class="main">
+      <div class="container">
+        <div class="content">
+          <div class="page-heading">Blog</div>
+          <ul>
+    
+    vazio
+    
+          </ul>
+        </div>
+      </div>
+    </section>
+    
+    
+  </body>
+</html>
+EOF
+
+${TESTS_ENVIRONMENT} @abs_top_builddir@/blogc \
+    -D BASE_DOMAIN=http://bola.com/ \
+    -D BASE_URL= \
+    -D SITE_TITLE="Chunda's website" \
+    -D DATE_FORMAT="%b %d, %Y, %I:%M %p GMT" \
+    -t "${TEMP}/main.tmpl" \
+    -o "${TEMP}/output15.html" \
+    -l
+
+diff -uN "${TEMP}/output15.html" "${TEMP}/expected-output6.html"
 
 echo "{% block listig %}foo{% endblock %}\n" > "${TEMP}/error.tmpl"
 

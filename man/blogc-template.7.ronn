@@ -22,7 +22,8 @@ matches the requirements of the given block.
 
 Blocks can be defined more than once, but can't be nested.
 
-The available blocks are: `entry`, `listing` and `listing_once`.
+The available blocks are: `entry`, `listing`, `listing_empty`, `listing_entry`
+and `listing_once`.
 
 ### entry block
 
@@ -56,6 +57,42 @@ This is how a `listing` block is defined:
     will be included once for each entry.
     {% endblock %}
 
+### listing_empty block
+
+This block is similar to the `listing` block, but its content is included
+only when there are no entries to be listed, either because no source files
+were provided or because there are no entries remaining after filtering (see
+blogc-pagination(7)).
+
+This is how a `listing_empty` block is defined:
+
+    {% block listing_empty %}
+    No entries available.
+    {% endblock %}
+
+### listing_entry block
+
+This block is identical to the `entry` block, but its content is included in
+the output file only when blogc(1) is called with `-l` and `-e` <SOURCE>
+options. The variables available in the block are provided by the source
+file provided using `-e` <SOURCE> option.
+
+This is how a `listing_entry` block is defined:
+
+    {% block listing_entry %}
+    This content will only be included when rendering a listing, but with
+    content provided by a single entry.
+    {% endblock %}
+
+When multiple `listing_entry` blocks are defined, blogc(1) should be called
+with multiple `-e` <SOURCE> options. If a `listing_entry` block does not have
+a corresponding `-e` <SOURCE> option, or if its value is an empty string,
+the content of the `listing_entry` block is not included.
+
+`listing_entry` blocks inside iterator are evaluated as multiple blocks and
+also require multiple `-e` <SOURCE> options. blogc(1) won't use the same
+source for every iteration.
+
 ### listing_once block
 
 The content of a `listing_once` block is included in the output file when
@@ -86,29 +123,6 @@ that the `TITLE` variable is defined:
     {% block listing_once %}
     </ul>
     {% endblock %}
-
-### listing_entry block
-
-This block is identical to the `entry` block, but its content is included in
-the output file only when blogc(1) is called with `-l` and `-e` <SOURCE>
-options. The variables available in the block are provided by the source
-file provided using `-e` <SOURCE> option.
-
-This is how a `listing_entry` block is defined:
-
-    {% block listing_entry %}
-    This content will only be included when rendering a listing, but with
-    content provided by a single entry.
-    {% endblock %}
-
-When multiple `listing_entry` blocks are defined, blogc(1) should be called
-with multiple `-e` <SOURCE> options. If a `listing_entry` block does not have
-a corresponding `-e` <SOURCE> option, or if its value is an empty string,
-the content of the `listing_entry` block is not included.
-
-`listing_entry` blocks inside iterator are evaluated as multiple blocks and
-also require multiple `-e` <SOURCE> options. blogc(1) won't use the same
-source for every iteration.
 
 ## TEMPLATE VARIABLES
 

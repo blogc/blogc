@@ -380,6 +380,14 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                         break;
                     }
                     else if ((current - start == 13) &&
+                        (0 == strncmp("listing_empty", src + start, 13)))
+                    {
+                        block_open = true;
+                        end = current;
+                        state = TEMPLATE_BLOCK_END_WHITESPACE_CLEANER;
+                        break;
+                    }
+                    else if ((current - start == 13) &&
                         (0 == strncmp("listing_entry", src + start, 13)))
                     {
                         block_open = true;
@@ -391,7 +399,7 @@ blogc_template_parse(const char *src, size_t src_len, bc_error_t **err)
                 *err = bc_error_parser(BLOGC_ERROR_TEMPLATE_PARSER, src,
                     src_len, current,
                     "Invalid block type. Allowed types are: 'entry', 'listing', "
-                    "'listing_once' and 'listing_entry'.");
+                    "'listing_once', 'listing_empty' and 'listing_entry'.");
                 break;
 
             case TEMPLATE_BLOCK_IF_START:

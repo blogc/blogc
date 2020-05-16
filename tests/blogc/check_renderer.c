@@ -75,7 +75,8 @@ test_render_entry(void **state)
         "{% if GUDA > \"zxd\" %}LOL3{% else %}ELSE{% endif %}\n"
         "{% if GUDA <= \"zxc\" %}LOL4{% endif %}\n"
         "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
-        "{% foreach TAGS_ASD %}yay{% endforeach %}\n";
+        "{% foreach TAGS_ASD %}yay{% endforeach %}\n"
+        "{% block listing_empty %}vazio{% endblock %}\n";
     bc_error_t *err = NULL;
     bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
@@ -100,6 +101,7 @@ test_render_entry(void **state)
         "ELSE\n"
         "LOL4\n"
         "lol foo haha lol bar haha lol baz haha \n"
+        "\n"
         "\n");
     blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
@@ -122,7 +124,8 @@ test_render_listing(void **state)
         "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
         "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
         "{% foreach TAGS_ASD %}yay{% endforeach %}\n"
-        "{% endblock %}\n";
+        "{% endblock %}\n"
+        "{% block listing_empty %}vazio{% endblock %}\n";
     bc_error_t *err = NULL;
     bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
@@ -147,6 +150,7 @@ test_render_listing(void **state)
         "\n"
         "2013-01-02 03:04:05\n"
         "bola: asd3\n"
+        "\n"
         "\n"
         "\n"
         "\n");
@@ -172,7 +176,8 @@ test_render_listing_entry(void **state)
         "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
         "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
         "{% foreach TAGS_ASD %}yay{% endforeach %}\n"
-        "{% endblock %}\n";
+        "{% endblock %}\n"
+        "{% block listing_empty %}vazio{% endblock %}\n";
     bc_error_t *err = NULL;
     bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
@@ -198,6 +203,7 @@ test_render_listing_entry(void **state)
         "\n"
         "2013-01-02 03:04:05\n"
         "bola: asd3\n"
+        "\n"
         "\n"
         "\n"
         "\n");
@@ -224,7 +230,8 @@ test_render_listing_entry2(void **state)
         "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
         "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
         "{% foreach TAGS_ASD %}yay{% endforeach %}\n"
-        "{% endblock %}\n";
+        "{% endblock %}\n"
+        "{% block listing_empty %}vazio{% endblock %}\n";
     bc_error_t *err = NULL;
     bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
@@ -259,6 +266,7 @@ test_render_listing_entry2(void **state)
         "bola: asd3\n"
         "\n"
         "\n"
+        "\n"
         "\n");
     blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
@@ -283,7 +291,8 @@ test_render_listing_entry3(void **state)
         "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
         "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
         "{% foreach TAGS_ASD %}yay{% endforeach %}\n"
-        "{% endblock %}\n";
+        "{% endblock %}\n"
+        "{% block listing_empty %}vazio{% endblock %}\n";
     bc_error_t *err = NULL;
     bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
@@ -319,6 +328,7 @@ test_render_listing_entry3(void **state)
         "bola: asd3\n"
         "\n"
         "\n"
+        "\n"
         "\n");
     blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
@@ -343,7 +353,8 @@ test_render_listing_entry4(void **state)
         "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
         "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
         "{% foreach TAGS_ASD %}yay{% endforeach %}\n"
-        "{% endblock %}\n";
+        "{% endblock %}\n"
+        "{% block listing_empty %}vazio{% endblock %}\n";
     bc_error_t *err = NULL;
     bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
@@ -382,6 +393,7 @@ test_render_listing_entry4(void **state)
         "bola: asd3\n"
         "\n"
         "\n"
+        "\n"
         "\n");
     blogc_template_free_ast(l);
     bc_slist_free_full(s, (bc_free_func_t) bc_trie_free);
@@ -403,7 +415,8 @@ test_render_listing_empty(void **state)
         "{% ifdef DATE_FORMATTED %}{{ DATE_FORMATTED }}{% endif %}\n"
         "bola: {% ifdef BOLA %}{{ BOLA }}{% endif %}\n"
         "{% foreach TAGS %}lol {{ FOREACH_ITEM }} haha {% endforeach %}\n"
-        "{% endblock %}\n";
+        "{% endblock %}\n"
+        "{% block listing_empty %}vazio{% endblock %}\n";
     bc_error_t *err = NULL;
     bc_slist_t *l = blogc_template_parse(str, strlen(str), &err);
     assert_non_null(l);
@@ -413,7 +426,8 @@ test_render_listing_empty(void **state)
         "foo\n"
         "fuuu\n"
         "\n"
-        "\n");
+        "\n"
+        "vazio\n");
     blogc_template_free_ast(l);
     free(out);
 }

@@ -242,8 +242,21 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_slist_t *listing_entries,
                     tmp_source = listing_entry;
                 }
                 else if ((0 == strcmp("listing", node->data[0])) ||
+                         (0 == strcmp("listing_empty", node->data[0])) ||
                          (0 == strcmp("listing_once", node->data[0]))) {
                     if (!listing) {
+
+                        // we can just skip anything and walk until the next
+                        // 'endblock'
+                        while (node->type != BLOGC_TEMPLATE_NODE_ENDBLOCK) {
+                            tmp = tmp->next;
+                            node = tmp->data;
+                        }
+                        break;
+                    }
+                }
+                if (0 == strcmp("listing_empty", node->data[0])) {
+                    if (sources != NULL) {
 
                         // we can just skip anything and walk until the next
                         // 'endblock'
