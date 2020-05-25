@@ -172,7 +172,8 @@ atom_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         bm_filectx_t *fctx = l->data;
         if (fctx == NULL)
             continue;
-        if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL, NULL,
+        if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL,
+                ctx->atom_template_tmp ? NULL : ctx->atom_template_fctx,
                 fctx, false))
         {
             rv = bm_exec_blogc(ctx, variables, NULL, true, NULL, ctx->atom_template_fctx,
@@ -238,7 +239,8 @@ atom_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
         bc_trie_insert(variables, "FILTER_TAG",
             bc_strdup(ctx->settings->tags[i]));
 
-        if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL, NULL,
+        if (bm_rule_need_rebuild(ctx->posts_fctx, ctx->settings_fctx, NULL,
+                ctx->atom_template_tmp ? NULL : ctx->atom_template_fctx,
                 fctx, false))
         {
             rv = bm_exec_blogc(ctx, variables, NULL, true, NULL, ctx->atom_template_fctx,
