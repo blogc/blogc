@@ -84,6 +84,9 @@ bm_exec_native_cp(bm_filectx_t *source, bm_filectx_t *dest, bool verbose)
         } while (nread > 0);
     }
 
+    close(fd_from);
+    close(fd_to);
+
     return 0;
 }
 
