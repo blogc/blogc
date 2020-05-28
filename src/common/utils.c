@@ -74,6 +74,22 @@ bc_slist_prepend(bc_slist_t *l, void *data)
 }
 
 
+bc_slist_t*
+bc_slist_append_list(bc_slist_t *l, bc_slist_t *n)
+{
+    if (l == NULL) {
+        return n;
+    }
+    if (n == NULL) {
+        return l;
+    }
+    bc_slist_t *tmp;
+    for (tmp = l; tmp->next != NULL; tmp = tmp->next);
+    tmp->next = n;
+    return l;
+}
+
+
 void
 bc_slist_free_full(bc_slist_t *l, bc_free_func_t free_func)
 {
