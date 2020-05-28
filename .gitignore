@@ -57,6 +57,7 @@ blogc*.html
 /tests/blogc/check_blogc.sh
 /tests/blogc/check_content_parser
 /tests/blogc/check_datetime_parser
+/tests/blogc/check_filelist_parser
 /tests/blogc/check_funcvars
 /tests/blogc/check_loader
 /tests/blogc/check_renderer

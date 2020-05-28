@@ -40,6 +40,7 @@ noinst_HEADERS = \
 	src/blogc/content-parser.h \
 	src/blogc/datetime-parser.h \
 	src/blogc/debug.h \
+	src/blogc/filelist-parser.h \
 	src/blogc/funcvars.h \
 	src/blogc/loader.h \
 	src/blogc/renderer.h \
@@ -128,6 +129,7 @@ libblogc_la_SOURCES = \
 	src/blogc/content-parser.c \
 	src/blogc/datetime-parser.c \
 	src/blogc/debug.c \
+	src/blogc/filelist-parser.c \
 	src/blogc/funcvars.c \
 	src/blogc/loader.c \
 	src/blogc/renderer.c \
@@ -468,6 +470,7 @@ if USE_CMOCKA
 check_PROGRAMS += \
 	tests/blogc/check_content_parser \
 	tests/blogc/check_datetime_parser \
+	tests/blogc/check_filelist_parser \
 	tests/blogc/check_renderer \
 	tests/blogc/check_source_parser \
 	tests/blogc/check_template_parser \
@@ -655,6 +658,24 @@ tests_blogc_check_datetime_parser_LDFLAGS = \
 	$(NULL)
 
 tests_blogc_check_datetime_parser_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc.la \
+	libblogc_common.la \
+	$(NULL)
+
+tests_blogc_check_filelist_parser_SOURCES = \
+	tests/blogc/check_filelist_parser.c \
+	$(NULL)
+
+tests_blogc_check_filelist_parser_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_check_filelist_parser_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_blogc_check_filelist_parser_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
 	libblogc_common.la \
