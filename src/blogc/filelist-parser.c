@@ -19,7 +19,6 @@ bc_slist_t*
 blogc_filelist_parse(const char *src, size_t src_len)
 {
     size_t current = 0;
-    size_t start = 0;
     bc_slist_t *rv = NULL;
     bc_string_t *line = bc_string_new();
     blogc_filelist_parser_state_t state = LINE_START;
@@ -41,7 +40,6 @@ blogc_filelist_parse(const char *src, size_t src_len)
                 }
                 if (c == ' ' || c == '\t' || c == '\r' || c == '\n')
                     break;
-                start = current;
                 state = LINE;
                 continue;
 
