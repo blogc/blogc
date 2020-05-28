@@ -29,12 +29,14 @@
 #include <string.h>
 
 #include "debug.h"
+#include "filelist-parser.h"
 #include "template-parser.h"
 #include "loader.h"
 #include "renderer.h"
 #include "../common/error.h"
 #include "../common/utf8.h"
 #include "../common/utils.h"
+#include "../common/stdin.h"
 
 #ifdef MAKE_EMBEDDED
 extern int bm_main(int argc, char **argv);
@@ -123,28 +125,6 @@ blogc_mkdir_recursive(const char *filename)
 #endif
     }
     free(fname);
-}
-
-
-static bc_slist_t*
-blogc_read_stdin_to_list(bc_slist_t *l)
-{
-    char buffer[4096];
-    while (NULL != fgets(buffer, 4096, stdin)) {
-        size_t len = strlen(buffer);
-        if (len == 0)
-            continue;
-        if (buffer[0] == '#')
-            continue;
-        if (len >= 2 && ((buffer[len - 2] == '\r') || (buffer[len - 2] == '\n')))
-            buffer[len - 2] = '\0';
-        if ((buffer[len - 1] == '\r') || (buffer[len - 1] == '\n'))
-            buffer[len - 1] = '\0';
-        if (strlen(buffer) == 0)
-            continue;
-        l = bc_slist_append(l, bc_strdup(buffer));
-    }
-    return l;
 }
 
 
@@ -289,8 +269,12 @@ main(int argc, char **argv)
 
     }
 
-    if (input_stdin)
-        sources = blogc_read_stdin_to_list(sources);
+    if (input_stdin) {
+        char *in = bc_stdin_read();
+        bc_slist_t *in_list = blogc_filelist_parse(in, strlen(in));
+        free(in);
+        sources = bc_slist_append_list(sources, in_list);
+    }
 
     if (!listing && bc_slist_length(sources) == 0) {
         blogc_print_usage();
