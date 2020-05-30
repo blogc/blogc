@@ -26,14 +26,25 @@ typedef struct {
     bc_trie_t *args;
 } bm_httpd_t;
 
+static pthread_mutex_t mutex_httpd_starting = PTHREAD_MUTEX_INITIALIZER;
+static bool httpd_starting = false;
+
 
 static void*
 httpd_thread(void *arg)
 {
     bm_httpd_t *httpd = arg;
 
+    pthread_mutex_lock(&mutex_httpd_starting);
+    httpd_starting = true;
+    pthread_mutex_unlock(&mutex_httpd_starting);
+
     int rv = bm_exec_blogc_runserver(httpd->ctx, bc_trie_lookup(httpd->args, "host"),
         bc_trie_lookup(httpd->args, "port"), bc_trie_lookup(httpd->args, "threads"));
+
+    pthread_mutex_lock(&mutex_httpd_starting);
+    httpd_starting = false;
+    pthread_mutex_unlock(&mutex_httpd_starting);
 
     free(httpd);
 
@@ -48,15 +59,13 @@ int
 bm_httpd_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec, bc_slist_t *outputs,
     bc_trie_t *args)
 {
-    // this is here to avoid that the httpd starts running in the middle of the
-    // first build, as the reloader and the httpd are started in parallel.
-    // we run the task synchronously for the first time, and start the httpd
-    // thread afterwards.
-    bool wait_before_reloader = false;
-    if (0 != rule_exec(*ctx, outputs, args)) {
-        fprintf(stderr, "blogc-make: warning: failed to rebuild website. "
-            "retrying in 5 seconds ...\n\n");
-        wait_before_reloader = true;
+    pthread_mutex_lock(&mutex_httpd_starting);
+    bool starting = httpd_starting;
+    pthread_mutex_unlock(&mutex_httpd_starting);
+
+    if (starting) {
+        fprintf(stderr, "blogc-make: error: httpd already running\n");
+        return 1;
     }
 
     int err;
@@ -88,9 +97,25 @@ bm_httpd_run(bm_ctx_t **ctx, bm_rule_exec_func_t rule_exec, bc_slist_t *outputs,
         return 1;
     }
 
-    // run the reloader
-    if (wait_before_reloader) {
-        sleep(5);
+    // we could use some pthread_*_timedwait() apis here, but I decided to
+    // just use simple mutexes for the sake of portability.
+    size_t count = 0;
+    while (true) {
+        pthread_mutex_lock(&mutex_httpd_starting);
+        starting = httpd_starting;
+        pthread_mutex_unlock(&mutex_httpd_starting);
+
+        if (starting)
+            break;
+
+        if (++count > 100) {
+            fprintf(stderr, "blogc-make: error: failed to start httpd thread: "
+                "too many retries\n");
+            // rv will leak, but it is not safe to free here
+            return 1;
+        }
+        usleep(100000);
     }
+
     return bm_reloader_run(ctx, rule_exec, outputs, args);
 }
