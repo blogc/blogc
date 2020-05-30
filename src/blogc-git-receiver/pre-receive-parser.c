@@ -6,6 +6,7 @@
  * See the file LICENSE.
  */
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include "../common/utils.h"
@@ -22,12 +23,11 @@ typedef enum {
 
 
 char*
-bgr_pre_receive_parse(const char *input)
+bgr_pre_receive_parse(const char *input, size_t input_len)
 {
     input_state_t state = START_OLD;
     size_t start = 0;
     size_t start_new = 0;
-    size_t input_len = strlen(input);
 
     for (size_t current = 0; current < input_len; current++) {
 

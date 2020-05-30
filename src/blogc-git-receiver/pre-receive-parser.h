@@ -9,6 +9,8 @@
 #ifndef _PRE_RECEIVE_PARSER_H
 #define _PRE_RECEIVE_PARSER_H
 
-char* bgr_pre_receive_parse(const char *input);
+#include <stddef.h>
+
+char* bgr_pre_receive_parse(const char *input, size_t input_len);
 
 #endif /* _PRE_RECEIVE_PARSER_H */

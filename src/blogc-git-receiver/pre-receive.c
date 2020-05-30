@@ -171,7 +171,7 @@ default_sym:
     }
     else {
         char *input = bc_stdin_read();
-        master = bgr_pre_receive_parse(input);
+        master = bgr_pre_receive_parse(input, strlen(input));
         free(input);
     }
 

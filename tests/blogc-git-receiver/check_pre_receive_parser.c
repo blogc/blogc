@@ -13,46 +13,48 @@
 #include <stdlib.h>
 #include "../../src/blogc-git-receiver/pre-receive-parser.h"
 
+#define _bgr_pre_receive_parse(a) bgr_pre_receive_parse(a, strlen(a))
+
 
 static void
 test_pre_receive_parse(void **state)
 {
-    assert_null(bgr_pre_receive_parse(""));
-    assert_null(bgr_pre_receive_parse(
+    assert_null(_bgr_pre_receive_parse(""));
+    assert_null(_bgr_pre_receive_parse(
         "4f1f932f6ef6d6c9770266775c2db072964d7a62"));
-    assert_null(bgr_pre_receive_parse(
+    assert_null(_bgr_pre_receive_parse(
         "4f1f932f6ef6d6c9770266775c2db072964d7a62 "));
-    assert_null(bgr_pre_receive_parse(
+    assert_null(_bgr_pre_receive_parse(
         "4f1f932f6ef6d6c9770266775c2db072964d7a62 "
         "3fff4bb3172f77b292b0c913749e81bedd3545f3"));
-    assert_null(bgr_pre_receive_parse(
+    assert_null(_bgr_pre_receive_parse(
         "4f1f932f6ef6d6c9770266775c2db072964d7a62 "
         "3fff4bb3172f77b292b0c913749e81bedd3545f3 "));
-    assert_null(bgr_pre_receive_parse(
+    assert_null(_bgr_pre_receive_parse(
         "4f1f932f6ef6d6c9770266775c2db072964d7a62 "
         "3fff4bb3172f77b292b0c913749e81bedd3545f3 "
         "refs/heads/lol"));
-    assert_null(bgr_pre_receive_parse(
+    assert_null(_bgr_pre_receive_parse(
         "4f1f932f6ef6d6c9770266775c2db072964d7a62 "
         "3fff4bb3172f77b292b0c913749e81bedd3545f3 "
         "refs/heads/lol"));
-    assert_null(bgr_pre_receive_parse(
+    assert_null(_bgr_pre_receive_parse(
         "4f1f932f6ef6d6c9770266775c2db072964d7a62 "
         "3fff4bb3172f77b292b0c913749e81bedd3545f3 "
         "refs/heads/master"));
-    assert_null(bgr_pre_receive_parse(
+    assert_null(_bgr_pre_receive_parse(
         "4f1f932f6ef6d6c9770266775c2db072964d7a62 "
         "3fff4bb3172f77b292b0c913749e81bedd3545f3 "
         "refs/heads/master asd\n"));
     char *t;
-    t = bgr_pre_receive_parse(
+    t = _bgr_pre_receive_parse(
         "4f1f932f6ef6d6c9770266775c2db072964d7a62 "
         "3fff4bb3172f77b292b0c913749e81bedd3545f3 "
         "refs/heads/master\n");
     assert_non_null(t);
     assert_string_equal(t, "3fff4bb3172f77b292b0c913749e81bedd3545f3");
     free(t);
-    t = bgr_pre_receive_parse(
+    t = _bgr_pre_receive_parse(
         "4f1f932f6ef6d6c9770266775c2db072964d7a62 "
         "3fff4bb3172f77b292b0c913749e81bedd3545fa "
         "refs/heads/master\n"
@@ -63,7 +65,7 @@ test_pre_receive_parse(void **state)
     assert_non_null(t);
     assert_string_equal(t, "3fff4bb3172f77b292b0c913749e81bedd3545fa");
     free(t);
-    t = bgr_pre_receive_parse(
+    t = _bgr_pre_receive_parse(
         "4f1f932f6ef6d6c9770266775c2db072964d7a63 "
         "3fff4bb3172f77b292b0c913749e81bedd3545f4 "
         "refs/heads/bola\n"
@@ -74,7 +76,7 @@ test_pre_receive_parse(void **state)
     assert_non_null(t);
     assert_string_equal(t, "3fff4bb3172f77b292b0c913749e81bedd3545fb");
     free(t);
-    t = bgr_pre_receive_parse(
+    t = _bgr_pre_receive_parse(
         "4f1f932f6ef6d6c9770266775c2db072964d7a63 "
         "3fff4bb3172f77b292b0c913749e81bedd3545f4 "
         "refs/heads/bola\n"
