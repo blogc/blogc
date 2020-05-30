@@ -56,26 +56,41 @@ test_slist_prepend(void **state)
 static void
 test_slist_append_list(void **state)
 {
+    assert_null(bc_slist_append_list(NULL, NULL));
+
     bc_slist_t *l = NULL;
-    assert_null(bc_slist_append_list(l, NULL));
     l = bc_slist_append(l, (void*) bc_strdup("bola"));
     l = bc_slist_append(l, (void*) bc_strdup("guda"));
+
     bc_slist_t *t = bc_slist_append_list(l, NULL);
-    assert_true(l == t);
+    assert_non_null(t);
+    assert_string_equal(t->data, "bola");
+    assert_non_null(t->next);
+    assert_string_equal(t->next->data, "guda");
+    assert_null(t->next->next);
+
+    t = bc_slist_append_list(NULL, l);
+    assert_non_null(t);
+    assert_string_equal(t->data, "bola");
+    assert_non_null(t->next);
+    assert_string_equal(t->next->data, "guda");
+    assert_null(t->next->next);
+
     bc_slist_t *n = NULL;
     n = bc_slist_append(n, (void*) bc_strdup("chunda"));
     n = bc_slist_append(n, (void*) bc_strdup("asd"));
-    l = bc_slist_append_list(l, n);
-    assert_non_null(l);
-    assert_string_equal(l->data, "bola");
-    assert_non_null(l->next);
-    assert_string_equal(l->next->data, "guda");
-    assert_non_null(l->next->next);
-    assert_string_equal(l->next->next->data, "chunda");
-    assert_non_null(l->next->next->next);
-    assert_string_equal(l->next->next->next->data, "asd");
-    assert_null(l->next->next->next->next);
-    bc_slist_free_full(l, free);
+
+    t = bc_slist_append_list(l, n);
+    assert_non_null(t);
+    assert_string_equal(t->data, "bola");
+    assert_non_null(t->next);
+    assert_string_equal(t->next->data, "guda");
+    assert_non_null(t->next->next);
+    assert_string_equal(t->next->next->data, "chunda");
+    assert_non_null(t->next->next->next);
+    assert_string_equal(t->next->next->next->data, "asd");
+    assert_null(t->next->next->next->next);
+    bc_slist_free_full(t, free);
 }
 
 
