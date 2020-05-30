@@ -170,8 +170,9 @@ default_sym:
         bc_strv_free(pieces);
     }
     else {
-        char *input = bc_stdin_read();
-        master = bgr_pre_receive_parse(input, strlen(input));
+        size_t input_len;
+        char *input = bc_stdin_read(&input_len);
+        master = bgr_pre_receive_parse(input, input_len);
         free(input);
     }
 

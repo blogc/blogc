@@ -270,10 +270,11 @@ main(int argc, char **argv)
     }
 
     if (input_stdin) {
-        char *in = bc_stdin_read();
-        bc_slist_t *in_list = blogc_filelist_parse(in, strlen(in));
-        free(in);
-        sources = bc_slist_append_list(sources, in_list);
+        size_t input_len;
+        char *input = bc_stdin_read(&input_len);
+        bc_slist_t *input_list = blogc_filelist_parse(input, input_len);
+        free(input);
+        sources = bc_slist_append_list(sources, input_list);
     }
 
     if (!listing && bc_slist_length(sources) == 0) {

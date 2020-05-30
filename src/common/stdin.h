@@ -9,6 +9,8 @@
 #ifndef _STDIN_H
 #define _STDIN_H
 
-char* bc_stdin_read(void);
+#include <stddef.h>
+
+char* bc_stdin_read(size_t *len);
 
 #endif /* _STDIN_H */

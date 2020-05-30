@@ -27,19 +27,23 @@ __wrap_fgetc(FILE *stream)
 static void
 test_read(void **state)
 {
+    assert_null(bc_stdin_read(NULL));
     will_return(__wrap_fgetc, EOF);
-    char *t = bc_stdin_read();
+    size_t len;
+    char *t = bc_stdin_read(&len);
     assert_non_null(t);
     assert_string_equal(t, "");
+    assert_int_equal(len, 0);
     free(t);
     will_return(__wrap_fgetc, 'b');
     will_return(__wrap_fgetc, 'o');
     will_return(__wrap_fgetc, 'l');
     will_return(__wrap_fgetc, 'a');
     will_return(__wrap_fgetc, EOF);
-    t = bc_stdin_read();
+    t = bc_stdin_read(&len);
     assert_non_null(t);
     assert_string_equal(t, "bola");
+    assert_int_equal(len, 4);
     free(t);
 }
 
