@@ -7,7 +7,7 @@ These are some rough steps required to produce a blogc release.
 
 - Read repository logs:
   ```
-  $ git log v0.18.0  # replace with whatever latest release
+  $ git log v0.18.0..HEAD  # replace with whatever latest release
   ```
 - Follow this criteria:
   - Only bug fixes: Bump micro version.
