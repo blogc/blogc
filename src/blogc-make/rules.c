@@ -715,18 +715,13 @@ copy_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 
 // CLEAN RULE
 
-static bc_slist_t*
-clean_outputlist(bm_ctx_t *ctx)
-{
-    return bm_rule_list_built_files(ctx);
-}
-
 static int
 clean_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 {
     int rv = 0;
 
-    for (bc_slist_t *l = outputs; l != NULL; l = l->next) {
+    bc_slist_t *files = bm_rule_list_built_files(ctx);
+    for (bc_slist_t *l = files; l != NULL; l = l->next) {
         bm_filectx_t *fctx = l->data;
         if (fctx == NULL)
             continue;
@@ -737,6 +732,7 @@ clean_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
                 break;
         }
     }
+    bc_slist_free_full(files, (bc_free_func_t) bm_filectx_free);
 
     if (!bm_exec_native_is_empty_dir(ctx->output_dir, NULL)) {
         fprintf(stderr, "blogc-make: warning: output directory is not empty!\n");
@@ -787,77 +783,66 @@ const bm_rule_t rules[] = {
         .help = "run all build rules",
         .outputlist_func = NULL,
         .exec_func = all_exec,
-        .generate_files = false,
     },
     {
         .name = "index",
         .help = "build website index from posts",
         .outputlist_func = index_outputlist,
         .exec_func = index_exec,
-        .generate_files = true,
     },
     {
         .name = "atom",
         .help = "build main atom feed from posts",
         .outputlist_func = atom_outputlist,
         .exec_func = atom_exec,
-        .generate_files = true,
     },
     {
         .name = "atom_tags",
         .help = "build atom feeds for each tag from posts",
         .outputlist_func = atom_tags_outputlist,
         .exec_func = atom_tags_exec,
-        .generate_files = true,
     },
     {
         .name = "pagination",
         .help = "build pagination pages from posts",
         .outputlist_func = pagination_outputlist,
         .exec_func = pagination_exec,
-        .generate_files = true,
     },
     {
         .name = "pagination_tags",
         .help = "build pagination pages for each tag from posts",
         .outputlist_func = pagination_tags_outputlist,
         .exec_func = pagination_tags_exec,
-        .generate_files = true,
     },
     {
         .name = "posts",
         .help = "build individual pages for each post",
         .outputlist_func = posts_outputlist,
         .exec_func = posts_exec,
-        .generate_files = true,
     },
     {
         .name = "tags",
         .help = "build post listings for each tag from posts",
         .outputlist_func = tags_outputlist,
         .exec_func = tags_exec,
-        .generate_files = true,
     },
     {
         .name = "pages",
         .help = "build individual pages for each page",
         .outputlist_func = pages_outputlist,
         .exec_func = pages_exec,
-        .generate_files = true,
     },
     {
         .name = "copy",
         .help = "copy static files from source directory to output directory",
         .outputlist_func = copy_outputlist,
         .exec_func = copy_exec,
-        .generate_files = true,
     },
     {
         .name = "clean",
         .help = "clean built files and empty directories in output directory",
-        .outputlist_func = clean_outputlist,
+        .outputlist_func = NULL,
         .exec_func = clean_exec,
-        .generate_files = false,
     },
     {
         .name = "runserver",
@@ -866,23 +851,20 @@ const bm_rule_t rules[] = {
             "                     arguments: host (127.0.0.1), port (8080) and threads (20)",
         .outputlist_func = NULL,
         .exec_func = runserver_exec,
-        .generate_files = false,
     },
     {
         .name = "watch",
         .help = "watch for changes in the source files, rebuilding as needed",
         .outputlist_func = NULL,
         .exec_func = watch_exec,
-        .generate_files = false,
     },
     {
         .name = "atom_dump",
         .help = "dump default Atom feed template based on current settings",
         .outputlist_func = NULL,
         .exec_func = atom_dump_exec,
-        .generate_files = false,
     },
-    {NULL, NULL, NULL, NULL, false},
+    {NULL, NULL, NULL, NULL},
 };
 
 
@@ -892,7 +874,7 @@ static int
 all_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
 {
     for (size_t i = 0; rules[i].name != NULL; i++) {
-        if (!rules[i].generate_files) {
+        if (rules[i].outputlist_func == NULL) {
             continue;
         }
 
@@ -1063,7 +1045,7 @@ bm_rule_list_built_files(bm_ctx_t *ctx)
 
     bc_slist_t *rv = NULL;
     for (size_t i = 0; rules[i].name != NULL; i++) {
-        if (!rules[i].generate_files) {
+        if (rules[i].outputlist_func == NULL) {
             continue;
         }
 
@@ -1083,13 +1065,13 @@ bm_rule_print_help(void)
 {
     printf("\nhelper rules:\n");
     for (size_t i = 0; rules[i].name != NULL; i++) {
-        if (!rules[i].generate_files) {
+        if (rules[i].outputlist_func == NULL) {
             printf("    %-15s  %s\n", rules[i].name, rules[i].help);
         }
     }
     printf("\nbuild rules:\n");
     for (size_t i = 0; rules[i].name != NULL; i++) {
-        if (rules[i].generate_files) {
+        if (rules[i].outputlist_func != NULL) {
             printf("    %-15s  %s\n", rules[i].name, rules[i].help);
         }
     }

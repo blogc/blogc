@@ -22,7 +22,6 @@ typedef struct {
     const char *help;
     bm_rule_outputlist_func_t outputlist_func;
     bm_rule_exec_func_t exec_func;
-    bool generate_files;
 } bm_rule_t;
 
 bc_trie_t* bm_rule_parse_args(const char *sep);
