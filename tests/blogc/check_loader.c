@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2014-2020 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -100,7 +100,8 @@ test_source_parse_from_file(void **state)
         "ASD: 123\n"
         "--------\n"
         "bola"));
-    bc_trie_t *t = blogc_source_parse_from_file("bola.txt", &err);
+    bc_trie_t *c = bc_trie_new(free);
+    bc_trie_t *t = blogc_source_parse_from_file(c, "bola.txt", &err);
     assert_null(err);
     assert_non_null(t);
     assert_int_equal(bc_trie_size(t), 6);
@@ -110,6 +111,83 @@ test_source_parse_from_file(void **state)
     assert_string_equal(bc_trie_lookup(t, "CONTENT"), "<p>bola</p>\n");
     assert_string_equal(bc_trie_lookup(t, "RAW_CONTENT"), "bola");
     assert_string_equal(bc_trie_lookup(t, "DESCRIPTION"), "bola");
+    bc_trie_free(c);
+    bc_trie_free(t);
+}
+
+
+static void
+test_source_parse_from_file_maxdepth(void **state)
+{
+    bc_error_t *err = NULL;
+    will_return(__wrap_bc_file_get_contents, "bola.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
+        "ASD: 123\n"
+        "TOCTREE_MAXDEPTH: 1\n"
+        "--------\n"
+        "### bola\n"
+        "#### guda"));
+    bc_trie_t *c = bc_trie_new(free);
+    bc_trie_insert(c, "TOCTREE_MAXDEPTH", bc_strdup("-1"));
+    bc_trie_t *t = blogc_source_parse_from_file(c, "bola.txt", &err);
+    assert_null(err);
+    assert_non_null(t);
+    assert_int_equal(bc_trie_size(t), 8);
+    assert_string_equal(bc_trie_lookup(t, "ASD"), "123");
+    assert_string_equal(bc_trie_lookup(t, "TOCTREE_MAXDEPTH"), "1");
+    assert_string_equal(bc_trie_lookup(t, "FILENAME"), "bola");
+    assert_string_equal(bc_trie_lookup(t, "EXCERPT"),
+        "<h3 id=\"bola\">bola</h3>\n"
+        "<h4 id=\"guda\">guda</h4>\n");
+    assert_string_equal(bc_trie_lookup(t, "CONTENT"),
+        "<h3 id=\"bola\">bola</h3>\n"
+        "<h4 id=\"guda\">guda</h4>\n");
+    assert_string_equal(bc_trie_lookup(t, "RAW_CONTENT"),
+        "### bola\n"
+        "#### guda");
+    assert_string_equal(bc_trie_lookup(t, "FIRST_HEADER"), "bola");
+    assert_string_equal(bc_trie_lookup(t, "TOCTREE"),
+        "<ul>\n"
+        "    <li><a href=\"#bola\">bola</a></li>\n"
+        "</ul>\n");
+    bc_trie_free(c);
+    bc_trie_free(t);
+}
+
+
+static void
+test_source_parse_from_file_maxdepth2(void **state)
+{
+    bc_error_t *err = NULL;
+    will_return(__wrap_bc_file_get_contents, "bola.txt");
+    will_return(__wrap_bc_file_get_contents, bc_strdup(
+        "ASD: 123\n"
+        "--------\n"
+        "### bola\n"
+        "#### guda"));
+    bc_trie_t *c = bc_trie_new(free);
+    bc_trie_insert(c, "TOCTREE_MAXDEPTH", bc_strdup("1"));
+    bc_trie_t *t = blogc_source_parse_from_file(c, "bola.txt", &err);
+    assert_null(err);
+    assert_non_null(t);
+    assert_int_equal(bc_trie_size(t), 7);
+    assert_string_equal(bc_trie_lookup(t, "ASD"), "123");
+    assert_string_equal(bc_trie_lookup(t, "FILENAME"), "bola");
+    assert_string_equal(bc_trie_lookup(t, "EXCERPT"),
+        "<h3 id=\"bola\">bola</h3>\n"
+        "<h4 id=\"guda\">guda</h4>\n");
+    assert_string_equal(bc_trie_lookup(t, "CONTENT"),
+        "<h3 id=\"bola\">bola</h3>\n"
+        "<h4 id=\"guda\">guda</h4>\n");
+    assert_string_equal(bc_trie_lookup(t, "RAW_CONTENT"),
+        "### bola\n"
+        "#### guda");
+    assert_string_equal(bc_trie_lookup(t, "FIRST_HEADER"), "bola");
+    assert_string_equal(bc_trie_lookup(t, "TOCTREE"),
+        "<ul>\n"
+        "    <li><a href=\"#bola\">bola</a></li>\n"
+        "</ul>\n");
+    bc_trie_free(c);
     bc_trie_free(t);
 }
 
@@ -120,9 +198,11 @@ test_source_parse_from_file_null(void **state)
     bc_error_t *err = NULL;
     will_return(__wrap_bc_file_get_contents, "bola.txt");
     will_return(__wrap_bc_file_get_contents, NULL);
-    bc_trie_t *t = blogc_source_parse_from_file("bola.txt", &err);
+    bc_trie_t *c = bc_trie_new(free);
+    bc_trie_t *t = blogc_source_parse_from_file(c, "bola.txt", &err);
     assert_null(err);
     assert_null(t);
+    bc_trie_free(c);
 }
 
 
@@ -947,6 +1027,8 @@ main(void)
         unit_test(test_template_parse_from_file),
         unit_test(test_template_parse_from_file_null),
         unit_test(test_source_parse_from_file),
+        unit_test(test_source_parse_from_file_maxdepth),
+        unit_test(test_source_parse_from_file_maxdepth2),
         unit_test(test_source_parse_from_file_null),
         unit_test(test_source_parse_from_files),
         unit_test(test_source_parse_from_files_filter_sort),

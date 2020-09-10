@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2014-2020 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -11,6 +11,7 @@
 
 #include "content-parser.h"
 #include "source-parser.h"
+#include "toctree.h"
 #include "../common/error.h"
 #include "../common/utils.h"
 
@@ -27,7 +28,8 @@ typedef enum {
 
 
 bc_trie_t*
-blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
+blogc_source_parse(const char *src, size_t src_len, int toctree_maxdepth,
+    bc_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -153,8 +155,11 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
                     bc_trie_insert(rv, "RAW_CONTENT", tmp);
                     char *first_header = NULL;
                     char *description = NULL;
+                    char *endl = NULL;
+                    bc_slist_t *headers = NULL;
+                    bool read_headers = (NULL == bc_trie_lookup(rv, "TOCTREE"));
                     content = blogc_content_parse(tmp, &end_excerpt,
-                        &first_header, &description);
+                        &first_header, &description, &endl, read_headers ? &headers : NULL);
                     if (first_header != NULL) {
                         // do not override source-provided first_header.
                         if (NULL == bc_trie_lookup(rv, "FIRST_HEADER")) {
@@ -177,6 +182,31 @@ blogc_source_parse(const char *src, size_t src_len, bc_error_t **err)
                             free(description);
                         }
                     }
+                    if (headers != NULL) {
+                        // we already validated that the user do not defined TOCTREE
+                        // manually in source file.
+                        const char *maxdepth = bc_trie_lookup(rv, "TOCTREE_MAXDEPTH");
+                        if (maxdepth != NULL) {
+                            char *endptr;
+                            toctree_maxdepth = strtol(maxdepth, &endptr, 10);
+                            if (*maxdepth != '\0' && *endptr != '\0') {
+                                *err = bc_error_parser(BLOGC_ERROR_SOURCE_PARSER, src, src_len,
+                                    current,
+                                    "Invalid value for 'TOCTREE_MAXDEPTH' variable: %s.",
+                                    maxdepth);
+                                blogc_toctree_free(headers);
+                                free(endl);
+                                free(content);
+                                break;
+                            }
+                        }
+                        char *toctree = blogc_toctree_render(headers, toctree_maxdepth, endl);
+                        blogc_toctree_free(headers);
+                        if (toctree != NULL) {
+                            bc_trie_insert(rv, "TOCTREE", toctree);
+                        }
+                    }
+                    free(endl);
                     bc_trie_insert(rv, "CONTENT", content);
                     bc_trie_insert(rv, "EXCERPT", end_excerpt == 0 ?
                         bc_strdup(content) : bc_strndup(content, end_excerpt));

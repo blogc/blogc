@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2014-2020 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -76,7 +76,7 @@ blogc_template_parse_from_file(const char *f, bc_error_t **err)
 
 
 bc_trie_t*
-blogc_source_parse_from_file(const char *f, bc_error_t **err)
+blogc_source_parse_from_file(bc_trie_t *conf, const char *f, bc_error_t **err)
 {
     if (err == NULL || *err != NULL)
         return NULL;
@@ -85,7 +85,19 @@ blogc_source_parse_from_file(const char *f, bc_error_t **err)
     char *s = bc_file_get_contents(f, true, &len, err);
     if (s == NULL)
         return NULL;
-    bc_trie_t *rv = blogc_source_parse(s, len, err);
+
+    int toctree_maxdepth = -1;
+    const char *maxdepth = bc_trie_lookup(conf, "TOCTREE_MAXDEPTH");
+    if (maxdepth != NULL) {
+        char *endptr;
+        toctree_maxdepth = strtol(maxdepth, &endptr, 10);
+        if (*maxdepth != '\0' && *endptr != '\0') {
+            fprintf(stderr, "warning: invalid value for 'TOCTREE_MAXDEPTH' "
+                "variable: %s. using %d instead\n", maxdepth, toctree_maxdepth);
+        }
+    }
+
+    bc_trie_t *rv = blogc_source_parse(s, len, toctree_maxdepth, err);
 
     // set FILENAME variable
     if (rv != NULL) {
@@ -133,7 +145,7 @@ blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l, bc_error_t **err)
     size_t with_date = 0;
     for (bc_slist_t *tmp = l; tmp != NULL; tmp = tmp->next) {
         char *f = tmp->data;
-        bc_trie_t *s = blogc_source_parse_from_file(f, &tmp_err);
+        bc_trie_t *s = blogc_source_parse_from_file(conf, f, &tmp_err);
         if (s == NULL) {
             *err = bc_error_new_printf(BLOGC_ERROR_LOADER,
                 "An error occurred while parsing source file: %s\n\n%s",

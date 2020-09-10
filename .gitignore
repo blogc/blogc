@@ -66,6 +66,7 @@ blogc*.html
 /tests/blogc/check_sysinfo
 /tests/blogc/check_sysinfo2
 /tests/blogc/check_template_parser
+/tests/blogc/check_toctree
 /tests/blogc-git-receiver/check_pre_receive_parser
 /tests/blogc-git-receiver/check_pre_receive.sh
 /tests/blogc-git-receiver/check_post_receive.sh
@@ -105,3 +106,5 @@ blogc-*.rpm
 /root/
 
 /maint/releases/
+
+.gdb_history

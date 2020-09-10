@@ -307,7 +307,7 @@ main(int argc, char **argv)
                 listing_entries_source = bc_slist_append(listing_entries_source, NULL);
                 continue;
             }
-            bc_trie_t *e = blogc_source_parse_from_file(tmp->data, &err);
+            bc_trie_t *e = blogc_source_parse_from_file(config, tmp->data, &err);
             if (err != NULL) {
                 bc_error_print(err, "blogc");
                 rv = 1;

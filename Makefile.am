@@ -48,6 +48,7 @@ noinst_HEADERS = \
 	src/blogc/sysinfo.h \
 	src/blogc/source-parser.h \
 	src/blogc/template-parser.h \
+	src/blogc/toctree.h \
 	src/blogc-git-receiver/post-receive.h \
 	src/blogc-git-receiver/pre-receive.h \
 	src/blogc-git-receiver/pre-receive-parser.h \
@@ -137,6 +138,7 @@ libblogc_la_SOURCES = \
 	src/blogc/sysinfo.c \
 	src/blogc/source-parser.c \
 	src/blogc/template-parser.c \
+	src/blogc/toctree.c \
 	$(NULL)
 
 libblogc_la_CFLAGS = \
@@ -474,6 +476,7 @@ check_PROGRAMS += \
 	tests/blogc/check_renderer \
 	tests/blogc/check_source_parser \
 	tests/blogc/check_template_parser \
+	tests/blogc/check_toctree \
 	tests/common/check_config_parser \
 	tests/common/check_error \
 	tests/common/check_sort \
@@ -730,6 +733,24 @@ tests_blogc_check_template_parser_LDFLAGS = \
 	$(NULL)
 
 tests_blogc_check_template_parser_LDADD = \
+	$(CMOCKA_LIBS) \
+	libblogc.la \
+	libblogc_common.la \
+	$(NULL)
+
+tests_blogc_check_toctree_SOURCES = \
+	tests/blogc/check_toctree.c \
+	$(NULL)
+
+tests_blogc_check_toctree_CFLAGS = \
+	$(CMOCKA_CFLAGS) \
+	$(NULL)
+
+tests_blogc_check_toctree_LDFLAGS = \
+	-no-install \
+	$(NULL)
+
+tests_blogc_check_toctree_LDADD = \
 	$(CMOCKA_LIBS) \
 	libblogc.la \
 	libblogc_common.la \

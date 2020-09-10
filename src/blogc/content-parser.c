@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2014-2020 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "content-parser.h"
+#include "toctree.h"
 #include "../common/utils.h"
 
 // this is a half ass implementation of a markdown-like syntax. bugs are
@@ -676,7 +677,7 @@ blogc_is_ordered_list_item(const char *str, size_t prefix_len)
 
 char*
 blogc_content_parse(const char *src, size_t *end_excerpt, char **first_header,
-    char **description)
+    char **description, char **endl, bc_slist_t **headers)
 {
     // src is always nul-terminated.
     size_t src_len = strlen(src);
@@ -696,11 +697,28 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **first_header,
     char *parsed = NULL;
     char *slug = NULL;
 
+    char *line_ending = NULL;
+    bool line_ending_found = false;
+    if (endl != NULL) {
+        if (*endl != NULL) {
+            line_ending_found = true;
+        }
+        else {
+            *endl = bc_malloc(3 * sizeof(char));
+        }
+        line_ending = *endl;
+    }
+    else {
+        line_ending = bc_malloc(3 * sizeof(char));
+    }
+
     // this isn't empty because we need some reasonable default value in the
     // unlikely case that we need to print some line ending before evaluating
     // the "real" value.
-    char line_ending[3] = "\n";
-    bool line_ending_found = false;
+    if (!line_ending_found) {
+        line_ending[0] = '\n';
+        line_ending[1] = '\0';
+    }
 
     char d = '\0';
 
@@ -840,6 +858,8 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **first_header,
                         *first_header = blogc_htmlentities(tmp);
                     parsed = blogc_content_parse_inline(tmp);
                     slug = blogc_slugify(tmp);
+                    if (headers != NULL)
+                        *headers = blogc_toctree_append(*headers, header_level, slug, parsed);
                     if (slug == NULL)
                         bc_string_append_printf(rv, "<h%d>%s</h%d>%s",
                             header_level, parsed, header_level, line_ending);
@@ -922,7 +942,7 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **first_header,
                     // do not propagate title and description to blockquote parsing,
                     // because we just want paragraphs from first level of
                     // content.
-                    tmp = blogc_content_parse(tmp_str->str, NULL, NULL, NULL);
+                    tmp = blogc_content_parse(tmp_str->str, NULL, NULL, NULL, endl, NULL);
                     bc_string_append_printf(rv, "<blockquote>%s</blockquote>%s",
                         tmp, line_ending);
                     free(tmp);
@@ -1278,6 +1298,10 @@ blogc_content_parse(const char *src, size_t *end_excerpt, char **first_header,
         }
 
         current++;
+    }
+
+    if (endl == NULL) {
+        free(line_ending);
     }
 
     return bc_string_free(rv, false);

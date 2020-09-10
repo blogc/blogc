@@ -47,7 +47,7 @@ create_sources(size_t count)
     bc_error_t *err = NULL;
     bc_slist_t *l = NULL;
     for (size_t i = 0; i < count; i++) {
-        l = bc_slist_append(l, blogc_source_parse(s[i], strlen(s[i]), &err));
+        l = bc_slist_append(l, blogc_source_parse(s[i], strlen(s[i]), -1, &err));
         assert_null(err);
     }
     assert_int_equal(bc_slist_length(l), count);

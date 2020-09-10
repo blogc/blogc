@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2014-2020 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -27,7 +27,7 @@ test_source_parse(void **state)
         "\n"
         "bola\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(err);
     assert_non_null(source);
     assert_int_equal(bc_trie_size(source), 7);
@@ -45,6 +45,7 @@ test_source_parse(void **state)
         "bola\n");
     assert_string_equal(bc_trie_lookup(source, "FIRST_HEADER"), "This is a test");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
+    assert_null(bc_trie_lookup(source, "TOCTREE"));
     bc_trie_free(source);
 }
 
@@ -60,10 +61,10 @@ test_source_parse_crlf(void **state)
         "\r\n"
         "bola\r\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 1, &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(bc_trie_size(source), 7);
+    assert_int_equal(bc_trie_size(source), 8);
     assert_string_equal(bc_trie_lookup(source, "VAR1"), "asd asd");
     assert_string_equal(bc_trie_lookup(source, "VAR2"), "123chunda");
     assert_string_equal(bc_trie_lookup(source, "EXCERPT"),
@@ -78,6 +79,10 @@ test_source_parse_crlf(void **state)
         "bola\r\n");
     assert_string_equal(bc_trie_lookup(source, "FIRST_HEADER"), "This is a test");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
+    assert_string_equal(bc_trie_lookup(source, "TOCTREE"),
+        "<ul>\r\n"
+        "    <li><a href=\"#this-is-a-test\">This is a test</a></li>\r\n"
+        "</ul>\r\n");
     bc_trie_free(source);
 }
 
@@ -95,10 +100,10 @@ test_source_parse_with_spaces(void **state)
         "\n"
         "bola\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), -1, &err);
     assert_null(err);
     assert_non_null(source);
-    assert_int_equal(bc_trie_size(source), 7);
+    assert_int_equal(bc_trie_size(source), 8);
     assert_string_equal(bc_trie_lookup(source, "VAR1"), "chunda");
     assert_string_equal(bc_trie_lookup(source, "BOLA"), "guda");
     assert_string_equal(bc_trie_lookup(source, "EXCERPT"),
@@ -113,6 +118,10 @@ test_source_parse_with_spaces(void **state)
         "bola\n");
     assert_string_equal(bc_trie_lookup(source, "FIRST_HEADER"), "This is a test");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
+    assert_string_equal(bc_trie_lookup(source, "TOCTREE"),
+        "<ul>\n"
+        "    <li><a href=\"#this-is-a-test\">This is a test</a></li>\n"
+        "</ul>\n");
     bc_trie_free(source);
 }
 
@@ -133,7 +142,7 @@ test_source_parse_with_excerpt(void **state)
         "guda\n"
         "yay";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(err);
     assert_non_null(source);
     assert_int_equal(bc_trie_size(source), 7);
@@ -158,6 +167,7 @@ test_source_parse_with_excerpt(void **state)
         "yay");
     assert_string_equal(bc_trie_lookup(source, "FIRST_HEADER"), "This is a test");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
+    assert_null(bc_trie_lookup(source, "TOCTREE"));
     bc_trie_free(source);
 }
 
@@ -174,7 +184,7 @@ test_source_parse_with_first_header(void **state)
         "\n"
         "bola\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(err);
     assert_non_null(source);
     assert_int_equal(bc_trie_size(source), 7);
@@ -192,6 +202,7 @@ test_source_parse_with_first_header(void **state)
         "bola\n");
     assert_string_equal(bc_trie_lookup(source, "FIRST_HEADER"), "THIS IS CHUNDA!");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "bola");
+    assert_null(bc_trie_lookup(source, "TOCTREE"));
     bc_trie_free(source);
 }
 
@@ -208,7 +219,7 @@ test_source_parse_with_description(void **state)
         "\n"
         "bola\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(err);
     assert_non_null(source);
     assert_int_equal(bc_trie_size(source), 7);
@@ -226,6 +237,172 @@ test_source_parse_with_description(void **state)
         "bola\n");
     assert_string_equal(bc_trie_lookup(source, "FIRST_HEADER"), "This is a test");
     assert_string_equal(bc_trie_lookup(source, "DESCRIPTION"), "huehuehuebrbr");
+    assert_null(bc_trie_lookup(source, "TOCTREE"));
+    bc_trie_free(source);
+}
+
+
+static void
+test_source_parse_with_toctree(void **state)
+{
+    const char *a =
+        "VAR1: asd asd\n"
+        "VAR2: 123chunda\n"
+        "----------\n"
+        "### asd\n"
+        "### qwe\n"
+        "## zxc\n"
+        "### rty\n"
+        "#### bnm\n"
+        "### asd\n";
+    bc_error_t *err = NULL;
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), -1, &err);
+    assert_null(err);
+    assert_non_null(source);
+    assert_int_equal(bc_trie_size(source), 7);
+    assert_string_equal(bc_trie_lookup(source, "VAR1"), "asd asd");
+    assert_string_equal(bc_trie_lookup(source, "VAR2"), "123chunda");
+    assert_string_equal(bc_trie_lookup(source, "EXCERPT"),
+        "<h3 id=\"asd\">asd</h3>\n"
+        "<h3 id=\"qwe\">qwe</h3>\n"
+        "<h2 id=\"zxc\">zxc</h2>\n"
+        "<h3 id=\"rty\">rty</h3>\n"
+        "<h4 id=\"bnm\">bnm</h4>\n"
+        "<h3 id=\"asd\">asd</h3>\n");
+    assert_string_equal(bc_trie_lookup(source, "CONTENT"),
+        "<h3 id=\"asd\">asd</h3>\n"
+        "<h3 id=\"qwe\">qwe</h3>\n"
+        "<h2 id=\"zxc\">zxc</h2>\n"
+        "<h3 id=\"rty\">rty</h3>\n"
+        "<h4 id=\"bnm\">bnm</h4>\n"
+        "<h3 id=\"asd\">asd</h3>\n");
+    assert_string_equal(bc_trie_lookup(source, "RAW_CONTENT"),
+        "### asd\n"
+        "### qwe\n"
+        "## zxc\n"
+        "### rty\n"
+        "#### bnm\n"
+        "### asd\n");
+    assert_string_equal(bc_trie_lookup(source, "FIRST_HEADER"), "asd");
+    assert_string_equal(bc_trie_lookup(source, "TOCTREE"),
+        "<ul>\n"
+        "    <ul>\n"
+        "        <li><a href=\"#asd\">asd</a></li>\n"
+        "        <li><a href=\"#qwe\">qwe</a></li>\n"
+        "    </ul>\n"
+        "    <li><a href=\"#zxc\">zxc</a></li>\n"
+        "    <ul>\n"
+        "        <li><a href=\"#rty\">rty</a></li>\n"
+        "        <ul>\n"
+        "            <li><a href=\"#bnm\">bnm</a></li>\n"
+        "        </ul>\n"
+        "        <li><a href=\"#asd\">asd</a></li>\n"
+        "    </ul>\n"
+        "</ul>\n");
+    bc_trie_free(source);
+}
+
+
+static void
+test_source_parse_with_toctree_noheader(void **state)
+{
+    const char *a =
+        "VAR1: asd asd\n"
+        "VAR2: 123chunda\n"
+        "----------\n"
+        "asd\n";
+    bc_error_t *err = NULL;
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), -1, &err);
+    assert_null(err);
+    assert_non_null(source);
+    assert_int_equal(bc_trie_size(source), 6);
+    assert_string_equal(bc_trie_lookup(source, "VAR1"), "asd asd");
+    assert_string_equal(bc_trie_lookup(source, "VAR2"), "123chunda");
+    assert_string_equal(bc_trie_lookup(source, "EXCERPT"),
+        "<p>asd</p>\n");
+    assert_string_equal(bc_trie_lookup(source, "CONTENT"),
+        "<p>asd</p>\n");
+    assert_string_equal(bc_trie_lookup(source, "RAW_CONTENT"),
+        "asd\n");
+    assert_null(bc_trie_lookup(source, "FIRST_HEADER"));
+    assert_null(bc_trie_lookup(source, "TOCTREE"));
+    bc_trie_free(source);
+}
+
+
+static void
+test_source_parse_with_toctree_maxdepth1(void **state)
+{
+    const char *a =
+        "VAR1: asd asd\n"
+        "VAR2: 123chunda\n"
+        "----------\n"
+        "### asd\n"
+        "### qwe\n"
+        "## zxc\n"
+        "### rty\n"
+        "#### bnm\n"
+        "### asd\n";
+    bc_error_t *err = NULL;
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 1, &err);
+    assert_null(err);
+    assert_non_null(source);
+    assert_int_equal(bc_trie_size(source), 7);
+    assert_string_equal(bc_trie_lookup(source, "VAR1"), "asd asd");
+    assert_string_equal(bc_trie_lookup(source, "VAR2"), "123chunda");
+    assert_string_equal(bc_trie_lookup(source, "EXCERPT"),
+        "<h3 id=\"asd\">asd</h3>\n"
+        "<h3 id=\"qwe\">qwe</h3>\n"
+        "<h2 id=\"zxc\">zxc</h2>\n"
+        "<h3 id=\"rty\">rty</h3>\n"
+        "<h4 id=\"bnm\">bnm</h4>\n"
+        "<h3 id=\"asd\">asd</h3>\n");
+    assert_string_equal(bc_trie_lookup(source, "CONTENT"),
+        "<h3 id=\"asd\">asd</h3>\n"
+        "<h3 id=\"qwe\">qwe</h3>\n"
+        "<h2 id=\"zxc\">zxc</h2>\n"
+        "<h3 id=\"rty\">rty</h3>\n"
+        "<h4 id=\"bnm\">bnm</h4>\n"
+        "<h3 id=\"asd\">asd</h3>\n");
+    assert_string_equal(bc_trie_lookup(source, "RAW_CONTENT"),
+        "### asd\n"
+        "### qwe\n"
+        "## zxc\n"
+        "### rty\n"
+        "#### bnm\n"
+        "### asd\n");
+    assert_string_equal(bc_trie_lookup(source, "FIRST_HEADER"), "asd");
+    assert_string_equal(bc_trie_lookup(source, "TOCTREE"),
+        "<ul>\n"
+        "    <li><a href=\"#zxc\">zxc</a></li>\n"
+        "</ul>\n");
+    bc_trie_free(source);
+}
+
+
+static void
+test_source_parse_with_toctree_maxdepth_invalid(void **state)
+{
+    const char *a =
+        "VAR1: asd asd\n"
+        "VAR2: 123chunda\n"
+        "TOCTREE_MAXDEPTH: bola\n"
+        "----------\n"
+        "### asd\n"
+        "### qwe\n"
+        "## zxc\n"
+        "### rty\n"
+        "#### bnm\n"
+        "### asd\n";
+    bc_error_t *err = NULL;
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 1, &err);
+    assert_non_null(err);
+    assert_null(source);
+    assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
+    assert_string_equal(err->msg,
+        "Invalid value for 'TOCTREE_MAXDEPTH' variable: bola.\n"
+        "Error occurred near line 10, position 8: ### asd");
+    bc_error_free(err);
     bc_trie_free(source);
 }
 
@@ -235,7 +412,7 @@ test_source_parse_config_empty(void **state)
 {
     const char *a = "";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -250,7 +427,7 @@ test_source_parse_config_invalid_key(void **state)
 {
     const char *a = "bola: guda";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
     assert_string_equal(err->msg,
@@ -266,7 +443,7 @@ test_source_parse_config_no_key(void **state)
 {
     const char *a = "BOLa";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
     assert_string_equal(err->msg,
@@ -282,7 +459,7 @@ test_source_parse_config_no_key2(void **state)
 {
     const char *a = "BOLA";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
     assert_string_equal(err->msg,
@@ -299,10 +476,11 @@ test_source_parse_config_no_value(void **state)
     // this is a special case, not an error
     const char *a = "BOLA:\r\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_non_null(source);
     assert_null(err);
     assert_string_equal(bc_trie_lookup(source, "BOLA"), "");
+    assert_null(bc_trie_lookup(source, "TOCTREE"));
     bc_trie_free(source);
 }
 
@@ -312,7 +490,7 @@ test_source_parse_config_no_value2(void **state)
 {
     const char *a = "BOLA:";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -329,7 +507,7 @@ test_source_parse_config_reserved_name(void **state)
 {
     const char *a = "FILENAME: asd\r\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -346,7 +524,7 @@ test_source_parse_config_reserved_name2(void **state)
 {
     const char *a = "CONTENT: asd\r\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -363,7 +541,7 @@ test_source_parse_config_reserved_name3(void **state)
 {
     const char *a = "DATE_FORMATTED: asd\r\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -380,7 +558,7 @@ test_source_parse_config_reserved_name4(void **state)
 {
     const char *a = "DATE_FIRST_FORMATTED: asd\r\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -397,7 +575,7 @@ test_source_parse_config_reserved_name5(void **state)
 {
     const char *a = "DATE_LAST_FORMATTED: asd\r\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -414,7 +592,7 @@ test_source_parse_config_reserved_name6(void **state)
 {
     const char *a = "PAGE_FIRST: asd\r\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -431,7 +609,7 @@ test_source_parse_config_reserved_name7(void **state)
 {
     const char *a = "PAGE_PREVIOUS: asd\r\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -448,7 +626,7 @@ test_source_parse_config_reserved_name8(void **state)
 {
     const char *a = "PAGE_CURRENT: asd\r\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -465,7 +643,7 @@ test_source_parse_config_reserved_name9(void **state)
 {
     const char *a = "PAGE_NEXT: asd\r\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -482,7 +660,7 @@ test_source_parse_config_reserved_name10(void **state)
 {
     const char *a = "PAGE_LAST: asd\r\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -499,7 +677,7 @@ test_source_parse_config_reserved_name11(void **state)
 {
     const char *a = "BLOGC_VERSION: 1.0\r\n";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -516,7 +694,7 @@ test_source_parse_config_value_no_line_ending(void **state)
 {
     const char *a = "BOLA: asd";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -533,7 +711,7 @@ test_source_parse_invalid_separator(void **state)
 {
     const char *a = "BOLA: asd\n---#";
     bc_error_t *err = NULL;
-    bc_trie_t *source = blogc_source_parse(a, strlen(a), &err);
+    bc_trie_t *source = blogc_source_parse(a, strlen(a), 0, &err);
     assert_null(source);
     assert_non_null(err);
     assert_int_equal(err->type, BLOGC_ERROR_SOURCE_PARSER);
@@ -555,6 +733,10 @@ main(void)
         unit_test(test_source_parse_with_excerpt),
         unit_test(test_source_parse_with_first_header),
         unit_test(test_source_parse_with_description),
+        unit_test(test_source_parse_with_toctree),
+        unit_test(test_source_parse_with_toctree_noheader),
+        unit_test(test_source_parse_with_toctree_maxdepth1),
+        unit_test(test_source_parse_with_toctree_maxdepth_invalid),
         unit_test(test_source_parse_config_empty),
         unit_test(test_source_parse_config_invalid_key),
         unit_test(test_source_parse_config_no_key),

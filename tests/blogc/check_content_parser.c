@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2014-2020 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -11,6 +11,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
+#include "../../src/blogc/toctree.h"
 #include "../../src/blogc/content-parser.h"
 
 
@@ -125,6 +126,8 @@ test_content_parse(void **state)
     size_t l = 0;
     char *t = NULL;
     char *d = NULL;
+    char *n = NULL;
+    bc_slist_t *h = NULL;
     char *html = blogc_content_parse(
         "# um\n"
         "## dois\n"
@@ -166,13 +169,17 @@ test_content_parse(void **state)
         "\n"
         "-- asd\n"
         "\n"
-        "--- lol\n", &l, &t, &d);
+        "--- lol\n", &l, &t, &d, &n, &h);
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_non_null(t);
     assert_string_equal(t, "um");
     assert_non_null(d);
     assert_string_equal(d, "bola chunda");
+    assert_non_null(n);
+    assert_string_equal(n, "\n");
+    assert_non_null(h);
+    assert_int_equal(bc_slist_length(h), 6);
     assert_string_equal(html,
         "<h1 id=\"um\">um</h1>\n"
         "<h2 id=\"dois\">dois</h2>\n"
@@ -212,6 +219,8 @@ test_content_parse(void **state)
     free(html);
     free(t);
     free(d);
+    free(n);
+    blogc_toctree_free(h);
 }
 
 
@@ -221,6 +230,8 @@ test_content_parse_crlf(void **state)
     size_t l = 0;
     char *t = NULL;
     char *d = NULL;
+    char *n = NULL;
+    bc_slist_t *h = NULL;
     char *html = blogc_content_parse(
         "# um\r\n"
         "## dois\r\n"
@@ -262,13 +273,17 @@ test_content_parse_crlf(void **state)
         "\r\n"
         "-- asd\r\n"
         "\r\n"
-        "--- lol\r\n", &l, &t, &d);
+        "--- lol\r\n", &l, &t, &d, &n, &h);
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_non_null(t);
     assert_string_equal(t, "um");
     assert_non_null(d);
     assert_string_equal(d, "bola chunda");
+    assert_non_null(n);
+    assert_string_equal(n, "\r\n");
+    assert_non_null(h);
+    assert_int_equal(bc_slist_length(h), 6);
     assert_string_equal(html,
         "<h1 id=\"um\">um</h1>\r\n"
         "<h2 id=\"dois\">dois</h2>\r\n"
@@ -308,6 +323,8 @@ test_content_parse_crlf(void **state)
     free(html);
     free(t);
     free(d);
+    free(n);
+    blogc_toctree_free(h);
 }
 
 
@@ -317,6 +334,8 @@ test_content_parse_with_excerpt(void **state)
     size_t l = 0;
     char *t = NULL;
     char *d = NULL;
+    char *n = NULL;
+    bc_slist_t *h = NULL;
     char *html = blogc_content_parse(
         "# test\n"
         "\n"
@@ -325,13 +344,17 @@ test_content_parse_with_excerpt(void **state)
         "..\n"
         "\n"
         "guda\n"
-        "lol", &l, &t, &d);
+        "lol", &l, &t, &d, &n, &h);
     assert_non_null(html);
     assert_int_equal(l, 38);
     assert_non_null(t);
     assert_string_equal(t, "test");
     assert_non_null(d);
     assert_string_equal(d, "chunda");
+    assert_non_null(n);
+    assert_string_equal(n, "\n");
+    assert_non_null(h);
+    assert_int_equal(bc_slist_length(h), 1);
     assert_string_equal(html,
         "<h1 id=\"test\">test</h1>\n"
         "<p>chunda</p>\n"
@@ -341,8 +364,12 @@ test_content_parse_with_excerpt(void **state)
     l = 0;
     free(t);
     free(d);
+    free(n);
+    blogc_toctree_free(h);
     t = NULL;
     d = NULL;
+    n = NULL;
+    h = NULL;
     html = blogc_content_parse(
         "# test\n"
         "\n"
@@ -351,13 +378,17 @@ test_content_parse_with_excerpt(void **state)
         "...\n"
         "\n"
         "guda\n"
-        "lol", &l, &t, &d);
+        "lol", &l, &t, &d, &n, &h);
     assert_non_null(html);
     assert_int_equal(l, 38);
     assert_non_null(t);
     assert_string_equal(t, "test");
     assert_non_null(d);
     assert_string_equal(d, "chunda");
+    assert_non_null(n);
+    assert_string_equal(n, "\n");
+    assert_non_null(h);
+    assert_int_equal(bc_slist_length(h), 1);
     assert_string_equal(html,
         "<h1 id=\"test\">test</h1>\n"
         "<p>chunda</p>\n"
@@ -366,6 +397,8 @@ test_content_parse_with_excerpt(void **state)
     free(html);
     free(t);
     free(d);
+    free(n);
+    blogc_toctree_free(h);
 }
 
 
@@ -375,6 +408,8 @@ test_content_parse_with_excerpt_crlf(void **state)
     size_t l = 0;
     char *t = NULL;
     char *d = NULL;
+    char *n = NULL;
+    bc_slist_t *h = NULL;
     char *html = blogc_content_parse(
         "# test\r\n"
         "\r\n"
@@ -383,13 +418,17 @@ test_content_parse_with_excerpt_crlf(void **state)
         "..\r\n"
         "\r\n"
         "guda\r\n"
-        "lol", &l, &t, &d);
+        "lol", &l, &t, &d, &n, &h);
     assert_non_null(html);
     assert_int_equal(l, 40);
     assert_non_null(t);
     assert_string_equal(t, "test");
     assert_non_null(d);
     assert_string_equal(d, "chunda");
+    assert_non_null(n);
+    assert_string_equal(n, "\r\n");
+    assert_non_null(h);
+    assert_int_equal(bc_slist_length(h), 1);
     assert_string_equal(html,
         "<h1 id=\"test\">test</h1>\r\n"
         "<p>chunda</p>\r\n"
@@ -399,8 +438,12 @@ test_content_parse_with_excerpt_crlf(void **state)
     l = 0;
     free(t);
     free(d);
+    free(n);
+    blogc_toctree_free(h);
     t = NULL;
     d = NULL;
+    n = NULL;
+    h = NULL;
     html = blogc_content_parse(
         "# test\r\n"
         "\r\n"
@@ -409,13 +452,17 @@ test_content_parse_with_excerpt_crlf(void **state)
         "...\r\n"
         "\r\n"
         "guda\r\n"
-        "lol", &l, &t, &d);
+        "lol", &l, &t, &d, &n, &h);
     assert_non_null(html);
     assert_int_equal(l, 40);
     assert_non_null(t);
     assert_string_equal(t, "test");
     assert_non_null(d);
     assert_string_equal(d, "chunda");
+    assert_non_null(n);
+    assert_string_equal(n, "\r\n");
+    assert_non_null(h);
+    assert_int_equal(bc_slist_length(h), 1);
     assert_string_equal(html,
         "<h1 id=\"test\">test</h1>\r\n"
         "<p>chunda</p>\r\n"
@@ -424,17 +471,19 @@ test_content_parse_with_excerpt_crlf(void **state)
     free(html);
     free(t);
     free(d);
+    free(n);
+    blogc_toctree_free(h);
 }
 
 
 static void
 test_content_parse_header(void **state)
 {
-    char *html = blogc_content_parse("## bola", NULL, NULL, NULL);
+    char *html = blogc_content_parse("## bola", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<h2 id=\"bola\">bola</h2>\n");
     free(html);
-    html = blogc_content_parse("## bola\n", NULL, NULL, NULL);
+    html = blogc_content_parse("## bola\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<h2 id=\"bola\">bola</h2>\n");
     free(html);
@@ -443,7 +492,7 @@ test_content_parse_header(void **state)
         "\n"
         "## bola\n"
         "\n"
-        "guda\n", NULL, NULL, NULL);
+        "guda\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -456,11 +505,11 @@ test_content_parse_header(void **state)
 static void
 test_content_parse_header_crlf(void **state)
 {
-    char *html = blogc_content_parse("## bola", NULL, NULL, NULL);
+    char *html = blogc_content_parse("## bola", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<h2 id=\"bola\">bola</h2>\n");
     free(html);
-    html = blogc_content_parse("## bola\r\n", NULL, NULL, NULL);
+    html = blogc_content_parse("## bola\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<h2 id=\"bola\">bola</h2>\r\n");
     free(html);
@@ -469,7 +518,7 @@ test_content_parse_header_crlf(void **state)
         "\r\n"
         "## bola\r\n"
         "\r\n"
-        "guda\r\n", NULL, NULL, NULL);
+        "guda\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\r\n"
@@ -482,11 +531,11 @@ test_content_parse_header_crlf(void **state)
 static void
 test_content_parse_html(void **state)
 {
-    char *html = blogc_content_parse("<div>\n</div>", NULL, NULL, NULL);
+    char *html = blogc_content_parse("<div>\n</div>", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<div>\n</div>\n");
     free(html);
-    html = blogc_content_parse("<div>\n</div>\n", NULL, NULL, NULL);
+    html = blogc_content_parse("<div>\n</div>\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<div>\n</div>\n");
     free(html);
@@ -496,7 +545,7 @@ test_content_parse_html(void **state)
         "<div>\n"
         "</div>\n"
         "\n"
-        "chunda\n", NULL, NULL, NULL);
+        "chunda\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -509,11 +558,11 @@ test_content_parse_html(void **state)
 static void
 test_content_parse_html_crlf(void **state)
 {
-    char *html = blogc_content_parse("<div>\r\n</div>", NULL, NULL, NULL);
+    char *html = blogc_content_parse("<div>\r\n</div>", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<div>\r\n</div>\r\n");
     free(html);
-    html = blogc_content_parse("<div>\r\n</div>\r\n", NULL, NULL, NULL);
+    html = blogc_content_parse("<div>\r\n</div>\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<div>\r\n</div>\r\n");
     free(html);
@@ -523,7 +572,7 @@ test_content_parse_html_crlf(void **state)
         "<div>\r\n"
         "</div>\r\n"
         "\r\n"
-        "chunda\r\n", NULL, NULL, NULL);
+        "chunda\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\r\n"
@@ -536,14 +585,14 @@ test_content_parse_html_crlf(void **state)
 static void
 test_content_parse_blockquote(void **state)
 {
-    char *html = blogc_content_parse(">  bola\n>  guda", NULL, NULL, NULL);
+    char *html = blogc_content_parse(">  bola\n>  guda", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<blockquote><p>bola\n"
         "guda</p>\n"
         "</blockquote>\n");
     free(html);
-    html = blogc_content_parse(">  bola\n>  guda\n", NULL, NULL, NULL);
+    html = blogc_content_parse(">  bola\n>  guda\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<blockquote><p>bola\n"
@@ -555,7 +604,7 @@ test_content_parse_blockquote(void **state)
         "\n"
         ">   bola\n"
         "\n"
-        "chunda\n", NULL, NULL, NULL);
+        "chunda\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -569,7 +618,7 @@ test_content_parse_blockquote(void **state)
         ">   bola\n"
         ">   guda\n"
         "\n"
-        "chunda\n", NULL, NULL, NULL);
+        "chunda\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -584,14 +633,14 @@ test_content_parse_blockquote(void **state)
 static void
 test_content_parse_blockquote_crlf(void **state)
 {
-    char *html = blogc_content_parse(">  bola\r\n>  guda", NULL, NULL, NULL);
+    char *html = blogc_content_parse(">  bola\r\n>  guda", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<blockquote><p>bola\r\n"
         "guda</p>\r\n"
         "</blockquote>\r\n");
     free(html);
-    html = blogc_content_parse(">  bola\r\n>  guda\r\n", NULL, NULL, NULL);
+    html = blogc_content_parse(">  bola\r\n>  guda\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<blockquote><p>bola\r\n"
@@ -603,7 +652,7 @@ test_content_parse_blockquote_crlf(void **state)
         "\r\n"
         ">   bola\r\n"
         "\r\n"
-        "chunda\r\n", NULL, NULL, NULL);
+        "chunda\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\r\n"
@@ -617,7 +666,7 @@ test_content_parse_blockquote_crlf(void **state)
         ">   bola\r\n"
         ">   guda\r\n"
         "\r\n"
-        "chunda\r\n", NULL, NULL, NULL);
+        "chunda\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\r\n"
@@ -632,13 +681,13 @@ test_content_parse_blockquote_crlf(void **state)
 static void
 test_content_parse_code(void **state)
 {
-    char *html = blogc_content_parse("  bola\n  guda", NULL, NULL, NULL);
+    char *html = blogc_content_parse("  bola\n  guda", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<pre><code>bola\n"
         "guda</code></pre>\n");
     free(html);
-    html = blogc_content_parse("  bola\n  guda\n", NULL, NULL, NULL);
+    html = blogc_content_parse("  bola\n  guda\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<pre><code>bola\n"
@@ -650,7 +699,7 @@ test_content_parse_code(void **state)
         "   bola\n"
         "   guda\n"
         "\n"
-        "chunda\n", NULL, NULL, NULL);
+        "chunda\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -664,13 +713,13 @@ test_content_parse_code(void **state)
 static void
 test_content_parse_code_crlf(void **state)
 {
-    char *html = blogc_content_parse("  bola\r\n  guda", NULL, NULL, NULL);
+    char *html = blogc_content_parse("  bola\r\n  guda", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<pre><code>bola\r\n"
         "guda</code></pre>\r\n");
     free(html);
-    html = blogc_content_parse("  bola\r\n  guda\r\n", NULL, NULL, NULL);
+    html = blogc_content_parse("  bola\r\n  guda\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<pre><code>bola\r\n"
@@ -682,7 +731,7 @@ test_content_parse_code_crlf(void **state)
         "   bola\r\n"
         "   guda\r\n"
         "\r\n"
-        "chunda\r\n", NULL, NULL, NULL);
+        "chunda\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\r\n"
@@ -696,28 +745,28 @@ test_content_parse_code_crlf(void **state)
 static void
 test_content_parse_horizontal_rule(void **state)
 {
-    char *html = blogc_content_parse("bola\nguda\n\n***", NULL, NULL, NULL);
+    char *html = blogc_content_parse("bola\nguda\n\n***", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\n"
         "guda</p>\n"
         "<hr />\n");
     free(html);
-    html = blogc_content_parse("bola\nguda\n\n++++", NULL, NULL, NULL);
+    html = blogc_content_parse("bola\nguda\n\n++++", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\n"
         "guda</p>\n"
         "<hr />\n");
     free(html);
-    html = blogc_content_parse("bola\nguda\n\n---\n", NULL, NULL, NULL);
+    html = blogc_content_parse("bola\nguda\n\n---\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\n"
         "guda</p>\n"
         "<hr />\n");
     free(html);
-    html = blogc_content_parse("bola\nguda\n\n****\n", NULL, NULL, NULL);
+    html = blogc_content_parse("bola\nguda\n\n****\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\n"
@@ -729,7 +778,7 @@ test_content_parse_horizontal_rule(void **state)
         "\n"
         "***\n"
         "\n"
-        "chunda\n", NULL, NULL, NULL);
+        "chunda\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -741,7 +790,7 @@ test_content_parse_horizontal_rule(void **state)
         "\n"
         "----\n"
         "\n"
-        "chunda\n", NULL, NULL, NULL);
+        "chunda\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\n"
@@ -754,28 +803,28 @@ test_content_parse_horizontal_rule(void **state)
 static void
 test_content_parse_horizontal_rule_crlf(void **state)
 {
-    char *html = blogc_content_parse("bola\r\nguda\r\n\r\n***", NULL, NULL, NULL);
+    char *html = blogc_content_parse("bola\r\nguda\r\n\r\n***", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\r\n"
         "guda</p>\r\n"
         "<hr />\r\n");
     free(html);
-    html = blogc_content_parse("bola\r\nguda\r\n\r\n++++", NULL, NULL, NULL);
+    html = blogc_content_parse("bola\r\nguda\r\n\r\n++++", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\r\n"
         "guda</p>\r\n"
         "<hr />\r\n");
     free(html);
-    html = blogc_content_parse("bola\r\nguda\r\n\r\n---\r\n", NULL, NULL, NULL);
+    html = blogc_content_parse("bola\r\nguda\r\n\r\n---\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\r\n"
         "guda</p>\r\n"
         "<hr />\r\n");
     free(html);
-    html = blogc_content_parse("bola\r\nguda\r\n\r\n****\r\n", NULL, NULL, NULL);
+    html = blogc_content_parse("bola\r\nguda\r\n\r\n****\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola\r\n"
@@ -787,7 +836,7 @@ test_content_parse_horizontal_rule_crlf(void **state)
         "\r\n"
         "***\r\n"
         "\r\n"
-        "chunda\r\n", NULL, NULL, NULL);
+        "chunda\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\r\n"
@@ -799,7 +848,7 @@ test_content_parse_horizontal_rule_crlf(void **state)
         "\r\n"
         "----\r\n"
         "\r\n"
-        "chunda\r\n", NULL, NULL, NULL);
+        "chunda\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>bola</p>\r\n"
@@ -817,7 +866,7 @@ test_content_parse_unordered_list(void **state)
         "\n"
         "*  asd\n"
         "*  qwe\n"
-        "*  zxc", NULL, NULL, NULL);
+        "*  zxc", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\n"
@@ -832,7 +881,7 @@ test_content_parse_unordered_list(void **state)
         "\n"
         "*  asd\n"
         "*  qwe\n"
-        "*  zxc\n", NULL, NULL, NULL);
+        "*  zxc\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\n"
@@ -849,7 +898,7 @@ test_content_parse_unordered_list(void **state)
         "*  qwe\n"
         "*  zxc\n"
         "\n"
-        "fuuuu\n", NULL, NULL, NULL);
+        "fuuuu\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\n"
@@ -869,7 +918,7 @@ test_content_parse_unordered_list(void **state)
         "*  zxc\n"
         "   1234\n"
         "\n"
-        "fuuuu\n", NULL, NULL, NULL);
+        "fuuuu\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\n"
@@ -885,7 +934,7 @@ test_content_parse_unordered_list(void **state)
     html = blogc_content_parse(
         "*  asd\n"
         "*   qwe\n"
-        "*    zxc", NULL, NULL, NULL);
+        "*    zxc", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<ul>\n"
@@ -905,7 +954,7 @@ test_content_parse_unordered_list_crlf(void **state)
         "\r\n"
         "*  asd\r\n"
         "*  qwe\r\n"
-        "*  zxc", NULL, NULL, NULL);
+        "*  zxc", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\r\n"
@@ -920,7 +969,7 @@ test_content_parse_unordered_list_crlf(void **state)
         "\r\n"
         "*  asd\r\n"
         "*  qwe\r\n"
-        "*  zxc\r\n", NULL, NULL, NULL);
+        "*  zxc\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\r\n"
@@ -937,7 +986,7 @@ test_content_parse_unordered_list_crlf(void **state)
         "*  qwe\r\n"
         "*  zxc\r\n"
         "\r\n"
-        "fuuuu\r\n", NULL, NULL, NULL);
+        "fuuuu\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\r\n"
@@ -957,7 +1006,7 @@ test_content_parse_unordered_list_crlf(void **state)
         "*  zxc\r\n"
         "   1234\r\n"
         "\r\n"
-        "fuuuu\r\n", NULL, NULL, NULL);
+        "fuuuu\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\r\n"
@@ -973,7 +1022,7 @@ test_content_parse_unordered_list_crlf(void **state)
     html = blogc_content_parse(
         "*  asd\r\n"
         "*   qwe\r\n"
-        "*    zxc", NULL, NULL, NULL);
+        "*    zxc", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<ul>\r\n"
@@ -993,7 +1042,7 @@ test_content_parse_ordered_list(void **state)
         "\n"
         "1.  asd\n"
         "2.  qwe\n"
-        "3.  zxc", NULL, NULL, NULL);
+        "3.  zxc", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\n"
@@ -1008,7 +1057,7 @@ test_content_parse_ordered_list(void **state)
         "\n"
         "1.  asd\n"
         "2.  qwe\n"
-        "3.  zxc\n", NULL, NULL, NULL);
+        "3.  zxc\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\n"
@@ -1025,7 +1074,7 @@ test_content_parse_ordered_list(void **state)
         "2.  qwe\n"
         "3.  zxc\n"
         "\n"
-        "fuuuu\n", NULL, NULL, NULL);
+        "fuuuu\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\n"
@@ -1045,7 +1094,7 @@ test_content_parse_ordered_list(void **state)
         "3.  zxc\n"
         "    1234\n"
         "\n"
-        "fuuuu\n", NULL, NULL, NULL);
+        "fuuuu\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\n"
@@ -1061,7 +1110,7 @@ test_content_parse_ordered_list(void **state)
     html = blogc_content_parse(
         "1.  asd\n"
         "2.   qwe\n"
-        "3.    zxc", NULL, NULL, NULL);
+        "3.    zxc", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<ol>\n"
@@ -1081,7 +1130,7 @@ test_content_parse_ordered_list_crlf(void **state)
         "\r\n"
         "1.  asd\r\n"
         "2.  qwe\r\n"
-        "3.  zxc", NULL, NULL, NULL);
+        "3.  zxc", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\r\n"
@@ -1096,7 +1145,7 @@ test_content_parse_ordered_list_crlf(void **state)
         "\r\n"
         "1.  asd\r\n"
         "2.  qwe\r\n"
-        "3.  zxc\r\n", NULL, NULL, NULL);
+        "3.  zxc\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\r\n"
@@ -1113,7 +1162,7 @@ test_content_parse_ordered_list_crlf(void **state)
         "2.  qwe\r\n"
         "3.  zxc\r\n"
         "\r\n"
-        "fuuuu\r\n", NULL, NULL, NULL);
+        "fuuuu\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\r\n"
@@ -1133,7 +1182,7 @@ test_content_parse_ordered_list_crlf(void **state)
         "3.  zxc\r\n"
         "    1234\r\n"
         "\r\n"
-        "fuuuu\r\n", NULL, NULL, NULL);
+        "fuuuu\r\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>lol</p>\r\n"
@@ -1149,7 +1198,7 @@ test_content_parse_ordered_list_crlf(void **state)
     html = blogc_content_parse(
         "1.  asd\r\n"
         "2.   qwe\r\n"
-        "3.    zxc", NULL, NULL, NULL);
+        "3.    zxc", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<ol>\r\n"
@@ -1165,7 +1214,7 @@ static void
 test_content_parse_first_header(void **state)
 {
     char *t = NULL;
-    char *html = blogc_content_parse("# foo", NULL, &t, NULL);
+    char *html = blogc_content_parse("# foo", NULL, &t, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<h1 id=\"foo\">foo</h1>\n");
     assert_non_null(t);
@@ -1173,7 +1222,7 @@ test_content_parse_first_header(void **state)
     free(html);
     free(t);
     t = NULL;
-    html = blogc_content_parse("# foo\n", NULL, &t, NULL);
+    html = blogc_content_parse("# foo\n", NULL, &t, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<h1 id=\"foo\">foo</h1>\n");
     assert_non_null(t);
@@ -1184,7 +1233,7 @@ test_content_parse_first_header(void **state)
     html = blogc_content_parse(
         "# foo\n"
         "## bar\n"
-        "### baz", NULL, &t, NULL);
+        "### baz", NULL, &t, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\n"
@@ -1198,7 +1247,7 @@ test_content_parse_first_header(void **state)
     html = blogc_content_parse(
         "# foo\n"
         "## bar\n"
-        "### baz\n", NULL, &t, NULL);
+        "### baz\n", NULL, &t, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\n"
@@ -1212,7 +1261,7 @@ test_content_parse_first_header(void **state)
     html = blogc_content_parse(
         "## bar\n"
         "# foo\n"
-        "### baz", NULL, &t, NULL);
+        "### baz", NULL, &t, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h2 id=\"bar\">bar</h2>\n"
@@ -1226,7 +1275,7 @@ test_content_parse_first_header(void **state)
     html = blogc_content_parse(
         "## bar\n"
         "# foo\n"
-        "### baz\n", NULL, &t, NULL);
+        "### baz\n", NULL, &t, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h2 id=\"bar\">bar</h2>\n"
@@ -1243,7 +1292,7 @@ static void
 test_content_parse_first_header_crlf(void **state)
 {
     char *t = NULL;
-    char *html = blogc_content_parse("# foo\r\n", NULL, &t, NULL);
+    char *html = blogc_content_parse("# foo\r\n", NULL, &t, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<h1 id=\"foo\">foo</h1>\r\n");
     assert_non_null(t);
@@ -1254,7 +1303,7 @@ test_content_parse_first_header_crlf(void **state)
     html = blogc_content_parse(
         "# foo\r\n"
         "## bar\r\n"
-        "### baz", NULL, &t, NULL);
+        "### baz", NULL, &t, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\r\n"
@@ -1268,7 +1317,7 @@ test_content_parse_first_header_crlf(void **state)
     html = blogc_content_parse(
         "# foo\r\n"
         "## bar\r\n"
-        "### baz\r\n", NULL, &t, NULL);
+        "### baz\r\n", NULL, &t, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\r\n"
@@ -1282,7 +1331,7 @@ test_content_parse_first_header_crlf(void **state)
     html = blogc_content_parse(
         "## bar\r\n"
         "# foo\r\n"
-        "### baz", NULL, &t, NULL);
+        "### baz", NULL, &t, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h2 id=\"bar\">bar</h2>\r\n"
@@ -1296,7 +1345,7 @@ test_content_parse_first_header_crlf(void **state)
     html = blogc_content_parse(
         "## bar\r\n"
         "# foo\r\n"
-        "### baz\r\n", NULL, &t, NULL);
+        "### baz\r\n", NULL, &t, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h2 id=\"bar\">bar</h2>\r\n"
@@ -1310,13 +1359,258 @@ test_content_parse_first_header_crlf(void **state)
 
 
 static void
+test_content_parse_headers(void **state)
+{
+    bc_slist_t *h = NULL;
+    char *html = blogc_content_parse("# foo", NULL, NULL, NULL, NULL, &h);
+    assert_non_null(html);
+    assert_string_equal(html, "<h1 id=\"foo\">foo</h1>\n");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->data)->level, 1);
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->slug, "foo");
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->text, "foo");
+    assert_null(h->next);
+    blogc_toctree_free(h);
+    h = NULL;
+    free(html);
+    html = blogc_content_parse("# foo\n", NULL, NULL, NULL, NULL, &h);
+    assert_non_null(html);
+    assert_string_equal(html, "<h1 id=\"foo\">foo</h1>\n");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->data)->level, 1);
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->slug, "foo");
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->text, "foo");
+    assert_null(h->next);
+    blogc_toctree_free(h);
+    h = NULL;
+    free(html);
+    html = blogc_content_parse(
+        "# foo\n"
+        "## bar\n"
+        "### baz", NULL, NULL, NULL, NULL, &h);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<h1 id=\"foo\">foo</h1>\n"
+        "<h2 id=\"bar\">bar</h2>\n"
+        "<h3 id=\"baz\">baz</h3>\n");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->data)->level, 1);
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->slug, "foo");
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->text, "foo");
+    assert_non_null(h->next);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->data)->level, 2);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->slug, "bar");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->text, "bar");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->next->data)->level, 3);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->slug, "baz");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->text, "baz");
+    assert_null(h->next->next->next);
+    blogc_toctree_free(h);
+    h = NULL;
+    free(html);
+    html = blogc_content_parse(
+        "# foo\n"
+        "## bar\n"
+        "### baz\n", NULL, NULL, NULL, NULL, &h);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<h1 id=\"foo\">foo</h1>\n"
+        "<h2 id=\"bar\">bar</h2>\n"
+        "<h3 id=\"baz\">baz</h3>\n");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->data)->level, 1);
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->slug, "foo");
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->text, "foo");
+    assert_non_null(h->next);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->data)->level, 2);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->slug, "bar");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->text, "bar");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->next->data)->level, 3);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->slug, "baz");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->text, "baz");
+    assert_null(h->next->next->next);
+    blogc_toctree_free(h);
+    h = NULL;
+    free(html);
+    html = blogc_content_parse(
+        "## bar\n"
+        "# foo\n"
+        "### baz", NULL, NULL, NULL, NULL, &h);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<h2 id=\"bar\">bar</h2>\n"
+        "<h1 id=\"foo\">foo</h1>\n"
+        "<h3 id=\"baz\">baz</h3>\n");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->data)->level, 2);
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->slug, "bar");
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->text, "bar");
+    assert_non_null(h->next);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->data)->level, 1);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->slug, "foo");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->text, "foo");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->next->data)->level, 3);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->slug, "baz");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->text, "baz");
+    assert_null(h->next->next->next);
+    blogc_toctree_free(h);
+    h = NULL;
+    free(html);
+    html = blogc_content_parse(
+        "## bar\n"
+        "# foo\n"
+        "### baz\n", NULL, NULL, NULL, NULL, &h);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<h2 id=\"bar\">bar</h2>\n"
+        "<h1 id=\"foo\">foo</h1>\n"
+        "<h3 id=\"baz\">baz</h3>\n");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->data)->level, 2);
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->slug, "bar");
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->text, "bar");
+    assert_non_null(h->next);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->data)->level, 1);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->slug, "foo");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->text, "foo");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->next->data)->level, 3);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->slug, "baz");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->text, "baz");
+    assert_null(h->next->next->next);
+    blogc_toctree_free(h);
+    free(html);
+}
+
+
+static void
+test_content_parse_headers_crlf(void **state)
+{
+    bc_slist_t *h = NULL;
+    char *html = blogc_content_parse("# foo\r\n", NULL, NULL, NULL, NULL, &h);
+    assert_non_null(html);
+    assert_string_equal(html, "<h1 id=\"foo\">foo</h1>\r\n");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->data)->level, 1);
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->slug, "foo");
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->text, "foo");
+    assert_null(h->next);
+    blogc_toctree_free(h);
+    h = NULL;
+    free(html);
+    html = blogc_content_parse(
+        "# foo\r\n"
+        "## bar\r\n"
+        "### baz", NULL, NULL, NULL, NULL, &h);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<h1 id=\"foo\">foo</h1>\r\n"
+        "<h2 id=\"bar\">bar</h2>\r\n"
+        "<h3 id=\"baz\">baz</h3>\r\n");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->data)->level, 1);
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->slug, "foo");
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->text, "foo");
+    assert_non_null(h->next);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->data)->level, 2);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->slug, "bar");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->text, "bar");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->next->data)->level, 3);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->slug, "baz");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->text, "baz");
+    assert_null(h->next->next->next);
+    blogc_toctree_free(h);
+    h = NULL;
+    free(html);
+    html = blogc_content_parse(
+        "# foo\r\n"
+        "## bar\r\n"
+        "### baz\r\n", NULL, NULL, NULL, NULL, &h);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<h1 id=\"foo\">foo</h1>\r\n"
+        "<h2 id=\"bar\">bar</h2>\r\n"
+        "<h3 id=\"baz\">baz</h3>\r\n");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->data)->level, 1);
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->slug, "foo");
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->text, "foo");
+    assert_non_null(h->next);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->data)->level, 2);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->slug, "bar");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->text, "bar");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->next->data)->level, 3);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->slug, "baz");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->text, "baz");
+    assert_null(h->next->next->next);
+    blogc_toctree_free(h);
+    h = NULL;
+    free(html);
+    html = blogc_content_parse(
+        "## bar\r\n"
+        "# foo\r\n"
+        "### baz", NULL, NULL, NULL, NULL, &h);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<h2 id=\"bar\">bar</h2>\r\n"
+        "<h1 id=\"foo\">foo</h1>\r\n"
+        "<h3 id=\"baz\">baz</h3>\r\n");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->data)->level, 2);
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->slug, "bar");
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->text, "bar");
+    assert_non_null(h->next);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->data)->level, 1);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->slug, "foo");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->text, "foo");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->next->data)->level, 3);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->slug, "baz");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->text, "baz");
+    assert_null(h->next->next->next);
+    blogc_toctree_free(h);
+    h = NULL;
+    free(html);
+    html = blogc_content_parse(
+        "## bar\r\n"
+        "# foo\r\n"
+        "### baz\r\n", NULL, NULL, NULL, NULL, &h);
+    assert_non_null(html);
+    assert_string_equal(html,
+        "<h2 id=\"bar\">bar</h2>\r\n"
+        "<h1 id=\"foo\">foo</h1>\r\n"
+        "<h3 id=\"baz\">baz</h3>\r\n");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->data)->level, 2);
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->slug, "bar");
+    assert_string_equal(((blogc_toctree_header_t*) h->data)->text, "bar");
+    assert_non_null(h->next);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->data)->level, 1);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->slug, "foo");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->data)->text, "foo");
+    assert_non_null(h);
+    assert_int_equal(((blogc_toctree_header_t*) h->next->next->data)->level, 3);
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->slug, "baz");
+    assert_string_equal(((blogc_toctree_header_t*) h->next->next->data)->text, "baz");
+    assert_null(h->next->next->next);
+    blogc_toctree_free(h);
+    free(html);
+}
+
+
+static void
 test_content_parse_description(void **state)
 {
     char *d = NULL;
     char *html = blogc_content_parse(
         "# foo\n"
         "\n"
-        "bar", NULL, NULL, &d);
+        "bar", NULL, NULL, &d, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\n"
@@ -1329,7 +1623,7 @@ test_content_parse_description(void **state)
     html = blogc_content_parse(
         "# foo\n"
         "\n"
-        "bar\n", NULL, NULL, &d);
+        "bar\n", NULL, NULL, &d, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\n"
@@ -1343,7 +1637,7 @@ test_content_parse_description(void **state)
         "# foo\n"
         "\n"
         "qwe\n"
-        "bar\n", NULL, NULL, &d);
+        "bar\n", NULL, NULL, &d, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\n"
@@ -1359,7 +1653,7 @@ test_content_parse_description(void **state)
         "\n"
         "> qwe\n"
         "\n"
-        "bar\n", NULL, NULL, &d);
+        "bar\n", NULL, NULL, &d, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\n"
@@ -1377,7 +1671,7 @@ test_content_parse_description(void **state)
         "> qwe\n"
         "> zxc\n"
         "\n"
-        "bar\n", NULL, NULL, &d);
+        "bar\n", NULL, NULL, &d, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\n"
@@ -1399,7 +1693,7 @@ test_content_parse_description_crlf(void **state)
     char *html = blogc_content_parse(
         "# foo\r\n"
         "\r\n"
-        "bar", NULL, NULL, &d);
+        "bar", NULL, NULL, &d, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\r\n"
@@ -1412,7 +1706,7 @@ test_content_parse_description_crlf(void **state)
     html = blogc_content_parse(
         "# foo\r\n"
         "\r\n"
-        "bar\r\n", NULL, NULL, &d);
+        "bar\r\n", NULL, NULL, &d, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\r\n"
@@ -1426,7 +1720,7 @@ test_content_parse_description_crlf(void **state)
         "# foo\r\n"
         "\r\n"
         "qwe\r\n"
-        "bar\r\n", NULL, NULL, &d);
+        "bar\r\n", NULL, NULL, &d, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\r\n"
@@ -1442,7 +1736,7 @@ test_content_parse_description_crlf(void **state)
         "\r\n"
         "> qwe\r\n"
         "\r\n"
-        "bar\r\n", NULL, NULL, &d);
+        "bar\r\n", NULL, NULL, &d, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\r\n"
@@ -1460,7 +1754,7 @@ test_content_parse_description_crlf(void **state)
         "> qwe\r\n"
         "> zxc\r\n"
         "\r\n"
-        "bar\r\n", NULL, NULL, &d);
+        "bar\r\n", NULL, NULL, &d, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<h1 id=\"foo\">foo</h1>\r\n"
@@ -1476,6 +1770,107 @@ test_content_parse_description_crlf(void **state)
 
 
 static void
+test_content_parse_endl(void **state)
+{
+    char *n = NULL;
+    char *html = blogc_content_parse("# test", NULL, NULL, NULL, &n, NULL);
+    assert_non_null(html);
+    assert_non_null(n);
+    assert_string_equal(n, "\n");
+    free(html);
+    free(n);
+    n = "\n";
+    html = blogc_content_parse("# test", NULL, NULL, NULL, &n, NULL);
+    assert_non_null(html);
+    assert_non_null(n);
+    assert_string_equal(n, "\n");
+    free(html);
+    n = NULL;
+    html = blogc_content_parse(
+        "# test\n", NULL, NULL, NULL, &n, NULL);
+    assert_non_null(html);
+    assert_non_null(n);
+    assert_string_equal(n, "\n");
+    free(html);
+    free(n);
+    n = NULL;
+    html = blogc_content_parse(
+        "# test\n"
+        "foo", NULL, NULL, NULL, &n, NULL);
+    assert_non_null(html);
+    assert_non_null(n);
+    assert_string_equal(n, "\n");
+    free(html);
+    free(n);
+    n = NULL;
+    html = blogc_content_parse(
+        "# test\n"
+        "foo\n", NULL, NULL, NULL, &n, NULL);
+    assert_non_null(html);
+    assert_non_null(n);
+    assert_string_equal(n, "\n");
+    free(html);
+    free(n);
+    n = NULL;
+    html = blogc_content_parse(
+        "# test\n"
+        "foo\r\n", NULL, NULL, NULL, &n, NULL);
+    assert_non_null(html);
+    assert_non_null(n);
+    assert_string_equal(n, "\n");
+    free(html);
+    free(n);
+}
+
+
+static void
+test_content_parse_endl_crlf(void **state)
+{
+    char *n = "\r\n";
+    char *html = blogc_content_parse("# test", NULL, NULL, NULL, &n, NULL);
+    assert_non_null(html);
+    assert_non_null(n);
+    assert_string_equal(n, "\r\n");
+    free(html);
+    n = NULL;
+    html = blogc_content_parse(
+        "# test\r\n", NULL, NULL, NULL, &n, NULL);
+    assert_non_null(html);
+    assert_non_null(n);
+    assert_string_equal(n, "\r\n");
+    free(html);
+    free(n);
+    n = NULL;
+    html = blogc_content_parse(
+        "# test\r\n"
+        "foo", NULL, NULL, NULL, &n, NULL);
+    assert_non_null(html);
+    assert_non_null(n);
+    assert_string_equal(n, "\r\n");
+    free(html);
+    free(n);
+    n = NULL;
+    html = blogc_content_parse(
+        "# test\r\n"
+        "foo\r\n", NULL, NULL, NULL, &n, NULL);
+    assert_non_null(html);
+    assert_non_null(n);
+    assert_string_equal(n, "\r\n");
+    free(html);
+    free(n);
+    n = NULL;
+    html = blogc_content_parse(
+        "# test\r\n"
+        "foo\n", NULL, NULL, NULL, &n, NULL);
+    assert_non_null(html);
+    assert_non_null(n);
+    assert_string_equal(n, "\r\n");
+    free(html);
+    free(n);
+}
+
+
+static void
 test_content_parse_invalid_excerpt(void **state)
 {
     size_t l = 0;
@@ -1487,7 +1882,7 @@ test_content_parse_invalid_excerpt(void **state)
         "..\n"
         "\n"
         "guda\n"
-        "lol", &l, NULL, &d);
+        "lol", &l, NULL, &d, NULL, NULL);
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_non_null(d);
@@ -1509,7 +1904,7 @@ test_content_parse_invalid_excerpt(void **state)
         "\n"
         "...\n"
         "guda\n"
-        "lol", &l, NULL, &d);
+        "lol", &l, NULL, &d, NULL, NULL);
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_non_null(d);
@@ -1530,7 +1925,7 @@ test_content_parse_invalid_excerpt(void **state)
         "chunda..\n"
         "\n"
         "guda\n"
-        "lol", &l, NULL, &d);
+        "lol", &l, NULL, &d, NULL, NULL);
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_non_null(d);
@@ -1550,7 +1945,7 @@ test_content_parse_invalid_excerpt(void **state)
         "chunda\n"
         "\n"
         "...guda\n"
-        "lol", &l, NULL, &d);
+        "lol", &l, NULL, &d, NULL, NULL);
     assert_non_null(html);
     assert_int_equal(l, 0);
     assert_non_null(d);
@@ -1571,7 +1966,7 @@ test_content_parse_invalid_header(void **state)
     char *html = blogc_content_parse(
         "asd\n"
         "\n"
-        "##bola\n", NULL, NULL, NULL);
+        "##bola\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>asd</p>\n"
@@ -1588,7 +1983,7 @@ test_content_parse_invalid_header_empty(void **state)
         "\n"
         "##\n"
         "\n"
-        "qwe\n", NULL, NULL, NULL);
+        "qwe\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>asd</p>\n"
@@ -1605,7 +2000,7 @@ test_content_parse_invalid_blockquote(void **state)
     char *html = blogc_content_parse(
         ">   asd\n"
         "> bola\n"
-        ">   foo\n", NULL, NULL, NULL);
+        ">   foo\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>&gt;   asd\n"
@@ -1614,7 +2009,7 @@ test_content_parse_invalid_blockquote(void **state)
     free(html);
     html = blogc_content_parse(
         ">   asd\n"
-        "> bola", NULL, NULL, NULL);
+        "> bola", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>&gt;   asd\n"
@@ -1629,7 +2024,7 @@ test_content_parse_invalid_code(void **state)
     char *html = blogc_content_parse(
         "    asd\n"
         "  bola\n"
-        "    foo\n", NULL, NULL, NULL);
+        "    foo\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>    asd\n"
@@ -1639,7 +2034,7 @@ test_content_parse_invalid_code(void **state)
     html = blogc_content_parse(
         "    asd\n"
         "  bola\n"
-        "    foo", NULL, NULL, NULL);
+        "    foo", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>    asd\n"
@@ -1652,11 +2047,11 @@ test_content_parse_invalid_code(void **state)
 static void
 test_content_parse_invalid_horizontal_rule(void **state)
 {
-    char *html = blogc_content_parse("** asd", NULL, NULL, NULL);
+    char *html = blogc_content_parse("** asd", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<p>** asd</p>\n");
     free(html);
-    html = blogc_content_parse("** asd\n", NULL, NULL, NULL);
+    html = blogc_content_parse("** asd\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<p>** asd</p>\n");
     free(html);
@@ -1668,7 +2063,7 @@ test_content_parse_invalid_unordered_list(void **state)
 {
     char *html = blogc_content_parse(
         "*  asd\n"
-        "1. qwe", NULL, NULL, NULL);
+        "1. qwe", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>*  asd\n"
@@ -1677,7 +2072,7 @@ test_content_parse_invalid_unordered_list(void **state)
     html = blogc_content_parse(
         "*  asd\n"
         "1. qwe\n"
-        "\n", NULL, NULL, NULL);
+        "\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>*  asd\n"
@@ -1685,7 +2080,7 @@ test_content_parse_invalid_unordered_list(void **state)
     free(html);
     html = blogc_content_parse(
         "*  asd\n"
-        "1. qwe\n", NULL, NULL, NULL);
+        "1. qwe\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>*  asd\n"
@@ -1694,7 +2089,7 @@ test_content_parse_invalid_unordered_list(void **state)
     free(html);
     html = blogc_content_parse(
         "* asd\n"
-        "1. qwe\n", NULL, NULL, NULL);
+        "1. qwe\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>* asd\n"
@@ -1707,7 +2102,7 @@ test_content_parse_invalid_unordered_list(void **state)
         "* asd\n"
         "1. qwe\n"
         "\n"
-        "poi\n", NULL, NULL, NULL);
+        "poi\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>chunda</p>\n"
@@ -1723,7 +2118,7 @@ test_content_parse_invalid_ordered_list(void **state)
 {
     char *html = blogc_content_parse(
         "1. asd\n"
-        "*  qwe", NULL, NULL, NULL);
+        "*  qwe", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
@@ -1732,7 +2127,7 @@ test_content_parse_invalid_ordered_list(void **state)
     html = blogc_content_parse(
         "1. asd\n"
         "*  qwe\n"
-        "\n", NULL, NULL, NULL);
+        "\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
@@ -1740,7 +2135,7 @@ test_content_parse_invalid_ordered_list(void **state)
     free(html);
     html = blogc_content_parse(
         "1. asd\n"
-        "*  qwe\n", NULL, NULL, NULL);
+        "*  qwe\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
@@ -1749,7 +2144,7 @@ test_content_parse_invalid_ordered_list(void **state)
     free(html);
     html = blogc_content_parse(
         "1. asd\n"
-        "*  qwe\n", NULL, NULL, NULL);
+        "*  qwe\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1. asd\n"
@@ -1762,7 +2157,7 @@ test_content_parse_invalid_ordered_list(void **state)
         "1. asd\n"
         "*  qwe\n"
         "\n"
-        "poi\n", NULL, NULL, NULL);
+        "poi\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>chunda</p>\n"
@@ -1772,7 +2167,7 @@ test_content_parse_invalid_ordered_list(void **state)
     free(html);
     html = blogc_content_parse(
         "1 asd\n"
-        "* qwe\n", NULL, NULL, NULL);
+        "* qwe\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1 asd\n"
@@ -1780,7 +2175,7 @@ test_content_parse_invalid_ordered_list(void **state)
     free(html);
     html = blogc_content_parse(
         "a. asd\n"
-        "2. qwe\n", NULL, NULL, NULL);
+        "2. qwe\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>a. asd\n"
@@ -1788,18 +2183,18 @@ test_content_parse_invalid_ordered_list(void **state)
     free(html);
     html = blogc_content_parse(
         "1.\nasd\n"
-        "2. qwe\n", NULL, NULL, NULL);
+        "2. qwe\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html,
         "<p>1.\n"
         "asd\n"
         "2. qwe</p>\n");
     free(html);
-    html = blogc_content_parse("1.\n", NULL, NULL, NULL);
+    html = blogc_content_parse("1.\n", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<p>1.</p>\n");
     free(html);
-    html = blogc_content_parse("1 ", NULL, NULL, NULL);
+    html = blogc_content_parse("1 ", NULL, NULL, NULL, NULL, NULL);
     assert_non_null(html);
     assert_string_equal(html, "<p>1 </p>\n");
     free(html);
@@ -2365,8 +2760,12 @@ main(void)
         unit_test(test_content_parse_ordered_list_crlf),
         unit_test(test_content_parse_first_header),
         unit_test(test_content_parse_first_header_crlf),
+        unit_test(test_content_parse_headers),
+        unit_test(test_content_parse_headers_crlf),
         unit_test(test_content_parse_description),
         unit_test(test_content_parse_description_crlf),
+        unit_test(test_content_parse_endl),
+        unit_test(test_content_parse_endl_crlf),
         unit_test(test_content_parse_invalid_excerpt),
         unit_test(test_content_parse_invalid_header),
         unit_test(test_content_parse_invalid_header_empty),

@@ -1,6 +1,6 @@
 /*
  * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+ * Copyright (C) 2014-2020 Rafael G. Martins <rafael@rafaelmartins.eng.br>
  *
  * This program can be distributed under the terms of the BSD License.
  * See the file LICENSE.
@@ -11,6 +11,7 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include "../common/utils.h"
 
 char* blogc_slugify(const char *str);
 char* blogc_htmlentities(const char *str);
@@ -18,6 +19,7 @@ char* blogc_fix_description(const char *paragraph);
 char* blogc_content_parse_inline(const char *src);
 bool blogc_is_ordered_list_item(const char *str, size_t prefix_len);
 char* blogc_content_parse(const char *src, size_t *end_excerpt,
-    char **first_header, char **description);
+    char **first_header, char **description, char **endl,
+    bc_slist_t **headers);
 
 #endif /* _CONTENT_PARSER_H */
