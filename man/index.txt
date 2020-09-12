@@ -6,6 +6,7 @@ blogc-runserver(1)     blogc-runserver.1.ronn
 blogcfile(5)           blogcfile.5.ronn
 blogc-source(7)        blogc-source.7.ronn
 blogc-template(7)      blogc-template.7.ronn
+blogc-toctree(7)       blogc-toctree.7.ronn
 blogc-pagination(7)    blogc-pagination.7.ronn
 
 # external manuals

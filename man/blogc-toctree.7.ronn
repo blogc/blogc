@@ -1,0 +1,87 @@
+blogc-toctree(7) -- blogc's "table of contents" tree support
+============================================================
+
+## DESCRIPTION
+
+blogc(1) generates a "table of contents" tree for every source file, out of
+its content headers, that is available for usage as a `{{ TOCTREE }}`
+template variable. The tree is composed by lists of links for the headers,
+and is usually placed right before the content, as an index.
+
+## USAGE
+
+For a source file with the following content:
+
+    TITLE: Some Title
+    -----------------
+    # Header 1
+
+    Some content.
+
+    ## Header 2
+
+    More content.
+
+    ### Header 3
+
+    Content.
+
+A template block with the following content:
+
+    {% block entry %}
+    {{ TOCTREE }}
+    {% endblock %}
+
+Would generate output similar to this:
+
+    <ul>
+        <li><a href="#header-1">Header 1</a></li>
+        <ul>
+            <li><a href="#header-2">Header 2</a></li>
+            <ul>
+                <li><a href="#header-3">Header 3</a></li>
+            </ul>
+        </ul>
+    </ul>
+
+The depth of the tree can be controlled using the `TOCTREE_MAXDEPTH` variable,
+that may be defined globally (see blogc(1)) or for each source file (see
+blogc-source(7)). Setting this variable to `0` disables the generator.
+Setting this variable to a positive number will limit the number of tree
+levels to such value. The default value is `-1`, which means no maximum depth.
+
+Please note that the depth is evaluated from the lower header level available
+in the content. This means that if a source file only have level 2 and level 3
+headers, and `TOCTREE_MAXDEPTH=1`, only headers with level 2 are included in the
+"table of contents" tree.
+
+For a source file with the following content:
+
+    TITLE: Some Title
+    TOCTREE_MAXDEPTH: 1
+    -----------------
+    ## Header 2
+
+    Some content
+
+    ### Header 3
+
+    More content
+
+With the same template presented before, would generate output similar to this:
+
+    <ul>
+        <li><a href="#header-2">Header 2</a></li>
+    </ul>
+
+## BUGS
+
+Please report any issues to: <https://github.com/blogc/blogc>
+
+## AUTHOR
+
+Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
+
+## SEE ALSO
+
+blogc(1), blogc-source(7), blogc-template(7)

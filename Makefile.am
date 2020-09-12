@@ -313,6 +313,7 @@ EXTRA_DIST += \
 	man/blogcfile.5.ronn \
 	man/blogc-source.7.ronn \
 	man/blogc-template.7.ronn \
+	man/blogc-toctree.7.ronn \
 	man/blogc-pagination.7.ronn \
 	man/index.txt \
 	blogc-git-receiver.1 \
@@ -325,6 +326,7 @@ dist_man_MANS = \
 	blogc.1 \
 	blogc-source.7 \
 	blogc-template.7 \
+	blogc-toctree.7 \
 	blogc-pagination.7 \
 	$(NULL)
 
@@ -409,6 +411,14 @@ blogc-template.7: man/blogc-template.7.ronn
 		--manual "$(PACKAGE_NAME) Manual" \
 		$(top_srcdir)/man/blogc-template.7.ronn > blogc-template.7
 
+blogc-toctree.7: man/blogc-toctree.7.ronn
+	$(AM_V_GEN)$(RONN) \
+		--roff \
+		--pipe \
+		--organization "Rafael G. Martins" \
+		--manual "$(PACKAGE_NAME) Manual" \
+		$(top_srcdir)/man/blogc-toctree.7.ronn > blogc-toctree.7
+
 blogc-pagination.7: man/blogc-pagination.7.ronn
 	$(AM_V_GEN)$(RONN) \
 		--roff \
@@ -435,6 +445,9 @@ blogc-source.7:
 	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
 
 blogc-template.7:
+	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
+
+blogc-toctree.7:
 	$(AM_V_GEN)echo "error: ronn not found. failed to build man page: $@"; exit 1
 
 blogc-pagination.7:
