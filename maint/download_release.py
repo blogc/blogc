@@ -12,7 +12,7 @@ re_version = re.compile(r'blogc-([^\'"]+)\.tar\.gz')
 re_distfile = re.compile(r'(blogc[^\'"]+)\.sha512')
 base_url = 'https://distfiles.rgm.io/blogc'
 cwd = os.path.dirname(os.path.abspath(__file__))
-gpg_key = '0xE00C52C92FEBED9B'
+gpg_key = '0x47B8CCD75DBE6358'
 
 
 def download_release(version):
