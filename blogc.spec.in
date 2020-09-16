@@ -49,6 +49,7 @@ blogc-runserver is a simple HTTP server to test blogc websites.
 %setup -q -n @PACKAGE_NAME@-@PACKAGE_VERSION@
 
 %build
+%define _lto_cflags %{nil}
 %if 0%{?el6}
 %configure --disable-git-receiver --enable-make --enable-runserver --enable-tests
 %else
@@ -73,6 +74,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man*/blogc.*
 %{_mandir}/man*/blogc-source.*
 %{_mandir}/man*/blogc-template.*
+%{_mandir}/man*/blogc-toctree.*
 %{_mandir}/man*/blogc-pagination.*
 %{_bindir}/blogc
 %doc README.md
