@@ -266,7 +266,7 @@ test_source_parse_from_files_filter_sort(void **state)
     will_return(__wrap_bc_file_get_contents, "bola3.txt");
     will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 789\n"
-        "DATE: 2001-02-03 04:05:06\n"
+        "DATE: 2011-02-03 04:05:06\n"
         "--------\n"
         "bola"));
     bc_error_t *err = NULL;
@@ -284,7 +284,7 @@ test_source_parse_from_files_filter_sort(void **state)
     assert_string_equal(bc_trie_lookup(c, "FILTER_SORT"), "1");
     assert_string_equal(bc_trie_lookup(c, "FILENAME_FIRST"), "bola3");
     assert_string_equal(bc_trie_lookup(c, "FILENAME_LAST"), "bola2");
-    assert_string_equal(bc_trie_lookup(c, "DATE_FIRST"), "2001-02-03 04:05:06");
+    assert_string_equal(bc_trie_lookup(c, "DATE_FIRST"), "2011-02-03 04:05:06");
     assert_string_equal(bc_trie_lookup(c, "DATE_LAST"), "2001-02-01 04:05:06");
     bc_trie_free(c);
     bc_slist_free_full(s, free);
@@ -356,7 +356,7 @@ test_source_parse_from_files_filter_sort_reverse(void **state)
     will_return(__wrap_bc_file_get_contents, "bola3.txt");
     will_return(__wrap_bc_file_get_contents, bc_strdup(
         "ASD: 789\n"
-        "DATE: 2001-02-03 04:05:06\n"
+        "DATE: 2011-02-03 04:05:06\n"
         "--------\n"
         "bola"));
     bc_error_t *err = NULL;
@@ -377,7 +377,7 @@ test_source_parse_from_files_filter_sort_reverse(void **state)
     assert_string_equal(bc_trie_lookup(c, "FILENAME_FIRST"), "bola2");
     assert_string_equal(bc_trie_lookup(c, "FILENAME_LAST"), "bola3");
     assert_string_equal(bc_trie_lookup(c, "DATE_FIRST"), "2001-02-01 04:05:06");
-    assert_string_equal(bc_trie_lookup(c, "DATE_LAST"), "2001-02-03 04:05:06");
+    assert_string_equal(bc_trie_lookup(c, "DATE_LAST"), "2011-02-03 04:05:06");
     bc_trie_free(c);
     bc_slist_free_full(s, free);
     bc_slist_free_full(t, (bc_free_func_t) bc_trie_free);

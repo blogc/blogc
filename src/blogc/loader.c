@@ -121,7 +121,10 @@ sort_source(const void *a, const void *b)
         return 0;  // wat
     }
 
-    return strcmp(cb, ca);
+    unsigned long la = strtoul(ca, NULL, 10);
+    unsigned long lb = strtoul(cb, NULL, 10);
+
+    return (int) (lb - la);
 }
 
 
