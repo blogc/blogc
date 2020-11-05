@@ -39,6 +39,10 @@ test_utf8_invalid(void **state)
     assert_false(bc_utf8_validate(c, 4));
     const uint8_t d[8] = {0xff, 0xfe, 0x00, 0x00, 0xac, 0x20, 0x00, 0x00};  // utf-32
     assert_false(bc_utf8_validate(d, 8));
+    const uint8_t e[6] = {'a', 0xff, 0xfe, 0xac, 0x20, 'b'};  // utf-16
+    assert_false(bc_utf8_validate(e, 6));
+    const uint8_t f[10] = {'a', 0xff, 0xfe, 0x00, 0x00, 0xac, 0x20, 0x00, 0x00, 'b'};  // utf-32
+    assert_false(bc_utf8_validate(f, 10));
 }
 
 

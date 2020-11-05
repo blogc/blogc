@@ -56,27 +56,13 @@ static const uint8_t utf8d[] = {
 };
 
 
-static uint32_t inline
-decode(uint32_t* state, uint32_t* codep, uint32_t byte) {
-    uint32_t type = utf8d[byte];
-
-    *codep = (*state != UTF8_ACCEPT) ?
-        (byte & 0x3fu) | (*codep << 6) :
-        (0xff >> type) & (byte);
-
-    *state = utf8d[256 + *state + type];
-    return *state;
-}
-
-
 bool
 bc_utf8_validate(const uint8_t *str, size_t len)
 {
-    uint32_t codepoint;
     uint32_t state = 0;
 
     for (size_t i = 0; i < len; i++)
-        decode(&state, &codepoint, str[i]);
+        state = utf8d[256 + state + utf8d[str[i]]];
 
     return state == UTF8_ACCEPT;
 }
