@@ -11,6 +11,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../../src/blogc-git-receiver/pre-receive-parser.h"
 
 #define _bgr_pre_receive_parse(a) bgr_pre_receive_parse(a, strlen(a))
