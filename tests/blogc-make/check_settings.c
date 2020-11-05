@@ -348,13 +348,13 @@ test_settings_copy_files(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_settings_empty),
-        unit_test(test_settings),
-        unit_test(test_settings_env),
-        unit_test(test_settings2),
-        unit_test(test_settings_env2),
-        unit_test(test_settings_copy_files),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_settings_empty),
+        cmocka_unit_test(test_settings),
+        cmocka_unit_test(test_settings_env),
+        cmocka_unit_test(test_settings2),
+        cmocka_unit_test(test_settings_env2),
+        cmocka_unit_test(test_settings_copy_files),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -1022,29 +1022,29 @@ test_source_parse_from_files_null(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_get_filename),
-        unit_test(test_template_parse_from_file),
-        unit_test(test_template_parse_from_file_null),
-        unit_test(test_source_parse_from_file),
-        unit_test(test_source_parse_from_file_maxdepth),
-        unit_test(test_source_parse_from_file_maxdepth2),
-        unit_test(test_source_parse_from_file_null),
-        unit_test(test_source_parse_from_files),
-        unit_test(test_source_parse_from_files_filter_sort),
-        unit_test(test_source_parse_from_files_filter_reverse),
-        unit_test(test_source_parse_from_files_filter_sort_reverse),
-        unit_test(test_source_parse_from_files_filter_by_tag),
-        unit_test(test_source_parse_from_files_filter_by_page),
-        unit_test(test_source_parse_from_files_filter_by_page2),
-        unit_test(test_source_parse_from_files_filter_by_page3),
-        unit_test(test_source_parse_from_files_filter_sort_and_by_page_and_tag),
-        unit_test(test_source_parse_from_files_filter_by_page_invalid),
-        unit_test(test_source_parse_from_files_filter_by_page_invalid2),
-        unit_test(test_source_parse_from_files_without_all_dates),
-        unit_test(test_source_parse_from_files_filter_sort_without_all_dates),
-        unit_test(test_source_parse_from_files_filter_sort_with_wrong_date),
-        unit_test(test_source_parse_from_files_null),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_get_filename),
+        cmocka_unit_test(test_template_parse_from_file),
+        cmocka_unit_test(test_template_parse_from_file_null),
+        cmocka_unit_test(test_source_parse_from_file),
+        cmocka_unit_test(test_source_parse_from_file_maxdepth),
+        cmocka_unit_test(test_source_parse_from_file_maxdepth2),
+        cmocka_unit_test(test_source_parse_from_file_null),
+        cmocka_unit_test(test_source_parse_from_files),
+        cmocka_unit_test(test_source_parse_from_files_filter_sort),
+        cmocka_unit_test(test_source_parse_from_files_filter_reverse),
+        cmocka_unit_test(test_source_parse_from_files_filter_sort_reverse),
+        cmocka_unit_test(test_source_parse_from_files_filter_by_tag),
+        cmocka_unit_test(test_source_parse_from_files_filter_by_page),
+        cmocka_unit_test(test_source_parse_from_files_filter_by_page2),
+        cmocka_unit_test(test_source_parse_from_files_filter_by_page3),
+        cmocka_unit_test(test_source_parse_from_files_filter_sort_and_by_page_and_tag),
+        cmocka_unit_test(test_source_parse_from_files_filter_by_page_invalid),
+        cmocka_unit_test(test_source_parse_from_files_filter_by_page_invalid2),
+        cmocka_unit_test(test_source_parse_from_files_without_all_dates),
+        cmocka_unit_test(test_source_parse_from_files_filter_sort_without_all_dates),
+        cmocka_unit_test(test_source_parse_from_files_filter_sort_with_wrong_date),
+        cmocka_unit_test(test_source_parse_from_files_null),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -122,10 +122,10 @@ test_filelist_parse_crlf(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_filelist_parse_empty),
-        unit_test(test_filelist_parse),
-        unit_test(test_filelist_parse_crlf),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_filelist_parse_empty),
+        cmocka_unit_test(test_filelist_parse),
+        cmocka_unit_test(test_filelist_parse_crlf),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

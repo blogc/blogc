@@ -97,8 +97,8 @@ test_pre_receive_parse(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_pre_receive_parse),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_pre_receive_parse),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -1089,53 +1089,53 @@ test_shell_quote(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
+    const struct CMUnitTest tests[] = {
 
         // slist
-        unit_test(test_slist_append),
-        unit_test(test_slist_prepend),
-        unit_test(test_slist_append_list),
-        unit_test(test_slist_free),
-        unit_test(test_slist_length),
+        cmocka_unit_test(test_slist_append),
+        cmocka_unit_test(test_slist_prepend),
+        cmocka_unit_test(test_slist_append_list),
+        cmocka_unit_test(test_slist_free),
+        cmocka_unit_test(test_slist_length),
 
         // strfuncs
-        unit_test(test_strdup),
-        unit_test(test_strndup),
-        unit_test(test_strdup_printf),
-        unit_test(test_str_starts_with),
-        unit_test(test_str_ends_with),
-        unit_test(test_str_lstrip),
-        unit_test(test_str_rstrip),
-        unit_test(test_str_strip),
-        unit_test(test_str_split),
-        unit_test(test_str_replace),
-        unit_test(test_str_find),
-        unit_test(test_str_to_bool),
-        unit_test(test_strv_join),
-        unit_test(test_strv_length),
+        cmocka_unit_test(test_strdup),
+        cmocka_unit_test(test_strndup),
+        cmocka_unit_test(test_strdup_printf),
+        cmocka_unit_test(test_str_starts_with),
+        cmocka_unit_test(test_str_ends_with),
+        cmocka_unit_test(test_str_lstrip),
+        cmocka_unit_test(test_str_rstrip),
+        cmocka_unit_test(test_str_strip),
+        cmocka_unit_test(test_str_split),
+        cmocka_unit_test(test_str_replace),
+        cmocka_unit_test(test_str_find),
+        cmocka_unit_test(test_str_to_bool),
+        cmocka_unit_test(test_strv_join),
+        cmocka_unit_test(test_strv_length),
 
         // string
-        unit_test(test_string_new),
-        unit_test(test_string_free),
-        unit_test(test_string_dup),
-        unit_test(test_string_append_len),
-        unit_test(test_string_append),
-        unit_test(test_string_append_c),
-        unit_test(test_string_append_printf),
-        unit_test(test_string_append_escaped),
+        cmocka_unit_test(test_string_new),
+        cmocka_unit_test(test_string_free),
+        cmocka_unit_test(test_string_dup),
+        cmocka_unit_test(test_string_append_len),
+        cmocka_unit_test(test_string_append),
+        cmocka_unit_test(test_string_append_c),
+        cmocka_unit_test(test_string_append_printf),
+        cmocka_unit_test(test_string_append_escaped),
 
         // trie
-        unit_test(test_trie_new),
-        unit_test(test_trie_insert),
-        unit_test(test_trie_insert_duplicated),
-        unit_test(test_trie_keep_data),
-        unit_test(test_trie_lookup),
-        unit_test(test_trie_size),
-        unit_test(test_trie_foreach),
-        unit_test(test_trie_inserted_after_prefix),
+        cmocka_unit_test(test_trie_new),
+        cmocka_unit_test(test_trie_insert),
+        cmocka_unit_test(test_trie_insert_duplicated),
+        cmocka_unit_test(test_trie_keep_data),
+        cmocka_unit_test(test_trie_lookup),
+        cmocka_unit_test(test_trie_size),
+        cmocka_unit_test(test_trie_foreach),
+        cmocka_unit_test(test_trie_inserted_after_prefix),
 
         // shell
-        unit_test(test_shell_quote),
+        cmocka_unit_test(test_shell_quote),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

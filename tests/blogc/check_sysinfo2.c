@@ -42,8 +42,8 @@ test_sysinfo_get_inside_docker(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_sysinfo_get_inside_docker),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_sysinfo_get_inside_docker),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

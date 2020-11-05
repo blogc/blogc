@@ -122,11 +122,11 @@ test_get_extension(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_readline),
-        unit_test(test_hextoi),
-        unit_test(test_urldecode),
-        unit_test(test_get_extension),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_readline),
+        cmocka_unit_test(test_hextoi),
+        cmocka_unit_test(test_urldecode),
+        cmocka_unit_test(test_get_extension),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

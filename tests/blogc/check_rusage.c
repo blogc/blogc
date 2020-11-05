@@ -117,11 +117,11 @@ test_rusage_inject(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_rusage_get),
-        unit_test(test_rusage_format_cpu_time),
-        unit_test(test_rusage_format_memory),
-        unit_test(test_rusage_inject),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_rusage_get),
+        cmocka_unit_test(test_rusage_format_cpu_time),
+        cmocka_unit_test(test_rusage_format_memory),
+        cmocka_unit_test(test_rusage_inject),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

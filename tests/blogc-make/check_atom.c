@@ -536,17 +536,17 @@ test_atom_legacy_entry_id(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_atom_generate_empty_file),
-        unit_test(test_atom_generate_empty_dir),
-        unit_test(test_atom_generate_file),
-        unit_test(test_atom_generate_dir),
-        unit_test(test_atom_empty_file),
-        unit_test(test_atom_empty_dir),
-        unit_test(test_atom_file),
-        unit_test(test_atom_dir),
-        unit_test(test_atom_legacy_entry_id_empty),
-        unit_test(test_atom_legacy_entry_id),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_atom_generate_empty_file),
+        cmocka_unit_test(test_atom_generate_empty_dir),
+        cmocka_unit_test(test_atom_generate_file),
+        cmocka_unit_test(test_atom_generate_dir),
+        cmocka_unit_test(test_atom_empty_file),
+        cmocka_unit_test(test_atom_empty_dir),
+        cmocka_unit_test(test_atom_file),
+        cmocka_unit_test(test_atom_dir),
+        cmocka_unit_test(test_atom_legacy_entry_id_empty),
+        cmocka_unit_test(test_atom_legacy_entry_id),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

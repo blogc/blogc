@@ -1019,19 +1019,19 @@ test_config_error_key_without_value(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_config_empty),
-        unit_test(test_config_section_empty),
-        unit_test(test_config_section),
-        unit_test(test_config_section_multiple_keys),
-        unit_test(test_config_section_multiple_sections),
-        unit_test(test_config_section_list),
-        unit_test(test_config_quoted_values),
-        unit_test(test_config_empty_values),
-        unit_test(test_config_key_prefix),
-        unit_test(test_config_error_start),
-        unit_test(test_config_error_section_with_newline),
-        unit_test(test_config_error_key_without_value),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_config_empty),
+        cmocka_unit_test(test_config_section_empty),
+        cmocka_unit_test(test_config_section),
+        cmocka_unit_test(test_config_section_multiple_keys),
+        cmocka_unit_test(test_config_section_multiple_sections),
+        cmocka_unit_test(test_config_section_list),
+        cmocka_unit_test(test_config_quoted_values),
+        cmocka_unit_test(test_config_empty_values),
+        cmocka_unit_test(test_config_key_prefix),
+        cmocka_unit_test(test_config_error_start),
+        cmocka_unit_test(test_config_error_section_with_newline),
+        cmocka_unit_test(test_config_error_key_without_value),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

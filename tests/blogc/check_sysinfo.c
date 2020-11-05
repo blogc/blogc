@@ -208,22 +208,22 @@ test_sysinfo_get_inside_docker(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
+    const struct CMUnitTest tests[] = {
 
 #ifdef HAVE_SYSINFO_HOSTNAME
-        unit_test(test_sysinfo_get_hostname),
-        unit_test(test_sysinfo_inject_hostname),
+        cmocka_unit_test(test_sysinfo_get_hostname),
+        cmocka_unit_test(test_sysinfo_inject_hostname),
 #endif
 
-        unit_test(test_sysinfo_get_username),
-        unit_test(test_sysinfo_inject_username),
+        cmocka_unit_test(test_sysinfo_get_username),
+        cmocka_unit_test(test_sysinfo_inject_username),
 
 #ifdef HAVE_SYSINFO_DATETIME
-        unit_test(test_sysinfo_get_datetime),
-        unit_test(test_sysinfo_inject_datetime),
+        cmocka_unit_test(test_sysinfo_get_datetime),
+        cmocka_unit_test(test_sysinfo_inject_datetime),
 #endif
 
-        unit_test(test_sysinfo_get_inside_docker),
+        cmocka_unit_test(test_sysinfo_get_inside_docker),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

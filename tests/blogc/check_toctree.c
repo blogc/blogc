@@ -226,9 +226,9 @@ test_toctree_render(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_toctree_append),
-        unit_test(test_toctree_render),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_toctree_append),
+        cmocka_unit_test(test_toctree_render),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -136,13 +136,13 @@ test_slist_sort_mixed2(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_slist_sort_empty),
-        unit_test(test_slist_sort_single),
-        unit_test(test_slist_sort_sorted),
-        unit_test(test_slist_sort_reverse),
-        unit_test(test_slist_sort_mixed1),
-        unit_test(test_slist_sort_mixed2),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_slist_sort_empty),
+        cmocka_unit_test(test_slist_sort_single),
+        cmocka_unit_test(test_slist_sort_sorted),
+        cmocka_unit_test(test_slist_sort_reverse),
+        cmocka_unit_test(test_slist_sort_mixed1),
+        cmocka_unit_test(test_slist_sort_mixed2),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

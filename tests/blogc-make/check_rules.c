@@ -96,9 +96,9 @@ test_rule_parse_args_error(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_rule_parse_args),
-        unit_test(test_rule_parse_args_error),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_rule_parse_args),
+        cmocka_unit_test(test_rule_parse_args_error),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

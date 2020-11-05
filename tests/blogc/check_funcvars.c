@@ -72,9 +72,9 @@ test_funcvars_eval_mocked(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_funcvars_eval),
-        unit_test(test_funcvars_eval_mocked),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_funcvars_eval),
+        cmocka_unit_test(test_funcvars_eval_mocked),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

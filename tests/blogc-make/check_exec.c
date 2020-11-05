@@ -304,15 +304,15 @@ test_build_blogc_cmd_print(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
+    const struct CMUnitTest tests[] = {
 #ifndef MAKE_EMBEDDED
-        unit_test(test_find_binary),
+        cmocka_unit_test(test_find_binary),
 #endif
-        unit_test(test_build_blogc_cmd_with_settings),
-        unit_test(test_build_blogc_cmd_with_settings_and_dev),
-        unit_test(test_build_blogc_cmd_with_settings_and_tags),
-        unit_test(test_build_blogc_cmd_without_settings),
-        unit_test(test_build_blogc_cmd_print),
+        cmocka_unit_test(test_build_blogc_cmd_with_settings),
+        cmocka_unit_test(test_build_blogc_cmd_with_settings_and_dev),
+        cmocka_unit_test(test_build_blogc_cmd_with_settings_and_tags),
+        cmocka_unit_test(test_build_blogc_cmd_without_settings),
+        cmocka_unit_test(test_build_blogc_cmd_print),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -84,9 +84,9 @@ test_guess_index(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_guess_content_type),
-        unit_test(test_guess_index),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_guess_content_type),
+        cmocka_unit_test(test_guess_index),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -51,8 +51,8 @@ test_read(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_read),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_read),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

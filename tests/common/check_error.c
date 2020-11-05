@@ -104,11 +104,11 @@ test_error_parser_crlf(void **state)
 int
 main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_error_new),
-        unit_test(test_error_new_printf),
-        unit_test(test_error_parser),
-        unit_test(test_error_parser_crlf),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_error_new),
+        cmocka_unit_test(test_error_new_printf),
+        cmocka_unit_test(test_error_parser),
+        cmocka_unit_test(test_error_parser_crlf),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }
