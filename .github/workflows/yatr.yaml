@@ -48,7 +48,6 @@ jobs:
       - name: Install dependencies
         run: |
           if [[ "x${{ matrix.image }}" = xubuntu-* ]]; then
-              sudo gem update --system 3.0.6  # hack for https://github.com/rubygems/rubygems/issues/3068
               sudo gem install ronn
               sudo apt-get update -y
               if [[ "x${{ matrix.target }}" = *check* ]] || [[ "x${{ matrix.target }}" = xvalgrind ]]; then
