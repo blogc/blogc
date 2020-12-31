@@ -1,0 +1,41 @@
+Source: blogc
+Section: text
+Priority: optional
+Maintainer: Rafael G. Martins <rafael@rafaelmartins.eng.br>
+Build-Depends: debhelper-compat (= 12),
+               git,
+               libcmocka-dev,
+               pkg-config
+Standards-Version: 4.5.1
+Homepage: https://blogc.rgm.io/
+Vcs-Browser: https://gio.rgm.io/debian/blogc
+Vcs-Git: https://git.rgm.io/git/debian/blogc.git
+Rules-Requires-Root: no
+
+Package: blogc
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Blog compiler
+ Main binary
+
+Package: blogc-git-receiver
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+         git,
+         make
+Description: Blog compiler
+ blogc-git-receiver binary
+
+Package: blogc-make
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+         blogc,
+         blogc-runserver
+Description: Blog compiler
+ blogc-make binary
+
+Package: blogc-runserver
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Blog compiler
+ blogc-runserver binary

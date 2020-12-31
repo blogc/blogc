@@ -28,6 +28,9 @@ jobs:
           - target: dist-srpm
             compiler: gcc
             image: ubuntu-20.04
+          - target: debian
+            compiler: gcc
+            image: ubuntu-20.04
           - target: static
             compiler: gcc
             image: ubuntu-20.04
@@ -50,7 +53,7 @@ jobs:
           if [[ "x${{ matrix.image }}" = xubuntu-* ]]; then
               sudo gem install ronn
               sudo apt-get update -y
-              if [[ "x${{ matrix.target }}" = *check* ]] || [[ "x${{ matrix.target }}" = xvalgrind ]]; then
+              if [[ "x${{ matrix.target }}" = *check* ]] || [[ "x${{ matrix.target }}" = xvalgrind ]] || [[ "x${{ matrix.target }}" = xdebian ]]; then
                   sudo apt-get install -y libcmocka-dev
               fi
               if [[ "x${{ matrix.target }}" = xvalgrind ]]; then
@@ -64,6 +67,9 @@ jobs:
               fi
               if [[ "x${{ matrix.target }}" = xwin64 ]]; then
                   sudo apt-get install -y gcc-mingw-w64-x86-64
+              fi
+              if [[ "x${{ matrix.target }}" = xdebian ]]; then
+                  sudo apt-get install -y cowbuilder debhelper pbuilder reprepro
               fi
           elif [[ "x${{ matrix.image }}" = xmacos-* ]]; then
               gem install ronn

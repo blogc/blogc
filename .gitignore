@@ -38,6 +38,19 @@ Makefile.in
 !/build-aux/git-version-gen
 !/build-aux/valgrind.sh
 
+# debian
+debian/.debhelper
+debian/autoreconf.*
+debian/*.log
+debian/*.substvars
+debian/debhelper-build-stamp
+debian/files
+debian/blogc/
+debian/blogc-git-receiver/
+debian/blogc-make/
+debian/blogc-runserver/
+debian/tmp/
+
 # installed .m4 files
 /m4/*.m4
 !/m4/ax_pthread.m4
