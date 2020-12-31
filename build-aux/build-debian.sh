@@ -29,7 +29,7 @@ create_reprepro_conf() {
         echo "Label: blogc-snapshot"
         echo "Codename: ${dist}"
         echo "Architectures: amd64"
-        echo "Components: ${dist}"
+        echo "Components: main"
         echo "Description: Apt repository containing blogc snapshots"
         echo
     done
@@ -39,8 +39,7 @@ download_pbuilder_chroots
 
 ${MAKE_CMD:-make} dist-xz
 
-MY_PV="$(echo ${PV} | sed -e 's/-dirty//g' -e 's/-/./g')"
-MY_P="${PN}_${MY_PV}"
+MY_P="${PN}_${PV}"
 
 mv ${P}.tar.xz "../${MY_P}.orig.tar.xz"
 
@@ -53,13 +52,35 @@ for dir in /tmp/pbuilder/*/base.cow; do
     tar -xf "../${MY_P}.orig.tar.xz" -C ..
     cp -r ../debian "../${P}/"
 
+    REV=
+    case ${DIST} in
+        buster)
+            REV="1~10buster"
+            ;;
+        bullseye)
+            REV="1~11bullseye"
+            ;;
+        sid)
+            REV="1~sid"
+            ;;
+        focal)
+            REV="1~11.0focal"
+            ;;
+        groovy)
+            REV="1~11.1groovy"
+            ;;
+        *)
+            echo "error: unsupported dist: ${DIST}"
+            ;;
+    esac
+
     pushd "../${P}" > /dev/null
 
     # do not mess with changelog for releases, it should be done manually during version bump
     if [[ ${PV} == *-* ]]; then
         dch \
             --distribution "${DIST}" \
-            --newversion "${MY_PV}-1" \
+            --newversion "${PV}-${REV}" \
             "snapshot"
     fi
 
@@ -92,3 +113,7 @@ tar \
     --exclude ./deb-repo/conf \
     --exclude ./deb-repo/db \
     ./deb-repo
+
+tar \
+    -cJf "blogc-deb-${PV}.tar.xz" \
+    ./deb
