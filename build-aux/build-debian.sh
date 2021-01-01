@@ -1,26 +1,29 @@
 #!/bin/bash
 
-set -eo pipefail
+set -exo pipefail
 
-export DEBEMAIL="noreply@rafaelmartins.eng.br"
-export DEBFULLNAME="Snapshot github-actions"
+export DEBEMAIL="rafael+deb@rafaelmartins.eng.br"
+export DEBFULLNAME="Automatic Builder (github-actions)"
+export DEB_BUILD_OPTIONS="noddebs"
 
 download_pbuilder_chroots() {
     local arch="amd64"
     local os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 
-    local index="$(curl --silent https://distfiles.rgm.io/pbuilder-chroots/LATEST/)"
+    local index="$(wget -q -O- https://distfiles.rgm.io/pbuilder-chroots/LATEST/)"
     local archive="$(echo "${index}" | sed -n "s/.*\(pbuilder-chroots-${os}-${arch}-.*\)\.sha512.*/\1/p")"
     local folder="$(echo "${index}" | sed -n "s/.*\(pbuilder-chroots-${os}-${arch}-.*\)\.tar.*\.sha512.*/\1/p")"
     local p="$(echo "${folder}" | sed "s/pbuilder-chroots-${os}-${arch}-\(.*\)/pbuilder-chroots-\1/")"
 
-    curl --fail --output "${archive}" "https://distfiles.rgm.io/pbuilder-chroots/${p}/${archive}"
-    curl --fail --output "${archive}.sha512" "https://distfiles.rgm.io/pbuilder-chroots/${p}/${archive}.sha512"
+    pushd "${SRCDIR}" > /dev/null
 
+    wget -c "https://distfiles.rgm.io/pbuilder-chroots/${p}/${archive}"{,.sha512}
     sha512sum --check --status "${archive}.sha512"
 
     sudo rm -rf /tmp/pbuilder
-    fakeroot tar -xf "${archive}" -C /tmp
+    fakeroot tar --checkpoint=.1000 -xf "${archive}" -C /tmp
+
+    popd > /dev/null
 }
 
 create_reprepro_conf() {
@@ -28,7 +31,7 @@ create_reprepro_conf() {
         echo "Origin: blogc-snapshot"
         echo "Label: blogc-snapshot"
         echo "Codename: ${dist}"
-        echo "Architectures: amd64"
+        echo "Architectures: source amd64"
         echo "Components: main"
         echo "Description: Apt repository containing blogc snapshots"
         echo
@@ -41,16 +44,16 @@ ${MAKE_CMD:-make} dist-xz
 
 MY_P="${PN}_${PV}"
 
-mv ${P}.tar.xz "../${MY_P}.orig.tar.xz"
+mv ${P}.tar.xz "${BUILDDIR}/${MY_P}.orig.tar.xz"
 
 for dir in /tmp/pbuilder/*/base.cow; do
     export DIST="$(basename "$(dirname "${dir}")" | cut -d- -f1)"
     RES="${BUILDDIR}/deb/${DIST}"
     mkdir -p "${RES}"
 
-    rm -rf "../${P}"
-    tar -xf "../${MY_P}.orig.tar.xz" -C ..
-    cp -r ../debian "../${P}/"
+    rm -rf "${BUILDDIR}/${P}"
+    tar -xf "${BUILDDIR}/${MY_P}.orig.tar.xz" -C "${BUILDDIR}"
+    cp -r "${SRCDIR}/debian" "${BUILDDIR}/${P}/"
 
     REV=
     case ${DIST} in
@@ -71,18 +74,16 @@ for dir in /tmp/pbuilder/*/base.cow; do
             ;;
         *)
             echo "error: unsupported dist: ${DIST}"
+            exit 1
             ;;
     esac
 
-    pushd "../${P}" > /dev/null
+    pushd "${BUILDDIR}/${P}" > /dev/null
 
-    # do not mess with changelog for releases, it should be done manually during version bump
-    if [[ ${PV} == *-* ]]; then
-        dch \
-            --distribution "${DIST}" \
-            --newversion "${PV}-${REV}" \
-            "snapshot"
-    fi
+    dch \
+        --distribution "${DIST}" \
+        --newversion "${PV}-${REV}" \
+        "Automated build for ${DIST}"
 
     pdebuild \
         --pbuilder cowbuilder \
@@ -101,9 +102,7 @@ create_reprepro_conf ${DISTS} > "${BUILDDIR}/deb-repo/conf/distributions"
 pushd "${BUILDDIR}/deb-repo" > /dev/null
 
 for dist in ${DISTS}; do
-    for deb in "../deb/${dist}"/*.deb; do
-        reprepro includedeb "${dist}" "${deb}"
-    done
+    reprepro include "${dist}" "../deb/${dist}"/*.changes
 done
 
 popd > /dev/null

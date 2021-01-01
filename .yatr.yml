@@ -67,4 +67,4 @@ targets:
     task_script: build-aux/build-windows.sh
   debian:
     task_script: build-aux/build-debian.sh
-    archive_extract_filter: "blogc-deb-repo-*.tar.xz"
+    archive_extract_filter: "blogc-deb-*.tar.xz"
