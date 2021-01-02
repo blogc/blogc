@@ -89,6 +89,7 @@ mkdir -p "${RES}"
 pdebuild \
     --pbuilder cowbuilder \
     --buildresult "${RES}" \
+    --debbuildopts -sa \
     -- --basepath "/tmp/pbuilder/${DIST}-${ARCH}/base.cow"
 
 popd > /dev/null
