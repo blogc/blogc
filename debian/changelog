@@ -1,5 +1,5 @@
-blogc (0.20.1-1~0upstream) unstable; urgency=medium
+blogc (0.20.0-1) unstable; urgency=medium
 
-  * Upstream Release
+  * Initial release
 
- -- Rafael G. Martins <rafael@rafaelmartins.eng.br>  Sat, 02 Jan 2021 19:38:56 +0100
+ -- Rafael G. Martins <rafael@rafaelmartins.eng.br>  Fri, 25 Dec 2020 05:48:28 +0100
