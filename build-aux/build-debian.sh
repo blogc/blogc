@@ -28,8 +28,8 @@ download_pbuilder_chroots() {
 
 create_reprepro_conf() {
     for dist in "$@"; do
-        echo "Origin: blogc-snapshot"
-        echo "Label: blogc-snapshot"
+        echo "Origin: blogc"
+        echo "Label: blogc"
         echo "Codename: ${dist}"
         echo "Architectures: source amd64"
         echo "Components: main"

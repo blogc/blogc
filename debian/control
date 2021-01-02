@@ -8,8 +8,8 @@ Build-Depends: debhelper-compat (= 12),
                pkg-config
 Standards-Version: 4.5.1
 Homepage: https://blogc.rgm.io/
-Vcs-Browser: https://gio.rgm.io/debian/blogc
-Vcs-Git: https://git.rgm.io/git/debian/blogc.git
+Vcs-Browser: https://github.com/blogc/blogc
+Vcs-Git: https://github.com/blogc/blogc.git
 Rules-Requires-Root: no
 
 Package: blogc
@@ -24,7 +24,7 @@ Depends: ${shlibs:Depends}, ${misc:Depends},
          git,
          make
 Description: Blog compiler
- blogc-git-receiver binary
+ Simple login shell/git hook to deploy blogc websites
 
 Package: blogc-make
 Architecture: any
@@ -32,10 +32,10 @@ Depends: ${shlibs:Depends}, ${misc:Depends},
          blogc,
          blogc-runserver
 Description: Blog compiler
- blogc-make binary
+ Simple build tool for blogc
 
 Package: blogc-runserver
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Blog compiler
- blogc-runserver binary
+ Simple HTTP server to test blogc websites
