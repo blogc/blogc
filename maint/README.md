@@ -41,7 +41,14 @@ These are some rough steps required to produce a blogc release.
 - Make sure that all the code is in place.
 - Edit `blogc.spec.in`. Check if dependencies and packaging are still correct.
   - If something needs update, do it. Then commit, push and wait for [CI](https://github.com/blogc/blogc/actions). After successful build, grab a `.src.rpm` from https://distfiles.rgm.io/blogc/LATEST/, upload to a test [Copr](https://copr.fedorainfracloud.org/), wait until it builds and follow also next step.
-  - If everything is ok, add a changelog line to the top of the `%changelog` section. Then commit, push and wait for [CI](https://github.com/blogc/blogc/actions).
+  - If everything is ok, add a changelog line to the top of the `%changelog` section.
+- Update debian version:
+  - If something needs update, do it. Then commit, push and wait for [CI](https://github.com/blogc/blogc/actions).
+  - Run `dch`:
+    ```
+    $ dch --distribution unstable --newversion 0.19.0-1~0upstream "Upstream Release"
+    ```
+- Commit, push and wait for [CI](https://github.com/blogc/blogc/actions).
 - Create signed tag:
   ```
   $ git tag -s -m 'blogc-0.19.0' v0.19.0  # replace with whatever version you defined before
@@ -61,7 +68,7 @@ These are some rough steps required to produce a blogc release.
   $ ./download_release.py
   ```
   This requires my (rafaelmartins) personal GPG key to sign files. If someone else needs to publish a release, please edit the script to add new GPG key and announce it in the blog post and GitHub release.
-- Grab files from `releases/0.19.0` (replace version) and upload to GitHub release draft, including `.asc` files. The `.src.rpm` files can be omited.
+- Grab files from `releases/0.19.0` (replace version) and upload to GitHub release draft, including `.asc` files. The `.src.rpm` and tarballs with debs can be omited.
 - Publish release on GitHub.
 - Fix blog post DATE, commit and push.
 
@@ -80,8 +87,6 @@ These are some rough steps required to produce a blogc release.
     $ ./scripts/run-docker.sh ./build-package.sh blogc
     ```
   - If everything builds fine, commit and create pull request.
-- Bump [Gentoo package](https://packages.gentoo.org/packages/app-text/blogc). Usually just moving the ebuild and commiting is enough. rafaelmartins can push directly, someone else could need to submit patch or open pull request.
-
 
 ## Celebrate
 
