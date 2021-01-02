@@ -28,7 +28,19 @@ jobs:
           - target: dist-srpm
             compiler: gcc
             image: ubuntu-20.04
-          - target: debian
+          - target: deb-buster-amd64
+            compiler: gcc
+            image: ubuntu-20.04
+          - target: deb-bullseye-amd64
+            compiler: gcc
+            image: ubuntu-20.04
+          - target: deb-sid-amd64
+            compiler: gcc
+            image: ubuntu-20.04
+          - target: deb-focal-amd64
+            compiler: gcc
+            image: ubuntu-20.04
+          - target: deb-groovy-amd64
             compiler: gcc
             image: ubuntu-20.04
           - target: static
@@ -53,7 +65,7 @@ jobs:
           if [[ "x${{ matrix.image }}" = xubuntu-* ]]; then
               sudo gem install ronn
               sudo apt-get update -y
-              if [[ "x${{ matrix.target }}" = *check* ]] || [[ "x${{ matrix.target }}" = xvalgrind ]] || [[ "x${{ matrix.target }}" = xdebian ]]; then
+              if [[ "x${{ matrix.target }}" = *check* ]] || [[ "x${{ matrix.target }}" = xvalgrind ]] || [[ "x${{ matrix.target }}" = xdeb-* ]]; then
                   sudo apt-get install -y libcmocka-dev
               fi
               if [[ "x${{ matrix.target }}" = xvalgrind ]]; then
@@ -68,7 +80,7 @@ jobs:
               if [[ "x${{ matrix.target }}" = xwin64 ]]; then
                   sudo apt-get install -y gcc-mingw-w64-x86-64
               fi
-              if [[ "x${{ matrix.target }}" = xdebian ]]; then
+              if [[ "x${{ matrix.target }}" = xdeb-* ]]; then
                   sudo apt-get install -y cowbuilder debhelper pbuilder reprepro
               fi
           elif [[ "x${{ matrix.image }}" = xmacos-* ]]; then
