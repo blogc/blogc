@@ -78,7 +78,7 @@ cp -r "${SRCDIR}/debian" "${BUILDDIR}/${P}/"
 pushd "${BUILDDIR}/${P}" > /dev/null
 
 ## skip build silently when new version is older than last changelog version (version bump)
-if !dch \
+if ! dch \
     --distribution "${DIST}" \
     --newversion "${PV}-${REV}" \
     "Automated build for ${DIST}"
