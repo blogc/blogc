@@ -60,16 +60,11 @@ create_reprepro_conf() {
     echo
 }
 
-download_pbuilder_chroot
-
 ${MAKE_CMD:-make} dist-xz
 
 MY_P="${PN}_${PV}"
 
 mv ${P}.tar.xz "${BUILDDIR}/${MY_P}.orig.tar.xz"
-
-RES="${BUILDDIR}/deb/${DIST}"
-mkdir -p "${RES}"
 
 rm -rf "${BUILDDIR}/${P}"
 tar -xf "${BUILDDIR}/${MY_P}.orig.tar.xz" -C "${BUILDDIR}"
@@ -85,6 +80,11 @@ if ! dch \
 then
     exit 0
 fi
+
+download_pbuilder_chroot
+
+RES="${BUILDDIR}/deb/${DIST}"
+mkdir -p "${RES}"
 
 pdebuild \
     --pbuilder cowbuilder \
