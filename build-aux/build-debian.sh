@@ -83,6 +83,10 @@ fi
 
 download_pbuilder_chroot
 
+sudo cowbuilder \
+    --update \
+    --basepath "/tmp/pbuilder/${DIST}-${ARCH}/base.cow"
+
 RES="${BUILDDIR}/deb/${DIST}"
 mkdir -p "${RES}"
 
@@ -99,7 +103,9 @@ create_reprepro_conf > "${BUILDDIR}/deb-repo/conf/distributions"
 
 pushd "${BUILDDIR}/deb-repo" > /dev/null
 
-reprepro include "${DIST}" "../deb/${DIST}"/*.changes
+for i in "../deb/${DIST}"/*.changes; do
+    reprepro include "${DIST}" "${i}"
+done
 
 popd > /dev/null
 
