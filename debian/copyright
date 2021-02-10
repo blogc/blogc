@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: blogc
 Upstream-Contact: Rafael G. Martins <rafael@rafaelmartins.eng.br>
-Source: https://git.rgm.io/blogc
+Source: https://github.com/blogc/blogc
 
 Files: *
 Copyright: 2014-2020, Rafael G. Martins <rafael@rafaelmartins.eng.br>
