@@ -18,6 +18,10 @@
 #include <time.h>
 #endif /* HAVE_TIME_H */
 
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,6 +41,12 @@ blogc_sysinfo_get_hostname(void)
     buf[1023] = '\0';
     if (-1 == gethostname(buf, 1024))
         return NULL;
+
+#ifdef HAVE_NETDB_H
+    struct hostent *h = gethostbyname(buf);
+    if (h != NULL && h->h_name != NULL)
+        return bc_strdup(h->h_name);
+#endif
 
     // FIXME: return FQDN instead of local host name
     return bc_strdup(buf);

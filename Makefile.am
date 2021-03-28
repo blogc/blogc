@@ -558,6 +558,12 @@ tests_blogc_check_sysinfo_LDFLAGS = \
 	-Wl,--wrap=getenv \
 	$(NULL)
 
+if HAVE_NETDB_H
+tests_blogc_check_sysinfo_LDFLAGS += \
+	-Wl,--wrap=gethostbyname \
+	$(NULL)
+endif
+
 if HAVE_UNISTD_H
 tests_blogc_check_sysinfo_LDFLAGS += \
 	-Wl,--wrap=gethostname \

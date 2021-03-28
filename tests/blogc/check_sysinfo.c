@@ -21,6 +21,23 @@
 #include <time.h>
 #endif
 
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+
+static struct hostent h = {
+    .h_name = "bola.example.com",
+};
+
+struct hostent*
+__wrap_gethostbyname(const char *name)
+{
+    if (0 == strcmp(name, "bola"))
+        return &h;
+    return NULL;
+}
+#endif
+
+
 #ifdef HAVE_SYSINFO_HOSTNAME
 int
 __wrap_gethostname(char *name, size_t len)
@@ -95,7 +112,14 @@ test_sysinfo_get_hostname(void **state)
     will_return(__wrap_gethostname, 0);
     f = blogc_sysinfo_get_hostname();
     assert_non_null(f);
-    assert_string_equal(f, "bola");
+    assert_string_equal(f, "bola.example.com");
+    free(f);
+
+    will_return(__wrap_gethostname, "guda");
+    will_return(__wrap_gethostname, 0);
+    f = blogc_sysinfo_get_hostname();
+    assert_non_null(f);
+    assert_string_equal(f, "guda");
     free(f);
 }
 
@@ -114,7 +138,15 @@ test_sysinfo_inject_hostname(void **state)
     will_return(__wrap_gethostname, 0);
     blogc_sysinfo_inject_hostname(t);
     assert_int_equal(bc_trie_size(t), 1);
-    assert_string_equal(bc_trie_lookup(t, "BLOGC_SYSINFO_HOSTNAME"), "bola");
+    assert_string_equal(bc_trie_lookup(t, "BLOGC_SYSINFO_HOSTNAME"), "bola.example.com");
+    bc_trie_free(t);
+
+    t = bc_trie_new(free);
+    will_return(__wrap_gethostname, "guda");
+    will_return(__wrap_gethostname, 0);
+    blogc_sysinfo_inject_hostname(t);
+    assert_int_equal(bc_trie_size(t), 1);
+    assert_string_equal(bc_trie_lookup(t, "BLOGC_SYSINFO_HOSTNAME"), "guda");
     bc_trie_free(t);
 }
 
