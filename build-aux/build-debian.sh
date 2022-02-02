@@ -12,11 +12,11 @@ ARCH="$(echo "${TARGET}" | cut -d- -f3)"
 
 REV=
 case ${DIST} in
-    buster)
-        REV="1~10buster"
-        ;;
     bullseye)
         REV="1~11bullseye"
+        ;;
+    bookworm)
+        REV="1~12bookworm"
         ;;
     sid)
         REV="1~sid"
@@ -24,8 +24,8 @@ case ${DIST} in
     focal)
         REV="1~11.0focal"
         ;;
-    groovy)
-        REV="1~11.1groovy"
+    impish)
+        REV="1~11.3impish"
         ;;
     *)
         echo "error: unsupported dist: ${DIST}"

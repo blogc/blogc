@@ -65,10 +65,10 @@ targets:
       - --disable-make
       - --disable-runserver
     task_script: build-aux/build-windows.sh
-  deb-buster-amd64:
+  deb-bullseye-amd64:
     task_script: build-aux/build-debian.sh
     archive_extract_filter: "blogc-deb-*.tar.xz"
-  deb-bullseye-amd64:
+  deb-bookworm-amd64:
     task_script: build-aux/build-debian.sh
     archive_extract_filter: "blogc-deb-*.tar.xz"
   deb-sid-amd64:
@@ -77,6 +77,6 @@ targets:
   deb-focal-amd64:
     task_script: build-aux/build-debian.sh
     archive_extract_filter: "blogc-deb-*.tar.xz"
-  deb-groovy-amd64:
+  deb-impish-amd64:
     task_script: build-aux/build-debian.sh
     archive_extract_filter: "blogc-deb-*.tar.xz"
