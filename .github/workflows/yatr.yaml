@@ -28,10 +28,10 @@ jobs:
           - target: dist-srpm
             compiler: gcc
             image: ubuntu-20.04
-          - target: deb-buster-amd64
+          - target: deb-bullseye-amd64
             compiler: gcc
             image: ubuntu-20.04
-          - target: deb-bullseye-amd64
+          - target: deb-bookworm-amd64
             compiler: gcc
             image: ubuntu-20.04
           - target: deb-sid-amd64
@@ -40,7 +40,7 @@ jobs:
           - target: deb-focal-amd64
             compiler: gcc
             image: ubuntu-20.04
-          - target: deb-groovy-amd64
+          - target: deb-impish-amd64
             compiler: gcc
             image: ubuntu-20.04
           - target: static
