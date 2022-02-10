@@ -29,7 +29,7 @@ EOF
 cd "${TEMP}/repos/foo.git"
 
 SHELL="${SELF}" HOME="${TEMP}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
-grep "warning: no reference to master branch found. nothing to deploy." "${TEMP}/output.txt" &> /dev/null
+grep "warning: no suitable branch found. nothing to deploy." "${TEMP}/output.txt" &> /dev/null
 
 cat > "${TEMP}/tmp.txt" <<EOF
 blob
@@ -55,7 +55,7 @@ git fast-import < "${TEMP}/tmp.txt" &> /dev/null
 cat > "${TEMP}/payload.txt" <<EOF
 0000000000000000000000000000000000000000 0000000000000000000000000000000000000000 refs/heads/foo
 0000000000000000000000000000000000000000 $(git rev-parse master) refs/heads/master
-0000000000000000000000000000000000000000 0000000000000000000000000000000000000000 refs/heads/bar
+0000000000000000000000000000000000000000 0000000000000000000000000000000000000000 refs/heads/main
 EOF
 
 SHELL="${SELF}" HOME="${TEMP}" GIT_DIR=. ${TESTS_ENVIRONMENT} ./hooks/pre-receive < "${TEMP}/payload.txt" 2>&1 | tee "${TEMP}/output.txt"
@@ -73,8 +73,8 @@ all:
 	mkdir -p \$(OUTPUT_DIR)
 	echo lol > \$(OUTPUT_DIR)/foo.txt
 
-reset refs/heads/master
-commit refs/heads/master
+reset refs/heads/main
+commit refs/heads/main
 mark :2
 author Rafael G. Martins <rafael@rafaelmartins.eng.br> 1476139736 +0200
 committer Rafael G. Martins <rafael@rafaelmartins.eng.br> 1476139736 +0200
@@ -89,7 +89,7 @@ git fast-import < "${TEMP}/tmp.txt" &> /dev/null
 
 cat > "${TEMP}/payload.txt" <<EOF
 0000000000000000000000000000000000000000 0000000000000000000000000000000000000000 refs/heads/foo
-0000000000000000000000000000000000000000 $(git rev-parse master) refs/heads/master
+0000000000000000000000000000000000000000 $(git rev-parse main) refs/heads/main
 0000000000000000000000000000000000000000 0000000000000000000000000000000000000000 refs/heads/bar
 EOF
 

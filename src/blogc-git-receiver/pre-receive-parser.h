@@ -10,7 +10,8 @@
 #define _PRE_RECEIVE_PARSER_H
 
 #include <stddef.h>
+#include "../common/utils.h"
 
-char* bgr_pre_receive_parse(const char *input, size_t input_len);
+bc_trie_t* bgr_pre_receive_parse(const char *input, size_t input_len);
 
 #endif /* _PRE_RECEIVE_PARSER_H */

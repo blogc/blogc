@@ -22,12 +22,14 @@ typedef enum {
 } input_state_t;
 
 
-char*
+bc_trie_t*
 bgr_pre_receive_parse(const char *input, size_t input_len)
 {
     input_state_t state = START_OLD;
     size_t start = 0;
     size_t start_new = 0;
+
+    bc_trie_t* rv = bc_trie_new(free);
 
     for (size_t current = 0; current < input_len; current++) {
 
@@ -62,16 +64,19 @@ bgr_pre_receive_parse(const char *input, size_t input_len)
                 if (c != '\n')
                     break;
                 state = START_OLD;
-                // we just care about a ref (refs/heads/master), everything
-                // else is disposable :)
-                if ((current - start == 17) &&
-                    (0 == strncmp("refs/heads/master", input + start, 17)))
-                {
-                    return bc_strndup(input + start_new, start - 1 - start_new);
+                if (current - start > 11) {
+                    char *key = bc_strndup(input + start + 11, current - start - 11);
+                    bc_trie_insert(rv, key, bc_strndup(input + start_new, start - 1 - start_new));
+                    free(key);
                 }
                 break;
         }
     }
 
-    return NULL;
+    if (bc_trie_size(rv) == 0) {
+        bc_trie_free(rv);
+        return NULL;
+    }
+
+    return rv;
 }

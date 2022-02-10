@@ -93,7 +93,7 @@ int
 bgr_pre_receive_hook(int argc, char *argv[])
 {
     int rv = 0;
-    char *master = NULL;
+    char *ref = NULL;
     char *output_dir = NULL;
     char *tmpdir = NULL;
     char *sym = NULL;
@@ -166,18 +166,27 @@ default_sym:
             rv = 1;
             goto cleanup;
         }
-        master = bc_strdup(pieces[0]);
+        ref = bc_strdup(pieces[0]);
         bc_strv_free(pieces);
     }
     else {
         size_t input_len;
         char *input = bc_stdin_read(&input_len);
-        master = bgr_pre_receive_parse(input, input_len);
+        bc_trie_t *branches = bgr_pre_receive_parse(input, input_len);
+
+        // try 'master' by default to avoid breaking existing setups
+        ref = bc_strdup(bc_trie_lookup(branches, "master"));
+        if (ref == NULL) {
+            // try 'main'
+            ref = bc_strdup(bc_trie_lookup(branches, "main"));
+        }
+
+        bc_trie_free(branches);
         free(input);
     }
 
-    if (master == NULL) {
-        fprintf(stderr, "warning: no reference to master branch found. "
+    if (ref == NULL) {
+        fprintf(stderr, "warning: no suitable branch found. "
             "nothing to deploy.\n");
         goto cleanup;
     }
@@ -190,7 +199,7 @@ default_sym:
     tmpdir = dir;
 
     char *git_archive_cmd = bc_strdup_printf(
-        "git archive \"%s\" | tar -x -C \"%s\" -f -", master, tmpdir);
+        "git archive \"%s\" | tar -x -C \"%s\" -f -", ref, tmpdir);
     if (0 != system(git_archive_cmd)) {
         fprintf(stderr, "error: failed to extract git content to temporary "
             "directory: %s\n", tmpdir);
@@ -215,7 +224,7 @@ default_sym:
     }
 
     unsigned long epoch = time(NULL);
-    output_dir = bc_strdup_printf("%s/%s-%lu", buildsd, master, epoch);
+    output_dir = bc_strdup_printf("%s/%s-%lu", buildsd, ref, epoch);
     free(buildsd);
 
     if (0 == access(output_dir, F_OK)) {
@@ -301,7 +310,7 @@ cleanup2:
 
 cleanup:
     free(sym);
-    free(master);
+    free(ref);
     free(output_dir);
     rmdir_recursive(tmpdir);
     free(repo_dir);
