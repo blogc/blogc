@@ -43,6 +43,10 @@ test_pre_receive_parse(void **state)
         "4f1f932f6ef6d6c9770266775c2db072964d7a62 "
         "3fff4bb3172f77b292b0c913749e81bedd3545f3 "
         "refs/heads/master"));
+    assert_null(_bgr_pre_receive_parse(
+        "4f1f932f6ef6d6c9770266775c2db072964d7a62 "
+        "3fff4bb3172f77b292b0c913749e81bedd3545f3 "
+        "adgfdgdfgfdgdfgdfgdfgdfgdfg\n"));
 
     bc_trie_t *t;
     t = _bgr_pre_receive_parse(

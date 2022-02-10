@@ -64,7 +64,9 @@ bgr_pre_receive_parse(const char *input, size_t input_len)
                 if (c != '\n')
                     break;
                 state = START_OLD;
-                if (current - start > 11) {
+                if ((current - start > 11) &&
+                    (0 == strncmp("refs/heads/", input + start, 11)))
+                {
                     char *key = bc_strndup(input + start + 11, current - start - 11);
                     bc_trie_insert(rv, key, bc_strndup(input + start_new, start - 1 - start_new));
                     free(key);
