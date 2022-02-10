@@ -26,6 +26,7 @@ Makefile.in
 *.lo
 /aclocal.m4
 /configure
+/configure~
 /config.*
 /autom4te.cache
 /libtool
