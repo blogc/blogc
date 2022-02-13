@@ -50,6 +50,36 @@ download_pbuilder_chroot() {
     popd > /dev/null
 }
 
+download_orig() {
+    local i=0
+    local out=0
+    local url="https://distfiles.rgm.io/${PN}/${P}/${P}.tar.xz"
+
+    while [[ $i -lt 20 ]]; do
+        set +ex
+        ((i++))
+        echo "waiting for ${P}.tar.xz: $i/20"
+        wget -q --spider --tries 1 "${url}"
+        out=$?
+        set -ex
+
+        if [[ $out -eq 0 ]]; then
+            wget -c "${url}"
+            mv "${P}.tar.xz" "${BUILDDIR}/${MY_P}.orig.tar.xz"
+            return
+        fi
+
+        if [[ $out -ne 8 ]]; then
+            exit $out
+        fi
+
+        sleep 30
+    done
+
+    echo "failed to find orig distfile. please check if that task succeeded."
+    exit 1
+}
+
 create_reprepro_conf() {
     echo "Origin: blogc"
     echo "Label: blogc"
@@ -60,11 +90,7 @@ create_reprepro_conf() {
     echo
 }
 
-${MAKE_CMD:-make} dist-xz
-
-MY_P="${PN}_${PV}"
-
-mv ${P}.tar.xz "${BUILDDIR}/${MY_P}.orig.tar.xz"
+download_orig
 
 rm -rf "${BUILDDIR}/${P}"
 tar -xf "${BUILDDIR}/${MY_P}.orig.tar.xz" -C "${BUILDDIR}"
