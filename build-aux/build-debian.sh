@@ -8,6 +8,7 @@ export DEB_BUILD_OPTIONS="noddebs"
 
 export DIST="$(echo "${TARGET}" | cut -d- -f2)"
 
+MY_P="${PN}_${PV}"
 ARCH="$(echo "${TARGET}" | cut -d- -f3)"
 
 REV=
