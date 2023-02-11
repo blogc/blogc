@@ -119,9 +119,24 @@ bm_settings_parse(const char *content, size_t content_len, bc_error_t **err)
     if (global != NULL) {
         for (size_t i = 0; global[i] != NULL; i++) {
             for (size_t j = 0; global[i][j] != '\0'; j++) {
-                if (!((global[i][j] >= 'A' && global[i][j] <= 'Z') || global[i][j] == '_')) {
+                if (j == 0) {
+                    if (!(global[i][j] >= 'A' && global[i][j] <= 'Z')) {
+                        *err = bc_error_new_printf(BLOGC_MAKE_ERROR_SETTINGS,
+                            "Invalid [%s] key (first character must be uppercase): %s",
+                            section, global[i]);
+                        bc_strv_free(global);
+                        bm_settings_free(rv);
+                        rv = NULL;
+                        goto cleanup;
+                    }
+                    continue;
+                }
+                if (!((global[i][j] >= 'A' && global[i][j] <= 'Z') ||
+                      (global[i][j] >= '0' && global[i][j] <= '9') ||
+                       global[i][j] == '_')) {
                     *err = bc_error_new_printf(BLOGC_MAKE_ERROR_SETTINGS,
-                        "Invalid [%s] key: %s", section, global[i]);
+                        "Invalid [%s] key (must be uppercase with '_' and digits after first character): %s",
+                        section, global[i]);
                     bc_strv_free(global);
                     bm_settings_free(rv);
                     rv = NULL;

@@ -53,6 +53,40 @@ test_settings(void **state)
     assert_string_equal(err->msg,
         "[global] key required but not found or empty: AUTHOR_NAME");
     bc_error_free(err);
+
+    a =
+        "[settings]\n"
+        "content_dir = guda\n"
+        "main_template = foo.tmpl\n"
+        "\n"
+        "[global]\n"
+        "bOLA = asd\n"
+        "GUDA = qwe\n";
+    err = NULL;
+    s = bm_settings_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(s);
+    assert_int_equal(err->type, BLOGC_MAKE_ERROR_SETTINGS);
+    assert_string_equal(err->msg,
+        "Invalid [global] key (first character must be uppercase): bOLA");
+    bc_error_free(err);
+
+    a =
+        "[settings]\n"
+        "content_dir = guda\n"
+        "main_template = foo.tmpl\n"
+        "\n"
+        "[global]\n"
+        "BOLA = asd\n"
+        "GUDa = qwe\n";
+    err = NULL;
+    s = bm_settings_parse(a, strlen(a), &err);
+    assert_non_null(err);
+    assert_null(s);
+    assert_int_equal(err->type, BLOGC_MAKE_ERROR_SETTINGS);
+    assert_string_equal(err->msg,
+        "Invalid [global] key (must be uppercase with '_' and digits after first character): GUDa");
+    bc_error_free(err);
 }
 
 
