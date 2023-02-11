@@ -1253,23 +1253,23 @@ test_format_variable(void **state)
     bc_trie_insert(l, "NAME", bc_strdup("chunda"));
     bc_trie_insert(l, "TITLE", bc_strdup("chunda2"));
     bc_trie_insert(l, "SIZE", bc_strdup("1234567890987654321"));
-    char *tmp = blogc_format_variable("NAME", g, l, NULL);
+    char *tmp = blogc_format_variable("NAME", g, l, NULL, NULL);
     assert_string_equal(tmp, "chunda");
     free(tmp);
-    tmp = blogc_format_variable("TITLE", g, l, NULL);
+    tmp = blogc_format_variable("TITLE", g, l, NULL, NULL);
     assert_string_equal(tmp, "chunda2");
     free(tmp);
-    tmp = blogc_format_variable("TITLE_2", g, l, NULL);
+    tmp = blogc_format_variable("TITLE_2", g, l, NULL, NULL);
     assert_string_equal(tmp, "ch");
     free(tmp);
-    tmp = blogc_format_variable("SIZE_12", g, l, NULL);
+    tmp = blogc_format_variable("SIZE_12", g, l, NULL, NULL);
     assert_string_equal(tmp, "123456789098");
     free(tmp);
-    tmp = blogc_format_variable("SIZE_200", g, l, NULL);
+    tmp = blogc_format_variable("SIZE_200", g, l, NULL, NULL);
     assert_string_equal(tmp, "1234567890987654321");
     free(tmp);
-    assert_null(blogc_format_variable("SIZE_", g, l, NULL));
-    assert_null(blogc_format_variable("BOLA", g, l, NULL));
+    assert_null(blogc_format_variable("SIZE_", g, l, NULL, NULL));
+    assert_null(blogc_format_variable("BOLA", g, l, NULL, NULL));
     bc_trie_free(g);
     bc_trie_free(l);
 }
@@ -1283,13 +1283,13 @@ test_format_variable_with_date(void **state)
     bc_trie_insert(g, "DATE_FORMAT", bc_strdup("%R"));
     bc_trie_t *l = bc_trie_new(free);
     bc_trie_insert(l, "DATE", bc_strdup("2011-12-13 14:15:16"));
-    char *tmp = blogc_format_variable("DATE_FORMATTED", g, l, NULL);
+    char *tmp = blogc_format_variable("DATE_FORMATTED", g, l, NULL, NULL);
     assert_string_equal(tmp, "14:15");
     free(tmp);
-    tmp = blogc_format_variable("DATE_FORMATTED_3", g, l, NULL);
+    tmp = blogc_format_variable("DATE_FORMATTED_3", g, l, NULL, NULL);
     assert_string_equal(tmp, "14:");
     free(tmp);
-    tmp = blogc_format_variable("DATE_FORMATTED_10", g, l, NULL);
+    tmp = blogc_format_variable("DATE_FORMATTED_10", g, l, NULL, NULL);
     assert_string_equal(tmp, "14:15");
     free(tmp);
     bc_trie_free(g);
@@ -1304,15 +1304,13 @@ test_format_variable_foreach(void **state)
     l = bc_slist_append(l, bc_strdup("asd"));
     l = bc_slist_append(l, bc_strdup("qwe"));
     l = bc_slist_append(l, bc_strdup("zxcvbn"));
-    char *tmp = blogc_format_variable("FOREACH_ITEM", NULL, NULL, l->next);
+    char *tmp = blogc_format_variable("FOREACH_ITEM", NULL, NULL, NULL, l->next);
     assert_string_equal(tmp, "qwe");
     free(tmp);
-    tmp = blogc_format_variable("FOREACH_ITEM_4", NULL, NULL,
-        l->next->next);
+    tmp = blogc_format_variable("FOREACH_ITEM_4", NULL, NULL, NULL, l->next->next);
     assert_string_equal(tmp, "zxcv");
     free(tmp);
-    tmp = blogc_format_variable("FOREACH_ITEM_10", NULL, NULL,
-        l->next->next);
+    tmp = blogc_format_variable("FOREACH_ITEM_10", NULL, NULL, NULL, l->next->next);
     assert_string_equal(tmp, "zxcvbn");
     free(tmp);
     bc_slist_free_full(l, free);
@@ -1320,10 +1318,37 @@ test_format_variable_foreach(void **state)
 
 
 static void
+test_format_variable_foreach_value(void **state)
+{
+    bc_trie_t *gl = bc_trie_new(free);
+    bc_trie_insert(gl, "FOO_BAR__QWE", bc_strdup("bnm"));
+    bc_trie_t *loc = bc_trie_new(free);
+    bc_trie_insert(loc, "BAR__ZXCVBN", bc_strdup("dfg"));
+    bc_trie_insert(loc, "HUE__ZXCVBN", bc_strdup("xcv"));
+    bc_slist_t *l = NULL;
+    l = bc_slist_append(l, bc_strdup("asd"));
+    l = bc_slist_append(l, bc_strdup("qwe"));
+    l = bc_slist_append(l, bc_strdup("zxcvbn"));
+    char *tmp = blogc_format_variable("FOREACH_VALUE", gl, loc, "foo-bar", l->next);
+    assert_string_equal(tmp, "bnm");
+    free(tmp);
+    tmp = blogc_format_variable("FOREACH_VALUE_2", gl, loc, "bar", l->next->next);
+    assert_string_equal(tmp, "df");
+    free(tmp);
+    tmp = blogc_format_variable("FOREACH_VALUE_4", gl, loc, "hue", l->next->next);
+    assert_string_equal(tmp, "xcv");
+    free(tmp);
+    bc_trie_free(gl);
+    bc_trie_free(loc);
+    bc_slist_free_full(l, free);
+}
+
+
+static void
 test_format_variable_foreach_empty(void **state)
 {
-    assert_null(blogc_format_variable("FOREACH_ITEM", NULL, NULL, NULL));
-    assert_null(blogc_format_variable("FOREACH_ITEM_4", NULL, NULL, NULL));
+    assert_null(blogc_format_variable("FOREACH_ITEM", NULL, NULL, NULL, NULL));
+    assert_null(blogc_format_variable("FOREACH_ITEM_4", NULL, NULL, NULL, NULL));
 }
 
 
@@ -1401,6 +1426,7 @@ main(void)
         cmocka_unit_test(test_format_variable),
         cmocka_unit_test(test_format_variable_with_date),
         cmocka_unit_test(test_format_variable_foreach),
+        cmocka_unit_test(test_format_variable_foreach_value),
         cmocka_unit_test(test_format_variable_foreach_empty),
         cmocka_unit_test(test_split_list_variable),
         cmocka_unit_test(test_split_list_variable_not_found),

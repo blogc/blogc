@@ -54,19 +54,54 @@ blogc_format_date(const char *date, bc_trie_t *global, bc_trie_t *local)
 }
 
 
+static char*
+foreach_value_variable(const char *name, const char *item)
+{
+    if (name == NULL || item == NULL)
+        return NULL;
+
+    char *rv = bc_strdup_printf("%s__%s", name, item);
+    int diff = 'a' - 'A';  // just to avoid magic numbers
+    for (size_t i = 0; rv[i] != '\0'; i++) {
+        if ((rv[i] >= '0' && rv[i] <= '9') ||
+            (rv[i] >= 'A' && rv[i] <= 'Z')) {
+            continue;
+        }
+        if (rv[i] >= 'a' && rv[i] <= 'z') {
+            rv[i] -= diff;
+            continue;
+        }
+        rv[i] = '_';
+    }
+
+    return rv;
+}
+
+
 char*
 blogc_format_variable(const char *name, bc_trie_t *global, bc_trie_t *local,
-    bc_slist_t *foreach_var)
+    const char *foreach_name, bc_slist_t *foreach_var)
 {
     // if used asked for a variable that exists, just return it right away
     const char *value = blogc_get_variable(name, global, local);
     if (value != NULL)
         return bc_strdup(value);
 
-    // do the same for special variable 'FOREACH_ITEM'
+    // do the same for special foreach variables
     if (0 == strcmp(name, "FOREACH_ITEM")) {
         if (foreach_var != NULL && foreach_var->data != NULL) {
             return bc_strdup(foreach_var->data);
+        }
+        return NULL;
+    }
+    if (0 == strcmp(name, "FOREACH_VALUE")) {
+        if (foreach_name != NULL && foreach_var != NULL && foreach_var->data != NULL) {
+            char *value_var = foreach_value_variable(foreach_name, foreach_var->data);
+            if (value_var != NULL) {
+                value = blogc_get_variable(value_var, global, local);
+                free(value_var);
+                return bc_strdup(value);
+            }
         }
         return NULL;
     }
@@ -104,6 +139,14 @@ blogc_format_variable(const char *name, bc_trie_t *global, bc_trie_t *local,
     if ((0 == strcmp(var, "FOREACH_ITEM")) &&
         (foreach_var != NULL && foreach_var->data != NULL)) {
         value = foreach_var->data;
+    }
+    else if ((0 == strcmp(var, "FOREACH_VALUE")) &&
+        (foreach_name != NULL && foreach_var != NULL && foreach_var->data != NULL)) {
+        char *value_var = foreach_value_variable(foreach_name, foreach_var->data);
+        if (value_var != NULL) {
+            value = blogc_get_variable(value_var, global, local);
+            free(value_var);
+        }
     }
     else {
         blogc_funcvars_eval(global, var);
@@ -183,6 +226,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_slist_t *listing_entries,
 
     size_t if_count = 0;
 
+    char *foreach_name = NULL;
     bc_slist_t *foreach_var = NULL;
     bc_slist_t *foreach_var_start = NULL;
     bc_slist_t *foreach_start = NULL;
@@ -289,7 +333,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_slist_t *listing_entries,
             case BLOGC_TEMPLATE_NODE_VARIABLE:
                 if (node->data[0] != NULL) {
                     config_value = blogc_format_variable(node->data[0],
-                        config, inside_block ? tmp_source : NULL, foreach_var);
+                        config, inside_block ? tmp_source : NULL, foreach_name, foreach_var);
                     if (config_value != NULL) {
                         bc_string_append(str, config_value);
                         free(config_value);
@@ -321,7 +365,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_slist_t *listing_entries,
                 defined = NULL;
                 if (node->data[0] != NULL)
                     defined = blogc_format_variable(node->data[0], config,
-                        inside_block ? tmp_source : NULL, foreach_var);
+                        inside_block ? tmp_source : NULL, foreach_name, foreach_var);
                 evaluate = false;
                 if (node->op != 0) {
                     // Strings that start with a '"' are actually strings, the
@@ -339,7 +383,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_slist_t *listing_entries,
                         else {
                             defined2 = blogc_format_variable(node->data[1],
                                 config, inside_block ? tmp_source : NULL,
-                                foreach_var);
+                                foreach_name, foreach_var);
                         }
                     }
 
@@ -452,6 +496,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_slist_t *listing_entries,
                             config, inside_block ? tmp_source : NULL);
 
                     if (foreach_var_start != NULL) {
+                        foreach_name = bc_strdup(node->data[0]);
                         foreach_var = foreach_var_start;
                         foreach_start = tmp;
                     }
@@ -469,6 +514,7 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_slist_t *listing_entries,
 
                 if (foreach_var == NULL) {
                     foreach_start = tmp;
+                    foreach_name = bc_strdup(node->data[0]);
                     foreach_var = foreach_var_start;
                 }
                 break;
@@ -484,6 +530,8 @@ blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_slist_t *listing_entries,
                 foreach_start = NULL;
                 bc_slist_free_full(foreach_var_start, free);
                 foreach_var_start = NULL;
+                free(foreach_name);
+                foreach_name = NULL;
                 break;
         }
         tmp = tmp->next;

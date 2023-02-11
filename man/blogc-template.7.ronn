@@ -317,16 +317,40 @@ This is how a `foreach` iterator is defined in a template:
     {% endforeach %}
 
 Where `TAGS` is the variable with space-separated list of items, and `FOREACH_ITEM`
-is the variable defined by blogc(1), that will store the item value for a given
-iteration.
+is the variable defined by blogc(1), that will store the item for a given iteration.
 
 If the value of the `TAGS` variable is "item1 item2 item3", this template is
-rendered 3 times, one for each item value.
+rendered 3 times, one for each item.
 
-The `FOREACH_ITEM` variable can be truncated, like:
+It is possible to map the items to arbitrary strings by defining other variables
+following a predefined for naming schema, like:
+
+    TAGS__ITEM1
+
+Where `TAGS` is the variable defined in the foreach iterator, and `ITEM1` is the
+current iteration item (the value of `FOREACH_ITEM` for the current iteration,
+converted to upper case and with special characters converted to `_`).
+
+This is how a `foreach` iterator using arbitrary string mapping is defined in a template:
 
     {% foreach TAGS %}
-    <a href="/tag/{{ FOREACH_ITEM }}/">{{ FOREACH_ITEM_5 }}</a>
+    <a href="/tag/{{ FOREACH_ITEM }}/">{{ FOREACH_VALUE }}</a>
+    {% endforeach %}
+
+`FOREACH_VALUE` is the variable defined by blogc(1), that will store the arbitrary string
+mapped to current iteration item. This variable can be checked using `ifdef` conditionals
+(and similar) as usual:
+
+    {% foreach TAGS %}
+    {% ifdef FOREACH_VALUE %}
+    <a href="/tag/{{ FOREACH_ITEM }}/">{{ FOREACH_VALUE }}</a>
+    {% endif %}
+    {% endforeach %}
+
+The `FOREACH_ITEM` and `FOREACH_VALUE` variables can be truncated, like:
+
+    {% foreach TAGS %}
+    <a href="/tag/{{ FOREACH_ITEM_5 }}/">{{ FOREACH_VALUE_5 }}</a>
     {% endforeach %}
 
 ## WHITESPACE CONTROL

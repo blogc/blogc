@@ -322,7 +322,7 @@ main(int argc, char **argv)
         if (!listing && s != NULL) {
             local = s->data;
         }
-        char *val = blogc_format_variable(print, config, local, NULL);
+        char *val = blogc_format_variable(print, config, local, NULL, NULL);
         if (val == NULL) {
             fprintf(stderr, "blogc: error: variable not found: %s\n",
                 print);
