@@ -36,8 +36,8 @@ esac
 
 download_pbuilder_chroot() {
     local index="$(wget -q -O- https://distfiles.rgm.io/pbuilder-chroots/LATEST/)"
-    local archive="$(echo "${index}" | sed -n "s/.*\(pbuilder-chroot-${DIST}-${ARCH}-.*\)\.sha512.*/\1/p")"
-    local p="$(echo "${index}" | sed -n "s/.*pbuilder-chroot-${DIST}-${ARCH}-\(.*\)\.tar.*\.sha512.*/pbuilder-chroots-\1/p")"
+    local archive="$(echo "${index}" | sed -n "s/.*\(pbuilder-chroot-${DIST}-${ARCH}-.*\)\.sha512.*/\1/p" | head -n 1)"
+    local p="$(echo "${index}" | sed -n "s/.*pbuilder-chroot-${DIST}-${ARCH}-\(.*\)\.tar.*\.sha512.*/pbuilder-chroots-\1/p" | head -n 1)"
 
     pushd "${SRCDIR}" > /dev/null
 
