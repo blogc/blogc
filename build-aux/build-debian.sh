@@ -18,6 +18,7 @@ case ${DIST} in
         ;;
     bookworm)
         REV="1~12bookworm"
+        DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS} nocheck"
         ;;
     sid)
         REV="1~sid"
@@ -28,7 +29,6 @@ case ${DIST} in
         ;;
     jammy)
         REV="1~12.0jammy"
-        DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS} nocheck"
         ;;
     kinetic)
         REV="1~12.1kinetic"
