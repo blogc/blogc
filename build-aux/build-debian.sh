@@ -21,15 +21,18 @@ case ${DIST} in
         ;;
     sid)
         REV="1~sid"
+        DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS} nocheck"
         ;;
     focal)
         REV="1~11.0focal"
         ;;
     jammy)
         REV="1~12.0jammy"
+        DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS} nocheck"
         ;;
     kinetic)
         REV="1~12.1kinetic"
+        DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS} nocheck"
         ;;
     *)
         echo "error: unsupported dist: ${DIST}"

@@ -27,7 +27,7 @@ jobs:
             image: ubuntu-20.04
           - target: dist-srpm
             compiler: gcc
-            image: ubuntu-22.04
+            image: ubuntu-20.04
           - target: deb-bullseye-amd64
             compiler: gcc
             image: ubuntu-22.04
@@ -45,7 +45,7 @@ jobs:
             image: ubuntu-22.04
           - target: deb-kinetic-amd64
             compiler: gcc
-            image: ubuntu-20.04
+            image: ubuntu-22.04
           - target: static
             compiler: gcc
             image: ubuntu-20.04
