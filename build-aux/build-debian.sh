@@ -25,8 +25,11 @@ case ${DIST} in
     focal)
         REV="1~11.0focal"
         ;;
-    impish)
-        REV="1~11.3impish"
+    jammy)
+        REV="1~12.0jammy"
+        ;;
+    kinetic)
+        REV="1~12.1kinetic"
         ;;
     *)
         echo "error: unsupported dist: ${DIST}"

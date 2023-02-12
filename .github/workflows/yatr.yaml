@@ -27,20 +27,23 @@ jobs:
             image: ubuntu-20.04
           - target: dist-srpm
             compiler: gcc
-            image: ubuntu-20.04
+            image: ubuntu-22.04
           - target: deb-bullseye-amd64
             compiler: gcc
-            image: ubuntu-20.04
+            image: ubuntu-22.04
           - target: deb-bookworm-amd64
             compiler: gcc
-            image: ubuntu-20.04
+            image: ubuntu-22.04
           - target: deb-sid-amd64
             compiler: gcc
-            image: ubuntu-20.04
+            image: ubuntu-22.04
           - target: deb-focal-amd64
             compiler: gcc
-            image: ubuntu-20.04
-          - target: deb-impish-amd64
+            image: ubuntu-22.04
+          - target: deb-jammy-amd64
+            compiler: gcc
+            image: ubuntu-22.04
+          - target: deb-kinetic-amd64
             compiler: gcc
             image: ubuntu-20.04
           - target: static
