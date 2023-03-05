@@ -6,53 +6,35 @@ export DEBEMAIL="rafael+deb@rafaelmartins.eng.br"
 export DEBFULLNAME="Automatic Builder (github-actions)"
 export DEB_BUILD_OPTIONS="noddebs"
 
-export DIST="$(echo "${TARGET}" | cut -d- -f2)"
+PBUILDER_CHROOTS_VERSION="202303052042"
+PBUILDER_CHROOTS_BASE_URL="https://github.com/rafaelmartins/pbuilder-chroots/releases/download/pbuilder-chroots-amd64-${PBUILDER_CHROOTS_VERSION}"
 
 MY_P="${PN}_${PV}"
+DIST="$(echo "${TARGET}" | cut -d- -f2)"
 ARCH="$(echo "${TARGET}" | cut -d- -f3)"
+DISTRO="$(wget -q -O- "${PBUILDER_CHROOTS_BASE_URL}/DISTROS" | grep "${DIST}")"
+DEB_VERSION="$(echo "${DISTRO}" | cut -d_ -f3)"
+REV="1~"
+if [[ x${DEB_VERSION} != x ]]; then
+    REV="${REV}${DEB_VERSION}"
+fi
+REV="${REV}${DIST}"
 
-REV=
 case ${DIST} in
-    bullseye)
-        REV="1~11bullseye"
-        ;;
-    bookworm)
-        REV="1~12bookworm"
+    bookworm|sid|kinetic)
         DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS} nocheck"
-        ;;
-    sid)
-        REV="1~sid"
-        DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS} nocheck"
-        ;;
-    focal)
-        REV="1~11.0focal"
-        ;;
-    jammy)
-        REV="1~12.0jammy"
-        ;;
-    kinetic)
-        REV="1~12.1kinetic"
-        DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS} nocheck"
-        ;;
-    *)
-        echo "error: unsupported dist: ${DIST}"
-        exit 1
         ;;
 esac
 
 download_pbuilder_chroot() {
-    local index="$(wget -q -O- https://distfiles.rgm.io/pbuilder-chroots/LATEST/)"
-    local archive="$(echo "${index}" | sed -n "s/.*\(pbuilder-chroot-${DIST}-${ARCH}-.*\)\.sha512.*/\1/p" | head -n 1)"
-    local p="$(echo "${index}" | sed -n "s/.*pbuilder-chroot-${DIST}-${ARCH}-\(.*\)\.tar.*\.sha512.*/pbuilder-chroots-\1/p" | head -n 1)"
-
     pushd "${SRCDIR}" > /dev/null
 
-    wget -c "https://distfiles.rgm.io/pbuilder-chroots/${p}/${archive}"{,.sha512}
-    sha512sum --check --status "${archive}.sha512"
+    wget -c "${PBUILDER_CHROOTS_BASE_URL}/pbuilder-chroot-${DISTRO}-${ARCH}-${PBUILDER_CHROOTS_VERSION}.tar.xz"{,.sha512}
+    sha512sum --check --status "pbuilder-chroot-${DISTRO}-${ARCH}-${PBUILDER_CHROOTS_VERSION}.tar.xz.sha512"
 
     sudo rm -rf /tmp/pbuilder
-    mkdir /tmp/pbuilder
-    fakeroot tar --checkpoint=1000 -xf "${archive}" -C /tmp/pbuilder
+    mkdir -p "/tmp/pbuilder/${DIST}-${ARCH}"
+    fakeroot tar --checkpoint=1000 -xf "pbuilder-chroot-${DISTRO}-${ARCH}-${PBUILDER_CHROOTS_VERSION}.tar.xz" -C "/tmp/pbuilder/${DIST}-${ARCH}"
 
     popd > /dev/null
 }
@@ -97,6 +79,7 @@ create_reprepro_conf() {
     echo
 }
 
+download_pbuilder_chroot
 download_orig
 
 rm -rf "${BUILDDIR}/${P}"
@@ -113,8 +96,6 @@ if ! dch \
 then
     exit 0
 fi
-
-download_pbuilder_chroot
 
 sudo cowbuilder \
     --update \
