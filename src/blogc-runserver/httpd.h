@@ -1,15 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef _HTTPD_H
-#define _HTTPD_H
+#pragma once
 
 int br_httpd_run(const char *host, const char *port, const char *docroot,
     size_t max_threads);
-
-#endif /* _HTTPD_H */

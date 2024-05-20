@@ -1,13 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef _MAKE_EXEC_H
-#define _MAKE_EXEC_H
+#pragma once
 
 #include <stdbool.h>
 #include "../common/error.h"
@@ -31,5 +25,3 @@ char* bm_exec_blogc_get_variable(bm_ctx_t *ctx, bc_trie_t *global_variables,
     bc_slist_t *sources, bool only_first_source);
 int bm_exec_blogc_runserver(bm_ctx_t *ctx, const char *host, const char *port,
     const char *threads);
-
-#endif /* _MAKE_EXEC_H */

@@ -1,13 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef _TEMPLATE_PARSER_H
-#define _TEMPLATE_PARSER_H
+#pragma once
 
 #include <stddef.h>
 #include "../common/error.h"
@@ -54,5 +48,3 @@ typedef struct {
 bc_slist_t* blogc_template_parse(const char *src, size_t src_len,
     bc_error_t **err);
 void blogc_template_free_ast(bc_slist_t *ast);
-
-#endif /* _TEMPLATE_PARSER_H */

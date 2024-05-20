@@ -1,13 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2020 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef ___TOCTREE_H
-#define ___TOCTREE_H
+#pragma once
 
 #include "../common/utils.h"
 
@@ -22,5 +16,3 @@ bc_slist_t* blogc_toctree_append(bc_slist_t *headers, size_t level,
 char* blogc_toctree_render(bc_slist_t *headers, int maxdepth,
     const char *endl);
 void blogc_toctree_free(bc_slist_t *l);
-
-#endif /* ___TOCTREE_H */

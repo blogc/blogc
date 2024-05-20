@@ -1,10 +1,5 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2020 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
 #include "../common/utils.h"
 

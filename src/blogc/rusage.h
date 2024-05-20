@@ -1,13 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef ___RUSAGE_H
-#define ___RUSAGE_H
+#pragma once
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -32,5 +26,3 @@ char* blogc_rusage_format_cpu_time(long long time);
 char* blogc_rusage_format_memory(long mem);
 
 void blogc_rusage_inject(bc_trie_t *global);
-
-#endif /* ___RUSAGE_H */

@@ -1,13 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2020 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef _RENDERER_H
-#define _RENDERER_H
+#pragma once
 
 #include <stdbool.h>
 #include "../common/utils.h"
@@ -20,5 +14,3 @@ bc_slist_t* blogc_split_list_variable(const char *name, bc_trie_t *global,
     bc_trie_t *local);
 char* blogc_render(bc_slist_t *tmpl, bc_slist_t *sources, bc_slist_t *listing_entries,
     bc_trie_t *config, bool listing);
-
-#endif /* _RENDERER_H */

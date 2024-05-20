@@ -1,13 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef ___SYSINFO_H
-#define ___SYSINFO_H
+#pragma once
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -34,5 +28,3 @@ char* blogc_sysinfo_get_datetime(void);
 void blogc_sysinfo_inject_datetime(bc_trie_t *global);
 bool blogc_sysinfo_get_inside_docker(void);
 void blogc_sysinfo_inject_inside_docker(bc_trie_t *global);
-
-#endif /* ___SYSINFO_H */

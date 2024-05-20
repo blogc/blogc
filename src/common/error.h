@@ -1,13 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef _ERROR_H
-#define _ERROR_H
+#pragma once
 
 #include <stddef.h>
 
@@ -43,5 +37,3 @@ bc_error_t* bc_error_parser(bc_error_type_t type, const char *src,
     size_t src_len, size_t current, const char *format, ...);
 void bc_error_print(bc_error_t *err, const char *prefix);
 void bc_error_free(bc_error_t *err);
-
-#endif /* _ERROR_H */

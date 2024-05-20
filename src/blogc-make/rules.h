@@ -1,13 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2020 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef _MAKE_RULES_H
-#define _MAKE_RULES_H
+#pragma once
 
 #include <stdbool.h>
 #include "ctx.h"
@@ -32,5 +26,3 @@ bool bm_rule_need_rebuild(bc_slist_t *sources, bm_filectx_t *settings,
     bool only_first_source);
 bc_slist_t* bm_rule_list_built_files(bm_ctx_t *ctx);
 void bm_rule_print_help(void);
-
-#endif /* _MAKE_RULES_H */

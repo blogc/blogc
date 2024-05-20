@@ -1,13 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2020 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef _SOURCE_PARSER_H
-#define _SOURCE_PARSER_H
+#pragma once
 
 #include <stddef.h>
 #include "../common/error.h"
@@ -15,5 +9,3 @@
 
 bc_trie_t* blogc_source_parse(const char *src, size_t src_len, int toctree_maxdepth,
     bc_error_t **err);
-
-#endif /* _SOURCE_PARSER_H */

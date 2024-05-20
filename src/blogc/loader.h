@@ -1,13 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2020 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef _LOADER_H
-#define _LOADER_H
+#pragma once
 
 #include "../common/error.h"
 #include "../common/utils.h"
@@ -18,5 +12,3 @@ bc_trie_t* blogc_source_parse_from_file(bc_trie_t *conf, const char *f,
     bc_error_t **err);
 bc_slist_t* blogc_source_parse_from_files(bc_trie_t *conf, bc_slist_t *l,
     bc_error_t **err);
-
-#endif /* _LOADER_H */

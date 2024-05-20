@@ -1,13 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef _MAKE_SETTINGS_H
-#define _MAKE_SETTINGS_H
+#pragma once
 
 #include <stddef.h>
 #include "../common/error.h"
@@ -25,5 +19,3 @@ typedef struct {
 bm_settings_t* bm_settings_parse(const char *content, size_t content_len,
     bc_error_t **err);
 void bm_settings_free(bm_settings_t *settings);
-
-#endif /* _MAKE_SETTINGS_H */

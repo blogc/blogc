@@ -1,13 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2020 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef _UTILS_H
-#define _UTILS_H
+#pragma once
 
 #include <stddef.h>
 #include <stdarg.h>
@@ -106,5 +100,3 @@ void bc_trie_foreach(bc_trie_t *trie, bc_trie_foreach_func_t func,
 // shell
 
 char* bc_shell_quote(const char *command);
-
-#endif /* _UTILS_H */

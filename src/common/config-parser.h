@@ -1,13 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef _CONFIG_PARSER_H
-#define _CONFIG_PARSER_H
+#pragma once
 
 #include <stddef.h>
 #include "utils.h"
@@ -27,5 +21,3 @@ const char* bc_config_get_with_default(bc_config_t *config, const char *section,
     const char *key, const char *default_);
 char** bc_config_get_list(bc_config_t *config, const char *section);
 void bc_config_free(bc_config_t *config);
-
-#endif /* _CONFIG_PARSER_H */

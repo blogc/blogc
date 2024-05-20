@@ -1,13 +1,7 @@
-/*
- * blogc: A blog compiler.
- * Copyright (C) 2014-2019 Rafael G. Martins <rafael@rafaelmartins.eng.br>
- *
- * This program can be distributed under the terms of the BSD License.
- * See the file LICENSE.
- */
+// SPDX-FileCopyrightText: 2014-2024 Rafael G. Martins <rafael@rafaelmartins.eng.br>
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef _MAKE_CTX_H
-#define _MAKE_CTX_H
+#pragma once
 
 #include <sys/stat.h>
 #include <stdbool.h>
@@ -80,5 +74,3 @@ void bm_ctx_free_internal(bm_ctx_t *ctx);
 void bm_ctx_free(bm_ctx_t *ctx);
 const char* bm_ctx_settings_lookup(bm_ctx_t *ctx, const char *key);
 const char* bm_ctx_settings_lookup_str(bm_ctx_t *ctx, const char *key);
-
-#endif /* _MAKE_CTX_H */
