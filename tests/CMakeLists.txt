@@ -8,13 +8,21 @@ find_program(BASH bash HINTS /bin /usr/bin REQUIRED)
 find_program(DIFF diff REQUIRED)
 find_program(TEE tee REQUIRED)
 
-try_compile(HAVE_LD_WRAP
-    SOURCE_FROM_CONTENT
-        main.c
-        "#include <stdlib.h>\nvoid __real_exit(int status);\nvoid __wrap_exit(int s){__real_exit(0);}\nint main(){exit(1);}"
-    LINK_OPTIONS
-        "-Wl,--wrap=exit"
-)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.25")
+    try_compile(HAVE_LD_WRAP
+        SOURCES
+            "${CMAKE_SOURCE_DIR}/cmake/try_compile/ldwrap.c"
+        LINK_OPTIONS
+            "-Wl,--wrap=exit"
+    )
+else()
+    try_compile(HAVE_LD_WRAP "${CMAKE_BINARY_DIR}/ldwrap"
+        SOURCES
+            "${CMAKE_SOURCE_DIR}/cmake/try_compile/ldwrap.c"
+        LINK_OPTIONS
+            "-Wl,--wrap=exit"
+    )
+endif()
 
 function(blogc_executable_test _libname _src)
     if (NOT CMOCKA_FOUND)
