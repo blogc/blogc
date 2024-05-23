@@ -64,6 +64,11 @@ however these rules can be customized with the following settings, from the
     will be used instead. The internal template can be dumped using the `atom_dump`
     blogc-make(1) rule.
 
+  * `blog_prefix` (default: unset):
+    If set, the value is added as a prefix to index, posts, tags, pagination, atom
+    feeds and any other resources related to blog posts. This setting is useful to
+    deploy the whole blog section of a website into a sub URL like "blog".
+
   * `content_dir` (default: `content`):
     The directory that stores the source files. This directory is relative
     to `blogcfile`.

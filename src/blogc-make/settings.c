@@ -36,6 +36,7 @@ static const struct default_settings_map {
     {"post_prefix", "post"},
     {"tag_prefix", "tag"},
     {"html_order", "DESC"},
+    {"blog_prefix", NULL},
 
     // atom
     {"atom_prefix", "atom"},

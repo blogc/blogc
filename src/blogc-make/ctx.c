@@ -251,13 +251,15 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     free(atom_template);
 
     const char *content_dir = bm_ctx_settings_lookup(rv, "content_dir");
+    const char *blog_prefix = bm_ctx_settings_lookup(rv, "blog_prefix");
     const char *post_prefix = bm_ctx_settings_lookup(rv, "post_prefix");
     const char *source_ext = bm_ctx_settings_lookup(rv, "source_ext");
     const char *listing_entry = bm_ctx_settings_lookup(rv, "listing_entry");
 
     rv->listing_entry_fctx = NULL;
     if (listing_entry != NULL) {
-        char *f = bm_generate_filename(content_dir, NULL, listing_entry, source_ext);
+        char *f = bm_generate_filename(content_dir, blog_prefix, NULL,
+            listing_entry, source_ext);
         rv->listing_entry_fctx = bm_filectx_new(rv, f, listing_entry, NULL);
         free(f);
     }
@@ -265,7 +267,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     rv->posts_fctx = NULL;
     if (settings->posts != NULL) {
         for (size_t i = 0; settings->posts[i] != NULL; i++) {
-            char *f = bm_generate_filename(content_dir, post_prefix,
+            char *f = bm_generate_filename(content_dir, blog_prefix, post_prefix,
                 settings->posts[i], source_ext);
             rv->posts_fctx = bc_slist_append(rv->posts_fctx,
                 bm_filectx_new(rv, f, settings->posts[i], NULL));
@@ -276,7 +278,7 @@ bm_ctx_new(bm_ctx_t *base, const char *settings_file, const char *argv0,
     rv->pages_fctx = NULL;
     if (settings->pages != NULL) {
         for (size_t i = 0; settings->pages[i] != NULL; i++) {
-            char *f = bm_generate_filename(content_dir, NULL, settings->pages[i],
+            char *f = bm_generate_filename(content_dir, NULL, NULL, settings->pages[i],
                 source_ext);
             rv->pages_fctx = bc_slist_append(rv->pages_fctx,
                 bm_filectx_new(rv, f, settings->pages[i], NULL));

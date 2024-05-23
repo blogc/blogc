@@ -15,9 +15,10 @@
 
 
 char*
-bm_generate_filename(const char *dir, const char *prefix, const char *fname,
-    const char *ext)
+bm_generate_filename(const char *dir, const char *gprefix, const char *prefix,
+    const char *fname, const char *ext)
 {
+    bool have_gprefix = gprefix != NULL && gprefix[0] != '\0';
     bool have_prefix = prefix != NULL && prefix[0] != '\0';
     bool have_fname = fname != NULL && fname[0] != '\0';
     bool have_ext = ext != NULL && ext[0] != '\0';
@@ -27,8 +28,13 @@ bm_generate_filename(const char *dir, const char *prefix, const char *fname,
 
     bc_string_t *rv = bc_string_new();
 
-    if (dir != NULL && (have_prefix || have_fname || have_ext))
+    if (dir != NULL && (have_gprefix || have_prefix || have_fname || have_ext))
         bc_string_append(rv, dir);
+
+    if (have_gprefix) {
+        bc_string_append(rv, "/");
+        bc_string_append(rv, gprefix);
+    }
 
     if ((have_prefix || have_fname || have_ext_noslash) && !is_index)
         bc_string_append_c(rv, '/');
@@ -65,8 +71,8 @@ bm_generate_filename(const char *dir, const char *prefix, const char *fname,
 
 
 char*
-bm_generate_filename2(const char *dir, const char *prefix, const char *fname,
-    const char *prefix2, const char *fname2, const char *ext)
+bm_generate_filename2(const char *dir, const char *gprefix, const char *prefix,
+    const char *fname, const char *prefix2, const char *fname2, const char *ext)
 {
     bool have_prefix = prefix != NULL && prefix[0] != '\0';
     bool have_fname = fname != NULL && fname[0] != '\0';
@@ -89,7 +95,7 @@ bm_generate_filename2(const char *dir, const char *prefix, const char *fname,
     if (have_prefix2)
         bc_string_append(p, prefix2);
 
-    char *rv = bm_generate_filename(dir, p->str, fname2, ext);
+    char *rv = bm_generate_filename(dir, gprefix, p->str, fname2, ext);
     bc_string_free(p, true);
 
     return rv;

@@ -48,12 +48,18 @@ bm_atom_generate(bm_settings_t *settings)
     if (settings == NULL)
         return NULL;
 
+    const char *blog_prefix = bc_trie_lookup(settings->settings, "blog_prefix");
     const char *atom_prefix = bc_trie_lookup(settings->settings, "atom_prefix");
     const char *atom_ext = bc_trie_lookup(settings->settings, "atom_ext");
     const char *post_prefix = bc_trie_lookup(settings->settings, "post_prefix");
     const char *post_ext = bc_trie_lookup(settings->settings, "html_ext");
 
     bc_string_t *atom_url = bc_string_new();
+
+    if (blog_prefix != NULL) {
+        bc_string_append_c(atom_url, '/');
+        bc_string_append_printf(atom_url, blog_prefix);
+    }
 
     if (atom_prefix[0] != '\0')
         bc_string_append_c(atom_url, '/');
@@ -67,8 +73,8 @@ bm_atom_generate(bm_settings_t *settings)
     bc_string_append(atom_url, "{% endif %}");
     bc_string_append(atom_url, atom_ext);
 
-    char *post_url = bm_generate_filename(NULL, post_prefix, "{{ FILENAME }}",
-        post_ext);
+    char *post_url = bm_generate_filename(NULL, blog_prefix, post_prefix,
+        "{{ FILENAME }}", post_ext);
 
     char *rv = bc_strdup_printf(atom_template, atom_url->str, atom_url->str,
         post_url, post_url);

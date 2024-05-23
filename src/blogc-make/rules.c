@@ -77,11 +77,12 @@ index_outputlist(bm_ctx_t *ctx)
 
     bc_slist_t *rv = NULL;
 
+    const char *blog_prefix = bm_ctx_settings_lookup(ctx, "blog_prefix");
     const char *index_prefix = bm_ctx_settings_lookup(ctx, "index_prefix");
     const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
 
-    char *f = bm_generate_filename(ctx->short_output_dir, index_prefix, NULL,
-        html_ext);
+    char *f = bm_generate_filename(ctx->short_output_dir, blog_prefix, index_prefix,
+        NULL, html_ext);
     rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
     free(f);
 
@@ -137,11 +138,12 @@ atom_outputlist(bm_ctx_t *ctx)
 
     bc_slist_t *rv = NULL;
 
+    const char *blog_prefix = bm_ctx_settings_lookup(ctx, "blog_prefix");
     const char *atom_prefix = bm_ctx_settings_lookup(ctx, "atom_prefix");
     const char *atom_ext = bm_ctx_settings_lookup(ctx, "atom_ext");
 
-    char *f = bm_generate_filename(ctx->short_output_dir, atom_prefix, NULL,
-        atom_ext);
+    char *f = bm_generate_filename(ctx->short_output_dir, blog_prefix, atom_prefix,
+        NULL, atom_ext);
     rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
     free(f);
 
@@ -197,12 +199,13 @@ atom_tags_outputlist(bm_ctx_t *ctx)
 
     bc_slist_t *rv = NULL;
 
+    const char *blog_prefix = bm_ctx_settings_lookup(ctx, "blog_prefix");
     const char *atom_prefix = bm_ctx_settings_lookup(ctx, "atom_prefix");
     const char *atom_ext = bm_ctx_settings_lookup(ctx, "atom_ext");
 
     for (size_t i = 0; ctx->settings->tags[i] != NULL; i++) {
-        char *f = bm_generate_filename(ctx->short_output_dir, atom_prefix,
-            ctx->settings->tags[i], atom_ext);
+        char *f = bm_generate_filename(ctx->short_output_dir, blog_prefix,
+            atom_prefix, ctx->settings->tags[i], atom_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
@@ -278,13 +281,14 @@ pagination_outputlist(bm_ctx_t *ctx)
 
     bc_slist_t *rv = NULL;
 
+    const char *blog_prefix = bm_ctx_settings_lookup(ctx, "blog_prefix");
     const char *pagination_prefix = bm_ctx_settings_lookup(ctx, "pagination_prefix");
     const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
 
     for (size_t i = 0; i < pages; i++) {
         char *j = bc_strdup_printf("%d", i + 1);
-        char *f = bm_generate_filename(ctx->short_output_dir, pagination_prefix,
-            j, html_ext);
+        char *f = bm_generate_filename(ctx->short_output_dir, blog_prefix,
+            pagination_prefix, j, html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(j);
         free(f);
@@ -348,6 +352,7 @@ pagination_tags_outputlist(bm_ctx_t *ctx)
     bc_trie_t *variables = bc_trie_new(free);
     posts_pagination(ctx, variables, "posts_per_page");
 
+    const char *blog_prefix = bm_ctx_settings_lookup(ctx, "blog_prefix");
     const char *tag_prefix = bm_ctx_settings_lookup(ctx, "tag_prefix");
     const char *pagination_prefix = bm_ctx_settings_lookup(ctx, "pagination_prefix");
     const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
@@ -371,8 +376,8 @@ pagination_tags_outputlist(bm_ctx_t *ctx)
 
         for (size_t i = 0; i < pages; i++) {
             char *j = bc_strdup_printf("%d", i + 1);
-            char *f = bm_generate_filename2(ctx->short_output_dir, tag_prefix,
-                ctx->settings->tags[k], pagination_prefix, j, html_ext);
+            char *f = bm_generate_filename2(ctx->short_output_dir, blog_prefix,
+                tag_prefix, ctx->settings->tags[k], pagination_prefix, j, html_ext);
             rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
             free(j);
             free(f);
@@ -404,6 +409,7 @@ pagination_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
     bc_trie_insert(variables, "MAKE_RULE", bc_strdup("pagination_tags"));
     bc_trie_insert(variables, "MAKE_TYPE", bc_strdup("post"));
 
+    const char *blog_prefix = bm_ctx_settings_lookup(ctx, "blog_prefix");
     const char *tag_prefix = bm_ctx_settings_lookup(ctx, "tag_prefix");
     const char *pagination_prefix = bm_ctx_settings_lookup(ctx, "pagination_prefix");
     const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
@@ -423,8 +429,8 @@ pagination_tags_exec(bm_ctx_t *ctx, bc_slist_t *outputs, bc_trie_t *args)
             // amount of output pages
             for (size_t k = 1; k <= bc_slist_length(outputs); k++) {
                 char *j = bc_strdup_printf("%d", k);
-                char *f = bm_generate_filename2(ctx->short_output_dir, tag_prefix,
-                    ctx->settings->tags[i], pagination_prefix, j, html_ext);
+                char *f = bm_generate_filename2(ctx->short_output_dir, blog_prefix,
+                    tag_prefix, ctx->settings->tags[i], pagination_prefix, j, html_ext);
                 free(j);
                 if (0 == strcmp(fctx->short_path, f)) {
                     tag = ctx->settings->tags[i];
@@ -470,12 +476,13 @@ posts_outputlist(bm_ctx_t *ctx)
 
     bc_slist_t *rv = NULL;
 
+    const char *blog_prefix = bm_ctx_settings_lookup(ctx, "blog_prefix");
     const char *post_prefix = bm_ctx_settings_lookup(ctx, "post_prefix");
     const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
 
     for (size_t i = 0; ctx->settings->posts[i] != NULL; i++) {
-        char *f = bm_generate_filename(ctx->short_output_dir, post_prefix,
-            ctx->settings->posts[i], html_ext);
+        char *f = bm_generate_filename(ctx->short_output_dir, blog_prefix,
+            post_prefix, ctx->settings->posts[i], html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
@@ -540,12 +547,13 @@ tags_outputlist(bm_ctx_t *ctx)
 
     bc_slist_t *rv = NULL;
 
+    const char *blog_prefix = bm_ctx_settings_lookup(ctx, "blog_prefix");
     const char *tag_prefix = bm_ctx_settings_lookup(ctx, "tag_prefix");
     const char *html_ext = bm_ctx_settings_lookup(ctx, "html_ext");
 
     for (size_t i = 0; ctx->settings->tags[i] != NULL; i++) {
-        char *f = bm_generate_filename(ctx->short_output_dir, tag_prefix,
-            ctx->settings->tags[i], html_ext);
+        char *f = bm_generate_filename(ctx->short_output_dir, blog_prefix,
+            tag_prefix, ctx->settings->tags[i], html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
@@ -608,7 +616,7 @@ pages_outputlist(bm_ctx_t *ctx)
 
     for (size_t i = 0; ctx->settings->pages[i] != NULL; i++) {
         char *f = bm_generate_filename(ctx->short_output_dir, NULL,
-            ctx->settings->pages[i], html_ext);
+            NULL, ctx->settings->pages[i], html_ext);
         rv = bc_slist_append(rv, bm_filectx_new(ctx, f, NULL, NULL));
         free(f);
     }
