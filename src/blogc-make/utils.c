@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include "../common/error.h"
 #include "../common/utils.h"
+#include "utils.h"
 
 #ifndef PATH_MAX
 #define PATH_MAX 4096
