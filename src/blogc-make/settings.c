@@ -47,6 +47,7 @@ static const struct default_settings_map {
     // generic
     {"date_format", "%b %d, %Y, %I:%M %p GMT"},
     {"locale", NULL},
+    {"run_from_make", NULL},
 
     {NULL, NULL},
 };

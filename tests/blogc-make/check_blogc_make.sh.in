@@ -20,6 +20,31 @@ trap_func() {
 
 trap trap_func EXIT
 
+mkdir -p "${TEMP}/proj/"
+
+
+### minimal settings, failure when not running from make
+
+cat > "${TEMP}/proj/blogcfile" <<EOF
+[global]
+AUTHOR_NAME = Lol
+AUTHOR_EMAIL = author@example.com
+SITE_TITLE = Lol's Website
+SITE_TAGLINE = WAT?!
+BASE_DOMAIN = http://example.org
+
+[settings]
+run_from_make = true
+EOF
+
+set +e
+${TESTS_ENVIRONMENT} ${BLOGC_MAKE} -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
+set -e
+
+grep "error: must run from " "${TEMP}/output.txt"
+
+rm -rf "${TEMP}/proj/"
+
 mkdir -p "${TEMP}"/proj{,/templates,/content/post}
 
 

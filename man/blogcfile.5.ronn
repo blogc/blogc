@@ -125,6 +125,12 @@ however these rules can be customized with the following settings, from the
     in the `[posts]` section, in descending order. This setting is compatible with
     `html_order` and `atom_order` settings, to control the order of the posts.
 
+  * `run_from_make` (default: `false`):
+    If true, enforces blogc-make(1) to check if it is running as a make(1) subprocess,
+    and exit with an error otherwise. This is useful when blogc-make(1) is called by
+    make(1) as part of a larger build infrastructure, and calling blogc-make(1) directly
+    could cause errors due to some generated dependencies missing.
+
   * `source_ext` (default: `.txt`):
     The extension of the source files.
 
@@ -209,4 +215,4 @@ Rafael G. Martins &lt;<rafael@rafaelmartins.eng.br>&gt;
 
 ## SEE ALSO
 
-blogc(1), blogc-make(1), blogc-template(7) strftime(3)
+blogc(1), blogc-make(1), make(1), blogc-template(7), strftime(3)

@@ -120,6 +120,14 @@ main(int argc, char **argv)
     ctx->dev = dev;
     ctx->verbose = verbose;
 
+    if (bc_str_to_bool(bm_ctx_settings_lookup_str(ctx, "run_from_make"))) {
+        if (getenv("MAKEFLAGS") == NULL) {
+            fprintf(stderr, "blogc-make: error: must run from `make`, try:\n\n    $ make\n");
+            rv = 1;
+            goto cleanup;
+        }
+    }
+
     rv = bm_rule_executor(ctx, rules);
 
 cleanup:
