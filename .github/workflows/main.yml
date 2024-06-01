@@ -41,6 +41,7 @@ jobs:
       - name: Install dependencies (Ubuntu)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
+          sudo apt update
           sudo apt install -y libcmocka-dev ninja-build ronn
           if [[ "${{ matrix.variant }}" = "memcheck" ]]; then
             sudo apt install -y valgrind
@@ -142,6 +143,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt update
           sudo apt install -y ninja-build ronn
           if [[ "${{ matrix.pkg }}" = "windows-i686" ]]; then
             sudo apt install -y gcc-mingw-w64-i686
@@ -203,7 +205,9 @@ jobs:
           path: source
 
       - name: Install dependencies
-        run: sudo apt install -y ninja-build ronn
+        run: |
+          sudo apt update
+          sudo apt install -y ninja-build ronn
 
       - name: Validate source
         run: |
