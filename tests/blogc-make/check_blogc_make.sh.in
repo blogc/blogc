@@ -38,7 +38,7 @@ run_from_make = true
 EOF
 
 set +e
-${TESTS_ENVIRONMENT} ${BLOGC_MAKE} -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
+env -i ${TESTS_ENVIRONMENT} ${BLOGC_MAKE} -f "${TEMP}/proj/blogcfile" 2>&1 | tee "${TEMP}/output.txt"
 set -e
 
 grep "error: must run from " "${TEMP}/output.txt"
